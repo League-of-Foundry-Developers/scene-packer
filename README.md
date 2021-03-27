@@ -37,13 +37,13 @@ const moduleName = 'your-module-name-as-defined-in-your-manifest-file';
  * Set to the following to disable:
  *   const welcomeJournal = '';
  */
-const welcomeJournal = 'A1\. Adventure Introduction';
+const welcomeJournal = 'A1. Adventure Introduction';
 /**
  * additionalJournals will automatically be imported.
  * Set to the following to disable:
  *   const additionalJournals = [];
  */
-const additionalJournals = ['A2\. Adventure Overview'];
+const additionalJournals = ['A2. Adventure Overview'];
 /**
  * creaturePacks is a list of compendium packs to look in for Actors by name (in prioritised order).
  * The first entry here assumes that you have an Actor pack in your module with the "name" of "actors".
