@@ -1,53 +1,110 @@
-![](https://img.shields.io/badge/Foundry-v0.7.9-informational)
-<!--- Downloads @ Latest Badge -->
-<!--- replace <user>/<repo> with your username/repository -->
-<!--- ![Latest Release Download Count](https://img.shields.io/github/downloads/<user>/<repo>/latest/module.zip) -->
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/League-of-Foundry-Developers/scene-packer) ![GitHub Releases](https://img.shields.io/github/downloads/League-of-Foundry-Developers/scene-packer/latest/total) ![GitHub Releases](https://img.shields.io/github/downloads/League-of-Foundry-Developers/scene-packer/total) ![Forge Installs](https://img.shields.io/badge/dynamic/json?label=Forge%20Installs&query=package.installs&suffix=%25&url=https%3A%2F%2Fforge-vtt.com%2Fapi%2Fbazaar%2Fpackage%2Fscene-packer&colorB=4aa94a) ![Foundry Version](https://img.shields.io/badge/dynamic/json.svg?url=https://github.com/League-of-Foundry-Developers/scene-packer/releases/latest/download/module.json&label=foundry%20version&query=$.compatibleCoreVersion&colorB=blueviolet)
 
-<!--- Forge Bazaar Install % Badge -->
-<!--- replace <your-module-name> with the `name` in your manifest -->
-<!--- ![Forge Installs](https://img.shields.io/badge/dynamic/json?label=Forge%20Installs&query=package.installs&suffix=%25&url=https%3A%2F%2Fforge-vtt.com%2Fapi%2Fbazaar%2Fpackage%2F<your-module-name>&colorB=4aa94a) -->
+# Scene Packer
 
+A library to help other developers package up Scenes and Adventures to solve the following:
 
-# How to use this Template to create a versioned Release
+- Scene Journal Pins link to the correct Journal
+- Actor tokens on a Scene link to the correct Actor
 
-1. Open your repository's releases page.
+## Installation
 
-![Where to click to open repository releases.](https://user-images.githubusercontent.com/7644614/93409301-9fd25080-f864-11ea-9e0c-bdd09e4418e4.png)
+In the setup screen, use the URL <https://raw.githubusercontent.com/League-of-Foundry-Developers/scene-packer/master/module.json> to install the module.
 
-2. Click "Draft a new release"
+## Usage
 
-![Draft a new release button.](https://user-images.githubusercontent.com/7644614/93409364-c1333c80-f864-11ea-89f1-abfcb18a8d9f.png)
+To use the Scene Packer as part of your module you will need to add it as a dependency in your `module.json` file.
 
-3. Fill out the release version as the tag name.
+```json
+"dependencies": [
+  {
+    "name": "scene-packer",
+    "manifest": "https://raw.githubusercontent.com/League-of-Foundry-Developers/scene-packer/master/module.json",
+  }
+]
+```
 
-## <span color="red">Do not prefix your tag name with a `v`.</span>
+### Module code requirements
 
-If you want to add details at this stage you can, or you can always come back later and edit them.
+To unpack your scenes automatically when first viewed by a user, include the following in your module js script, updating the variable names where appropriate.
 
-![Release Creation Form](https://user-images.githubusercontent.com/7644614/93409543-225b1000-f865-11ea-9a19-f1906a724421.png)
+```javascript
+const adventureName = 'The Name of Your Adventure or Collection';
+const moduleName = 'your-module-name-as-defined-in-your-manifest-file';
 
-4. Hit submit.
+/**
+ * welcomeJournal (if set) will automatically be imported and opened after the first activation of a scene imported from the module compendium.
+ * Set to the following to disable:
+ *   const welcomeJournal = '';
+ */
+const welcomeJournal = 'A1\. Adventure Introduction';
+/**
+ * additionalJournals will automatically be imported.
+ * Set to the following to disable:
+ *   const additionalJournals = [];
+ */
+const additionalJournals = ['A2\. Adventure Overview'];
+/**
+ * creaturePacks is a list of compendium packs to look in for Actors by name (in prioritised order).
+ * The first entry here assumes that you have an Actor pack in your module with the "name" of "actors".
+ * Set to the following to disable:
+ *   const creaturePacks = [];
+ */
+const creaturePacks = [`${moduleName}.actors`, 'dnd5e.monsters'];
+/**
+ * journalPacks is a list of compendium packs to look in for Journals by name (in prioritised order).
+ * The first entry here assumes that you have a Journal pack in your module with the "name" of "journals".
+ * Set to the following to disable:
+ *   const journalPacks = [];
+ */
+const journalPacks = [`${moduleName}.journals`];
+/**
+ * compendiumSceneName set this to the "name" of the "pack" in your module.json file that has "entity": "Scene"
+ */
+const compendiumSceneName = 'maps';
 
-5. Wait a few minutes.
+Hooks.once('scenePackerReady', ({ getInstance }) => {
+  // Initialise the Scene Packer with your adventure name and module name
+  let packer = getInstance(adventureName, moduleName);
+  if (creaturePacks.length) {
+    packer.SetCreaturePacks(creaturePacks);
+  }
+  if (journalPacks.length) {
+    packer.SetJournalPacks(journalPacks);
+  }
+  if (welcomeJournal) {
+    packer.SetWelcomeJournal(welcomeJournal);
+  }
+  if (additionalJournals.length) {
+    packer.SetAdditionalJournalsToImport(additionalJournals);
+  }
+  if (compendiumSceneName) {
+    packer.SetCompendiumSceneName(compendiumSceneName);
+  }
+});
+```
 
-A Github Action will run to populate the `module.json` and `module.zip` with the correct urls that you can then use to distribute this release. You can check on its status in the "Actions" tab.
+### Packing your Scenes
 
-![Actions Tab](https://user-images.githubusercontent.com/7644614/93409820-c1800780-f865-11ea-8c6b-c3792e35e0c8.png)
+To pack your scene ready for distribution:
 
-6. Grab the module.json url from the release's details page.
+1. `Enable Scene Packer context menu` in Module Settings.
+2. Build your scene as normal, adding Actors and Journal Pins where you'd like.
+3. Export your Actors/Journals/Roll Tables to compendiums as normal.
+4. Right click on your Scene in the Scenes Directory and choose `Pack Scene Data`.
+5. Export your Scene to your compendium.
+6. Right click on your Scene in the Scenes Directory and choose `Clear Packed Scene Data`.
 
-![image](https://user-images.githubusercontent.com/7644614/93409960-10c63800-f866-11ea-83f6-270cc5d10b71.png)
+  - You want to choose this otherwise next time you open your Scene locally it will run the Scene import scripts.
 
-This `module.json` will only ever point at this release's `module.zip`, making it useful for sharing a specific version for compatibility purposes.
+![scene-context-menu](scene-context-menu.png)
 
-7. You can use the url `https://github.com/<user>/<repo>/releases/latest/download/module.json` to refer to the manifest.
+## TODO
 
-This is the url you want to use to install the module typically, as it will get updated automatically.
+- Provide example complete module
+- Subfolder support for Actors
+- Subfolder support for Journals
 
+## Acknowledgements
 
-# FoundryVTT Module
-
-Does something, probably
-
-## Changelog
-
+A portion of the code is based on code created by <https://onepagemage.com/> and used with permission.

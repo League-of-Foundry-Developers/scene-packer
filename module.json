@@ -1,48 +1,34 @@
 {
-  "name": "module",
-  "title": "New Module",
-  "description": "",
+  "name": "scene-packer",
+  "title": "Library: Scene Packer",
+  "description": "A module to assist with Scene and Adventure packing and unpacking.",
   "version": "This is auto replaced",
-  "library": "false",
+  "library": "true",
   "manifestPlusVersion": "1.0.0",
   "minimumCoreVersion": "0.7.9",
   "compatibleCoreVersion": "0.7.9",
-  "authors": [
-    {
+  "author": "The League of Extraordinary FVTT Developers",
+  "authors": [{
       "name": "The League of Extraordinary FVTT Developers",
-      "url": "https://github.com/League-of-Foundry-Developers",
-      "discord": "discordID#0001"
+      "url": "https://github.com/League-of-Foundry-Developers"
+    },
+    {
+      "name": "Blair McMillan",
+      "discord": "blair#9056"
     }
-  ],
-  "dependencies": [
-
-  ],
-  "conflicts": [
-    
   ],
   "esmodules": [
-    "/scripts/module.js"
+    "/scripts/scene-packer.js"
   ],
-  "scripts": [
-    "/scripts/lib/lib.js"
-  ],
-  "styles": [
-    "/styles/module.css"
-  ],
-  "languages": [
-    {
-      "lang": "en",
-      "name": "English",
-      "path": "languages/en.json"
-    }
-  ],
+  "languages": [{
+    "lang": "en",
+    "name": "English",
+    "path": "languages/en.json"
+  }],
   "url": "This is auto replaced",
   "manifest": "This is auto replaced",
   "download": "This is auto replaced",
-  "media": [
-    {
-      "type": "icon",
-      "url": "https://avatars2.githubusercontent.com/u/71292812?s=400&u=ccdb4eeb7abf551ca8f314e5a9bfd0479a4d3d41&v=4"
-    }
-  ]
+  "bugs": "https://github.com/League-of-Foundry-Developers/scene-packer/issues",
+  "changelog": "https://github.com/League-of-Foundry-Developers/scene-packer/blob/master/changelog.md",
+  "allowBugReporter": true
 }
