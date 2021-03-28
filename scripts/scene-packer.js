@@ -18,7 +18,6 @@
 export default class ScenePacker {
   adventureName = null;
   moduleName = null;
-  compendiumSceneName = null;
   welcomeJournal = null;
   additionalJournals = [];
   packs = {
@@ -56,9 +55,8 @@ export default class ScenePacker {
         });
 
         game.settings.register(this.moduleName, 'enableContextMenu', {
-          name: 'Enable Scene Packer context menu',
-          hint:
-            'Adds context menu items to assist with packing a Scene. You should only need to enable this while actively developing and packing a module with scenes.',
+          name: game.i18n.localize('SCENE-PACKER.settings.context-menu.name'),
+          hint: game.i18n.localize('SCENE-PACKER.settings.context-menu.hint'),
           scope: 'client',
           config: true,
           type: Boolean,
@@ -66,7 +64,7 @@ export default class ScenePacker {
         });
 
         game.settings.register(this.moduleName, 'showCompendiumInfo', {
-          name: 'Show the dialog information when opening a compendium',
+          name: game.i18n.localize('SCENE-PACKER.settings.compendium.name'),
           scope: 'client',
           type: Boolean,
           default: true,
@@ -76,11 +74,13 @@ export default class ScenePacker {
       Hooks.on('canvasReady', async (readyCanvas) => {
         if (readyCanvas.scene.getFlag(this.moduleName, this.tokenFlag)) {
           ui.notifications.info(
-            'First launch of this adventure! Unpacking scene...'
+            game.i18n.localize('SCENE-PACKER.notifications.first-launch')
           );
           await this.UnpackScene(readyCanvas.scene);
           await this.ClearPackedData(readyCanvas.scene);
-          ui.notifications.info('All done!');
+          ui.notifications.info(
+            game.i18n.localize('SCENE-PACKER.notifications.done')
+          );
           game.settings.set(this.moduleName, 'imported', true);
 
           if (this.welcomeJournal) {
@@ -112,28 +112,27 @@ export default class ScenePacker {
         ) {
           let content = `<p><strong>${this.adventureName}</strong></p>`;
 
-          if (
-            this.compendiumSceneName &&
-            data.collection.endsWith(`.${this.compendiumSceneName}`)
-          ) {
-            content +=
-              '<p>Please <strong>view each scene</strong> after importing to allow the module to correctly relink Journal Pins and Actors.</p>';
+          content += '<p>';
+          if (data.cssClass === 'scene') {
+            content += game.i18n.localize('SCENE-PACKER.compendium.info-scene');
           } else {
-            content +=
-              '<p>To import this adventure correctly, please <strong>import just the scenes</strong> first and then view each one. This will allow the module to correctly relink Journal Pins and Actors.</p>';
+            content += game.i18n.localize('SCENE-PACKER.compendium.info-other');
           }
+          content += '</p>';
 
           let d = new Dialog({
-            title: `${this.adventureName} Importer`,
+            title: game.i18n.format('SCENE-PACKER.compendium.title', {
+              title: this.adventureName,
+            }),
             content: content,
             buttons: {
               ok: {
                 icon: '<i class="fas fa-check"></i>',
-                label: 'Ok',
+                label: game.i18n.localize('SCENE-PACKER.ok'),
               },
               noShow: {
                 icon: '<i class="fas fa-times"></i>',
-                label: "Don't show me again",
+                label: game.i18n.localize('SCENE-PACKER.dontShow'),
                 callback: () =>
                   game.settings.set(
                     this.moduleName,
@@ -151,7 +150,7 @@ export default class ScenePacker {
         if (game.user.isGM) {
           html.push(
             {
-              name: 'Pack Scene Data',
+              name: game.i18n.localize('SCENE-PACKER.scene-context.pack.title'),
               icon: '<i class="fas fa-scroll"></i>',
               condition: () =>
                 game.user.isGM &&
@@ -165,7 +164,9 @@ export default class ScenePacker {
               },
             },
             {
-              name: 'Clear Packed Scene Data',
+              name: game.i18n.localize(
+                'SCENE-PACKER.scene-context.clear.title'
+              ),
               icon: '<i class="fas fa-scroll"></i>',
               condition: () =>
                 game.user.isGM &&
@@ -202,8 +203,10 @@ export default class ScenePacker {
     try {
       if (typeof force !== 'boolean') {
         console.warn(
-          `${this.moduleName} | Invalid log usage. Expected "log(force, ...args)" as boolean but got`,
-          force
+          game.i18n.format('SCENE-PACKER.log.invalidForce', {
+            moduleName: this.moduleName,
+            force: force,
+          })
         );
       }
 
@@ -259,9 +262,9 @@ export default class ScenePacker {
   SetAdventureName(adventureName) {
     if (!adventureName) {
       ui.notifications.error(
-        'Invalid call to SetAdventureName(). See console for details.'
+        game.i18n.localize('SCENE-PACKER.errors.adventureName.ui')
       );
-      throw 'Invalid module name passed to "SetAdventureName()". This must be the name of the adventure as defined in module.json under the "title" field.';
+      throw game.i18n.localize('SCENE-PACKER.errors.adventureName.details');
     }
     this.adventureName = adventureName;
     return this;
@@ -275,9 +278,9 @@ export default class ScenePacker {
   SetModuleName(moduleName) {
     if (!moduleName) {
       ui.notifications.error(
-        'Invalid call to SetModuleName(). See console for details.'
+        game.i18n.localize('SCENE-PACKER.errors.moduleName.ui')
       );
-      throw 'Invalid module name passed to "SetModuleName()". This must be the name of the module as defined in module.json under the "name" field.';
+      throw game.i18n.localize('SCENE-PACKER.errors.moduleName.details');
     }
     this.moduleName = moduleName;
     return this;
@@ -292,16 +295,6 @@ export default class ScenePacker {
   }
 
   /**
-   * Set the compendium name holding the scenes in this module.
-   * @param {string} compendiumSceneName
-   * @returns this to support chaining
-   */
-  SetCompendiumSceneName(compendiumSceneName) {
-    this.compendiumSceneName = compendiumSceneName;
-    return this;
-  }
-
-  /**
    * Set the name of the journal to be imported and automatically opened after activation.
    * @param {string} journal
    * @returns this to support chaining
@@ -310,14 +303,14 @@ export default class ScenePacker {
     if (journal) {
       if (typeof journal !== 'string') {
         ui.notifications.error(
-          'Invalid call to SetWelcomeJournal(). See console for details.'
+          game.i18n.localize('SCENE-PACKER.errors.welcomeJournal.ui')
         );
-        throw 'Invalid journal name passed to "SetWelcomeJournal()". This must be the name of a journal in the module compendium.';
+        throw game.i18n.localize('SCENE-PACKER.errors.welcomeJournal.details');
       }
     } else {
-      this.logWarn(
+      this.log(
         false,
-        'SetWelcomeJournal() called with no value. This disables importing a welcome journal. No journal will automatically be opened.'
+        game.i18n.localize('SCENE-PACKER.errors.welcomeJournal.missing')
       );
     }
 
@@ -335,13 +328,21 @@ export default class ScenePacker {
       journals = journals instanceof Array ? journals : [journals];
       journals.forEach((j) => {
         if (typeof j !== 'string') {
-          throw `You must pass an array of strings to SetAdditionalJournalsToImport(). They must be the names of journals. Received: ${j}`;
+          ui.notifications.error(
+            game.i18n.localize('SCENE-PACKER.errors.additionalJournals.ui')
+          );
+          throw game.i18n.format(
+            'SCENE-PACKER.errors.additionalJournals.details',
+            {
+              journal: j,
+            }
+          );
         }
       });
     } else {
-      this.logWarn(
+      this.log(
         false,
-        'SetAdditionalJournalsToImport() called with no value. This disables importing of additional journals. Only those journals linked to the scene by a map pin will be imported.'
+        game.i18n.localize('SCENE-PACKER.errors.additionalJournals.missing')
       );
     }
 
@@ -360,15 +361,17 @@ export default class ScenePacker {
       packs.forEach((j) => {
         if (typeof j !== 'string') {
           ui.notifications.error(
-            'Invalid call to SetCreaturePacks(). See console for details.'
+            game.i18n.localize('SCENE-PACKER.errors.creaturePacks.ui')
           );
-          throw `You must pass an array of strings to SetCreaturePacks(). They must be the names of Actor packs. Received: ${j}`;
+          throw game.i18n.format('SCENE-PACKER.errors.creaturePacks.details', {
+            pack: j,
+          });
         }
       });
     } else {
-      this.logWarn(
+      this.log(
         false,
-        'SetCreatePacks() called with no value. This disables importing of Actors.'
+        game.i18n.localize('SCENE-PACKER.errors.additionalJournals.missing')
       );
     }
 
@@ -387,15 +390,17 @@ export default class ScenePacker {
       packs.forEach((j) => {
         if (typeof j !== 'string') {
           ui.notifications.error(
-            'Invalid call to SetJournalPacks(). See console for details.'
+            game.i18n.localize('SCENE-PACKER.errors.journalPacks.ui')
           );
-          throw `You must pass an array of strings to SetJournalPacks(). They must be the names of Journal packs. Received: ${j}`;
+          throw game.i18n.format('SCENE-PACKER.errors.journalPacks.details', {
+            pack: j,
+          });
         }
       });
     } else {
-      this.logWarn(
+      this.log(
         false,
-        'SetJournalPacks() called with no value. This disables importing of Journals.'
+        game.i18n.localize('SCENE-PACKER.errors.journalPacks.missing')
       );
     }
 
@@ -411,7 +416,7 @@ export default class ScenePacker {
    */
   async PackScene(scene = game.scenes.get(game.user.viewedScene)) {
     ui.notifications.warn(
-      "Don't forget to run ScenePacker.ClearPackedData() after exporting to prevent future duplicates."
+      game.i18n.localize('SCENE-PACKER.notifications.pack-scene.clear-reminder')
     );
 
     /**
@@ -434,11 +439,21 @@ export default class ScenePacker {
 
     if (journalInfo.length > 0) {
       ui.notifications.info(
-        `Writing ${journalInfo.length} journals to scene: ${scene.name}`
+        game.i18n.format(
+          'SCENE-PACKER.notifications.pack-scene.writing-journals',
+          {
+            number: journalInfo.length,
+            name: scene.name,
+          }
+        )
       );
       await scene.setFlag(this.moduleName, this.journalFlag, journalInfo);
     } else {
-      ui.notifications.info('No journal pins detected on the scene.');
+      ui.notifications.info(
+        game.i18n.localize(
+          'SCENE-PACKER.notifications.pack-scene.no-journal-pins'
+        )
+      );
     }
 
     /**
@@ -447,11 +462,15 @@ export default class ScenePacker {
     const tokenInfo = scene.data.tokens.map((token) => {
       if (!token.name) {
         ui.notifications.warn(
-          'Cannot pack a token that has no name. Check console for details.'
+          game.i18n.localize(
+            'SCENE-PACKER.notifications.pack-scene.no-token-name-warning'
+          )
         );
         this.logWarn(
           true,
-          'Trying to pack a token that has no name is not going to end well. Please ensure the Token and Actor have a name.',
+          game.i18n.localize(
+            'SCENE-PACKER.notifications.pack-scene.no-token-name-log'
+          ),
           token
         );
       }
@@ -472,11 +491,19 @@ export default class ScenePacker {
 
     if (tokenInfo.length > 0) {
       ui.notifications.info(
-        `Writing ${tokenInfo.length} tokens to scene: ${scene.name}`
+        game.i18n.format(
+          'SCENE-PACKER.notifications.pack-scene.writing-tokens',
+          {
+            number: tokenInfo.length,
+            name: scene.name,
+          }
+        )
       );
       return scene.setFlag(this.moduleName, this.tokenFlag, tokenInfo);
     } else {
-      ui.notifications.info('No tokens detected on the scene.');
+      ui.notifications.info(
+        game.i18n.localize('SCENE-PACKER.notifications.pack-scene.no-tokens')
+      );
     }
 
     return Promise.resolve();
@@ -508,13 +535,25 @@ export default class ScenePacker {
 
     if (searchPacks.length === 0) {
       ui.notifications.error(
-        `Invalid pack configuration. Cannot import ${type}. Check console for more details.`
+        game.i18n.format(
+          'SCENE-PACKER.notifications.import-by-name.invalid-packs.error',
+          {
+            type: type,
+          }
+        )
       );
       this.logError(
         true,
-        `ImportByName was called with no searchPacks defined`
+        game.i18n.localize(
+          'SCENE-PACKER.notifications.import-by-name.invalid-packs.short'
+        )
       );
-      throw `Invalid pack configuration. Cannot import ${type}.`;
+      throw game.i18n.format(
+        'SCENE-PACKER.notifications.import-by-name.invalid-packs.error',
+        {
+          type: type,
+        }
+      );
     }
 
     let createData = [];
@@ -522,26 +561,50 @@ export default class ScenePacker {
     const exampleEntity = game.packs.get(searchPacks[0])?.entity;
     if (!exampleEntity) {
       ui.notifications.error(
-        `Invalid pack configuration. Cannot import ${type}. Check console for more details.`
+        game.i18n.format(
+          'SCENE-PACKER.notifications.import-by-name.invalid-packs.error',
+          {
+            type: type,
+          }
+        )
       );
       this.logError(
         true,
-        `ImportByName was called with no valid searchPacks defined. Received the following call details:`,
+        game.i18n.localize(
+          'SCENE-PACKER.notifications.import-by-name.invalid-packs.details'
+        ),
         { searchPacks, entityNames, type }
       );
-      throw `Invalid pack configuration. Cannot import ${type}.`;
+      throw game.i18n.format(
+        'SCENE-PACKER.notifications.import-by-name.invalid-packs.error',
+        {
+          type: type,
+        }
+      );
     }
     const entityClass = CONFIG[exampleEntity]?.entityClass;
     if (!entityClass) {
       ui.notifications.error(
-        `Invalid pack configuration. Cannot import ${type}. Check console for more details.`
+        game.i18n.format(
+          'SCENE-PACKER.notifications.import-by-name.invalid-packs.error',
+          {
+            type: type,
+          }
+        )
       );
       this.logError(
         true,
-        `ImportByName was called with a reference that is not registered with Foundry. Received the following call details:`,
+        game.i18n.localize(
+          'SCENE-PACKER.notifications.import-by-name.invalid-packs.reference'
+        ),
         { searchPacks, entityNames, type }
       );
-      throw `Invalid pack configuration. Cannot import ${type}.`;
+      throw game.i18n.format(
+        'SCENE-PACKER.notifications.import-by-name.invalid-packs.error',
+        {
+          type: type,
+        }
+      );
     }
 
     /** search the packs in priority order */
@@ -554,11 +617,21 @@ export default class ScenePacker {
       const pack = game.packs.get(packName);
       if (!pack) {
         ui.notifications.error(
-          `Invalid pack configuration. Cannot find compendium ${packName}. Check console for more details.`
+          game.i18n.format(
+            'SCENE-PACKER.notifications.import-by-name.invalid-packs.missing-pack',
+            {
+              packName: packName,
+            }
+          )
         );
         this.logError(
           true,
-          `ImportByName was called to search for pack "${packName}" which is not found. Check for typos in your module setup.`
+          game.i18n.format(
+            'SCENE-PACKER.notifications.import-by-name.invalid-packs.missing-pack-details',
+            {
+              packName: packName,
+            }
+          )
         );
         continue;
       }
@@ -602,7 +675,15 @@ export default class ScenePacker {
     }
 
     if (createData.length > 0) {
-      ui.notifications.info(`Importing ${createData.length} new ${type}.`);
+      ui.notifications.info(
+        game.i18n.format(
+          'SCENE-PACKER.notifications.import-by-name.creating-data',
+          {
+            count: createData.length,
+            type: type,
+          }
+        )
+      );
       return entityClass.create(createData);
     }
 
@@ -658,7 +739,12 @@ export default class ScenePacker {
   findActorForTokenName(tokenName, folder) {
     let actor = null;
     if (!tokenName) {
-      this.logWarn(false, 'Tried to find an actor for a token with no name');
+      this.logWarn(
+        false,
+        game.i18n.localize(
+          'SCENE-PACKER.notifications.import-by-name.missing-name'
+        )
+      );
       return actor;
     }
 
@@ -696,11 +782,13 @@ export default class ScenePacker {
   findActorForToken(token, tokenWorldData, folder) {
     if (!token?.name) {
       ui.notifications.warn(
-        'Cannot find a token that has no name. Check console for details.'
+        game.i18n.localize('SCENE-PACKER.notifications.find-actor.missing-name')
       );
       this.logWarn(
         true,
-        'Trying to find a token that has no name is not going to end well. Please ensure the Token and Actor have a name prior to packing.',
+        game.i18n.localize(
+          'SCENE-PACKER.notifications.find-actor.missing-name-details'
+        ),
         token
       );
       return null;
@@ -760,18 +848,26 @@ export default class ScenePacker {
 
     if (missing.length > 0) {
       ui.notifications.error(
-        `Could not find ${missing.length} actors to link, they will remain unlinked. Check console for details.`
+        game.i18n.format('SCENE-PACKER.notifications.link-tokens.missing', {
+          count: missing.length,
+        })
       );
       this.logError(
         true,
-        `${this.moduleName} | Could not find ${missing.length} actors to link. The following actor tokens were not found in the "${this.adventureName}" folder.`,
+        game.i18n.format('SCENE-PACKER.notifications.link-tokens.missing', {
+          count: missing.length,
+          adventureName: this.adventureName,
+        }),
         missing
       );
     }
 
     if (updates.length > 0) {
       ui.notifications.info(
-        `Relinking ${updates.length} Tokens linked to actors.`
+        game.i18n.format('SCENE-PACKER.notifications.link-tokens.linking', {
+          count: updates.length,
+          adventureName: this.adventureName,
+        })
       );
       return scene.updateEmbeddedEntity('Token', updates);
     }
@@ -816,18 +912,29 @@ export default class ScenePacker {
     const missing = spawnInfo.filter((info) => !info.entryId);
     if (missing.length > 0) {
       ui.notifications.error(
-        `Could not find ${missing.length} journals to link. Check console for details.`
+        game.i18n.format('SCENE-PACKER.notifications.spawn-notes.missing', {
+          count: missing.length,
+        })
       );
       this.logError(
         true,
-        `${this.moduleName} | Could not find ${missing.length} notes to spawn. The following journals were not found.`,
+        game.i18n.format(
+          'SCENE-PACKER.notifications.spawn-notes.missing-details',
+          {
+            count: missing.length,
+          }
+        ),
         missing
       );
     }
 
     spawnInfo = spawnInfo.filter((info) => !!info.entryId);
     if (spawnInfo.length > 0) {
-      ui.notifications.info(`Spawning ${spawnInfo.length} journal notes.`);
+      ui.notifications.info(
+        game.i18n.format('SCENE-PACKER.notifications.spawn-notes.spawning', {
+          count: spawnInfo.length,
+        })
+      );
       // Cleanup the notes already embedded in the scene to prevent "duplicates".
       await scene.deleteEmbeddedEntity(
         'Note',
@@ -846,7 +953,9 @@ export default class ScenePacker {
     const tokenInfo = scene.getFlag(this.moduleName, this.tokenFlag);
     const journalInfo = scene.getFlag(this.moduleName, this.journalFlag);
     if (!tokenInfo && !journalInfo) {
-      ui.notifications.info('No items to configure. All done!');
+      ui.notifications.info(
+        game.i18n.localize('SCENE-PACKER.notifications.unpack.no-items')
+      );
       return;
     }
 
@@ -894,7 +1003,9 @@ export default class ScenePacker {
   async ClearPackedData(scene = game.scenes.get(game.user.viewedScene)) {
     await scene.unsetFlag(this.moduleName, this.tokenFlag);
     await scene.unsetFlag(this.moduleName, this.journalFlag);
-    ui.notifications.info('Finished clearing Packed Data.');
+    ui.notifications.info(
+      game.i18n.localize('SCENE-PACKER.notifications.clear-data.done')
+    );
     return Promise.resolve();
   }
 }
