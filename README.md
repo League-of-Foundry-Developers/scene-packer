@@ -58,10 +58,6 @@ const creaturePacks = [`${moduleName}.actors`, 'dnd5e.monsters'];
  *   const journalPacks = [];
  */
 const journalPacks = [`${moduleName}.journals`];
-/**
- * compendiumSceneName set this to the "name" of the "pack" in your module.json file that has "entity": "Scene"
- */
-const compendiumSceneName = 'maps';
 
 Hooks.once('scenePackerReady', ({ getInstance }) => {
   // Initialise the Scene Packer with your adventure name and module name
@@ -77,9 +73,6 @@ Hooks.once('scenePackerReady', ({ getInstance }) => {
   }
   if (additionalJournals.length) {
     packer.SetAdditionalJournalsToImport(additionalJournals);
-  }
-  if (compendiumSceneName) {
-    packer.SetCompendiumSceneName(compendiumSceneName);
   }
 });
 ```
