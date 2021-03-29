@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.2
+
+- Fix bug that would occur if Journal entries weren't in a folder of the same name as the adventure.
+
 ## v1.0.1
 
 - Added localization.

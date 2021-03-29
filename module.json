@@ -2,7 +2,7 @@
   "name": "scene-packer",
   "title": "Library: Scene Packer",
   "description": "A module to assist with Scene and Adventure packing and unpacking.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "library": "true",
   "manifestPlusVersion": "1.0.0",
   "minimumCoreVersion": "0.7.9",
@@ -27,7 +27,7 @@
   }],
   "url": "https://github.com/League-of-Foundry-Developers/scene-packer",
   "manifest": "https://github.com/League-of-Foundry-Developers/scene-packer/releases/latest/download/module.json",
-  "download": "https://github.com/League-of-Foundry-Developers/scene-packer/releases/download/1.0.1/module.zip",
+  "download": "https://github.com/League-of-Foundry-Developers/scene-packer/releases/download/1.0.2/module.zip",
   "bugs": "https://github.com/League-of-Foundry-Developers/scene-packer/issues",
   "changelog": "https://github.com/League-of-Foundry-Developers/scene-packer/blob/master/changelog.md",
   "allowBugReporter": true

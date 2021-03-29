@@ -723,7 +723,7 @@ export default class ScenePacker {
       .filter((info) => {
         // Filter for only the entries that are missing, or are in a different folder.
         const j = game.journal.getName(info.journalName);
-        return j == null || j.data.folder !== folder.id;
+        return j == null || (folder && j.data.folder !== folder.id);
       })
       .map((info) => info.journalName);
     return missing_journals;
