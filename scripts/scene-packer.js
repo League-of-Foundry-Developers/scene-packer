@@ -1014,4 +1014,6 @@ window['scene-packer'] = {
   getInstance: ScenePacker.GetInstance,
 };
 
-Hooks.callAll('scenePackerReady', window['scene-packer']);
+Hooks.on('canvasReady', () => {
+  Hooks.callAll('scenePackerReady', window['scene-packer']);
+});
