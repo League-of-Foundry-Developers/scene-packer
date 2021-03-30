@@ -101,6 +101,25 @@
         "details": "You must pass an array of strings to \"SetJournalPacks()\". They must be the names of Journal Packs. Received: {pack}",
         "missing": "SetJournalPacks() called with no value. This disables importing of Journals."
       }
+    },
+    "world-conversion": {
+      "compendiums": {
+        "unlock": "Unlocking compendiums: {list}",
+        "lock": "Locking compendiums: {list}",
+        "checking-and-updating": "Checking and updating {count} journal references from world links to compendium links.",
+        "invalid-ref-type": "Found a journal reference that isn't handled: {type}. Skipping reference...",
+        "invalid-no-name": "Found a journal reference but couldn't find its original name. Check console for details.",
+        "invalid-no-matching-name": "Could not find reference name in world data",
+        "invalid-not-found": "Found a journal reference but couldn't find its compendium version by name. Check console for details.",
+        "invalid-not-found-console": "Could not find reference in compendium data. Skipping updating reference...",
+        "invalid-too-many": "Found a journal reference but found more than one compendium version by name. Check console for details.",
+        "invalid-too-many-console": "Found more than one reference in compendium data. Skipping updating reference...",
+        "updating-journal-references": "Changing {count} journal references in: {journal}",
+        "updating-reference-console": "Changing {pack}[{journalEntryId}] {type} reference {oldRef} -> {newRefPack}.{newRef}",
+        "updating-reference": "Updating {count} references in {journal}. See console for full details.",
+        "completed-journal": "Completed journal {journal} {entryId}",
+        "completed": "Completed!"
+      }
     }
   }
 }

@@ -26,6 +26,7 @@ export default class ScenePacker {
   };
   journalFlag = 'aiJournals';
   tokenFlag = 'aiTokens';
+  initialised = false;
 
   /**
    * @param {string} adventureName The human readable name of the adventure.
@@ -42,71 +43,13 @@ export default class ScenePacker {
     this.SetModuleName(moduleName);
 
     if (moduleName) {
-      Hooks.once('devModeReady', ({ registerPackageDebugFlag }) => {
-        registerPackageDebugFlag(this.moduleName);
-      });
-
-      Hooks.on('init', () => {
-        game.settings.register(this.moduleName, 'imported', {
-          scope: 'world',
-          config: false,
-          type: Boolean,
-          default: false,
-        });
-
-        game.settings.register(this.moduleName, 'enableContextMenu', {
-          name: game.i18n.localize('SCENE-PACKER.settings.context-menu.name'),
-          hint: game.i18n.localize('SCENE-PACKER.settings.context-menu.hint'),
-          scope: 'client',
-          config: true,
-          type: Boolean,
-          default: false,
-        });
-
-        game.settings.register(this.moduleName, 'showCompendiumInfo', {
-          name: game.i18n.localize('SCENE-PACKER.settings.compendium.name'),
-          scope: 'client',
-          type: Boolean,
-          default: true,
-        });
-      });
-
-      Hooks.on('canvasReady', async (readyCanvas) => {
-        if (readyCanvas.scene.getFlag(this.moduleName, this.tokenFlag)) {
-          ui.notifications.info(
-            game.i18n.localize('SCENE-PACKER.notifications.first-launch')
-          );
-          await this.UnpackScene(readyCanvas.scene);
-          await this.ClearPackedData(readyCanvas.scene);
-          ui.notifications.info(
-            game.i18n.localize('SCENE-PACKER.notifications.done')
-          );
-          game.settings.set(this.moduleName, 'imported', true);
-
-          if (this.welcomeJournal) {
-            // Display the welcome journal
-            const folder = game.folders.find(
-              (j) =>
-                j.data.type === 'JournalEntry' &&
-                j.data.name === this.adventureName
-            );
-            const j =
-              folder &&
-              game.journal.filter(
-                (j) =>
-                  j.data.name === this.welcomeJournal &&
-                  j.data.folder === folder.id
-              );
-            if (j.length > 0) {
-              j[0].sheet.render(true, { sheetMode: 'text' });
-            }
-          }
-        }
-      });
-
       Hooks.on('renderCompendium', (app, html, data) => {
+        let collectionName = data.collection;
+        if (typeof collectionName === 'object') {
+          collectionName = collectionName.collection;
+        }
         if (
-          data.collection.startsWith(`${this.moduleName}.`) &&
+          collectionName.startsWith(`${this.moduleName}.`) &&
           !game.settings.get(this.moduleName, 'imported') &&
           game.settings.get(this.moduleName, 'showCompendiumInfo')
         ) {
@@ -182,7 +125,79 @@ export default class ScenePacker {
           );
         }
       });
+
+      if (!this.initialised) {
+        this.init();
+      }
     }
+  }
+
+  /**
+   * Initialises the Scene Packer.
+   * @returns ScenePacker for chaining
+   */
+  async init() {
+    if (this.initialised) {
+      return this;
+    }
+
+    if (typeof window.DEV?.registerPackageDebugFlag === 'function') {
+      window.DEV.registerPackageDebugFlag(this.moduleName);
+    }
+
+    game.settings.register(this.moduleName, 'imported', {
+      scope: 'world',
+      config: false,
+      type: Boolean,
+      default: false,
+    });
+
+    game.settings.register(this.moduleName, 'enableContextMenu', {
+      name: game.i18n.localize('SCENE-PACKER.settings.context-menu.name'),
+      hint: game.i18n.localize('SCENE-PACKER.settings.context-menu.hint'),
+      scope: 'client',
+      config: true,
+      type: Boolean,
+      default: false,
+    });
+
+    game.settings.register(this.moduleName, 'showCompendiumInfo', {
+      name: game.i18n.localize('SCENE-PACKER.settings.compendium.name'),
+      scope: 'client',
+      type: Boolean,
+      default: true,
+    });
+
+    if (canvas.scene.getFlag(this.moduleName, this.tokenFlag)) {
+      ui.notifications.info(
+        game.i18n.localize('SCENE-PACKER.notifications.first-launch')
+      );
+      await this.UnpackScene(readyCanvas.scene);
+      await this.ClearPackedData(readyCanvas.scene);
+      ui.notifications.info(
+        game.i18n.localize('SCENE-PACKER.notifications.done')
+      );
+      game.settings.set(this.moduleName, 'imported', true);
+
+      if (this.welcomeJournal) {
+        // Display the welcome journal
+        const folder = game.folders.find(
+          (j) =>
+            j.data.type === 'JournalEntry' && j.data.name === this.adventureName
+        );
+        const j =
+          folder &&
+          game.journal.filter(
+            (j) =>
+              j.data.name === this.welcomeJournal && j.data.folder === folder.id
+          );
+        if (j.length > 0) {
+          j[0].sheet.render(true, { sheetMode: 'text' });
+        }
+      }
+    }
+
+    return this;
   }
 
   /**
@@ -196,32 +211,33 @@ export default class ScenePacker {
 
   /**
    * Log a message to console of the requested type if dev mode is enabled.
+   * @param {string} moduleName The name of the module
    * @param {boolean} force if true, always log regardless of dev mode settings
    * @param  {...any} args the arguments to log
    */
-  logType(type, force, ...args) {
+  static logType(moduleName, type, force, ...args) {
     try {
       if (typeof force !== 'boolean') {
         console.warn(
           game.i18n.format('SCENE-PACKER.log.invalidForce', {
-            moduleName: this.moduleName,
+            moduleName: moduleName,
             force: force,
           })
         );
       }
 
-      const isDebugging = window.DEV?.getPackageDebugValue(this.moduleName);
+      const isDebugging = window.DEV?.getPackageDebugValue(moduleName);
 
       if (force || isDebugging) {
         switch (type) {
           case 'error':
-            console.error(this.moduleName, '|', ...args);
+            console.error(moduleName, '|', ...args);
             break;
           case 'warn':
-            console.warn(this.moduleName, '|', ...args);
+            console.warn(moduleName, '|', ...args);
             break;
           default:
-            console.log(this.moduleName, '|', ...args);
+            console.log(moduleName, '|', ...args);
         }
       }
     } catch (e) {}
@@ -233,7 +249,7 @@ export default class ScenePacker {
    * @param  {...any} args the arguments to log
    */
   log(force, ...args) {
-    this.logType('info', force, ...args);
+    ScenePacker.logType(this.moduleName, 'info', force, ...args);
   }
 
   /**
@@ -242,7 +258,7 @@ export default class ScenePacker {
    * @param  {...any} args the arguments to log
    */
   logWarn(force, ...args) {
-    this.logType('warn', force, ...args);
+    ScenePacker.logType(this.moduleName, 'warn', force, ...args);
   }
 
   /**
@@ -251,7 +267,7 @@ export default class ScenePacker {
    * @param  {...any} args the arguments to log
    */
   logError(force, ...args) {
-    this.logType('error', force, ...args);
+    ScenePacker.logType(this.moduleName, 'error', force, ...args);
   }
 
   /**
@@ -1008,10 +1024,284 @@ export default class ScenePacker {
     );
     return Promise.resolve();
   }
+
+  /**
+   * Bulk set the compendium lock state for compendiums owned by the initialised module
+   * @param {boolean} locked true to lock, false to unlock
+   * @param {string} moduleName The name of the module that owns the compendiums to be updated
+   */
+  static async SetModuleCompendiumLockState(locked, moduleName) {
+    locked = !!locked;
+    const compendiums = game.packs.filter(
+      (p) => p.metadata.package === moduleName
+    );
+    const settings = {};
+    compendiums.forEach((p) => {
+      settings[`${p.metadata.package}.${p.metadata.name}`] = { locked };
+    });
+    if (Object.keys(settings).length) {
+      let key = locked
+        ? 'SCENE-PACKER.world-conversion.compendiums.lock'
+        : 'SCENE-PACKER.world-conversion.compendiums.unlock';
+      ui.notifications.info(
+        game.i18n.format(key, {
+          list: Object.keys(settings).join(', '),
+          locked: locked,
+        })
+      );
+      await game.settings.set('core', Compendium.CONFIG_SETTING, settings);
+    }
+  }
+
+  /**
+   * Updates compendium journals to link to the compendium entries rather than the world references.
+   * This method looks up references by Name and will warn you if it doesn't find a match, or finds more than one.
+   * Supports relinking:
+   *   Actors
+   *   JournalEntries
+   *   Rolltables
+   *   Items
+   *   Scenes
+   * @param {string} moduleName The name of the module that owns the compendiums to be updated
+   */
+  static async RelinkJournalEntries(moduleName) {
+    // Get all of the compendium packs that belong to the requested module
+    const allPacks = game.packs.filter(
+      (p) => p.metadata.package === moduleName
+    );
+    for (let i = 0; i < allPacks.length; i++) {
+      // Ensure that all of the packs' indexes are loaded
+      await allPacks[i].getIndex();
+    }
+    const packs = {};
+    CONST.FOLDER_ENTITY_TYPES.forEach((type) => {
+      packs[`${type}Packs`] = allPacks.filter((p) => p.entity == type);
+    });
+
+    // Unlock the module compendiums for editing
+    await ScenePacker.SetModuleCompendiumLockState(false, moduleName);
+
+    // Matches things like: @Actor[obe2mDyYDXYmxHJb]{
+    const rex = /@(\w+)\[(\w+)\]\{/g;
+
+    // Check each of the JournalEntry compendium packs in the requested module
+    for (let i = 0; i < packs.JournalEntryPacks.length; i++) {
+      const pack = packs.JournalEntryPacks[i];
+      ui.notifications.info(
+        game.i18n.format(
+          'SCENE-PACKER.world-conversion.compendiums.checking-and-updating',
+          {
+            count: pack.index.length,
+          }
+        )
+      );
+      // Check each of the Journals in the pack
+      for (let j = 0; j < pack.index.length; j++) {
+        const references = new Set();
+        const entry = pack.index[j];
+        const journal = await pack.getEntity(entry._id);
+        if (!journal?.data?.content) {
+          continue;
+        }
+        const links = [...journal.data.content.matchAll(rex)];
+        for (let k = 0; k < links.length; k++) {
+          const link = links[k];
+          const type = link[1];
+          const oldRef = link[2];
+          let newRef = [];
+          // Need to look up the in world reference to find the new compendium reference by name
+          let name = null;
+          switch (type) {
+            case 'Actor':
+              name = game.actors.get(oldRef)?.name;
+              break;
+            case 'JournalEntry':
+              name = game.journal.get(oldRef)?.name;
+              break;
+            case 'RollTable':
+              name = game.tables.get(oldRef)?.name;
+              break;
+            case 'Item':
+              name = game.items.get(oldRef)?.name;
+              break;
+            case 'Scene':
+              name = game.scenes.get(oldRef)?.name;
+              break;
+            default:
+              ui.notifications.error(
+                game.i18n.format(
+                  'SCENE-PACKER.world-conversion.compendiums.invalid-ref-type',
+                  {
+                    type: type,
+                  }
+                )
+              );
+              continue;
+          }
+          if (!name) {
+            ui.notifications.error(
+              game.i18n.localize(
+                'SCENE-PACKER.world-conversion.compendiums.invalid-ref-type'
+              )
+            );
+            ScenePacker.logType(
+              moduleName,
+              'error',
+              true,
+              journal.name,
+              game.i18n.localize(
+                'SCENE-PACKER.world-conversion.compendiums.invalid-no-matching-name'
+              ),
+              type,
+              entry,
+              oldRef
+            );
+            continue;
+          }
+          // Build the links to the new references that exist within the compendium/s
+          packs[`${type}Packs`].forEach((p) => {
+            let found = p.index.find((e) => e.name == name);
+            if (found) {
+              newRef.push({ pack: p.collection, ref: found._id });
+            }
+          });
+
+          if (!newRef.length) {
+            ui.notifications.error(
+              game.i18n.localize(
+                'SCENE-PACKER.world-conversion.compendiums.invalid-not-found'
+              )
+            );
+            ScenePacker.logType(
+              moduleName,
+              'error',
+              true,
+              journal.name,
+              game.i18n.localize(
+                'SCENE-PACKER.world-conversion.compendiums.invalid-not-found-console'
+              ),
+              type,
+              name,
+              entry,
+              oldRef
+            );
+          } else if (newRef.length > 1) {
+            ui.notifications.error(
+              game.i18n.localize(
+                'SCENE-PACKER.world-conversion.compendiums.invalid-too-many'
+              )
+            );
+            ScenePacker.logType(
+              moduleName,
+              'error',
+              true,
+              journal.name,
+              game.i18n.localize(
+                'SCENE-PACKER.world-conversion.compendiums.invalid-too-many-console'
+              ),
+              type,
+              name,
+              entry,
+              oldRef,
+              newRef
+            );
+          }
+
+          references.add({
+            type: type,
+            oldRef: oldRef,
+            newRef: newRef,
+            pack: pack.collection,
+            journalEntryId: entry._id,
+          });
+        }
+
+        if (references.size) {
+          ScenePacker.logType(
+            moduleName,
+            'info',
+            false,
+            game.i18n.format(
+              'SCENE-PACKER.world-conversion.compendiums.updating-journal-references',
+              {
+                count: references.size,
+                journal: journal.name,
+              }
+            )
+          );
+
+          // Build the new journal content, progressively replacing each reference
+          let newContent = journal.data.content;
+          for (const change of references) {
+            if (change.newRef.length !== 1) {
+              // Skip any reference update that isn't a one to one replacement
+              continue;
+            }
+            ScenePacker.logType(
+              moduleName,
+              'info',
+              false,
+              game.i18n.format(
+                'SCENE-PACKER.world-conversion.compendiums.updating-reference-console',
+                {
+                  pack: change.pack,
+                  journalEntryId: change.journalEntryId,
+                  type: change.type,
+                  oldRef: change.oldRef,
+                  newRefPack: change.newRef[0].pack,
+                  newRef: change.newRef[0].ref,
+                }
+              )
+            );
+            let regex = new RegExp(
+              `@${change.type}\\[${change.oldRef}\\]\\{`,
+              'g'
+            );
+            newContent = newContent.replace(
+              regex,
+              `@Compendium[${change.newRef[0].pack}.${change.newRef[0].ref}]{`
+            );
+          }
+          ui.notifications.info(
+            game.i18n.format(
+              'SCENE-PACKER.world-conversion.compendiums.updating-reference',
+              {
+                count: references.size,
+                journal: journal.name,
+              }
+            )
+          );
+
+          // Update the journal entry with the fully replaced content
+          await pack.updateEntity({ _id: entry._id, content: newContent });
+        }
+        ScenePacker.logType(
+          moduleName,
+          'info',
+          false,
+          game.i18n.format(
+            'SCENE-PACKER.world-conversion.compendiums.completed-journal',
+            {
+              journal: journal.name,
+              entryId: entry._id,
+            }
+          )
+        );
+      }
+    }
+
+    // Lock the module compendiums again
+    await ScenePacker.SetModuleCompendiumLockState(true, moduleName);
+
+    ui.notifications.info(
+      game.i18n.localize('SCENE-PACKER.world-conversion.compendiums.completed')
+    );
+  }
 }
 
 window['scene-packer'] = {
   getInstance: ScenePacker.GetInstance,
+  relinkJournalEntries: ScenePacker.RelinkJournalEntries,
 };
 
 Hooks.on('canvasReady', () => {
