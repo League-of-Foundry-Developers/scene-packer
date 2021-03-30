@@ -6,6 +6,7 @@ A library to help other developers package up Scenes and Adventures to solve the
 
 - Scene Journal Pins link to the correct Journal
 - Actor tokens on a Scene link to the correct Actor
+- Relink journal entries to compendium entities (to automatically fix the broken links after exporting from your World to your Compendium)
 
 ## Installation
 
@@ -92,11 +93,17 @@ To pack your scene ready for distribution:
 
 ![scene-context-menu](scene-context-menu.png)
 
+### Updating Journal links
+
+When you build an adventure module, it's a painful process updating all of your Journal references to link to the compendium versions. You can simplify this by running the following command in your browser console putting in your appropriate module name (as per your manifest json name):
+
+```js
+`await window['scene-packer'].relinkJournalEntries('module-name');`
+```
+
 ## TODO
 
 - Provide example complete module
-- Subfolder support for Actors
-- Subfolder support for Journals
 
 ## Acknowledgements
 
