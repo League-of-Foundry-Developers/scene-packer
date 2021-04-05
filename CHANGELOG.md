@@ -1,6 +1,12 @@
 # Changelog
 
-## V1.0.3
+## v1.0.4
+
+- Added welcome prompt to import and unpack all scenes in the adventure.
+- Importing the adventure multiple times will no longer import the welcome journal multiple times.
+- Removed compendium prompts. `packer.DisableImportPrompts();` will now disable the welcome prompt.
+
+## v1.0.3
 
 - Added `packer.DisableImportPrompts();` as a way to prevent the popups from appearing when opening your module's compendiums.
 - Added `Unpack Scene Data` option to Scene context menu.

@@ -47,62 +47,6 @@ export default class ScenePacker {
     this.SetModuleName(moduleName);
 
     if (this.moduleName) {
-      Hooks.on('renderCompendium', (app, html, data) => {
-        let collectionName = data.collection;
-        if (typeof collectionName === 'object') {
-          collectionName = collectionName.collection;
-        }
-
-        let importedAdventureVersion = '0.0.0';
-        try {
-          importedAdventureVersion = game.settings.get(this.moduleName, 'imported') || '0.0.0';
-        } catch (e) {
-          // Just means the adventure has never been imported before
-        }
-
-        if (
-          collectionName.startsWith(`${this.moduleName}.`) &&
-          importedAdventureVersion === '0.0.0' &&
-          game.settings.get(this.moduleName, 'showCompendiumInfo') &&
-          this.allowImportPrompts
-          // TODO check if a newer version of the adventure module exists by comparing the scene flags with the compendium flags
-        ) {
-          let content = `<p><strong>${this.adventureName}</strong></p>`;
-
-          content += '<p>';
-          if (data.cssClass === 'scene') {
-            content += game.i18n.localize('SCENE-PACKER.compendium.info-scene');
-          } else {
-            content += game.i18n.localize('SCENE-PACKER.compendium.info-other');
-          }
-          content += '</p>';
-
-          let d = new Dialog({
-            title: game.i18n.format('SCENE-PACKER.compendium.title', {
-              title: this.adventureName,
-            }),
-            content: content,
-            buttons: {
-              ok: {
-                icon: '<i class="fas fa-check"></i>',
-                label: game.i18n.localize('SCENE-PACKER.ok'),
-              },
-              noShow: {
-                icon: '<i class="fas fa-times"></i>',
-                label: game.i18n.localize('SCENE-PACKER.dontShow'),
-                callback: () =>
-                  game.settings.set(
-                    this.moduleName,
-                    'showCompendiumInfo',
-                    false
-                  ),
-              },
-            },
-          });
-          d.render(true);
-        }
-      });
-
       Hooks.on('getSceneDirectoryEntryContext', function (app, html, data) {
         if (game.user.isGM) {
           html.push(
@@ -176,7 +120,21 @@ export default class ScenePacker {
           scope: 'world',
           config: false,
           type: String,
-          default: '',
+          default: '0.0.0',
+        });
+
+        game.settings.register(this.moduleName, 'prompted', {
+          scope: 'world',
+          config: false,
+          type: String,
+          default: '0.0.0',
+        });
+
+        game.settings.register(this.moduleName, 'showWelcomePrompts', {
+          scope: 'world',
+          config: false,
+          type: Boolean,
+          default: true,
         });
 
         game.settings.register(this.moduleName, 'enableContextMenu', {
@@ -188,12 +146,92 @@ export default class ScenePacker {
           default: true,
         });
 
-        game.settings.register(this.moduleName, 'showCompendiumInfo', {
-          name: game.i18n.localize('SCENE-PACKER.settings.compendium.name'),
-          scope: 'client',
-          type: Boolean,
-          default: true,
-        });
+        let promptedVersion = game.settings.get(this.moduleName, 'prompted') || '0.0.0';
+        let moduleVersion = game.modules.get(this.moduleName)?.data?.version || '0.0.0';
+        if (this.allowImportPrompts && isNewerVersion(moduleVersion, promptedVersion) && game.settings.get(this.moduleName, 'showWelcomePrompts')) {
+          // A newer version of the module is installed from what was last prompted
+          let content = game.i18n.format('SCENE-PACKER.welcome.intro', {
+            adventure: this.adventureName,
+          });
+
+          if (promptedVersion === '0.0.0') {
+            content += game.i18n.format('SCENE-PACKER.welcome.brand-new', {
+              adventure: this.adventureName,
+            });
+          } else {
+            content += game.i18n.format('SCENE-PACKER.welcome.update-available', {
+              existing: promptedVersion,
+              version: moduleVersion,
+            });
+          }
+          let d = new Dialog({
+            title: game.i18n.format('SCENE-PACKER.welcome.title', {
+              title: this.adventureName,
+            }),
+            content: content,
+            buttons: {
+              yesAll: {
+                icon: '<i class="fas fa-check-double"></i>',
+                label: game.i18n.localize('SCENE-PACKER.welcome.yes-all'),
+                callback: async () => {
+                  const packs = game.packs.filter(
+                    (p) => p.metadata.package === this.moduleName && p.entity === 'Scene'
+                  );
+                  for (let i = 0; i < packs.length; i++) {
+                    const c = packs[i];
+                    let folderId = game.folders.find(
+                      (folder) => folder.name === c.metadata.label && folder.type === 'Scene'
+                    )?._id;
+                    if (!folderId) {
+                      const folder = await Folder.create({
+                        name: c.metadata.label,
+                        type: 'Scene',
+                        parent: null,
+                      });
+                      folderId = folder._id;
+                    }
+                    const scenes = await c.importAll({folderId: folderId, folderName: c.metadata.label});
+                    if (scenes.length) {
+                      for (let j = 0; j < scenes.length; j++) {
+                        await this.ProcessScene(scenes[j]);
+                      }
+                    } else {
+                      await this.ProcessScene(scenes);
+                    }
+                  }
+                }
+              },
+              choose: {
+                icon: '<i class="fas fa-check"></i>',
+                label: game.i18n.localize('SCENE-PACKER.welcome.let-me-choose'),
+                callback: () => {
+                  game.packs.filter(
+                    (p) => p.metadata.package === this.moduleName && p.entity === 'Scene'
+                  ).forEach(c => c.render(true));
+                }
+              },
+              no: {
+                icon: '<i class="fas fa-times"></i>',
+                label: game.i18n.localize('SCENE-PACKER.welcome.no'),
+              },
+              dontAsk: {
+                icon: '<i class="fas fa-times"></i>',
+                label: game.i18n.localize('SCENE-PACKER.welcome.dont-ask'),
+                callback: () =>
+                  game.settings.set(
+                    this.moduleName,
+                    'showWelcomePrompts',
+                    false
+                  ),
+              },
+            },
+          }, {
+            // Set the width to somewhere between 400 and 620 pixels.
+            width: Math.max(400, Math.min(640, Math.floor(window.innerWidth / 2)))
+          });
+          d.render(true);
+        }
+        game.settings.set(this.moduleName, 'prompted', moduleVersion);
 
         this.initialised = true;
       }
@@ -1059,7 +1097,9 @@ export default class ScenePacker {
       // Import the "Welcome Journal"
       await this.ImportByName(
         this.packs.journals,
-        [this.welcomeJournal],
+        this.findMissingJournals([this.welcomeJournal].map(d => {
+          return {journalName: d};
+        })),
         'journals'
       );
     }
@@ -1067,7 +1107,9 @@ export default class ScenePacker {
       // Import any additional Journals
       await this.ImportByName(
         this.packs.journals,
-        this.additionalJournals,
+        this.findMissingJournals(this.additionalJournals.map(d => {
+          return {journalName: d};
+        })),
         'journals'
       );
     }

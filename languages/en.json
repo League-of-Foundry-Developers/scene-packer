@@ -11,6 +11,16 @@
         "name": "Show the dialog information when opening a compendium"
       }
     },
+    "welcome": {
+      "title": "{title} Importer",
+      "intro": "<p>Welcome to <strong>{adventure}</strong></p>",
+      "brand-new": "<p>Would you like to import and unpack the Scenes from this adventure?</p>",
+      "update-available": "<p>An update is available. You have <strong>{existing}</strong> installed, and <strong>{version}</strong> is available. Would you like to import and unpack the Scenes from this adventure?</p><p><strong>Note: If you choose to import all, you will end up with a second copy of the scene, the bottom one is the newer version.</strong></p>",
+      "yes-all": "Yes import all",
+      "let-me-choose": "Let me choose",
+      "no": "No",
+      "dont-ask": "Don't ask me again"
+    },
     "notifications": {
       "first-launch": "First launch of this adventure! Unpacking scene...",
       "done": "All done!",
@@ -55,11 +65,6 @@
       "clear-data": {
         "done": "Finished clearing Packed Data."
       }
-    },
-    "compendium": {
-      "title": "{title} Importer",
-      "info-scene": "Please <strong>view each scene</strong> or choose <strong>Unpack Scene Data</strong> from the Scene context menu after importing to allow the module to correctly relink Journal Pins and Actors.",
-      "info-other": "To import this adventure correctly, please <strong>import just the scenes</strong> first and then view each one (or choose Unpack Scene Data from the context menu). This will allow the module to correctly relink Journal Pins and Actors."
     },
     "scene-context": {
       "pack": {
