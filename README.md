@@ -75,6 +75,8 @@ Hooks.once('scenePackerReady', ({ getInstance }) => {
   if (additionalJournals.length) {
     packer.SetAdditionalJournalsToImport(additionalJournals);
   }
+  // If you don't want the dialogs to appear when your users first open the compendiums, uncomment the following line.
+  // packer.DisableImportPrompts();
 });
 ```
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## V1.0.3
+
+- Added `packer.DisableImportPrompts();` as a way to prevent the popups from appearing when opening your module's compendiums.
+- Added `Unpack Scene Data` option to Scene context menu.
+- Changed Scene context menu options to only show based on whether the Scene has Packed Data already.
+- Default to showing the context menu on scenes for GMs.
+- Changed the flag used to store whether the adventure module has been imported from a `boolean` to a `version` string to allow future support of "upgrades" to the module.
+- Exposed `HasPackedData(scene, moduleName, tokenFlag, journalFlag)` static method to allow checking whether a given Scene has data packed for the given module.
+
 ## v1.0.2
 
 - Fixed bug that would occur if Journal entries weren't in a folder of the same name as the adventure.

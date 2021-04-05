@@ -1,7 +1,5 @@
 /**
- * You can use this ScenePacker to "fix" Actors and Journal Pins on a Scene. You should only need to
- * change these first few constants in this file.
- *
+ * You can use this ScenePacker to "fix" Actors and Journal Pins on a Scene.
  * This code supports relinking Actor Tokens, even if their token name doesn't match the Actor.
  *
  * To use:
@@ -16,10 +14,15 @@
  *   Actor Tokens on top of your existing ones, effectively duplicating them. You'll have to clean up manually.
  */
 export default class ScenePacker {
+  /** @type {String|null} */
   adventureName = null;
+  /** @type {String|null} */
   moduleName = null;
+  /** @type {String|null} */
   welcomeJournal = null;
+  /** @type {String[]} */
   additionalJournals = [];
+  /** @type {{creatures: String[], journals: String[]}} */
   packs = {
     creatures: [],
     journals: [],
@@ -27,10 +30,11 @@ export default class ScenePacker {
   journalFlag = 'aiJournals';
   tokenFlag = 'aiTokens';
   initialised = false;
+  allowImportPrompts = true;
 
   /**
-   * @param {string} adventureName The human readable name of the adventure.
-   * @param {string} moduleName The name of the module this is part of.
+   * @param {String} adventureName The human readable name of the adventure.
+   * @param {String} moduleName The name of the module this is part of.
    */
   constructor(adventureName, moduleName) {
     const instance = this.constructor.instance;
@@ -42,16 +46,26 @@ export default class ScenePacker {
     this.SetAdventureName(adventureName);
     this.SetModuleName(moduleName);
 
-    if (moduleName) {
+    if (this.moduleName) {
       Hooks.on('renderCompendium', (app, html, data) => {
         let collectionName = data.collection;
         if (typeof collectionName === 'object') {
           collectionName = collectionName.collection;
         }
+
+        let importedAdventureVersion = '0.0.0';
+        try {
+          importedAdventureVersion = game.settings.get(this.moduleName, 'imported') || '0.0.0';
+        } catch (e) {
+          // Just means the adventure has never been imported before
+        }
+
         if (
           collectionName.startsWith(`${this.moduleName}.`) &&
-          !game.settings.get(this.moduleName, 'imported') &&
-          game.settings.get(this.moduleName, 'showCompendiumInfo')
+          importedAdventureVersion === '0.0.0' &&
+          game.settings.get(this.moduleName, 'showCompendiumInfo') &&
+          this.allowImportPrompts
+          // TODO check if a newer version of the adventure module exists by comparing the scene flags with the compendium flags
         ) {
           let content = `<p><strong>${this.adventureName}</strong></p>`;
 
@@ -95,15 +109,35 @@ export default class ScenePacker {
             {
               name: game.i18n.localize('SCENE-PACKER.scene-context.pack.title'),
               icon: '<i class="fas fa-scroll"></i>',
-              condition: () =>
-                game.user.isGM &&
-                game.settings.get(
-                  ScenePacker.GetInstance().GetModuleName(),
-                  'enableContextMenu'
-                ),
+              condition: (li) => {
+                let scene = game.scenes.get(li.data('entityId'));
+                return !ScenePacker.HasPackedData(scene, ScenePacker.GetInstance().GetModuleName(), ScenePacker.GetInstance().tokenFlag, ScenePacker.GetInstance().journalFlag) &&
+                  game.user.isGM &&
+                  game.settings.get(
+                    ScenePacker.GetInstance().GetModuleName(),
+                    'enableContextMenu'
+                  )
+              },
               callback: (li) => {
                 let scene = game.scenes.get(li.data('entityId'));
                 ScenePacker.GetInstance().PackScene(scene);
+              },
+            },
+            {
+              name: game.i18n.localize('SCENE-PACKER.scene-context.unpack.title'),
+              icon: '<i class="fas fa-scroll"></i>',
+              condition: (li) => {
+                let scene = game.scenes.get(li.data('entityId'));
+                return ScenePacker.HasPackedData(scene, ScenePacker.GetInstance().GetModuleName(), ScenePacker.GetInstance().tokenFlag, ScenePacker.GetInstance().journalFlag) &&
+                  game.user.isGM &&
+                  game.settings.get(
+                    ScenePacker.GetInstance().GetModuleName(),
+                    'enableContextMenu'
+                  )
+              },
+              callback: (li) => {
+                let scene = game.scenes.get(li.data('entityId'));
+                ScenePacker.GetInstance().ProcessScene(scene);
               },
             },
             {
@@ -111,12 +145,15 @@ export default class ScenePacker {
                 'SCENE-PACKER.scene-context.clear.title'
               ),
               icon: '<i class="fas fa-scroll"></i>',
-              condition: () =>
-                game.user.isGM &&
-                game.settings.get(
-                  ScenePacker.GetInstance().GetModuleName(),
-                  'enableContextMenu'
-                ),
+              condition: (li) => {
+                let scene = game.scenes.get(li.data('entityId'));
+                return ScenePacker.HasPackedData(scene, ScenePacker.GetInstance().GetModuleName(), ScenePacker.GetInstance().tokenFlag, ScenePacker.GetInstance().journalFlag) &&
+                  game.user.isGM &&
+                  game.settings.get(
+                    ScenePacker.GetInstance().GetModuleName(),
+                    'enableContextMenu'
+                  )
+              },
               callback: (li) => {
                 let scene = game.scenes.get(li.data('entityId'));
                 ScenePacker.GetInstance().ClearPackedData(scene);
@@ -126,74 +163,105 @@ export default class ScenePacker {
         }
       });
 
+      Hooks.on('canvasReady', (readyCanvas) => {
+        this.ProcessScene(readyCanvas.scene);
+      });
+
       if (!this.initialised) {
-        this.init();
+        if (typeof window.DEV?.registerPackageDebugFlag === 'function') {
+          window.DEV.registerPackageDebugFlag(this.moduleName);
+        }
+
+        game.settings.register(this.moduleName, 'imported', {
+          scope: 'world',
+          config: false,
+          type: String,
+          default: '',
+        });
+
+        game.settings.register(this.moduleName, 'enableContextMenu', {
+          name: game.i18n.localize('SCENE-PACKER.settings.context-menu.name'),
+          hint: game.i18n.localize('SCENE-PACKER.settings.context-menu.hint'),
+          scope: 'client',
+          config: true,
+          type: Boolean,
+          default: true,
+        });
+
+        game.settings.register(this.moduleName, 'showCompendiumInfo', {
+          name: game.i18n.localize('SCENE-PACKER.settings.compendium.name'),
+          scope: 'client',
+          type: Boolean,
+          default: true,
+        });
+
+        this.initialised = true;
       }
     }
   }
 
   /**
-   * Initialises the Scene Packer.
+   * Returns whether the scene has and Packed Data.
+   * @param {Object} scene The scene to check.
+   * @param {String} moduleName The name of the module that Packed the data.
+   * @param {String} tokenFlag The flag that stores token data.
+   * @param {String} journalFlag The flag that stores journal pin data.
+   * @returns {Boolean}
+   */
+  static HasPackedData(scene, moduleName, tokenFlag, journalFlag) {
+    try {
+      if (scene.getFlag(moduleName, tokenFlag)) {
+        return true;
+      }
+    } catch (e) {
+      // Happens if the scene has no flag registered
+    }
+    try {
+      if (scene.getFlag(moduleName, journalFlag)) {
+        return true;
+      }
+    } catch (e) {
+      // Happens if the scene has no flag registered
+    }
+    return false;
+  }
+
+  /**
+   * Initialises the Scene Packer on the scene.
+   * @param {Object} scene The scene to initialise. Defaults to the currently viewed scene.
    * @returns ScenePacker for chaining
    */
-  async init() {
-    if (this.initialised) {
+  async ProcessScene(scene = game.scenes.get(game.user.viewedScene)) {
+    if (!ScenePacker.HasPackedData(scene, this.moduleName, this.tokenFlag, this.journalFlag)) {
       return this;
     }
 
-    if (typeof window.DEV?.registerPackageDebugFlag === 'function') {
-      window.DEV.registerPackageDebugFlag(this.moduleName);
-    }
+    ui.notifications.info(
+      game.i18n.localize('SCENE-PACKER.notifications.first-launch')
+    );
+    await this.UnpackScene(scene);
+    await this.ClearPackedData(scene);
+    ui.notifications.info(
+      game.i18n.localize('SCENE-PACKER.notifications.done')
+    );
+    // Set both world and scene imported version flags
+    game.settings.set(this.moduleName, 'imported', game.modules.get('scene-packer')?.data?.version || '0.0.0');
+    scene.setFlag(this.moduleName, 'imported', game.modules.get('scene-packer')?.data?.version || '0.0.0');
 
-    game.settings.register(this.moduleName, 'imported', {
-      scope: 'world',
-      config: false,
-      type: Boolean,
-      default: false,
-    });
-
-    game.settings.register(this.moduleName, 'enableContextMenu', {
-      name: game.i18n.localize('SCENE-PACKER.settings.context-menu.name'),
-      hint: game.i18n.localize('SCENE-PACKER.settings.context-menu.hint'),
-      scope: 'client',
-      config: true,
-      type: Boolean,
-      default: false,
-    });
-
-    game.settings.register(this.moduleName, 'showCompendiumInfo', {
-      name: game.i18n.localize('SCENE-PACKER.settings.compendium.name'),
-      scope: 'client',
-      type: Boolean,
-      default: true,
-    });
-
-    if (canvas.scene.getFlag(this.moduleName, this.tokenFlag)) {
-      ui.notifications.info(
-        game.i18n.localize('SCENE-PACKER.notifications.first-launch')
+    if (this.welcomeJournal) {
+      // Display the welcome journal
+      const folder = game.folders.find(
+        (j) =>
+          j.data.type === 'JournalEntry' && j.data.name === this.adventureName
       );
-      await this.UnpackScene(readyCanvas.scene);
-      await this.ClearPackedData(readyCanvas.scene);
-      ui.notifications.info(
-        game.i18n.localize('SCENE-PACKER.notifications.done')
-      );
-      game.settings.set(this.moduleName, 'imported', true);
-
-      if (this.welcomeJournal) {
-        // Display the welcome journal
-        const folder = game.folders.find(
+      const j =
+        folder &&
+        game.journal.filter(
           (j) =>
-            j.data.type === 'JournalEntry' && j.data.name === this.adventureName
+            j.data.name === this.welcomeJournal && j.data.folder === folder.id
         );
-        const j =
-          folder &&
-          game.journal.filter(
-            (j) =>
-              j.data.name === this.welcomeJournal && j.data.folder === folder.id
-          );
-        if (j.length > 0) {
-          j[0].sheet.render(true, { sheetMode: 'text' });
-        }
+      if (j.length > 0) {
+        j[0].sheet.render(true, {sheetMode: 'text'});
       }
     }
 
@@ -201,7 +269,7 @@ export default class ScenePacker {
   }
 
   /**
-   * Get the singleton instance of Scenepacker
+   * Get the singleton instance of ScenePacker
    * @param  {...any} args
    * @returns The singleton instance
    */
@@ -211,8 +279,9 @@ export default class ScenePacker {
 
   /**
    * Log a message to console of the requested type if dev mode is enabled.
-   * @param {string} moduleName The name of the module
-   * @param {boolean} force if true, always log regardless of dev mode settings
+   * @param {String} moduleName The name of the module
+   * @param {String} type The type of log. One of "error", "warn" or "log"
+   * @param {Boolean} force if true, always log regardless of dev mode settings
    * @param  {...any} args the arguments to log
    */
   static logType(moduleName, type, force, ...args) {
@@ -240,12 +309,13 @@ export default class ScenePacker {
             console.log(moduleName, '|', ...args);
         }
       }
-    } catch (e) {}
+    } catch (e) {
+    }
   }
 
   /**
    * Log a message to console if dev mode is enabled.
-   * @param {boolean} force if true, always log regardless of dev mode settings
+   * @param {Boolean} force if true, always log regardless of dev mode settings
    * @param  {...any} args the arguments to log
    */
   log(force, ...args) {
@@ -254,7 +324,7 @@ export default class ScenePacker {
 
   /**
    * Log a warning message to console if dev mode is enabled.
-   * @param {boolean} force if true, always log regardless of dev mode settings
+   * @param {Boolean} force if true, always log regardless of dev mode settings
    * @param  {...any} args the arguments to log
    */
   logWarn(force, ...args) {
@@ -263,7 +333,7 @@ export default class ScenePacker {
 
   /**
    * Log an error message to console if dev mode is enabled.
-   * @param {boolean} force if true, always log regardless of dev mode settings
+   * @param {Boolean} force if true, always log regardless of dev mode settings
    * @param  {...any} args the arguments to log
    */
   logError(force, ...args) {
@@ -272,7 +342,7 @@ export default class ScenePacker {
 
   /**
    * Set the human readable name of the adventure. This will populate folder names etc.
-   * @param {string} adventureName
+   * @param {String} adventureName
    * @returns this to support chaining
    */
   SetAdventureName(adventureName) {
@@ -288,7 +358,7 @@ export default class ScenePacker {
 
   /**
    * Set the module name of the module the ScenePacker is being used in.
-   * @param {string} moduleName
+   * @param {String} moduleName
    * @returns this to support chaining
    */
   SetModuleName(moduleName) {
@@ -304,7 +374,7 @@ export default class ScenePacker {
 
   /**
    * Gets the module name this Scene Packer was set up with.
-   * @returns string
+   * @returns String
    */
   GetModuleName() {
     return this.moduleName;
@@ -312,7 +382,7 @@ export default class ScenePacker {
 
   /**
    * Set the name of the journal to be imported and automatically opened after activation.
-   * @param {string} journal
+   * @param {String} journal
    * @returns this to support chaining
    */
   SetWelcomeJournal(journal) {
@@ -336,7 +406,7 @@ export default class ScenePacker {
 
   /**
    * Set which journals (by name) should be automatically imported.
-   * @param {Array<string>} journals
+   * @param {Array<String>} journals
    * @returns this to support chaining
    */
   SetAdditionalJournalsToImport(journals) {
@@ -368,7 +438,7 @@ export default class ScenePacker {
 
   /**
    * Set which Actor packs should be used when searching for Actors.
-   * @param {Array<string>} packs
+   * @param {Array<String>} packs
    * @returns this to support chaining
    */
   SetCreaturePacks(packs) {
@@ -397,7 +467,7 @@ export default class ScenePacker {
 
   /**
    * Set which Journal packs should be used when searching for Journals.
-   * @param {Array<string>} packs
+   * @param {Array<String>} packs
    * @returns this to support chaining
    */
   SetJournalPacks(packs) {
@@ -449,7 +519,7 @@ export default class ScenePacker {
           '-=entryId': null,
           '-=_id': null,
         },
-        { inplace: false }
+        {inplace: false}
       );
     });
 
@@ -535,9 +605,9 @@ export default class ScenePacker {
    * @url https://patreon.com/forien
    * @author Atropos
    * @licence MIT
-   * @param {Array<string>} searchPacks The compendium pack names to search within
-   * @param {Array<string>} entityNames The names of the entities to import
-   * @param {string} type The type of entity being imported. Used for notification purposes only.
+   * @param {Array<String>} searchPacks The compendium pack names to search within
+   * @param {Array<String>} entityNames The names of the entities to import
+   * @param {String} type The type of entity being imported. Used for notification purposes only.
    */
   async ImportByName(searchPacks, entityNames, type) {
     if (entityNames.length === 0) {
@@ -589,7 +659,7 @@ export default class ScenePacker {
         game.i18n.localize(
           'SCENE-PACKER.notifications.import-by-name.invalid-packs.details'
         ),
-        { searchPacks, entityNames, type }
+        {searchPacks, entityNames, type}
       );
       throw game.i18n.format(
         'SCENE-PACKER.notifications.import-by-name.invalid-packs.error',
@@ -613,7 +683,7 @@ export default class ScenePacker {
         game.i18n.localize(
           'SCENE-PACKER.notifications.import-by-name.invalid-packs.reference'
         ),
-        { searchPacks, entityNames, type }
+        {searchPacks, entityNames, type}
       );
       throw game.i18n.format(
         'SCENE-PACKER.notifications.import-by-name.invalid-packs.error',
@@ -669,7 +739,7 @@ export default class ScenePacker {
       if (content.length > 0) {
         // Check if a folder for our adventure and entity type already exists, otherwise create it
         let folderId = game.folders.find(
-          (folder) => folder.name == this.adventureName && folder.type == entity
+          (folder) => folder.name === this.adventureName && folder.type === entity
         )?._id;
         if (!folderId) {
           const folder = await Folder.create({
@@ -702,8 +772,6 @@ export default class ScenePacker {
       );
       return entityClass.create(createData);
     }
-
-    return;
   }
 
   /**
@@ -719,8 +787,7 @@ export default class ScenePacker {
     );
     const actor_names = missing_actors.map((info) => info.actorName);
     const unique_names = new Set(actor_names);
-    const actors_to_import = Array.from(unique_names);
-    return actors_to_import;
+    return Array.from(unique_names);
   }
 
   /**
@@ -735,19 +802,18 @@ export default class ScenePacker {
       (j) =>
         j.data.type === 'JournalEntry' && j.data.name === this.adventureName
     );
-    const missing_journals = journalInfo
+    return journalInfo
       .filter((info) => {
         // Filter for only the entries that are missing, or are in a different folder.
         const j = game.journal.getName(info.journalName);
         return j == null || (folder && j.data.folder !== folder.id);
       })
       .map((info) => info.journalName);
-    return missing_journals;
   }
 
   /**
    * Search for an actor with the requested token name, prioritising the requested folder if possible.
-   * @param {string} tokenName the name of the token being searched for
+   * @param {String} tokenName the name of the token being searched for
    * @param {Object} folder the game.folders entity to prioritise the search to
    * @private
    * @returns {Object|null}
@@ -819,7 +885,7 @@ export default class ScenePacker {
     // No direct name lookup found, get the Actor name from the token world data at the same
     // coordinates with the same Token name
     let actorRef = tokenWorldData.find(
-      (a) => a.x == token.x && a.y == token.y && a.tokenName == token.name
+      (a) => a.x === token.x && a.y === token.y && a.tokenName === token.name
     );
     if (actorRef) {
       actor = this.findActorForTokenName(actorRef.actorName, folder);
@@ -834,7 +900,7 @@ export default class ScenePacker {
 
   /**
    * Relinks tokens with the actors they represent.
-   * @param {Array<Object>} journalInfo data written during PackScene()
+   * @param {Array<Object>} tokenInfo data written during PackScene()
    * @param {Object} scene The scene to unpack. Defaults to the currently viewed scene.
    * @see PackScene
    */
@@ -921,7 +987,7 @@ export default class ScenePacker {
           '-=journalName': null,
           '-=folderName': null,
         },
-        { inplace: false }
+        {inplace: false}
       );
     });
 
@@ -1027,8 +1093,8 @@ export default class ScenePacker {
 
   /**
    * Bulk set the compendium lock state for compendiums owned by the initialised module
-   * @param {boolean} locked true to lock, false to unlock
-   * @param {string} moduleName The name of the module that owns the compendiums to be updated
+   * @param {Boolean} locked true to lock, false to unlock
+   * @param {String} moduleName The name of the module that owns the compendiums to be updated
    */
   static async SetModuleCompendiumLockState(locked, moduleName) {
     locked = !!locked;
@@ -1037,7 +1103,7 @@ export default class ScenePacker {
     );
     const settings = {};
     compendiums.forEach((p) => {
-      settings[`${p.metadata.package}.${p.metadata.name}`] = { locked };
+      settings[`${p.metadata.package}.${p.metadata.name}`] = {locked};
     });
     if (Object.keys(settings).length) {
       let key = locked
@@ -1062,7 +1128,7 @@ export default class ScenePacker {
    *   Rolltables
    *   Items
    *   Scenes
-   * @param {string} moduleName The name of the module that owns the compendiums to be updated
+   * @param {String} moduleName The name of the module that owns the compendiums to be updated
    */
   static async RelinkJournalEntries(moduleName) {
     // Get all of the compendium packs that belong to the requested module
@@ -1075,7 +1141,7 @@ export default class ScenePacker {
     }
     const packs = {};
     CONST.FOLDER_ENTITY_TYPES.forEach((type) => {
-      packs[`${type}Packs`] = allPacks.filter((p) => p.entity == type);
+      packs[`${type}Packs`] = allPacks.filter((p) => p.entity === type);
     });
 
     // Unlock the module compendiums for editing
@@ -1160,9 +1226,9 @@ export default class ScenePacker {
           }
           // Build the links to the new references that exist within the compendium/s
           packs[`${type}Packs`].forEach((p) => {
-            let found = p.index.find((e) => e.name == name);
+            let found = p.index.find((e) => e.name === name);
             if (found) {
-              newRef.push({ pack: p.collection, ref: found._id });
+              newRef.push({pack: p.collection, ref: found._id});
             }
           });
 
@@ -1273,7 +1339,7 @@ export default class ScenePacker {
           );
 
           // Update the journal entry with the fully replaced content
-          await pack.updateEntity({ _id: entry._id, content: newContent });
+          await pack.updateEntity({_id: entry._id, content: newContent});
         }
         ScenePacker.logType(
           moduleName,
@@ -1297,13 +1363,35 @@ export default class ScenePacker {
       game.i18n.localize('SCENE-PACKER.world-conversion.compendiums.completed')
     );
   }
+
+  /**
+   * Disables import prompts from appearing when opening compendiums.
+   */
+  DisableImportPrompts() {
+    this.allowImportPrompts = false;
+  }
+
+  /**
+   * Enables import prompts to appear when opening compendiums.
+   */
+  EnableImportPrompts() {
+    this.allowImportPrompts = true;
+  }
 }
 
+/**
+ * Expose Scene Packer to other modules.
+ * @type {{relinkJournalEntries: (function(String): Promise<void>), getInstance: (function(...[*]): ScenePacker), hasPackedData: (function(Object, String, String, String): Boolean)}}
+ */
 window['scene-packer'] = {
   getInstance: ScenePacker.GetInstance,
   relinkJournalEntries: ScenePacker.RelinkJournalEntries,
+  hasPackedData: ScenePacker.HasPackedData,
 };
 
-Hooks.on('canvasReady', () => {
+/**
+ * Trigger scenePackerReady once the game is ready to give consuming modules time to bind any dependencies they need.
+ */
+Hooks.on('ready', () => {
   Hooks.callAll('scenePackerReady', window['scene-packer']);
 });

@@ -58,12 +58,15 @@
     },
     "compendium": {
       "title": "{title} Importer",
-      "info-scene": "Please <strong>view each scene</strong> after importing to allow the module to correctly relink Journal Pins and Actors.",
-      "info-other": "To import this adventure correctly, please <strong>import just the scenes</strong> first and then view each one. This will allow the module to correctly relink Journal Pins and Actors."
+      "info-scene": "Please <strong>view each scene</strong> or choose <strong>Unpack Scene Data</strong> from the Scene context menu after importing to allow the module to correctly relink Journal Pins and Actors.",
+      "info-other": "To import this adventure correctly, please <strong>import just the scenes</strong> first and then view each one (or choose Unpack Scene Data from the context menu). This will allow the module to correctly relink Journal Pins and Actors."
     },
     "scene-context": {
       "pack": {
         "title": "Pack Scene Data"
+      },
+      "unpack": {
+        "title": "Unpack Scene Data"
       },
       "clear": {
         "title": "Clear Packed Scene Data"
