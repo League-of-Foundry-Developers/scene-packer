@@ -55,12 +55,17 @@ export default class ScenePacker {
               icon: '<i class="fas fa-scroll"></i>',
               condition: (li) => {
                 let scene = game.scenes.get(li.data('entityId'));
-                return !ScenePacker.HasPackedData(scene, ScenePacker.GetInstance().GetModuleName(), ScenePacker.GetInstance().tokenFlag, ScenePacker.GetInstance().journalFlag) &&
+                return !ScenePacker.HasPackedData(
+                  scene,
+                  ScenePacker.GetInstance().GetModuleName(),
+                  ScenePacker.GetInstance().tokenFlag,
+                  ScenePacker.GetInstance().journalFlag,
+                  ) &&
                   game.user.isGM &&
                   game.settings.get(
                     ScenePacker.GetInstance().GetModuleName(),
-                    'enableContextMenu'
-                  )
+                    'enableContextMenu',
+                  );
               },
               callback: (li) => {
                 let scene = game.scenes.get(li.data('entityId'));
@@ -72,12 +77,17 @@ export default class ScenePacker {
               icon: '<i class="fas fa-scroll"></i>',
               condition: (li) => {
                 let scene = game.scenes.get(li.data('entityId'));
-                return ScenePacker.HasPackedData(scene, ScenePacker.GetInstance().GetModuleName(), ScenePacker.GetInstance().tokenFlag, ScenePacker.GetInstance().journalFlag) &&
+                return ScenePacker.HasPackedData(
+                  scene,
+                  ScenePacker.GetInstance().GetModuleName(),
+                  ScenePacker.GetInstance().tokenFlag,
+                  ScenePacker.GetInstance().journalFlag,
+                  ) &&
                   game.user.isGM &&
                   game.settings.get(
                     ScenePacker.GetInstance().GetModuleName(),
-                    'enableContextMenu'
-                  )
+                    'enableContextMenu',
+                  );
               },
               callback: (li) => {
                 let scene = game.scenes.get(li.data('entityId'));
@@ -86,23 +96,28 @@ export default class ScenePacker {
             },
             {
               name: game.i18n.localize(
-                'SCENE-PACKER.scene-context.clear.title'
+                'SCENE-PACKER.scene-context.clear.title',
               ),
               icon: '<i class="fas fa-scroll"></i>',
               condition: (li) => {
                 let scene = game.scenes.get(li.data('entityId'));
-                return ScenePacker.HasPackedData(scene, ScenePacker.GetInstance().GetModuleName(), ScenePacker.GetInstance().tokenFlag, ScenePacker.GetInstance().journalFlag) &&
+                return ScenePacker.HasPackedData(
+                  scene,
+                  ScenePacker.GetInstance().GetModuleName(),
+                  ScenePacker.GetInstance().tokenFlag,
+                  ScenePacker.GetInstance().journalFlag,
+                  ) &&
                   game.user.isGM &&
                   game.settings.get(
                     ScenePacker.GetInstance().GetModuleName(),
-                    'enableContextMenu'
-                  )
+                    'enableContextMenu',
+                  );
               },
               callback: (li) => {
                 let scene = game.scenes.get(li.data('entityId'));
                 ScenePacker.GetInstance().ClearPackedData(scene);
               },
-            }
+            },
           );
         }
       });
@@ -175,12 +190,12 @@ export default class ScenePacker {
                 label: game.i18n.localize('SCENE-PACKER.welcome.yes-all'),
                 callback: async () => {
                   const packs = game.packs.filter(
-                    (p) => p.metadata.package === this.moduleName && p.entity === 'Scene'
+                    (p) => p.metadata.package === this.moduleName && p.entity === 'Scene',
                   );
                   for (let i = 0; i < packs.length; i++) {
                     const c = packs[i];
                     let folderId = game.folders.find(
-                      (folder) => folder.name === c.metadata.label && folder.type === 'Scene'
+                      (folder) => folder.name === c.metadata.label && folder.type === 'Scene',
                     )?._id;
                     if (!folderId) {
                       const folder = await Folder.create({
@@ -199,16 +214,16 @@ export default class ScenePacker {
                       await this.ProcessScene(scenes);
                     }
                   }
-                }
+                },
               },
               choose: {
                 icon: '<i class="fas fa-check"></i>',
                 label: game.i18n.localize('SCENE-PACKER.welcome.let-me-choose'),
                 callback: () => {
                   game.packs.filter(
-                    (p) => p.metadata.package === this.moduleName && p.entity === 'Scene'
+                    (p) => p.metadata.package === this.moduleName && p.entity === 'Scene',
                   ).forEach(c => c.render(true));
-                }
+                },
               },
               no: {
                 icon: '<i class="fas fa-times"></i>',
@@ -221,13 +236,13 @@ export default class ScenePacker {
                   game.settings.set(
                     this.moduleName,
                     'showWelcomePrompts',
-                    false
+                    false,
                   ),
               },
             },
           }, {
             // Set the width to somewhere between 400 and 620 pixels.
-            width: Math.max(400, Math.min(640, Math.floor(window.innerWidth / 2)))
+            width: Math.max(400, Math.min(640, Math.floor(window.innerWidth / 2))),
           });
           d.render(true);
         }
@@ -275,12 +290,12 @@ export default class ScenePacker {
     }
 
     ui.notifications.info(
-      game.i18n.localize('SCENE-PACKER.notifications.first-launch')
+      game.i18n.localize('SCENE-PACKER.notifications.first-launch'),
     );
     await this.UnpackScene(scene);
     await this.ClearPackedData(scene);
     ui.notifications.info(
-      game.i18n.localize('SCENE-PACKER.notifications.done')
+      game.i18n.localize('SCENE-PACKER.notifications.done'),
     );
     // Set both world and scene imported version flags
     game.settings.set(this.moduleName, 'imported', game.modules.get('scene-packer')?.data?.version || '0.0.0');
@@ -289,14 +304,12 @@ export default class ScenePacker {
     if (this.welcomeJournal) {
       // Display the welcome journal
       const folder = game.folders.find(
-        (j) =>
-          j.data.type === 'JournalEntry' && j.data.name === this.adventureName
+        (j) => j.data.type === 'JournalEntry' && j.data.name === this.adventureName,
       );
       const j =
         folder &&
         game.journal.filter(
-          (j) =>
-            j.data.name === this.welcomeJournal && j.data.folder === folder.id
+          (j) => j.data.name === this.welcomeJournal && j.data.folder === folder.id,
         );
       if (j.length > 0) {
         j[0].sheet.render(true, {sheetMode: 'text'});
@@ -329,7 +342,7 @@ export default class ScenePacker {
           game.i18n.format('SCENE-PACKER.log.invalidForce', {
             moduleName: moduleName,
             force: force,
-          })
+          }),
         );
       }
 
@@ -386,7 +399,7 @@ export default class ScenePacker {
   SetAdventureName(adventureName) {
     if (!adventureName) {
       ui.notifications.error(
-        game.i18n.localize('SCENE-PACKER.errors.adventureName.ui')
+        game.i18n.localize('SCENE-PACKER.errors.adventureName.ui'),
       );
       throw game.i18n.localize('SCENE-PACKER.errors.adventureName.details');
     }
@@ -402,7 +415,7 @@ export default class ScenePacker {
   SetModuleName(moduleName) {
     if (!moduleName) {
       ui.notifications.error(
-        game.i18n.localize('SCENE-PACKER.errors.moduleName.ui')
+        game.i18n.localize('SCENE-PACKER.errors.moduleName.ui'),
       );
       throw game.i18n.localize('SCENE-PACKER.errors.moduleName.details');
     }
@@ -427,14 +440,14 @@ export default class ScenePacker {
     if (journal) {
       if (typeof journal !== 'string') {
         ui.notifications.error(
-          game.i18n.localize('SCENE-PACKER.errors.welcomeJournal.ui')
+          game.i18n.localize('SCENE-PACKER.errors.welcomeJournal.ui'),
         );
         throw game.i18n.localize('SCENE-PACKER.errors.welcomeJournal.details');
       }
     } else {
       this.log(
         false,
-        game.i18n.localize('SCENE-PACKER.errors.welcomeJournal.missing')
+        game.i18n.localize('SCENE-PACKER.errors.welcomeJournal.missing'),
       );
     }
 
@@ -453,20 +466,20 @@ export default class ScenePacker {
       journals.forEach((j) => {
         if (typeof j !== 'string') {
           ui.notifications.error(
-            game.i18n.localize('SCENE-PACKER.errors.additionalJournals.ui')
+            game.i18n.localize('SCENE-PACKER.errors.additionalJournals.ui'),
           );
           throw game.i18n.format(
             'SCENE-PACKER.errors.additionalJournals.details',
             {
               journal: j,
-            }
+            },
           );
         }
       });
     } else {
       this.log(
         false,
-        game.i18n.localize('SCENE-PACKER.errors.additionalJournals.missing')
+        game.i18n.localize('SCENE-PACKER.errors.additionalJournals.missing'),
       );
     }
 
@@ -485,7 +498,7 @@ export default class ScenePacker {
       packs.forEach((j) => {
         if (typeof j !== 'string') {
           ui.notifications.error(
-            game.i18n.localize('SCENE-PACKER.errors.creaturePacks.ui')
+            game.i18n.localize('SCENE-PACKER.errors.creaturePacks.ui'),
           );
           throw game.i18n.format('SCENE-PACKER.errors.creaturePacks.details', {
             pack: j,
@@ -495,7 +508,7 @@ export default class ScenePacker {
     } else {
       this.log(
         false,
-        game.i18n.localize('SCENE-PACKER.errors.additionalJournals.missing')
+        game.i18n.localize('SCENE-PACKER.errors.additionalJournals.missing'),
       );
     }
 
@@ -514,7 +527,7 @@ export default class ScenePacker {
       packs.forEach((j) => {
         if (typeof j !== 'string') {
           ui.notifications.error(
-            game.i18n.localize('SCENE-PACKER.errors.journalPacks.ui')
+            game.i18n.localize('SCENE-PACKER.errors.journalPacks.ui'),
           );
           throw game.i18n.format('SCENE-PACKER.errors.journalPacks.details', {
             pack: j,
@@ -524,7 +537,7 @@ export default class ScenePacker {
     } else {
       this.log(
         false,
-        game.i18n.localize('SCENE-PACKER.errors.journalPacks.missing')
+        game.i18n.localize('SCENE-PACKER.errors.journalPacks.missing'),
       );
     }
 
@@ -540,7 +553,7 @@ export default class ScenePacker {
    */
   async PackScene(scene = game.scenes.get(game.user.viewedScene)) {
     ui.notifications.warn(
-      game.i18n.localize('SCENE-PACKER.notifications.pack-scene.clear-reminder')
+      game.i18n.localize('SCENE-PACKER.notifications.pack-scene.clear-reminder'),
     );
 
     /**
@@ -557,7 +570,7 @@ export default class ScenePacker {
           '-=entryId': null,
           '-=_id': null,
         },
-        {inplace: false}
+        {inplace: false},
       );
     });
 
@@ -568,15 +581,15 @@ export default class ScenePacker {
           {
             number: journalInfo.length,
             name: scene.name,
-          }
-        )
+          },
+        ),
       );
       await scene.setFlag(this.moduleName, this.journalFlag, journalInfo);
     } else {
       ui.notifications.info(
         game.i18n.localize(
-          'SCENE-PACKER.notifications.pack-scene.no-journal-pins'
-        )
+          'SCENE-PACKER.notifications.pack-scene.no-journal-pins',
+        ),
       );
     }
 
@@ -587,15 +600,15 @@ export default class ScenePacker {
       if (!token.name) {
         ui.notifications.warn(
           game.i18n.localize(
-            'SCENE-PACKER.notifications.pack-scene.no-token-name-warning'
-          )
+            'SCENE-PACKER.notifications.pack-scene.no-token-name-warning',
+          ),
         );
         this.logWarn(
           true,
           game.i18n.localize(
-            'SCENE-PACKER.notifications.pack-scene.no-token-name-log'
+            'SCENE-PACKER.notifications.pack-scene.no-token-name-log',
           ),
-          token
+          token,
         );
       }
       let actorName = token.name;
@@ -620,13 +633,13 @@ export default class ScenePacker {
           {
             number: tokenInfo.length,
             name: scene.name,
-          }
-        )
+          },
+        ),
       );
       return scene.setFlag(this.moduleName, this.tokenFlag, tokenInfo);
     } else {
       ui.notifications.info(
-        game.i18n.localize('SCENE-PACKER.notifications.pack-scene.no-tokens')
+        game.i18n.localize('SCENE-PACKER.notifications.pack-scene.no-tokens'),
       );
     }
 
@@ -663,20 +676,20 @@ export default class ScenePacker {
           'SCENE-PACKER.notifications.import-by-name.invalid-packs.error',
           {
             type: type,
-          }
-        )
+          },
+        ),
       );
       this.logError(
         true,
         game.i18n.localize(
-          'SCENE-PACKER.notifications.import-by-name.invalid-packs.short'
-        )
+          'SCENE-PACKER.notifications.import-by-name.invalid-packs.short',
+        ),
       );
       throw game.i18n.format(
         'SCENE-PACKER.notifications.import-by-name.invalid-packs.error',
         {
           type: type,
-        }
+        },
       );
     }
 
@@ -689,21 +702,21 @@ export default class ScenePacker {
           'SCENE-PACKER.notifications.import-by-name.invalid-packs.error',
           {
             type: type,
-          }
-        )
+          },
+        ),
       );
       this.logError(
         true,
         game.i18n.localize(
-          'SCENE-PACKER.notifications.import-by-name.invalid-packs.details'
+          'SCENE-PACKER.notifications.import-by-name.invalid-packs.details',
         ),
-        {searchPacks, entityNames, type}
+        {searchPacks, entityNames, type},
       );
       throw game.i18n.format(
         'SCENE-PACKER.notifications.import-by-name.invalid-packs.error',
         {
           type: type,
-        }
+        },
       );
     }
     const entityClass = CONFIG[exampleEntity]?.entityClass;
@@ -713,21 +726,21 @@ export default class ScenePacker {
           'SCENE-PACKER.notifications.import-by-name.invalid-packs.error',
           {
             type: type,
-          }
-        )
+          },
+        ),
       );
       this.logError(
         true,
         game.i18n.localize(
-          'SCENE-PACKER.notifications.import-by-name.invalid-packs.reference'
+          'SCENE-PACKER.notifications.import-by-name.invalid-packs.reference',
         ),
-        {searchPacks, entityNames, type}
+        {searchPacks, entityNames, type},
       );
       throw game.i18n.format(
         'SCENE-PACKER.notifications.import-by-name.invalid-packs.error',
         {
           type: type,
-        }
+        },
       );
     }
 
@@ -745,8 +758,8 @@ export default class ScenePacker {
             'SCENE-PACKER.notifications.import-by-name.invalid-packs.missing-pack',
             {
               packName: packName,
-            }
-          )
+            },
+          ),
         );
         this.logError(
           true,
@@ -754,8 +767,8 @@ export default class ScenePacker {
             'SCENE-PACKER.notifications.import-by-name.invalid-packs.missing-pack-details',
             {
               packName: packName,
-            }
-          )
+            },
+          ),
         );
         continue;
       }
@@ -765,19 +778,19 @@ export default class ScenePacker {
 
       // Filter to just the needed actors
       const content = packContent.filter((entity) =>
-        entityNames.includes(entity.name)
+        entityNames.includes(entity.name),
       );
 
       // Remove the entries that we found in this pack
       entityNames = entityNames.filter(
         (requestedName) =>
-          content.find((entity) => entity.name === requestedName) == null
+          content.find((entity) => entity.name === requestedName) == null,
       );
 
       if (content.length > 0) {
         // Check if a folder for our adventure and entity type already exists, otherwise create it
         let folderId = game.folders.find(
-          (folder) => folder.name === this.adventureName && folder.type === entity
+          (folder) => folder.name === this.adventureName && folder.type === entity,
         )?._id;
         if (!folderId) {
           const folder = await Folder.create({
@@ -793,7 +806,7 @@ export default class ScenePacker {
           content.map((c) => {
             c.data.folder = folderId;
             return c.data;
-          })
+          }),
         );
       }
     }
@@ -805,8 +818,8 @@ export default class ScenePacker {
           {
             count: createData.length,
             type: type,
-          }
-        )
+          },
+        ),
       );
       return entityClass.create(createData);
     }
@@ -821,7 +834,7 @@ export default class ScenePacker {
    */
   findMissingActors(tokenInfo) {
     const missing_actors = tokenInfo.filter(
-      (info) => game.actors.getName(info.actorName) == null
+      (info) => game.actors.getName(info.actorName) == null,
     );
     const actor_names = missing_actors.map((info) => info.actorName);
     const unique_names = new Set(actor_names);
@@ -838,7 +851,7 @@ export default class ScenePacker {
   findMissingJournals(journalInfo) {
     const folder = game.folders.find(
       (j) =>
-        j.data.type === 'JournalEntry' && j.data.name === this.adventureName
+        j.data.type === 'JournalEntry' && j.data.name === this.adventureName,
     );
     return journalInfo
       .filter((info) => {
@@ -862,15 +875,15 @@ export default class ScenePacker {
       this.logWarn(
         false,
         game.i18n.localize(
-          'SCENE-PACKER.notifications.import-by-name.missing-name'
-        )
+          'SCENE-PACKER.notifications.import-by-name.missing-name',
+        ),
       );
       return actor;
     }
 
     if (folder && folder.id) {
       actor = game.actors.entities.find(
-        (a) => a.data.name === tokenName && a.data.folder === folder.id
+        (a) => a.data.name === tokenName && a.data.folder === folder.id,
       );
       if (actor) {
         // Found a direct Token <-> Actor name match in the Adventure folder
@@ -902,14 +915,14 @@ export default class ScenePacker {
   findActorForToken(token, tokenWorldData, folder) {
     if (!token?.name) {
       ui.notifications.warn(
-        game.i18n.localize('SCENE-PACKER.notifications.find-actor.missing-name')
+        game.i18n.localize('SCENE-PACKER.notifications.find-actor.missing-name'),
       );
       this.logWarn(
         true,
         game.i18n.localize(
-          'SCENE-PACKER.notifications.find-actor.missing-name-details'
+          'SCENE-PACKER.notifications.find-actor.missing-name-details',
         ),
-        token
+        token,
       );
       return null;
     }
@@ -923,7 +936,7 @@ export default class ScenePacker {
     // No direct name lookup found, get the Actor name from the token world data at the same
     // coordinates with the same Token name
     let actorRef = tokenWorldData.find(
-      (a) => a.x === token.x && a.y === token.y && a.tokenName === token.name
+      (a) => a.x === token.x && a.y === token.y && a.tokenName === token.name,
     );
     if (actorRef) {
       actor = this.findActorForTokenName(actorRef.actorName, folder);
@@ -949,7 +962,7 @@ export default class ScenePacker {
     }
 
     const folder = game.folders.find(
-      (j) => j.data.type === 'Actor' && j.data.name === this.adventureName
+      (j) => j.data.type === 'Actor' && j.data.name === this.adventureName,
     );
     let updates = [];
     let missing = [];
@@ -970,7 +983,7 @@ export default class ScenePacker {
       ui.notifications.error(
         game.i18n.format('SCENE-PACKER.notifications.link-tokens.missing', {
           count: missing.length,
-        })
+        }),
       );
       this.logError(
         true,
@@ -978,7 +991,7 @@ export default class ScenePacker {
           count: missing.length,
           adventureName: this.adventureName,
         }),
-        missing
+        missing,
       );
     }
 
@@ -987,7 +1000,7 @@ export default class ScenePacker {
         game.i18n.format('SCENE-PACKER.notifications.link-tokens.linking', {
           count: updates.length,
           adventureName: this.adventureName,
-        })
+        }),
       );
       return scene.updateEmbeddedEntity('Token', updates);
     }
@@ -1025,7 +1038,7 @@ export default class ScenePacker {
           '-=journalName': null,
           '-=folderName': null,
         },
-        {inplace: false}
+        {inplace: false},
       );
     });
 
@@ -1034,7 +1047,7 @@ export default class ScenePacker {
       ui.notifications.error(
         game.i18n.format('SCENE-PACKER.notifications.spawn-notes.missing', {
           count: missing.length,
-        })
+        }),
       );
       this.logError(
         true,
@@ -1042,9 +1055,9 @@ export default class ScenePacker {
           'SCENE-PACKER.notifications.spawn-notes.missing-details',
           {
             count: missing.length,
-          }
+          },
         ),
-        missing
+        missing,
       );
     }
 
@@ -1053,12 +1066,12 @@ export default class ScenePacker {
       ui.notifications.info(
         game.i18n.format('SCENE-PACKER.notifications.spawn-notes.spawning', {
           count: spawnInfo.length,
-        })
+        }),
       );
       // Cleanup the notes already embedded in the scene to prevent "duplicates".
       await scene.deleteEmbeddedEntity(
         'Note',
-        scene.data.notes.map((n) => n._id)
+        scene.data.notes.map((n) => n._id),
       );
       return scene.createEmbeddedEntity('Note', spawnInfo);
     }
@@ -1074,7 +1087,7 @@ export default class ScenePacker {
     const journalInfo = scene.getFlag(this.moduleName, this.journalFlag);
     if (!tokenInfo && !journalInfo) {
       ui.notifications.info(
-        game.i18n.localize('SCENE-PACKER.notifications.unpack.no-items')
+        game.i18n.localize('SCENE-PACKER.notifications.unpack.no-items'),
       );
       return;
     }
@@ -1083,14 +1096,14 @@ export default class ScenePacker {
     await this.ImportByName(
       this.packs.creatures,
       this.findMissingActors(tokenInfo),
-      'actors'
+      'actors',
     );
 
     // Import Journal Pins
     await this.ImportByName(
       this.packs.journals,
       this.findMissingJournals(journalInfo),
-      'journals'
+      'journals',
     );
 
     if (this.welcomeJournal) {
@@ -1100,7 +1113,7 @@ export default class ScenePacker {
         this.findMissingJournals([this.welcomeJournal].map(d => {
           return {journalName: d};
         })),
-        'journals'
+        'journals',
       );
     }
     if (this.additionalJournals.length > 0) {
@@ -1110,7 +1123,7 @@ export default class ScenePacker {
         this.findMissingJournals(this.additionalJournals.map(d => {
           return {journalName: d};
         })),
-        'journals'
+        'journals',
       );
     }
 
@@ -1128,7 +1141,7 @@ export default class ScenePacker {
     await scene.unsetFlag(this.moduleName, this.tokenFlag);
     await scene.unsetFlag(this.moduleName, this.journalFlag);
     ui.notifications.info(
-      game.i18n.localize('SCENE-PACKER.notifications.clear-data.done')
+      game.i18n.localize('SCENE-PACKER.notifications.clear-data.done'),
     );
     return Promise.resolve();
   }
@@ -1141,21 +1154,21 @@ export default class ScenePacker {
   static async SetModuleCompendiumLockState(locked, moduleName) {
     locked = !!locked;
     const compendiums = game.packs.filter(
-      (p) => p.metadata.package === moduleName
+      (p) => p.metadata.package === moduleName,
     );
     const settings = {};
     compendiums.forEach((p) => {
       settings[`${p.metadata.package}.${p.metadata.name}`] = {locked};
     });
     if (Object.keys(settings).length) {
-      let key = locked
-        ? 'SCENE-PACKER.world-conversion.compendiums.lock'
-        : 'SCENE-PACKER.world-conversion.compendiums.unlock';
+      let key = locked ?
+                'SCENE-PACKER.world-conversion.compendiums.lock' :
+                'SCENE-PACKER.world-conversion.compendiums.unlock';
       ui.notifications.info(
         game.i18n.format(key, {
           list: Object.keys(settings).join(', '),
           locked: locked,
-        })
+        }),
       );
       await game.settings.set('core', Compendium.CONFIG_SETTING, settings);
     }
@@ -1175,7 +1188,7 @@ export default class ScenePacker {
   static async RelinkJournalEntries(moduleName) {
     // Get all of the compendium packs that belong to the requested module
     const allPacks = game.packs.filter(
-      (p) => p.metadata.package === moduleName
+      (p) => p.metadata.package === moduleName,
     );
     for (let i = 0; i < allPacks.length; i++) {
       // Ensure that all of the packs' indexes are loaded
@@ -1200,8 +1213,8 @@ export default class ScenePacker {
           'SCENE-PACKER.world-conversion.compendiums.checking-and-updating',
           {
             count: pack.index.length,
-          }
-        )
+          },
+        ),
       );
       // Check each of the Journals in the pack
       for (let j = 0; j < pack.index.length; j++) {
@@ -1241,16 +1254,16 @@ export default class ScenePacker {
                   'SCENE-PACKER.world-conversion.compendiums.invalid-ref-type',
                   {
                     type: type,
-                  }
-                )
+                  },
+                ),
               );
               continue;
           }
           if (!name) {
             ui.notifications.error(
               game.i18n.localize(
-                'SCENE-PACKER.world-conversion.compendiums.invalid-ref-type'
-              )
+                'SCENE-PACKER.world-conversion.compendiums.invalid-ref-type',
+              ),
             );
             ScenePacker.logType(
               moduleName,
@@ -1258,11 +1271,11 @@ export default class ScenePacker {
               true,
               journal.name,
               game.i18n.localize(
-                'SCENE-PACKER.world-conversion.compendiums.invalid-no-matching-name'
+                'SCENE-PACKER.world-conversion.compendiums.invalid-no-matching-name',
               ),
               type,
               entry,
-              oldRef
+              oldRef,
             );
             continue;
           }
@@ -1277,27 +1290,8 @@ export default class ScenePacker {
           if (!newRef.length) {
             ui.notifications.error(
               game.i18n.localize(
-                'SCENE-PACKER.world-conversion.compendiums.invalid-not-found'
-              )
-            );
-            ScenePacker.logType(
-              moduleName,
-              'error',
-              true,
-              journal.name,
-              game.i18n.localize(
-                'SCENE-PACKER.world-conversion.compendiums.invalid-not-found-console'
+                'SCENE-PACKER.world-conversion.compendiums.invalid-not-found',
               ),
-              type,
-              name,
-              entry,
-              oldRef
-            );
-          } else if (newRef.length > 1) {
-            ui.notifications.error(
-              game.i18n.localize(
-                'SCENE-PACKER.world-conversion.compendiums.invalid-too-many'
-              )
             );
             ScenePacker.logType(
               moduleName,
@@ -1305,13 +1299,32 @@ export default class ScenePacker {
               true,
               journal.name,
               game.i18n.localize(
-                'SCENE-PACKER.world-conversion.compendiums.invalid-too-many-console'
+                'SCENE-PACKER.world-conversion.compendiums.invalid-not-found-console',
               ),
               type,
               name,
               entry,
               oldRef,
-              newRef
+            );
+          } else if (newRef.length > 1) {
+            ui.notifications.error(
+              game.i18n.localize(
+                'SCENE-PACKER.world-conversion.compendiums.invalid-too-many',
+              ),
+            );
+            ScenePacker.logType(
+              moduleName,
+              'error',
+              true,
+              journal.name,
+              game.i18n.localize(
+                'SCENE-PACKER.world-conversion.compendiums.invalid-too-many-console',
+              ),
+              type,
+              name,
+              entry,
+              oldRef,
+              newRef,
             );
           }
 
@@ -1334,8 +1347,8 @@ export default class ScenePacker {
               {
                 count: references.size,
                 journal: journal.name,
-              }
-            )
+              },
+            ),
           );
 
           // Build the new journal content, progressively replacing each reference
@@ -1358,16 +1371,16 @@ export default class ScenePacker {
                   oldRef: change.oldRef,
                   newRefPack: change.newRef[0].pack,
                   newRef: change.newRef[0].ref,
-                }
-              )
+                },
+              ),
             );
             let regex = new RegExp(
               `@${change.type}\\[${change.oldRef}\\]\\{`,
-              'g'
+              'g',
             );
             newContent = newContent.replace(
               regex,
-              `@Compendium[${change.newRef[0].pack}.${change.newRef[0].ref}]{`
+              `@Compendium[${change.newRef[0].pack}.${change.newRef[0].ref}]{`,
             );
           }
           ui.notifications.info(
@@ -1376,8 +1389,8 @@ export default class ScenePacker {
               {
                 count: references.size,
                 journal: journal.name,
-              }
-            )
+              },
+            ),
           );
 
           // Update the journal entry with the fully replaced content
@@ -1392,8 +1405,8 @@ export default class ScenePacker {
             {
               journal: journal.name,
               entryId: entry._id,
-            }
-          )
+            },
+          ),
         );
       }
     }
@@ -1402,7 +1415,7 @@ export default class ScenePacker {
     await ScenePacker.SetModuleCompendiumLockState(true, moduleName);
 
     ui.notifications.info(
-      game.i18n.localize('SCENE-PACKER.world-conversion.compendiums.completed')
+      game.i18n.localize('SCENE-PACKER.world-conversion.compendiums.completed'),
     );
   }
 
