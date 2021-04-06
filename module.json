@@ -2,13 +2,14 @@
   "name": "scene-packer",
   "title": "Library: Scene Packer",
   "description": "A module to assist with Scene and Adventure packing and unpacking.",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "library": "true",
   "manifestPlusVersion": "1.0.0",
   "minimumCoreVersion": "0.7.9",
   "compatibleCoreVersion": "0.7.9",
   "author": "The League of Extraordinary FVTT Developers",
-  "authors": [{
+  "authors": [
+    {
       "name": "The League of Extraordinary FVTT Developers",
       "url": "https://github.com/League-of-Foundry-Developers"
     },
@@ -17,17 +18,33 @@
       "discord": "blair#9056"
     }
   ],
+  "packs": [
+    {
+      "name": "journals",
+      "label": "Library: Scene Packer",
+      "path": "/packs/journals.db",
+      "entity": "JournalEntry"
+    },
+    {
+      "name": "macros",
+      "label": "Library: Scene Packer",
+      "path": "/packs/macros.db",
+      "entity": "Macro"
+    }
+  ],
   "esmodules": [
     "/scripts/scene-packer.js"
   ],
-  "languages": [{
-    "lang": "en",
-    "name": "English",
-    "path": "languages/en.json"
-  }],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "languages/en.json"
+    }
+  ],
   "url": "https://github.com/League-of-Foundry-Developers/scene-packer",
   "manifest": "https://github.com/League-of-Foundry-Developers/scene-packer/releases/latest/download/module.json",
-  "download": "https://github.com/League-of-Foundry-Developers/scene-packer/releases/download/1.0.4/module.zip",
+  "download": "https://github.com/League-of-Foundry-Developers/scene-packer/releases/download/1.0.5/module.zip",
   "bugs": "https://github.com/League-of-Foundry-Developers/scene-packer/issues",
   "changelog": "https://github.com/League-of-Foundry-Developers/scene-packer/blob/master/changelog.md",
   "allowBugReporter": true

@@ -20,14 +20,14 @@ To use the Scene Packer as part of your module you will need to add it as a depe
 "dependencies": [
   {
     "name": "scene-packer",
-    "manifest": "https://raw.githubusercontent.com/League-of-Foundry-Developers/scene-packer/master/module.json",
+    "manifest": "https://raw.githubusercontent.com/League-of-Foundry-Developers/scene-packer/master/module.json"
   }
 ]
 ```
 
 ### Module code requirements
 
-To unpack your scenes automatically when first viewed by a user, include the following in your module js script, updating the variable names where appropriate.
+To unpack your scenes automatically when first viewed by a user, include the following in your module javascript, updating the variable names where appropriate.
 
 ```javascript
 const adventureName = 'The Name of Your Adventure or Collection';
@@ -58,25 +58,24 @@ const creaturePacks = [`${moduleName}.actors`, 'dnd5e.monsters'];
  * Set to the following to disable:
  *   const journalPacks = [];
  */
-const journalPacks = [`${moduleName}.journals`];
+const journalPacks = [`${moduleName}.journals`];/**
+ * macroPacks is a list of compendium packs to look in for Macros by name (in prioritised order).
+ * The first entry here assumes that you have a Macro pack in your module with the "name" of "macros".
+ * Set to the following to disable:
+ *   const macroPacks = [];
+ */
+const macroPacks = [`${moduleName}.macros`];
 
 Hooks.once('scenePackerReady', ({ getInstance }) => {
   // Initialise the Scene Packer with your adventure name and module name
-  let packer = getInstance(adventureName, moduleName);
-  if (creaturePacks.length) {
-    packer.SetCreaturePacks(creaturePacks);
-  }
-  if (journalPacks.length) {
-    packer.SetJournalPacks(journalPacks);
-  }
-  if (welcomeJournal) {
-    packer.SetWelcomeJournal(welcomeJournal);
-  }
-  if (additionalJournals.length) {
-    packer.SetAdditionalJournalsToImport(additionalJournals);
-  }
-  // If you don't want the dialogs to appear when your users first open the compendiums, uncomment the following line.
-  // packer.DisableImportPrompts();
+  let packer = getInstance(adventureName, moduleName, {
+    creaturePacks,
+    journalPacks,
+    macroPacks,
+    welcomeJournal,
+    additionalJournals,
+    allowImportPrompts: true, // Set to false if you don't want the popup
+  });
 });
 ```
 
@@ -84,12 +83,14 @@ Hooks.once('scenePackerReady', ({ getInstance }) => {
 
 To pack your scene ready for distribution:
 
-1. `Enable Scene Packer context menu` in Module Settings.
+1. Enable the `Scene Packer context menu` in Module Settings.
 2. Build your scene as normal, adding Actors and Journal Pins where you'd like.
-3. Export your Actors/Journals/Roll Tables to compendiums as normal.
-4. Right click on your Scene in the Scenes Directory and choose `Pack Scene Data`.
-5. Export your Scene to your compendium.
-6. Right click on your Scene in the Scenes Directory and choose `Clear Packed Scene Data`.
+3. Export your Actors/Journals/Roll Tables/Items/Macros to your compendiums as normal. 
+4. Run the script to Update Journal links to fix up the journal compendium linking (see section below)
+5. Re-export your Journals to compendiums, be sure to select the "Merge By Name" option to prevent the IDs from changing (and therefore re-breaking the links)
+6. Right click on your Scene in the Scenes Directory and choose `Pack Scene Data`.
+7. Export your Scene to your compendium.
+8. Right click on your Scene in the Scenes Directory and choose `Clear Packed Scene Data`.
 
   - You want to choose this otherwise next time you open your Scene locally it will run the Scene import scripts.
 
@@ -100,8 +101,12 @@ To pack your scene ready for distribution:
 When you build an adventure module, it's a painful process updating all of your Journal references to link to the compendium versions. You can simplify this by running the following command in your browser console putting in your appropriate module name (as per your manifest json name):
 
 ```js
-`await window['scene-packer'].relinkJournalEntries('module-name');`
+await window['scene-packer'].relinkJournalEntries('module-name', {dryRun: false});
 ```
+
+Alternatively, you can run the macro `Relink compendium journal entries` that is included in the Scene Packer compendium, which will prompt you for your module name and whether you want to run in "dry run" mode (not saving changes).
+
+This will automatically go through the Journal compendiums that belong to your module, and change the reference links to the compendium versions. For example, if you had a link to `@Actor[alvhCr52HIrWmoez]{Commoner}` it would change it to `@Compendium[your-module.actors.lOBiqShvkT83eGzY]{Commoner}` using your module and compendium names and ID references.
 
 ## TODO
 
@@ -109,4 +114,6 @@ When you build an adventure module, it's a painful process updating all of your 
 
 ## Acknowledgements
 
-A portion of the code is based on code created by <https://onepagemage.com/> and used with permission.
+A portion of the code is based on code created by [honeybadger](https://github.com/trioderegion) and used with permission.
+
+Thanks to [Baileywiki](https://www.patreon.com/baileywiki) for their initial testing and feedback.

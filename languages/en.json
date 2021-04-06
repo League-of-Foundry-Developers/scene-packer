@@ -13,9 +13,9 @@
     },
     "welcome": {
       "title": "{title} Importer",
-      "intro": "<p>Welcome to <strong>{adventure}</strong></p>",
-      "brand-new": "<p>Would you like to import and unpack the Scenes from this adventure?</p>",
-      "update-available": "<p>An update is available. You have <strong>{existing}</strong> installed, and <strong>{version}</strong> is available. Would you like to import and unpack the Scenes from this adventure?</p><p><strong>Note: If you choose to import all, you will end up with a second copy of the scene, the bottom one is the newer version.</strong></p>",
+      "intro": "<h2>Welcome to <strong>{adventure}</strong>.</h2>",
+      "brand-new": "<p>Would you like to import and unpack the Scenes from this module?</p>",
+      "update-available": "<p>An update is available. You have <strong>{existing}</strong> installed, and <strong>{version}</strong> is available. Would you like to import and unpack the Scenes from this module?</p><p><strong>Note: If you choose to import all, you will end up with a second copy of the scenes, the bottom one is the newer version.</strong></p>",
       "yes-all": "Yes import all",
       "let-me-choose": "Let me choose",
       "no": "No",
@@ -25,11 +25,13 @@
       "first-launch": "First launch of this adventure! Unpacking scene...",
       "done": "All done!",
       "pack-scene": {
-        "clear-reminder": "Don't forget to run ScenePacker.ClearPackedData() after exporting to prevent future duplicates.",
+        "clear-reminder": "Don't forget to \"Clear Packed Scene Data\" after exporting to prevent future duplicates.",
         "writing-journals": "Writing {number} journals to scene: {name}",
         "no-journal-pins": "No journal pins detected on the scene.",
-        "no-token-name-warning": "Cannot pack a token that has no name. Check console for details.",
+        "no-token-name-warning": "Cannot pack a token that has no name. Check debug logs for details.",
         "no-token-name-log": "Trying to pack a token that has no name is not going to end well. Please ensure the Token and Actor have a name.",
+        "no-journal-link-warning": "Cannot pack a journal pin that does not link to a valid journal entry. Journal pin is called: \"{pin}\". Check debug logs for details.",
+        "no-journal-link-log": "Trying to pack a journal pin that does not link to a journal entry is not going to end well. Please ensure the pin \"{pin}\" is linked correctly.",
         "writing-tokens": "Writing {number} tokens to scene: {name}",
         "no-tokens": "No tokens detected on the scene."
       },
@@ -46,16 +48,16 @@
         }
       },
       "find-actor": {
-        "missing-name": "Cannot find a token that has no name. Check console for details.",
+        "missing-name": "Cannot find a token that has no name. Check debug logs for details.",
         "missing-name-details": "Trying to find a token that has no name is not going to end well. Please ensure the Token and Actor have a name prior to packing."
       },
       "link-tokens": {
-        "missing": "Could not find {count} actors to link, they will remain unlinked. Check console for details.",
+        "missing": "Could not find {count} actors to link, they will remain unlinked. Check debug logs for details.",
         "missing-details": "Could not find {count} actors to link. The following actor tokens were not found in the \"{adventureName}\" folder.",
         "linking": "Relinking {count} Tokens linked to actors."
       },
       "spawn-notes": {
-        "missing": "Could not find {count} journals to link. Check console for details.",
+        "missing": "Could not find {count} journals to link. Check debug logs for details.",
         "missing-details": "Could not find {count} notes to spawn. The following journals were not found.",
         "spawning": "Spawning {count} journal notes."
       },
@@ -64,7 +66,8 @@
       },
       "clear-data": {
         "done": "Finished clearing Packed Data."
-      }
+      },
+      "deprecated": "Warning, {method} is deprecated and will be removed in the future."
     },
     "scene-context": {
       "pack": {
@@ -108,6 +111,11 @@
         "ui": "Invalid call to SetJournalPacks(). See console for details.",
         "details": "You must pass an array of strings to \"SetJournalPacks()\". They must be the names of Journal Packs. Received: {pack}",
         "missing": "SetJournalPacks() called with no value. This disables importing of Journals."
+      },
+      "macroPacks": {
+        "ui": "Invalid call to SetMacroPacks(). See console for details.",
+        "details": "You must pass an array of strings to \"SetMacroPacks()\". They must be the names of Macro Packs. Received: {pack}",
+        "missing": "SetMacroPacks() called with no value. This disables importing of Macros."
       }
     },
     "world-conversion": {
@@ -116,18 +124,28 @@
         "lock": "Locking compendiums: {list}",
         "checking-and-updating": "Checking and updating {count} journal references from world links to compendium links.",
         "invalid-ref-type": "Found a journal reference that isn't handled: {type}. Skipping reference...",
-        "invalid-no-name": "Found a journal reference but couldn't find its original name. Check console for details.",
+        "invalid-no-name": "Found a journal reference but couldn't find its original name. Check debug logs for details.",
         "invalid-no-matching-name": "Could not find reference name in world data",
-        "invalid-not-found": "Found a journal reference but couldn't find its compendium version by name. Check console for details.",
+        "invalid-not-found": "Found a journal reference but couldn't find its compendium version by name. Check debug logs for details.",
         "invalid-not-found-console": "Could not find reference in compendium data. Skipping updating reference...",
-        "invalid-too-many": "Found a journal reference but found more than one compendium version by name. Check console for details.",
+        "invalid-too-many": "Found a journal reference but found more than one compendium version by name. Check debug logs for details.",
         "invalid-too-many-console": "Found more than one reference in compendium data. Skipping updating reference...",
-        "updating-journal-references": "Changing {count} journal references in: {journal}",
+        "updating-journal-references": "Changing {count} journal references in: \"{journal}\"",
         "updating-reference-console": "Changing {pack}[{journalEntryId}] {type} reference {oldRef} -> {newRefPack}.{newRef}",
-        "updating-reference": "Updating {count} references in {journal}. See console for full details.",
-        "completed-journal": "Completed journal {journal} {entryId}",
+        "updating-reference": "Updating {count} references in \"{journal}\". See console for full details.",
+        "completed-journal": "Completed journal \"{journal}\" {entryId}.",
+        "no-references": "There were no references that needed updating in journal  \"{journal}\" {entryId}.",
+        "checking-journal": "Checking contents of journal \"{journal}\" {entryId}.",
         "completed": "Completed!"
       }
+    },
+    "relink-prompt": {
+      "title": "Relink Journal Entries",
+      "intro": "Select the module you are using Scene Packer with:",
+      "make-changes": "Save changes?",
+      "make-changes-info": "Leaving this unchecked will operate in a \"dry run\" mode, where changes are only output to the console.",
+      "relink": "Relink",
+      "cancel": "Cancel"
     }
   }
 }
