@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.6
+
+- Made the `Enable Scene Packer context menu` setting appear under `Library: Scene Packer` rather than the module utilising Scene Packer.
+- The Welcome Journal will now only show once per module version, rather than once per imported Scene.
+- Added a performance report dialog. Trigger it with `window['scene-packer'].showPerformanceReport();` or via the Macro in the compendium.
+
 ## v1.0.5
 
 - Added "How to use" style journals to the Scene Packer compendium.

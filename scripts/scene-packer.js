@@ -1,3 +1,5 @@
+import Report from './report.js';
+
 /**
  * You can use this ScenePacker to "fix" Actors and Journal Pins on a Scene.
  * This code supports relinking Actor Tokens, even if their token name doesn't match the Actor.
@@ -96,10 +98,7 @@ export default class ScenePacker {
                   ScenePacker.GetInstance().journalFlag,
                   ) &&
                   game.user.isGM &&
-                  game.settings.get(
-                    ScenePacker.GetInstance().GetModuleName(),
-                    'enableContextMenu',
-                  );
+                  game.settings.get('scene-packer', 'enableContextMenu');
               },
               callback: (li) => {
                 let scene = game.scenes.get(li.data('entityId'));
@@ -118,10 +117,7 @@ export default class ScenePacker {
                   ScenePacker.GetInstance().journalFlag,
                   ) &&
                   game.user.isGM &&
-                  game.settings.get(
-                    ScenePacker.GetInstance().GetModuleName(),
-                    'enableContextMenu',
-                  );
+                  game.settings.get('scene-packer', 'enableContextMenu');
               },
               callback: (li) => {
                 let scene = game.scenes.get(li.data('entityId'));
@@ -142,10 +138,7 @@ export default class ScenePacker {
                   ScenePacker.GetInstance().journalFlag,
                   ) &&
                   game.user.isGM &&
-                  game.settings.get(
-                    ScenePacker.GetInstance().GetModuleName(),
-                    'enableContextMenu',
-                  );
+                  game.settings.get('scene-packer', 'enableContextMenu');
               },
               callback: (li) => {
                 let scene = game.scenes.get(li.data('entityId'));
@@ -186,7 +179,7 @@ export default class ScenePacker {
           default: true,
         });
 
-        game.settings.register(this.moduleName, 'enableContextMenu', {
+        game.settings.register('scene-packer', 'enableContextMenu', {
           name: game.i18n.localize('SCENE-PACKER.settings.context-menu.name'),
           hint: game.i18n.localize('SCENE-PACKER.settings.context-menu.hint'),
           scope: 'client',
@@ -331,12 +324,11 @@ export default class ScenePacker {
     ui.notifications.info(
       game.i18n.localize('SCENE-PACKER.notifications.done'),
     );
-    // Set both world and scene imported version flags
-    game.settings.set(this.moduleName, 'imported', game.modules.get('scene-packer')?.data?.version || '0.0.0');
-    scene.setFlag(this.moduleName, 'imported', game.modules.get('scene-packer')?.data?.version || '0.0.0');
 
+    let importedVersion = game.settings.get(this.moduleName, 'imported') || '0.0.0';
+    let moduleVersion = game.modules.get(this.moduleName)?.data?.version || '0.0.0';
     if (this.welcomeJournal) {
-      // Display the welcome journal
+      // Display the welcome journal once per new module version
       const folder = game.folders.find(
         (j) => j.data.type === 'JournalEntry' && j.data.name === this.adventureName,
       );
@@ -346,9 +338,21 @@ export default class ScenePacker {
           (j) => j.data.name === this.welcomeJournal && j.data.folder === folder.id,
         );
       if (j.length > 0) {
-        j[0].sheet.render(true, {sheetMode: 'text'});
+        if (isNewerVersion(moduleVersion, importedVersion)) {
+          j[0].sheet.render(true, {sheetMode: 'text'});
+        } else {
+          this.log(false,
+            game.i18n.format('SCENE-PACKER.notifications.already-shown-welcome', {
+              journal: j[0]?.name,
+              version: moduleVersion,
+            }),
+          );
+        }
       }
     }
+    // Set both world and scene imported version flags
+    game.settings.set(this.moduleName, 'imported', game.modules.get('scene-packer')?.data?.version || '0.0.0');
+    scene.setFlag(this.moduleName, 'imported', moduleVersion || '0.0.0');
 
     return this;
   }
@@ -1625,6 +1629,7 @@ window['scene-packer'] = {
   relinkJournalEntries: ScenePacker.RelinkJournalEntries,
   hasPackedData: ScenePacker.HasPackedData,
   promptRelinkJournalEntries: ScenePacker.PromptRelinkJournalEntries,
+  showPerformanceReport: Report.RenderReport,
 };
 
 /**

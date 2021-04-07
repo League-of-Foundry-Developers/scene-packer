@@ -22,7 +22,7 @@
       "dont-ask": "Don't ask me again"
     },
     "notifications": {
-      "first-launch": "First launch of this adventure! Unpacking scene...",
+      "first-launch": "First launch of this Scene! Unpacking scene...",
       "done": "All done!",
       "pack-scene": {
         "clear-reminder": "Don't forget to \"Clear Packed Scene Data\" after exporting to prevent future duplicates.",
@@ -33,7 +33,8 @@
         "no-journal-link-warning": "Cannot pack a journal pin that does not link to a valid journal entry. Journal pin is called: \"{pin}\". Check debug logs for details.",
         "no-journal-link-log": "Trying to pack a journal pin that does not link to a journal entry is not going to end well. Please ensure the pin \"{pin}\" is linked correctly.",
         "writing-tokens": "Writing {number} tokens to scene: {name}",
-        "no-tokens": "No tokens detected on the scene."
+        "no-tokens": "No tokens detected on the scene.",
+        "already-shown-welcome": "The welcome journal \"{journal}\" has already been shown for this version \"{version\"."
       },
       "import-by-name": {
         "creating-data": "Importing {count} new {type}.",
@@ -146,6 +147,11 @@
       "make-changes-info": "Leaving this unchecked will operate in a \"dry run\" mode, where changes are only output to the console.",
       "relink": "Relink",
       "cancel": "Cancel"
+    },
+    "performance-report": {
+      "title": "Performance Report",
+      "copy": "Copy to clipboard",
+      "close": "Close"
     }
   }
 }
