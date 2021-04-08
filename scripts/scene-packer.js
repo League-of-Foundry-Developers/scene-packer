@@ -233,7 +233,10 @@ export default class ScenePacker {
                       folderId = folder._id;
                     }
                     const scenes = await c.importAll({folderId: folderId, folderName: c.metadata.label});
-                    if (scenes.length) {
+                    if (!scenes) {
+                      continue;
+                    }
+                    if (Array.isArray(scenes) && scenes.length) {
                       for (let j = 0; j < scenes.length; j++) {
                         await this.ProcessScene(scenes[j]);
                       }
@@ -337,7 +340,7 @@ export default class ScenePacker {
         game.journal.filter(
           (j) => j.data.name === this.welcomeJournal && j.data.folder === folder.id,
         );
-      if (j.length > 0) {
+      if (j?.length) {
         if (isNewerVersion(moduleVersion, importedVersion)) {
           j[0].sheet.render(true, {sheetMode: 'text'});
         } else {
