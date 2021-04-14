@@ -1,5 +1,30 @@
 # Changelog
 
+## v2.0.0
+
+- Major rewrite of how the module is accessed.
+  - Scene Packer now supports more than one ScenePacker enabled module in a world. Previously they would conflict with each other and cause issues.
+- DEPRECATED: Calls to `window['scene-packer']` have been deprecated in favour of a global `ScenePacker` object.
+  - View the Readme for the new way to initialise Scene Packer.
+    - `ScenePacker.Initialise({...});`
+    - `ScenePacker.RelinkJournalEntries('module-name', {dryRun: true});`
+    - `ScenePacker.PromptRelinkJournalEntries();`
+    - `ScenePacker.HasPackedData(scene, moduleName);`
+    - `ScenePacker['module-name'];`
+    - etc.
+- Made the `Enable Scene Packer context menu` setting appear under `Library: Scene Packer` rather than the module utilising Scene Packer.
+- Packing a Scene will now store the initial view position of the Scene. Unpacking a Scene will use this value rather than defaulting to 0, 0 and a zoom of 1.
+- The Welcome Journal will now only show once per module version, rather than once per imported Scene. Upgrading the version of your module will redisplay the Welcome Journal (allowing you to show Changelogs etc.).
+- Added [libWrapper](https://foundryvtt.com/packages/lib-wrapper/) to set the `sourceId` value of entities imported from compendiums in versions of FoundryVTT prior to 0.8.0 (which does it by default).
+  - This allows appropriate tracking and linking of entities imported.
+- Unpacking a Scene will show its associated Journal entry to an authorised person. Generally this is just the GM unless your Journal has different permissions.
+  - Journal sheets will not automatically appear if you use the "Import All" option on the dialog you receive when first enabling a "packed" module.
+- Packing and Unpacking a Scene will prioritise matching based on `sourceId`'s for exact matches, rather than by name (it will still fall back to name based matching).
+- Before unpacking a Scene, a check will be made to ensure the Scene was packed with a compatible version of Scene Packer.
+- Added a performance report dialog option. Trigger it with `ScenePacker.ShowPerformanceReport();` or via the Macro in the compendium.
+  - This can be useful when building your Scenes to get an idea of how "heavy" they are.
+- Removed warning about remembering to Unpack after Packing. It's no longer needed. Unpacking a Scene over the top of itself won't cause any problems.
+
 ## v1.0.5
 
 - Added "How to use" style journals to the Scene Packer compendium.
