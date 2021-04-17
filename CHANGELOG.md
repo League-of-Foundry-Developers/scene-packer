@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.0.1
+
+- Fixed bug where importing from compendiums would sometimes break.
+
 ## v2.0.0
 
 - Major rewrite of how the module is accessed.
