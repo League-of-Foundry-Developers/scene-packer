@@ -18,6 +18,10 @@ Hooks.once('setup', function () {
             return wrapped.bind(this)(...args);
           }
 
+          // Sometimes the updateData argument isn't set
+          if (!args[2]) {
+            args[2] = {};
+          }
           // Set the source uuid of the entity if it isn't already set in updateData
           if (!args[2]['flags.core.sourceId']) {
             const source = await pack.getEntity(args[1]);
