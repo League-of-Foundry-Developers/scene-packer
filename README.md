@@ -97,9 +97,8 @@ To pack your scene ready for distribution:
 2. Build your scene as normal, adding Actors and Journal Pins where you'd like.
 3. Export your Actors/Journals/Roll Tables/Items/Macros to your compendiums as normal. 
 4. Run the script to Update Journal links to fix up the journal compendium linking (see section below)
-5. Re-export your Journals to compendiums, be sure to select the "Merge By Name" option to prevent the IDs from changing (and therefore re-breaking the links)
-6. Right click on your Scene in the Scenes Directory and choose `Pack Scene Data`.
-7. Export your Scene to your compendium.
+5. Right click on your Scene in the Scenes Directory and choose `Pack Scene Data`.
+6. Export your Scene to your compendium.
 
 ![scene-context-menu](scene-context-menu.png)
 
