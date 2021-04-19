@@ -658,32 +658,11 @@ export default class ScenePacker {
     await scene.setFlag(this.moduleName, FLAGS_SCENE_JOURNAL, sceneJournalInfo);
     await scene.setFlag(this.moduleName, FLAGS_SCENE_POSITION, scene.data?.initial);
 
-    let invalid = false;
-
     /**
      * journalInfo is the data that gets passed to findMissingJournals
      */
-
     const journalInfo = await Promise.all(scene.data.notes.map(async note => {
       const journalData = game.journal.get(note.entryId);
-      if (!journalData?.name) {
-        ui.notifications.warn(
-          game.i18n.format(
-            'SCENE-PACKER.notifications.pack-scene.no-journal-link-warning',
-            {pin: note.text},
-          ),
-        );
-        this.logWarn(
-          true,
-          game.i18n.format(
-            'SCENE-PACKER.notifications.pack-scene.no-journal-link-log',
-            {pin: note.text},
-          ),
-          note,
-        );
-        invalid = true;
-      }
-
       const compendiumJournal = await this.FindJournalInCompendiums(journalData, this.packs.journals);
 
       // Take a copy of the original note without the ids, adding in the sourceId, journal name and folder name it belongs to
@@ -700,10 +679,6 @@ export default class ScenePacker {
         {inplace: false},
       );
     }));
-
-    if (invalid) {
-      return Promise.resolve();
-    }
 
     if (journalInfo.length > 0) {
       ui.notifications.info(
@@ -728,22 +703,6 @@ export default class ScenePacker {
      * tokenInfo is the data that gets passed to findMissingTokens
      */
     const tokenInfo = await Promise.all(scene.data.tokens.map(async token => {
-      if (!token.name) {
-        ui.notifications.warn(
-          game.i18n.localize(
-            'SCENE-PACKER.notifications.pack-scene.no-token-name-warning',
-          ),
-        );
-        this.logWarn(
-          true,
-          game.i18n.localize(
-            'SCENE-PACKER.notifications.pack-scene.no-token-name-log',
-          ),
-          token,
-        );
-        invalid = true;
-      }
-
       // Pull the sourceId of the actor, preferring the Actor entry in the module's compendium.
       let sourceId = '';
       let compendiumSourceId = '';
@@ -780,10 +739,6 @@ export default class ScenePacker {
         y: token.y,
       };
     }));
-
-    if (invalid) {
-      return Promise.resolve();
-    }
 
     if (tokenInfo.length > 0) {
       ui.notifications.info(

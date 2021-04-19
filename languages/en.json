@@ -27,10 +27,6 @@
       "pack-scene": {
         "writing-journals": "Writing {number} journals to scene: {name}",
         "no-journal-pins": "No journal pins detected on the scene.",
-        "no-token-name-warning": "Cannot pack a token that has no name. Check debug logs for details.",
-        "no-token-name-log": "Trying to pack a token that has no name is not going to end well. Please ensure the Token and Actor have a name.",
-        "no-journal-link-warning": "Cannot pack a journal pin that does not link to a valid journal entry. Journal pin is called: \"{pin}\". Check debug logs for details.",
-        "no-journal-link-log": "Trying to pack a journal pin that does not link to a journal entry is not going to end well. Please ensure the pin \"{pin}\" is linked correctly.",
         "writing-tokens": "Writing {number} tokens to scene: {name}",
         "no-tokens": "No tokens detected on the scene.",
         "already-shown-welcome": "The welcome journal \"{journal}\" has already been shown for this version \"{version\"."

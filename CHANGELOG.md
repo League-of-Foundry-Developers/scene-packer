@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.0.3
+
+- Fixed the compendium packs being missing. Thanks Noshei :)
+- Tokens no longer require names to be packed.
+- Removed step specifying to re-export compendiums as it is no longer required.
+
 ## v2.0.2
 
 - Load compendium pack data prior to trying to use it to reduce the chance of possible race conditions.
