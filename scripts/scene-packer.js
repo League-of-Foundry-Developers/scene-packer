@@ -798,6 +798,10 @@ export default class ScenePacker {
    * @returns {Object|null} The journal in the compendium.
    */
   async FindJournalInCompendiums(journal, searchPacks) {
+    if (!journal) {
+      return null;
+    }
+
     const sourceId = journal.getFlag('core', 'sourceId');
     if (sourceId && sourceId.startsWith(`Compendium.${this.moduleName}`)) {
       const match = fromUuid(sourceId);
@@ -911,6 +915,10 @@ export default class ScenePacker {
    * @returns {Object|null} The actor in the compendium.
    */
   async FindActorInCompendiums(actor, searchPacks) {
+    if (!actor) {
+      return null;
+    }
+
     const sourceId = actor.getFlag('core', 'sourceId');
     if (sourceId && sourceId.startsWith(`Compendium.${this.moduleName}`)) {
       const match = fromUuid(sourceId);
