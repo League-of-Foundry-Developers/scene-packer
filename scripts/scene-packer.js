@@ -615,6 +615,19 @@ export default class ScenePacker {
   }
 
   /**
+   * Ensure that each of the packs are loaded
+   * @returns {Promise<void>}
+   */
+  async loadPacks() {
+    for (let packName of [...this.packs.journals, ...this.packs.creatures, ...this.packs.macros]) {
+      const pack = game.packs.get(packName);
+      if (pack) {
+        await pack.getIndex();
+      }
+    }
+  }
+
+  /**
    * PackScene() will write the following information to the Scene data for later retrieval:
    *   Journal Note Pins
    *   Actor Tokens
@@ -623,6 +636,8 @@ export default class ScenePacker {
    * @returns Promise
    */
   async PackScene(scene = game.scenes.get(game.user.viewedScene)) {
+    await this.loadPacks();
+
     // Remove the flag that tracks what version of the module imported the Scene, as it doesn't make sense to ship that out in the module.
     await scene.unsetFlag(this.moduleName, FLAGS_IMPORTED_VERSION);
 
@@ -675,9 +690,9 @@ export default class ScenePacker {
       return mergeObject(
         note,
         {
-          sourceId: journalData.getFlag('core', 'sourceId'),
+          sourceId: journalData?.getFlag('core', 'sourceId'),
           compendiumSourceId: compendiumJournal?.uuid,
-          journalName: journalData.name,
+          journalName: journalData?.name,
           folderName: game.folders.get(journalData?.data?.folder)?.data?.name,
           '-=entryId': null,
           '-=_id': null,
@@ -798,6 +813,10 @@ export default class ScenePacker {
    * @returns {Object|null} The journal in the compendium.
    */
   async FindJournalInCompendiums(journal, searchPacks) {
+    if (!journal) {
+      return null;
+    }
+
     const sourceId = journal.getFlag('core', 'sourceId');
     if (sourceId && sourceId.startsWith(`Compendium.${this.moduleName}`)) {
       const match = fromUuid(sourceId);
@@ -911,6 +930,10 @@ export default class ScenePacker {
    * @returns {Object|null} The actor in the compendium.
    */
   async FindActorInCompendiums(actor, searchPacks) {
+    if (!actor) {
+      return null;
+    }
+
     const sourceId = actor.getFlag('core', 'sourceId');
     if (sourceId && sourceId.startsWith(`Compendium.${this.moduleName}`)) {
       const match = fromUuid(sourceId);
@@ -1517,6 +1540,8 @@ export default class ScenePacker {
    * @param {Boolean} showLinkedJournal Whether to show any Journals linked to the Scene.
    */
   async UnpackScene(scene = game.scenes.get(game.user.viewedScene), {showLinkedJournal = true} = {}) {
+    await this.loadPacks();
+
     const tokenInfo = scene.getFlag(this.moduleName, FLAGS_TOKENS);
     const journalInfo = scene.getFlag(this.moduleName, FLAGS_JOURNALS);
     const sceneJournalInfo = scene.getFlag(this.moduleName, FLAGS_SCENE_JOURNAL);

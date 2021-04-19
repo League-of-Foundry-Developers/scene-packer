@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.0.2
+
+- Load compendium pack data prior to trying to use it to reduce the chance of possible race conditions.
+- Journal Pins that are entirely unlinked will no longer throw an error, they'll just be packed up and included as unlinked pins.
+
 ## v2.0.1
 
 - Fixed bug where importing from compendiums would sometimes break.
