@@ -675,9 +675,9 @@ export default class ScenePacker {
       return mergeObject(
         note,
         {
-          sourceId: journalData.getFlag('core', 'sourceId'),
+          sourceId: journalData?.getFlag('core', 'sourceId'),
           compendiumSourceId: compendiumJournal?.uuid,
-          journalName: journalData.name,
+          journalName: journalData?.name,
           folderName: game.folders.get(journalData?.data?.folder)?.data?.name,
           '-=entryId': null,
           '-=_id': null,
