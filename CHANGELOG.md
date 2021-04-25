@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.0.4
+
+- Fixed error shown when a non-GM user connects.
+  - Error: User lacks permission to update the World setting
+
 ## v2.0.3
 
 - Fixed the compendium packs being missing. Thanks Noshei :)

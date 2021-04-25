@@ -65,6 +65,10 @@ export default class ScenePacker {
       allowImportPrompts = true,
     } = {},
   ) {
+    if (!game.user.isGM) {
+      return null;
+    }
+
     // Return the existing instance if it has been configured already.
     if (moduleName) {
       let instance = globalScenePacker.instances[moduleName];
@@ -226,6 +230,10 @@ export default class ScenePacker {
     journalFlag = FLAGS_JOURNALS,
     macroFlag = FLAGS_MACROS,
   ) {
+    if (!game.user.isGM) {
+      return false;
+    }
+
     try {
       if (scene.getFlag(moduleName, tokenFlag)) {
         return true;
@@ -1596,6 +1604,10 @@ export default class ScenePacker {
    * @param {String} moduleName The name of the module that owns the compendiums to be updated
    */
   static async SetModuleCompendiumLockState(locked, moduleName) {
+    if (!game.user.isGM) {
+      return;
+    }
+
     locked = !!locked;
     const compendiums = game.packs.filter(
       (p) => p.metadata.package === moduleName,
@@ -1632,6 +1644,10 @@ export default class ScenePacker {
    * @param {Boolean} dryRun Whether to do a dry-run (no changes committed, just calculations and logs)
    */
   static async RelinkJournalEntries(moduleName, {dryRun = false} = {}) {
+    if (!game.user.isGM) {
+      return;
+    }
+
     // Get all of the compendium packs that belong to the requested module
     const allPacks = game.packs.filter(
       (p) => p.metadata.package === moduleName,
@@ -1904,6 +1920,10 @@ export default class ScenePacker {
    * @see RelinkJournalEntries
    */
   static async PromptRelinkJournalEntries() {
+    if (!game.user.isGM) {
+      return;
+    }
+
     let activeModules = Object.keys(globalScenePacker.instances);
     if (!activeModules.length) {
       ui.notifications.info(
@@ -1946,6 +1966,10 @@ export default class ScenePacker {
    * @returns {Promise<null|ScenePacker>}
    */
   static PromptForInstance() {
+    if (!game.user.isGM) {
+      return null;
+    }
+
     return new Promise((resolve, reject) => {
       const modulesRegistered = Object.keys(globalScenePacker.instances);
       if (!modulesRegistered.length) {
@@ -1998,6 +2022,10 @@ export default class ScenePacker {
    * @returns {null|ScenePacker}
    */
   static GetInstanceForScene(scene) {
+    if (!game.user.isGM) {
+      return null;
+    }
+
     if (!scene) {
       return null;
     }
@@ -2118,6 +2146,10 @@ Hooks.once('setup', () => {
   });
 
   Hooks.on('canvasReady', async (readyCanvas) => {
+    if (!game.user.isGM) {
+      return;
+    }
+
     const instance = ScenePacker.GetInstanceForScene(readyCanvas.scene);
     if (!instance) {
       // No instance for the requested module
@@ -2206,5 +2238,9 @@ globalThis.ScenePacker = new Proxy(globalScenePacker, {
  * Trigger scenePackerReady once the game is ready to give consuming modules time to bind any dependencies they need.
  */
 Hooks.on('ready', () => {
+  if (!game.user.isGM) {
+    return;
+  }
+
   Hooks.callAll('scenePackerReady', globalThis.ScenePacker);
 });
