@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.0.5
+
+- Fixed Token <--> Actor linking when SourceId references exist. Thanks Falerion for providing the data to replicate.
+
 ## v2.0.4
 
 - Fixed error shown when a non-GM user connects.

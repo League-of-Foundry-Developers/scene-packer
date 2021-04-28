@@ -1323,11 +1323,14 @@ export default class ScenePacker {
    * @returns {Object|null}
    */
   findActorForToken(token, tokenWorldData, folder) {
-    // Check if we have a direct match within the token world data
+    // Check if we have a direct match within the token world data and game actors
     if (token?.actorId) {
-      const actors = tokenWorldData.filter(t => t.sourceId === `Actor.${token.actorId}`);
-      if (actors.length === 1) {
-        return actors[0];
+      const tData = tokenWorldData.find(t => t.sourceId === `Actor.${token.actorId}` && t.compendiumSourceId);
+      if (tData) {
+        const actor = game.actors.entities.find(a => a.getFlag('core', 'sourceId') === tData.compendiumSourceId);
+        if (actor) {
+          return actor;
+        }
       }
     }
 
