@@ -1164,14 +1164,14 @@ export default class ScenePacker {
         // Check if a folder for our adventure and entity type already exists, otherwise create it
         let folderId = game.folders.find(
           (folder) => folder.name === this.adventureName && folder.type === entity,
-        )?._id;
+        )?.id;
         if (!folderId) {
           const folder = await Folder.create({
             name: this.adventureName,
             type: entity,
             parent: null,
           });
-          folderId = folder._id;
+          folderId = folder.id;
         }
 
         // Append the entities found in this pack to the growing list to import
@@ -1427,10 +1427,17 @@ export default class ScenePacker {
     scene.data.tokens.forEach((t) => {
       let actor = this.findActorForToken(t, tokenInfo, folder);
       if (actor) {
-        updates.push({
-          _id: t._id,
-          actorId: actor.id,
-        });
+        if (isNewerVersion(game.data.version, '0.7.9')) {
+          updates.push({
+            _id: t.id,
+            actorId: actor.id,
+          });
+        } else {
+          updates.push({
+            _id: t._id,
+            actorId: actor.id,
+          });
+        }
       } else {
         missing.push(t);
       }
@@ -1527,10 +1534,17 @@ export default class ScenePacker {
         }),
       );
       // Cleanup the notes already embedded in the scene to prevent "duplicates".
-      await scene.deleteEmbeddedEntity(
-        'Note',
-        scene.data.notes.map((n) => n._id),
-      );
+      if (isNewerVersion(game.data.version, '0.7.9')) {
+        await scene.deleteEmbeddedEntity(
+          'Note',
+          scene.data.notes.map((n) => n.id),
+        );
+      } else {
+        await scene.deleteEmbeddedEntity(
+          'Note',
+          scene.data.notes.map((n) => n._id),
+        );
+      }
       return scene.createEmbeddedEntity('Note', spawnInfo);
     }
     return Promise.resolve();
