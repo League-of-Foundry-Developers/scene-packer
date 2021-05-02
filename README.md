@@ -27,7 +27,8 @@ To use the Scene Packer as part of your module you will need to add it as a depe
 "dependencies": [
   {
     "name": "scene-packer",
-    "manifest": "https://raw.githubusercontent.com/League-of-Foundry-Developers/scene-packer/master/module.json"
+    "manifest": "https://raw.githubusercontent.com/League-of-Foundry-Developers/scene-packer/master/module.json",
+    "type": "module"
   }
 ]
 ```
@@ -117,7 +118,6 @@ This will automatically go through the Journal compendiums that belong to your m
 ## TODO
 
 - Provide complete example module
-- Support v0.8.x (Scene Packer does not currently work with v0.8.0 and above)
 
 ## Acknowledgements
 
