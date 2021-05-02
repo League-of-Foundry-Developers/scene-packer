@@ -1466,7 +1466,11 @@ export default class ScenePacker {
           adventureName: this.adventureName,
         }),
       );
-      return scene.updateEmbeddedEntity('Token', updates);
+      if (isNewerVersion(game.data.version, '0.7.9')) {
+        return scene.updateEmbeddedDocuments('Token', updates);
+      } else {
+        return scene.updateEmbeddedEntity('Token', updates);
+      }
     }
 
     return Promise.resolve();
@@ -1535,17 +1539,18 @@ export default class ScenePacker {
       );
       // Cleanup the notes already embedded in the scene to prevent "duplicates".
       if (isNewerVersion(game.data.version, '0.7.9')) {
-        await scene.deleteEmbeddedEntity(
+        await scene.deleteEmbeddedDocuments(
           'Note',
           scene.data.notes.map((n) => n.id),
         );
+        return scene.createEmbeddedDocuments('Note', spawnInfo);
       } else {
         await scene.deleteEmbeddedEntity(
           'Note',
           scene.data.notes.map((n) => n._id),
         );
+        return scene.createEmbeddedEntity('Note', spawnInfo);
       }
-      return scene.createEmbeddedEntity('Note', spawnInfo);
     }
     return Promise.resolve();
   }
