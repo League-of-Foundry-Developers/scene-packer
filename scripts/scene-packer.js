@@ -1976,6 +1976,9 @@ export default class ScenePacker {
     return new Promise((resolve, reject) => {
       const modulesRegistered = Object.keys(globalScenePacker.instances);
       if (!modulesRegistered.length) {
+        ui.notifications.warn(
+          game.i18n.localize('SCENE-PACKER.instance-prompt.none-found'),
+        );
         ScenePacker.logType(
           MODULE_NAME,
           'warn',
@@ -2101,7 +2104,12 @@ Hooks.once('setup', () => {
             }
 
             // No existing instance bound to the Scene, ask which should be used to pack against.
-            ScenePacker.PromptForInstance().then(instance => instance.PackScene(scene));
+            ScenePacker.PromptForInstance().then(instance => {
+              if (!instance) {
+                return;
+              }
+              instance.PackScene(scene);
+            });
           },
         },
         {
