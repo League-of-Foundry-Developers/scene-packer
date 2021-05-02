@@ -1202,7 +1202,12 @@ export default class ScenePacker {
       if (!token?.compendiumSourceId) {
         continue;
       }
-      const matches = game.actors.entities.filter(a => a.getFlag('core', 'sourceId') === token.compendiumSourceId);
+      let matches = [];
+      if (isNewerVersion(game.data.version, '0.7.9')) {
+        matches = game.actors.contents.filter(a => a.getFlag('core', 'sourceId') === token.compendiumSourceId);
+      } else {
+        matches = game.actors.entities.filter(a => a.getFlag('core', 'sourceId') === token.compendiumSourceId);
+      }
       if (matches.length) {
         exact_matches.push(token);
       }
@@ -1241,7 +1246,12 @@ export default class ScenePacker {
       if (!journal?.compendiumSourceId) {
         continue;
       }
-      const matches = game.journal.entities.filter(a => a.getFlag('core', 'sourceId') === journal.compendiumSourceId);
+      let matches = [];
+      if (isNewerVersion(game.data.version, '0.7.9')) {
+        matches = game.journal.contents.filter(a => a.getFlag('core', 'sourceId') === journal.compendiumSourceId);
+      } else {
+        matches = game.journal.entities.filter(a => a.getFlag('core', 'sourceId') === journal.compendiumSourceId);
+      }
       if (matches.length) {
         exact_matches.push(journal);
       }
@@ -1291,16 +1301,26 @@ export default class ScenePacker {
     }
 
     if (folder?.id) {
-      actor = game.actors.entities.find(
-        (a) => a.data.name === tokenName && a.data.folder === folder.id,
-      );
+      if (isNewerVersion(game.data.version, '0.7.9')) {
+        actor = game.actors.contents.find(
+          (a) => a.data.name === tokenName && a.data.folder === folder.id,
+        );
+      } else {
+        actor = game.actors.entities.find(
+          (a) => a.data.name === tokenName && a.data.folder === folder.id,
+        );
+      }
       if (actor) {
         // Found a direct Token <-> Actor name match in the Adventure folder
         return actor;
       }
     }
 
-    actor = game.actors.entities.find((a) => a.data.name === tokenName);
+    if (isNewerVersion(game.data.version, '0.7.9')) {
+      actor = game.actors.contents.find((a) => a.data.name === tokenName);
+    } else {
+      actor = game.actors.entities.find((a) => a.data.name === tokenName);
+    }
     if (actor) {
       // Found a direct Token <-> Actor name match in world
       return actor;
