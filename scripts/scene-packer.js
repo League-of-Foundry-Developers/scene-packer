@@ -1081,7 +1081,12 @@ export default class ScenePacker {
         },
       );
     }
-    const entityClass = CONFIG[exampleEntity]?.entityClass;
+    let entityClass;
+    if (isNewerVersion(game.data.version, '0.7.9')) {
+      entityClass = CONFIG[exampleEntity]?.documentClass;
+    } else {
+      entityClass = CONFIG[exampleEntity]?.entityClass;
+    }
     if (!entityClass) {
       ui.notifications.error(
         game.i18n.format(
