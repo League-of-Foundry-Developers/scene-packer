@@ -1140,13 +1140,14 @@ export default class ScenePacker {
         continue;
       }
       let entity = '';
+      let packContent;
       if (isNewerVersion(game.data.version, '0.7.9')) {
         entity = pack.documentClass.documentName;
+        packContent = await pack.getDocuments();
       } else {
         entity = pack.entity
+        packContent = await pack.getContent();
       }
-
-      const packContent = await pack.getContent();
 
       // Filter to just the needed actors
       const content = packContent.filter((entity) =>
