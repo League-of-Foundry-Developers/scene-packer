@@ -1052,7 +1052,12 @@ export default class ScenePacker {
 
     let createData = [];
 
-    const exampleEntity = game.packs.get(searchPacks[0])?.entity;
+    let exampleEntity = '';
+    if (isNewerVersion(game.data.version, '0.7.9')) {
+      exampleEntity = game.packs.get(searchPacks[0])?.documentClass?.documentName;
+    } else {
+      exampleEntity = game.packs.get(searchPacks[0])?.entity;
+    }
     if (!exampleEntity) {
       ui.notifications.error(
         game.i18n.format(
@@ -1129,7 +1134,12 @@ export default class ScenePacker {
         );
         continue;
       }
-      const entity = pack.entity;
+      let entity = '';
+      if (isNewerVersion(game.data.version, '0.7.9')) {
+        entity = pack.documentClass.documentName;
+      } else {
+        entity = pack.entity
+      }
 
       const packContent = await pack.getContent();
 
