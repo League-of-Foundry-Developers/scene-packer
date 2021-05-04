@@ -1141,12 +1141,60 @@ export default class ScenePacker {
       }
       let entity = '';
       let packContent;
+      let collection;
       if (isNewerVersion(game.data.version, '0.7.9')) {
         entity = pack.documentClass.documentName;
         packContent = await pack.getDocuments();
+        collection = game[entityClass.collectionName];
       } else {
-        entity = pack.entity
+        entity = pack.entity;
         packContent = await pack.getContent();
+        switch (entity) {
+          case 'Actor':
+            collection = game.actors;
+            break;
+          case 'JournalEntry':
+            collection = game.journal;
+            break;
+          case 'RollTable':
+            collection = game.tables;
+            break;
+          case 'Item':
+            collection = game.items;
+            break;
+          case 'Scene':
+            collection = game.scenes;
+            break;
+          case 'Macro':
+            collection = game.macros;
+            break;
+          case 'Playlist':
+            collection = game.playlists;
+            break;
+        }
+      }
+      if (!collection) {
+        ui.notifications.error(
+          game.i18n.format(
+            'SCENE-PACKER.notifications.import-by-name.invalid-packs.error',
+            {
+              type: type,
+            },
+          ),
+        );
+        this.logError(
+          true,
+          game.i18n.localize(
+            'SCENE-PACKER.notifications.import-by-name.invalid-packs.reference',
+          ),
+          {searchPacks, entityNames, type},
+        );
+        throw game.i18n.format(
+          'SCENE-PACKER.notifications.import-by-name.invalid-packs.error',
+          {
+            type: type,
+          },
+        );
       }
 
       // Filter to just the needed actors
@@ -1177,6 +1225,13 @@ export default class ScenePacker {
         // Append the entities found in this pack to the growing list to import
         createData = createData.concat(
           content.map((c) => {
+            if (isNewerVersion(game.data.version, '0.7.9')) {
+              const createData = collection.fromCompendium(c);
+              createData.folder = folderId;
+              createData['flags.core.sourceId'] = c.uuid;
+              return createData;
+            }
+
             c.data['flags.core.sourceId'] = c.uuid;
             c.data.folder = folderId;
             return c.data;
@@ -1784,6 +1839,9 @@ export default class ScenePacker {
               break;
             case 'Macro':
               name = game.macros.get(oldRef)?.name;
+              break;
+            case 'Playlist':
+              name = game.playlists.get(oldRef)?.name;
               break;
             default:
               ui.notifications.error(
