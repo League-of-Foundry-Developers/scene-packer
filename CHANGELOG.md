@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.1.0
+
+- Added support for Foundry VTT v0.8.2
+  - Version 0.7.9 support will eventually be dropped. 
+- Improved fallback functionality for [Automatic Journal Icon Numbers](https://foundryvtt.com/packages/journal-icon-numbers). More improvements in this space to come in future versions.
+
 ## v2.0.5
 
 - Fixed Token <--> Actor linking when SourceId references exist. Thanks Falerion for providing the data to replicate.
