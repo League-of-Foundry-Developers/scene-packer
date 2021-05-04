@@ -1052,7 +1052,12 @@ export default class ScenePacker {
 
     let createData = [];
 
-    const exampleEntity = game.packs.get(searchPacks[0])?.entity;
+    let exampleEntity = '';
+    if (isNewerVersion(game.data.version, '0.7.9')) {
+      exampleEntity = game.packs.get(searchPacks[0])?.documentClass?.documentName;
+    } else {
+      exampleEntity = game.packs.get(searchPacks[0])?.entity;
+    }
     if (!exampleEntity) {
       ui.notifications.error(
         game.i18n.format(
@@ -1076,7 +1081,12 @@ export default class ScenePacker {
         },
       );
     }
-    const entityClass = CONFIG[exampleEntity]?.entityClass;
+    let entityClass;
+    if (isNewerVersion(game.data.version, '0.7.9')) {
+      entityClass = CONFIG[exampleEntity]?.documentClass;
+    } else {
+      entityClass = CONFIG[exampleEntity]?.entityClass;
+    }
     if (!entityClass) {
       ui.notifications.error(
         game.i18n.format(
@@ -1129,9 +1139,63 @@ export default class ScenePacker {
         );
         continue;
       }
-      const entity = pack.entity;
-
-      const packContent = await pack.getContent();
+      let entity = '';
+      let packContent;
+      let collection;
+      if (isNewerVersion(game.data.version, '0.7.9')) {
+        entity = pack.documentClass.documentName;
+        packContent = await pack.getDocuments();
+        collection = game[entityClass.collectionName];
+      } else {
+        entity = pack.entity;
+        packContent = await pack.getContent();
+        switch (entity) {
+          case 'Actor':
+            collection = game.actors;
+            break;
+          case 'JournalEntry':
+            collection = game.journal;
+            break;
+          case 'RollTable':
+            collection = game.tables;
+            break;
+          case 'Item':
+            collection = game.items;
+            break;
+          case 'Scene':
+            collection = game.scenes;
+            break;
+          case 'Macro':
+            collection = game.macros;
+            break;
+          case 'Playlist':
+            collection = game.playlists;
+            break;
+        }
+      }
+      if (!collection) {
+        ui.notifications.error(
+          game.i18n.format(
+            'SCENE-PACKER.notifications.import-by-name.invalid-packs.error',
+            {
+              type: type,
+            },
+          ),
+        );
+        this.logError(
+          true,
+          game.i18n.localize(
+            'SCENE-PACKER.notifications.import-by-name.invalid-packs.reference',
+          ),
+          {searchPacks, entityNames, type},
+        );
+        throw game.i18n.format(
+          'SCENE-PACKER.notifications.import-by-name.invalid-packs.error',
+          {
+            type: type,
+          },
+        );
+      }
 
       // Filter to just the needed actors
       const content = packContent.filter((entity) =>
@@ -1148,19 +1212,26 @@ export default class ScenePacker {
         // Check if a folder for our adventure and entity type already exists, otherwise create it
         let folderId = game.folders.find(
           (folder) => folder.name === this.adventureName && folder.type === entity,
-        )?._id;
+        )?.id;
         if (!folderId) {
           const folder = await Folder.create({
             name: this.adventureName,
             type: entity,
             parent: null,
           });
-          folderId = folder._id;
+          folderId = folder.id;
         }
 
         // Append the entities found in this pack to the growing list to import
         createData = createData.concat(
           content.map((c) => {
+            if (isNewerVersion(game.data.version, '0.7.9')) {
+              const createData = collection.fromCompendium(c);
+              createData.folder = folderId;
+              createData['flags.core.sourceId'] = c.uuid;
+              return createData;
+            }
+
             c.data['flags.core.sourceId'] = c.uuid;
             c.data.folder = folderId;
             return c.data;
@@ -1202,7 +1273,12 @@ export default class ScenePacker {
       if (!token?.compendiumSourceId) {
         continue;
       }
-      const matches = game.actors.entities.filter(a => a.getFlag('core', 'sourceId') === token.compendiumSourceId);
+      let matches = [];
+      if (isNewerVersion(game.data.version, '0.7.9')) {
+        matches = game.actors.contents.filter(a => a.getFlag('core', 'sourceId') === token.compendiumSourceId);
+      } else {
+        matches = game.actors.entities.filter(a => a.getFlag('core', 'sourceId') === token.compendiumSourceId);
+      }
       if (matches.length) {
         exact_matches.push(token);
       }
@@ -1241,7 +1317,12 @@ export default class ScenePacker {
       if (!journal?.compendiumSourceId) {
         continue;
       }
-      const matches = game.journal.entities.filter(a => a.getFlag('core', 'sourceId') === journal.compendiumSourceId);
+      let matches = [];
+      if (isNewerVersion(game.data.version, '0.7.9')) {
+        matches = game.journal.contents.filter(a => a.getFlag('core', 'sourceId') === journal.compendiumSourceId);
+      } else {
+        matches = game.journal.entities.filter(a => a.getFlag('core', 'sourceId') === journal.compendiumSourceId);
+      }
       if (matches.length) {
         exact_matches.push(journal);
       }
@@ -1291,16 +1372,26 @@ export default class ScenePacker {
     }
 
     if (folder?.id) {
-      actor = game.actors.entities.find(
-        (a) => a.data.name === tokenName && a.data.folder === folder.id,
-      );
+      if (isNewerVersion(game.data.version, '0.7.9')) {
+        actor = game.actors.contents.find(
+          (a) => a.data.name === tokenName && a.data.folder === folder.id,
+        );
+      } else {
+        actor = game.actors.entities.find(
+          (a) => a.data.name === tokenName && a.data.folder === folder.id,
+        );
+      }
       if (actor) {
         // Found a direct Token <-> Actor name match in the Adventure folder
         return actor;
       }
     }
 
-    actor = game.actors.entities.find((a) => a.data.name === tokenName);
+    if (isNewerVersion(game.data.version, '0.7.9')) {
+      actor = game.actors.contents.find((a) => a.data.name === tokenName);
+    } else {
+      actor = game.actors.entities.find((a) => a.data.name === tokenName);
+    }
     if (actor) {
       // Found a direct Token <-> Actor name match in world
       return actor;
@@ -1391,10 +1482,17 @@ export default class ScenePacker {
     scene.data.tokens.forEach((t) => {
       let actor = this.findActorForToken(t, tokenInfo, folder);
       if (actor) {
-        updates.push({
-          _id: t._id,
-          actorId: actor.id,
-        });
+        if (isNewerVersion(game.data.version, '0.7.9')) {
+          updates.push({
+            _id: t.id,
+            actorId: actor.id,
+          });
+        } else {
+          updates.push({
+            _id: t._id,
+            actorId: actor.id,
+          });
+        }
       } else {
         missing.push(t);
       }
@@ -1423,7 +1521,11 @@ export default class ScenePacker {
           adventureName: this.adventureName,
         }),
       );
-      return scene.updateEmbeddedEntity('Token', updates);
+      if (isNewerVersion(game.data.version, '0.7.9')) {
+        return scene.updateEmbeddedDocuments('Token', updates);
+      } else {
+        return scene.updateEmbeddedEntity('Token', updates);
+      }
     }
 
     return Promise.resolve();
@@ -1442,13 +1544,16 @@ export default class ScenePacker {
     }
 
     let spawnInfo = journalInfo.map((note) => {
-      // Replace icon with a Book if Automatic Journal Icon Numbers isn't installed.
+      // Replace icon with a Book if Automatic Journal Icon Numbers isn't installed or the image doesn't exist yet.
       let icon = note.icon;
       if (
-        icon.startsWith('modules/journal-icon-numbers/') &&
-        !game.modules.get('journal-icon-numbers')
+        (icon.startsWith('modules/journal-icon-numbers/') || note?.flags?.autoIconFlags) &&
+        !game.modules.get('journal-icon-numbers')?.active
       ) {
         icon = 'icons/svg/book.svg';
+      } else {
+        // Test the icon exists and replace it if it doesn't
+        $.get(icon).fail(() => icon = 'icons/svg/book.svg');
       }
 
       // Take a copy of the saved note without the meta-data specific to the scene packer
@@ -1491,11 +1596,19 @@ export default class ScenePacker {
         }),
       );
       // Cleanup the notes already embedded in the scene to prevent "duplicates".
-      await scene.deleteEmbeddedEntity(
-        'Note',
-        scene.data.notes.map((n) => n._id),
-      );
-      return scene.createEmbeddedEntity('Note', spawnInfo);
+      if (isNewerVersion(game.data.version, '0.7.9')) {
+        await scene.deleteEmbeddedDocuments(
+          'Note',
+          scene.data.notes.map((n) => n.id),
+        );
+        return scene.createEmbeddedDocuments('Note', spawnInfo);
+      } else {
+        await scene.deleteEmbeddedEntity(
+          'Note',
+          scene.data.notes.map((n) => n._id),
+        );
+        return scene.createEmbeddedEntity('Note', spawnInfo);
+      }
     }
     return Promise.resolve();
   }
@@ -1729,6 +1842,9 @@ export default class ScenePacker {
               break;
             case 'Macro':
               name = game.macros.get(oldRef)?.name;
+              break;
+            case 'Playlist':
+              name = game.playlists.get(oldRef)?.name;
               break;
             default:
               ui.notifications.error(
@@ -1976,6 +2092,9 @@ export default class ScenePacker {
     return new Promise((resolve, reject) => {
       const modulesRegistered = Object.keys(globalScenePacker.instances);
       if (!modulesRegistered.length) {
+        ui.notifications.warn(
+          game.i18n.localize('SCENE-PACKER.instance-prompt.none-found'),
+        );
         ScenePacker.logType(
           MODULE_NAME,
           'warn',
@@ -2101,7 +2220,12 @@ Hooks.once('setup', () => {
             }
 
             // No existing instance bound to the Scene, ask which should be used to pack against.
-            ScenePacker.PromptForInstance().then(instance => instance.PackScene(scene));
+            ScenePacker.PromptForInstance().then(instance => {
+              if (!instance) {
+                return;
+              }
+              instance.PackScene(scene);
+            });
           },
         },
         {

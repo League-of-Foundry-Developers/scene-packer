@@ -27,7 +27,8 @@ To use the Scene Packer as part of your module you will need to add it as a depe
 "dependencies": [
   {
     "name": "scene-packer",
-    "manifest": "https://raw.githubusercontent.com/League-of-Foundry-Developers/scene-packer/master/module.json"
+    "manifest": "https://raw.githubusercontent.com/League-of-Foundry-Developers/scene-packer/master/module.json",
+    "type": "module"
   }
 ]
 ```
@@ -117,7 +118,6 @@ This will automatically go through the Journal compendiums that belong to your m
 ## TODO
 
 - Provide complete example module
-- Support v0.8.x (Scene Packer does not currently work with v0.8.0 and above)
 
 ## Acknowledgements
 
@@ -132,5 +132,7 @@ Please submit any issues via the [Bug Reporter](https://foundryvtt.com/packages/
 You can contact me on Discord `blair#9056` if you have questions, comments, queries, concerns etc.
 
 If you are making money and utilising this module, please consider sending a few dollars my way and/or providing me with the cool adventures and modules you're building :)
+
+[![Patreon](https://img.shields.io/badge/patreon-donate-blue.svg)](https://www.patreon.com/blairm)
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/A0A0488MI)
