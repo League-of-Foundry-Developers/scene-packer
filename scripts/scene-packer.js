@@ -1544,13 +1544,16 @@ export default class ScenePacker {
     }
 
     let spawnInfo = journalInfo.map((note) => {
-      // Replace icon with a Book if Automatic Journal Icon Numbers isn't installed.
+      // Replace icon with a Book if Automatic Journal Icon Numbers isn't installed or the image doesn't exist yet.
       let icon = note.icon;
       if (
-        icon.startsWith('modules/journal-icon-numbers/') &&
-        !game.modules.get('journal-icon-numbers')
+        (icon.startsWith('modules/journal-icon-numbers/') || note?.flags?.autoIconFlags) &&
+        !game.modules.get('journal-icon-numbers')?.active
       ) {
         icon = 'icons/svg/book.svg';
+      } else {
+        // Test the icon exists and replace it if it doesn't
+        $.get(icon).fail(() => icon = 'icons/svg/book.svg');
       }
 
       // Take a copy of the saved note without the meta-data specific to the scene packer
