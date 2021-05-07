@@ -2019,7 +2019,7 @@ export default class ScenePacker {
       await allPacks[i].getIndex();
     }
     const packs = {};
-    CONST.ENTITY_LINK_TYPES.forEach((type) => {
+    CONST.COMPENDIUM_ENTITY_TYPES.forEach((type) => {
       packs[`${type}Packs`] = allPacks.filter((p) => p.entity === type);
     });
 

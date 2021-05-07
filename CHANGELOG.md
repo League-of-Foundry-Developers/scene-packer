@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.1.2
+
+- Fixed bug which prevented updating links to Playlists within Journal entries.
+
 ## v2.1.1
 
 - Added support for Playlist compendium packs.
