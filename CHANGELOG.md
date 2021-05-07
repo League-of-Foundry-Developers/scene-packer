@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.1.1
+
+- Added support for Playlist compendium packs.
+  - This supports re-linking playlists to scenes.
+
 ## v2.1.0
 
 - Added support for Foundry VTT v0.8.2

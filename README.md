@@ -6,7 +6,9 @@ A library to help other developers package up Scenes and Adventures to solve the
 
 - Scene Journal Pins link to the correct Journal
 - Actor tokens on a Scene link to the correct Actor
-- Imported Journals link to their correct Journal entry
+- Journals configured for the Scene aren't linked
+- Playlists configured for the Scene aren't linked/don't work
+- Imported Journals link to their correct Journal entry/don't work
 - Relink journal entries to compendium entities (to automatically fix the broken links after exporting from your World to your Compendium)
 
 In summary, it makes importing a Scene from a Compendium (via an "adventure module") work as though you build it in your world.
@@ -74,6 +76,13 @@ const journalPacks = [`${moduleName}.journals`];
  *   const macroPacks = [];
  */
 const macroPacks = [`${moduleName}.macros`];
+/**
+ * playlistPacks is a list of compendium packs to look in for Playlists by name (in prioritised order).
+ * The first entry here assumes that you have a Playlist pack in your module with the "name" of "playlists".
+ * Set to the following to disable:
+ *   const playlistPacks = [];
+ */
+const playlistPacks = [`${moduleName}.playlists`];
 
 Hooks.once('scenePackerReady', ScenePacker => {
   // Initialise the Scene Packer with your adventure name and module name
@@ -83,6 +92,7 @@ Hooks.once('scenePackerReady', ScenePacker => {
     creaturePacks,
     journalPacks,
     macroPacks,
+    playlistPacks,
     welcomeJournal,
     additionalJournals,
     allowImportPrompts: true, // Set to false if you don't want the popup

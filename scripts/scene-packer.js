@@ -5,6 +5,7 @@ const MODULE_NAME = 'scene-packer';
 const FLAGS_JOURNALS = 'journals';
 const FLAGS_TOKENS = 'tokens';
 const FLAGS_MACROS = 'macros';
+const FLAGS_PLAYLIST = 'playlist';
 const FLAGS_SCENE_JOURNAL = 'scene-journal';
 const FLAGS_SCENE_POSITION = 'scene-position';
 const FLAGS_SOURCE_MODULE = 'source-module';
@@ -18,6 +19,8 @@ const FLAGS_IMPORTED_VERSION = 'imported';
 const globalScenePacker = {
   instances: {},
   ShowPerformanceReport: Report.RenderReport,
+  MODULE_NAME: MODULE_NAME,
+  MINIMUM_SUPPORTED_PACKER_VERSION: MINIMUM_SUPPORTED_PACKER_VERSION,
 };
 
 /**
@@ -35,11 +38,12 @@ export default class ScenePacker {
   welcomeJournal = null;
   /** @type {String[]} */
   additionalJournals = [];
-  /** @type {{creatures: String[], journals: String[], macros: String[]}} */
+  /** @type {{creatures: String[], journals: String[], macros: String[], playlists: String[]}} */
   packs = {
     creatures: [],
     journals: [],
     macros: [],
+    playlists: [],
   };
   allowImportPrompts = true;
 
@@ -49,6 +53,7 @@ export default class ScenePacker {
    * @param {String[]} creaturePacks Set which Actor packs should be used when searching for Actors.
    * @param {String[]} journalPacks Set which Journal packs should be used when searching for Journals.
    * @param {String[]} macroPacks Set which Macro packs should be used when searching for Macros.
+   * @param {String[]} playlistPacks Set which Playlist packs should be used when searching for Playlists.
    * @param {String} welcomeJournal Set the name of the journal to be imported and automatically opened after activation.
    * @param {String[]} additionalJournals Set which journals (by name) should be automatically imported.
    * @param {Boolean} allowImportPrompts Set whether import prompts should be allowed.
@@ -60,6 +65,7 @@ export default class ScenePacker {
       creaturePacks = [],
       journalPacks = [],
       macroPacks = [],
+      playlistPacks = [],
       welcomeJournal = '',
       additionalJournals = [],
       allowImportPrompts = true,
@@ -87,6 +93,9 @@ export default class ScenePacker {
     }
     if (macroPacks?.length) {
       this.SetMacroPacks(macroPacks);
+    }
+    if (playlistPacks?.length) {
+      this.SetPlaylistPacks(playlistPacks);
     }
     if (welcomeJournal) {
       this.SetWelcomeJournal(welcomeJournal);
@@ -220,7 +229,8 @@ export default class ScenePacker {
    * @param {String} moduleName The name of the module that Packed the data.
    * @param {String} tokenFlag The flag that stores token data.
    * @param {String} journalFlag The flag that stores journal pin data.
-   * @param {String} macroFlag The flag that stores linkes Macro data.
+   * @param {String} macroFlag The flag that stores linked Macro data.
+   * @param {String} playlistFlag The flag that stores linked Playlist data.
    * @returns {Boolean}
    */
   static HasPackedData(
@@ -229,6 +239,7 @@ export default class ScenePacker {
     tokenFlag = FLAGS_TOKENS,
     journalFlag = FLAGS_JOURNALS,
     macroFlag = FLAGS_MACROS,
+    playlistFlag = FLAGS_PLAYLIST,
   ) {
     if (!game.user.isGM) {
       return false;
@@ -250,6 +261,13 @@ export default class ScenePacker {
     }
     try {
       if (scene.getFlag(moduleName, macroFlag)) {
+        return true;
+      }
+    } catch (e) {
+      // Happens if the scene has no flag registered
+    }
+    try {
+      if (scene.getFlag(moduleName, playlistFlag)) {
         return true;
       }
     } catch (e) {
@@ -623,11 +641,40 @@ export default class ScenePacker {
   }
 
   /**
+   * Set which Playlist packs should be used when searching for Playlists.
+   * @param {String[]} packs
+   * @returns this to support chaining
+   */
+  SetPlaylistPacks(packs) {
+    if (packs) {
+      packs = packs instanceof Array ? packs : [packs];
+      packs.forEach((j) => {
+        if (typeof j !== 'string') {
+          ui.notifications.error(
+            game.i18n.localize('SCENE-PACKER.errors.playlistPacks.ui'),
+          );
+          throw game.i18n.format('SCENE-PACKER.errors.playlistPacks.details', {
+            pack: j,
+          });
+        }
+      });
+    } else {
+      this.log(
+        false,
+        game.i18n.localize('SCENE-PACKER.errors.playlistPacks.missing'),
+      );
+    }
+
+    this.packs.playlists = packs;
+    return this;
+  }
+
+  /**
    * Ensure that each of the packs are loaded
    * @returns {Promise<void>}
    */
   async loadPacks() {
-    for (let packName of [...this.packs.journals, ...this.packs.creatures, ...this.packs.macros]) {
+    for (let packName of [...this.packs.journals, ...this.packs.creatures, ...this.packs.macros, ...this.packs.playlists]) {
       const pack = game.packs.get(packName);
       if (pack) {
         await pack.getIndex();
@@ -665,6 +712,12 @@ export default class ScenePacker {
     }
     await scene.setFlag(this.moduleName, FLAGS_SCENE_JOURNAL, sceneJournalInfo);
     await scene.setFlag(this.moduleName, FLAGS_SCENE_POSITION, scene.data?.initial);
+    if (scene.playlist) {
+      const compendiumPlaylist = await this.FindPlaylistInCompendiums(scene.playlist, this.packs.playlists);
+      if (compendiumPlaylist) {
+        await scene.setFlag(this.moduleName, FLAGS_PLAYLIST, compendiumPlaylist?.uuid);
+      }
+    }
 
     /**
      * journalInfo is the data that gets passed to findMissingJournals
@@ -1001,6 +1054,118 @@ export default class ScenePacker {
     }
 
     return compendiumActor;
+  }
+
+  /**
+   * Find a playlist in the listed search packs compendiums.
+   * @param {Object} playlist The entry to find.
+   * @param {String[]} searchPacks The compendium pack names to search within
+   * @returns {Object|null} The playlist in the compendium.
+   */
+  async FindPlaylistInCompendiums(playlist, searchPacks) {
+    if (!playlist) {
+      return null;
+    }
+
+    let compendiumPlaylist = null;
+    let possibleMatches = [];
+
+    for (let packName of searchPacks) {
+      const pack = game.packs.get(packName);
+      if (!pack) {
+        ui.notifications.error(
+          game.i18n.format(
+            'SCENE-PACKER.notifications.find-playlist-compendium.missing-pack',
+            {
+              packName: packName,
+            },
+          ),
+        );
+        this.logError(
+          true,
+          game.i18n.format(
+            'SCENE-PACKER.notifications.find-playlist-compendium.missing-pack-details',
+            {
+              packName: packName,
+            },
+          ),
+        );
+        continue;
+      }
+
+      await pack.getIndex();
+
+      const matchingIndexes = pack.index.filter(p => p.name === playlist.name);
+      for (let i = 0; i < matchingIndexes.length; i++) {
+        let id = matchingIndexes[i]?._id;
+        const entity = await pack.getEntity(id);
+        if (entity) {
+          if (entity.getFlag(MODULE_NAME, 'sourceId') === `Playlist.${playlist.id}`) {
+            // Exact match
+            return entity
+          }
+          possibleMatches.push(entity);
+        }
+      }
+    }
+
+    if (!possibleMatches.length) {
+      ui.notifications.error(
+        game.i18n.format(
+          'SCENE-PACKER.notifications.find-playlist-compendium.no-match',
+          {
+            playlist: playlist.name,
+          },
+        ),
+      );
+      this.logError(
+        true,
+        game.i18n.format(
+          'SCENE-PACKER.notifications.find-playlist-compendium.no-match',
+          {
+            playlist: playlist.name,
+          },
+        ),
+      );
+
+      return compendiumPlaylist;
+    }
+
+    if (possibleMatches.length === 1) {
+      // Only one Playlist matches by name
+      return possibleMatches.pop();
+    }
+
+    // There is more than one possible match, check the Playlist contents for an exact match.
+    for (let i = 0; i < possibleMatches.length; i++) {
+      const entity = possibleMatches[i];
+      if (Object.keys(playlist.audio) === Object.keys(entity.audio)) {
+        compendiumPlaylist = entity;
+        break;
+      }
+    }
+
+    if (!compendiumPlaylist) {
+      ui.notifications.error(
+        game.i18n.format(
+          'SCENE-PACKER.notifications.find-playlist-compendium.no-match',
+          {
+            playlist: playlist.name,
+          },
+        ),
+      );
+      this.logError(
+        true,
+        game.i18n.format(
+          'SCENE-PACKER.notifications.find-playlist-compendium.no-match',
+          {
+            playlist: playlist.name,
+          },
+        ),
+      );
+    }
+
+    return compendiumPlaylist;
   }
 
   /**
@@ -1614,6 +1779,77 @@ export default class ScenePacker {
   }
 
   /**
+   * Imports the requested entity by uuid if it doesn't already exist.
+   * @param {String} uuid The uuid of entity being imported.
+   */
+  async ImportByUuid(uuid) {
+    if (!uuid) {
+      return;
+    }
+
+    const entity = await fromUuid(uuid);
+    if (!entity) {
+      return;
+    }
+
+    let type = '';
+    let collection;
+    if (isNewerVersion(game.data.version, '0.7.9')) {
+      type = entity.documentName;
+      collection = game[entity.collectionName];
+    } else {
+      type = entity.entity;
+      switch (type) {
+        case 'Actor':
+          collection = game.actors;
+          break;
+        case 'JournalEntry':
+          collection = game.journal;
+          break;
+        case 'RollTable':
+          collection = game.tables;
+          break;
+        case 'Item':
+          collection = game.items;
+          break;
+        case 'Scene':
+          collection = game.scenes;
+          break;
+        case 'Macro':
+          collection = game.macros;
+          break;
+        case 'Playlist':
+          collection = game.playlists;
+          break;
+      }
+    }
+
+    const existingEntity = collection.find(p => p.getFlag('core', 'sourceId') === entity.uuid);
+    if (existingEntity) {
+      return existingEntity;
+    }
+
+    let folder = game.folders.find(
+      (folder) => folder.name === this.adventureName && folder.type === type,
+    );
+    // Macros Playlists don't support folders
+    if (!folder && type !== 'Macro' && type !== 'Playlist') {
+      folder = await Folder.create({
+        name: this.adventureName,
+        type: type,
+        parent: null,
+      });
+    }
+
+    const update = {};
+    if (folder) {
+      update.folder = folder.id;
+    }
+
+    return collection.importFromCollection(entity.compendium.collection, entity.id, update);
+  }
+
+  /**
    * Unpack the scene data and reconstruct the appropriate links.
    * @param {Object} scene The scene to unpack. Defaults to the currently viewed scene.
    * @param {Boolean} showLinkedJournal Whether to show any Journals linked to the Scene.
@@ -1625,8 +1861,16 @@ export default class ScenePacker {
     const journalInfo = scene.getFlag(this.moduleName, FLAGS_JOURNALS);
     const sceneJournalInfo = scene.getFlag(this.moduleName, FLAGS_SCENE_JOURNAL);
     const sceneInitialPosition = scene.getFlag(this.moduleName, FLAGS_SCENE_POSITION);
+    const scenePlaylist = scene.getFlag(this.moduleName, FLAGS_PLAYLIST);
     if (sceneInitialPosition) {
       await scene.update({initial: sceneInitialPosition});
+    }
+
+    if (scenePlaylist) {
+      const playlist = await this.ImportByUuid(scenePlaylist);
+      if (playlist?.id !== scene.data.playlist) {
+        await scene.update({playlist: playlist.id});
+      }
     }
 
     // Import tokens that don't yet exist in the world
@@ -1702,6 +1946,7 @@ export default class ScenePacker {
     await scene.unsetFlag(this.moduleName, FLAGS_JOURNALS);
     await scene.unsetFlag(this.moduleName, FLAGS_SCENE_JOURNAL);
     await scene.unsetFlag(this.moduleName, FLAGS_SCENE_POSITION);
+    await scene.unsetFlag(this.moduleName, FLAGS_PLAYLIST);
     await scene.unsetFlag(this.moduleName, FLAGS_MACROS);
 
     // Old format cleanup
@@ -1756,6 +2001,7 @@ export default class ScenePacker {
    *   Items
    *   Scenes
    *   Macros
+   *   Playlists
    * @param {String} moduleName The name of the module that owns the compendiums to be updated
    * @param {Boolean} dryRun Whether to do a dry-run (no changes committed, just calculations and logs)
    */

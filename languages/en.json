@@ -55,6 +55,12 @@
         "missing-pack": "Invalid pack configuration. Cannot find compendium {packName}. Check console for more details.",
         "missing-pack-details": "FindActorInCompendiums was called to search for pack \"{packName}\" which is not found. Check for typos in your module setup."
       },
+      "find-playlist-compendium": {
+        "no-match": "Could not find a Playlist entry named \"{playlist}\" in the compendiums.",
+        "invalid-index": "Error loading playlist content from compendium. Check debug logs for details.",
+        "missing-pack": "Invalid pack configuration. Cannot find compendium {packName}. Check console for more details.",
+        "missing-pack-details": "FindPlaylistInCompendiums was called to search for pack \"{packName}\" which is not found. Check for typos in your module setup."
+      },
       "find-actor": {
         "missing-name": "Cannot find a token that has no name. Check debug logs for details.",
         "missing-name-details": "Trying to find a token that has no name is not going to end well. Please ensure the Token and Actor have a name prior to packing."
@@ -128,6 +134,11 @@
         "ui": "Invalid call to SetMacroPacks(). See console for details.",
         "details": "You must pass an array of strings to \"SetMacroPacks()\". They must be the names of Macro Packs. Received: {pack}",
         "missing": "SetMacroPacks() called with no value. This disables importing of Macros."
+      },
+      "playlistPacks": {
+        "ui": "Invalid call to SetPlaylistPacks(). See console for details.",
+        "details": "You must pass an array of strings to \"SetPlaylistPacks()\". They must be the names of Playlist Packs. Received: {pack}",
+        "missing": "SetPlaylistPacks() called with no value. This disables importing of Playlists."
       }
     },
     "world-conversion": {

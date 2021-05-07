@@ -8,6 +8,17 @@ Hooks.once('setup', function () {
     if (!isNewerVersion(game.data.version, '0.7.9')) {
       libWrapper.register(
         'scene-packer',
+        'Entity.prototype.toCompendium',
+        async function (wrapped, ...args) {
+          await this.setFlag(ScenePacker.MODULE_NAME, 'sourceId', this.uuid);
+
+          return wrapped.bind(this)(...args);
+        },
+        'WRAPPER',
+      );
+
+      libWrapper.register(
+        'scene-packer',
         'EntityCollection.prototype.importFromCollection',
         async function (wrapped, ...args) {
           // const [ collection, entryId, updateData, options ] = args;
@@ -73,6 +84,23 @@ Hooks.once('setup', function () {
         },
         'OVERRIDE',
       );
+    } else {
+      // Wrap things >= 0.8.0
+
+      // Set the sourceId when exporting to a compendium
+      ['Actor', 'Item', 'JournalEntry', 'Macro', 'Playlist', 'RollTable', 'Scene'].forEach(item => {
+        libWrapper.register(
+          'scene-packer',
+          `${item}.prototype.toCompendium`,
+          async function (wrapped, ...args) {
+            // const [ pack ] = args;
+            await this.setFlag(ScenePacker.MODULE_NAME, 'sourceId', this.uuid);
+
+            return wrapped.bind(this)(...args);
+          },
+          'WRAPPER',
+        );
+      });
     }
   },
 );
