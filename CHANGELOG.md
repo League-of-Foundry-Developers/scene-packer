@@ -3,7 +3,7 @@
 ## v2.1.1
 
 - Added support for Playlist compendium packs.
-  - This supports re-linking playlists to scenes.
+  - Playlists linked on a Packed Scene will automatically import if they don't already exist.
 
 ## v2.1.0
 
