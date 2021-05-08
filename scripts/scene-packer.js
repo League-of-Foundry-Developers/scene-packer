@@ -1912,7 +1912,7 @@ export default class ScenePacker {
       // Ensure the scene journal is imported
       await this.ImportByName(
         this.packs.journals,
-        this.findMissingJournals(sceneJournalInfo),
+        this.findMissingJournals([sceneJournalInfo]),
         'journals',
       );
       if (sceneJournalInfo.sourceId === `JournalEntry.${scene.data.journal}`) {
