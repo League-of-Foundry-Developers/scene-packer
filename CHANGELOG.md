@@ -2,7 +2,14 @@
 
 ## v2.1.2
 
+- Added new bundled Macros to:
+  - *Reset world Scene Packer prompts*
+    - Handy if you are wanting to test that "first load" experience.
+  - *Verify module compendium data*
+    - Useful to ensure that your compendiums have the required Scene Packer data embedded.
+    - This Macro will get further functionality in future versions.
 - Fixed bug which prevented updating links to Playlists within Journal entries.
+- Fixed bug which prevented Scene Journals from relinking properly.
 
 ## v2.1.1
 
