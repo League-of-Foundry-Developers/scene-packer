@@ -344,7 +344,7 @@ export default class ScenePacker {
       }
     }
     // Set both world and scene imported version flags
-    game.settings.set(this.moduleName, 'imported', game.modules.get('scene-packer')?.data?.version || '0.0.0');
+    game.settings.set(this.moduleName, 'imported', moduleVersion || '0.0.0');
     scene.setFlag(this.moduleName, FLAGS_IMPORTED_VERSION, moduleVersion || '0.0.0');
 
     return this;
