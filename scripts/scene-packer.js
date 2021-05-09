@@ -1855,6 +1855,7 @@ export default class ScenePacker {
    * @param {Boolean} showLinkedJournal Whether to show any Journals linked to the Scene.
    */
   async UnpackScene(scene = game.scenes.get(game.user.viewedScene), {showLinkedJournal = true} = {}) {
+    let switchTabs = false;
     await this.loadPacks();
 
     const tokenInfo = scene.getFlag(this.moduleName, FLAGS_TOKENS);
@@ -1870,6 +1871,7 @@ export default class ScenePacker {
       const playlist = await this.ImportByUuid(scenePlaylist);
       if (playlist?.id !== scene.data.playlist) {
         await scene.update({playlist: playlist.id});
+        switchTabs = true;
       }
     }
 
@@ -1931,6 +1933,10 @@ export default class ScenePacker {
     // Display the Scene's journal note if it has one
     if (showLinkedJournal && scene.journal) {
       scene.journal.show();
+    }
+
+    if (switchTabs) {
+      ui.sidebar.activateTab("scenes");
     }
 
     return Promise.resolve();

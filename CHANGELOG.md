@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.1.3
+
+- Importing a Scene with a packed Playlist will no longer leave you on the Playlist tab. You'll go to the Scenes tab instead.
+
 ## v2.1.2
 
 - Added new bundled Macros to:
