@@ -335,7 +335,7 @@ export default class ScenePacker {
           j[0].sheet.render(true, {sheetMode: 'text'});
         } else {
           this.log(false,
-            game.i18n.format('SCENE-PACKER.notifications.already-shown-welcome', {
+            game.i18n.format('SCENE-PACKER.notifications.pack-scene.already-shown-welcome', {
               journal: j[0]?.name,
               version: moduleVersion,
             }),
