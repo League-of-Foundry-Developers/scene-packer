@@ -1915,7 +1915,7 @@ export default class ScenePacker {
         this.findMissingJournals([sceneJournalInfo]),
         'journals',
       );
-      if (sceneJournalInfo.sourceId === `JournalEntry.${scene.data.journal}`) {
+      if (!scene.journal) {
         // Relink the journal to the correct entry
         const newSceneJournal = game.journal.find(j => j.getFlag('core', 'sourceId') === sceneJournalInfo.compendiumSourceId);
         if (newSceneJournal?.id) {
