@@ -1,8 +1,16 @@
 # Changelog
 
-## v2.1.3
+## v2.2.0
 
-- Importing a Scene with a packed Playlist will no longer leave you on the Playlist tab. You'll go to the Scenes tab instead.
+- Added support for packing Scenes that have embedded [Quick Encounters](https://foundryvtt.com/packages/quick-encounters).
+- Vastly changed the way that entities are referenced to rarely rely on name based matching.
+  - *Please re-pack your adventures to ensure that `sourceId` values are set.*
+    1. Re-export everything to your compendiums.
+    1. Re-pack your Scenes.
+    1. Re-export your Scenes to your compendiums.
+  - This change is backwards compatible for now.
+- After unpacking a Scene you will return to the Scenes tab in the sidebar.
+  - It was somewhat frustrating ending up on the Actors, Journals or Playlists tab - whatever was the last thing to be imported.
 
 ## v2.1.2
 

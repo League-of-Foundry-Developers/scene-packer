@@ -34,7 +34,7 @@ Hooks.once('setup', function () {
             args[2] = {};
           }
           // Set the source uuid of the entity if it isn't already set in updateData
-          if (!args[2]['flags.core.sourceId']) {
+          if (!args[2]['flags.core.sourceId'] && !args[2].flags?.core?.sourceId) {
             const source = await pack.getEntity(args[1]);
             args[2]['flags.core.sourceId'] = source.uuid;
           }
