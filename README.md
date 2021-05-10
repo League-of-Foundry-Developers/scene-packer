@@ -18,7 +18,7 @@ Scene Packer is system agnostic, it doesn't matter whether you're packaging up a
 
 ## Installation
 
-In the setup screen, find the module `Library: Scene Packer` under the "Add-on Modules" tab. Alternatively, use the URL <https://raw.githubusercontent.com/League-of-Foundry-Developers/scene-packer/master/module.json> to install the module.
+In the setup screen, find the module `Library: Scene Packer` under the "Add-on Modules" tab. Alternatively, use the URL https://github.com/League-of-Foundry-Developers/scene-packer/releases/latest/download/module.json to install the module.
 
 ## Usage
 
@@ -30,7 +30,7 @@ To use the Scene Packer as part of your module you will need to add it as a depe
 "dependencies": [
   {
     "name": "scene-packer",
-    "manifest": "https://raw.githubusercontent.com/League-of-Foundry-Developers/scene-packer/master/module.json",
+    "manifest": "https://github.com/League-of-Foundry-Developers/scene-packer/releases/latest/download/module.json",
     "type": "module"
   }
 ]
