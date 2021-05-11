@@ -11,6 +11,7 @@ A library to help other developers package up Scenes and Adventures to solve sev
 - Imported Journals link correctly to other Journal entries.
 - Actors, Journals and Playlists referenced by a Scene are automatically imported.
 - [Quick Encounters](https://foundryvtt.com/packages/quick-encounters) work, creating actors you can double-click on.
+- You can provide a list of Journals and/or Macros that you want to ensure are imported to the world.
 
 In summary, it makes importing a Scene from a Compendium (via an "adventure module") work as though you build it in your world.
 
@@ -57,6 +58,12 @@ const welcomeJournal = 'A1. Adventure Introduction';
  */
 const additionalJournals = ['A2. Adventure Overview'];
 /**
+ * additionalMacros will automatically be imported.
+ * Set to the following to disable:
+ *   const additionalMacros = [];
+ */
+const additionalMacros = [];
+/**
  * creaturePacks is a list of compendium packs to look in for Actors by name (in prioritised order).
  * The first entry here assumes that you have an Actor pack in your module with the "name" of "actors".
  * Set to the following to disable:
@@ -96,6 +103,7 @@ Hooks.once('scenePackerReady', ScenePacker => {
     playlistPacks,
     welcomeJournal,
     additionalJournals,
+    additionalMacros,
     allowImportPrompts: true, // Set to false if you don't want the popup
   });
 });
@@ -128,15 +136,15 @@ This will automatically go through the Journal compendiums that belong to your m
 
 ## Macros
 
-There are several Macros included in the Library: `Scene Packer` compendium entry. Each macro has a comment at the top describing its purpose.
+There are several Macros included in the `Library: Scene Packer` compendium entry. Each macro has a comment at the top describing its purpose.
 
 ## Quick Encounters
 
 Support for packing Scenes with embedded [Quick Encounters](https://foundryvtt.com/packages/quick-encounters) data was added in v2.2.0 of Scene Packer. There is a Journal Entry bundled in the Scene Packer compendium which describes how to pack these scenes.
 
-## TODO
+## Example module use
 
-- Provide complete example module
+You can view an example module that showcases Scene Packer's features at https://github.com/sneat/example-scene-packer
 
 ## Acknowledgements
 
@@ -148,7 +156,8 @@ Thanks to [Baileywiki](https://www.patreon.com/baileywiki) for their initial tes
 
 Please submit any issues via the [Bug Reporter](https://foundryvtt.com/packages/bug-reporter) module or via [GitHub Issues](https://github.com/League-of-Foundry-Developers/scene-packer/issues).
 
-You can contact me on Discord `blair#9056` in the [Scene Packer server](https://discord.com/invite/HY3xhBEf2A) or the `Foundry VTT server` if you have questions, comments, queries, suggestions etc.
+You can contact me on Discord `blair#9056` in the [<img src="https://github.com/League-of-Foundry-Developers/scene-packer/raw/main/assets/icons/hand-truck.png" alt="icon" height="24" valign="middle">
+ Scene Packer server](https://discord.com/invite/HY3xhBEf2A) or the `Foundry VTT server` if you have questions, comments, queries, suggestions etc.
 
 If you are making money and utilising this module, please consider sending a few dollars my way and/or providing me with the cool adventures and modules you're building :)
 

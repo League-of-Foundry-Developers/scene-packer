@@ -38,6 +38,8 @@ export default class ScenePacker {
   welcomeJournal = null;
   /** @type {String[]} */
   additionalJournals = [];
+  /** @type {String[]} */
+  additionalMacros = [];
   /** @type {{creatures: String[], journals: String[], macros: String[], playlists: String[]}} */
   packs = {
     creatures: [],
@@ -56,6 +58,7 @@ export default class ScenePacker {
    * @param {String[]} playlistPacks Set which Playlist packs should be used when searching for Playlists.
    * @param {String} welcomeJournal Set the name of the journal to be imported and automatically opened after activation.
    * @param {String[]} additionalJournals Set which journals (by name) should be automatically imported.
+   * @param {String[]} additionalMacros Set which macros (by name) should be automatically imported.
    * @param {Boolean} allowImportPrompts Set whether import prompts should be allowed.
    */
   constructor(
@@ -68,6 +71,7 @@ export default class ScenePacker {
       playlistPacks = [],
       welcomeJournal = '',
       additionalJournals = [],
+      additionalMacros = [],
       allowImportPrompts = true,
     } = {},
   ) {
@@ -102,6 +106,9 @@ export default class ScenePacker {
     }
     if (additionalJournals?.length) {
       this.SetAdditionalJournalsToImport(additionalJournals);
+    }
+    if (additionalMacros?.length) {
+      this.SetAdditionalMacrosToImport(additionalMacros);
     }
     this.allowImportPrompts = allowImportPrompts;
 
@@ -554,6 +561,38 @@ export default class ScenePacker {
     }
 
     this.additionalJournals = journals;
+    return this;
+  }
+
+  /**
+   * Set which macros (by name) should be automatically imported.
+   * @param {String[]} macros
+   * @returns this to support chaining
+   */
+  SetAdditionalMacrosToImport(macros) {
+    if (macros) {
+      macros = macros instanceof Array ? macros : [macros];
+      macros.forEach((m) => {
+        if (typeof m !== 'string') {
+          ui.notifications.error(
+            game.i18n.localize('SCENE-PACKER.errors.additionalMacros.ui'),
+          );
+          throw game.i18n.format(
+            'SCENE-PACKER.errors.additionalMacros.details',
+            {
+              macro: m,
+            },
+          );
+        }
+      });
+    } else {
+      this.log(
+        false,
+        game.i18n.localize('SCENE-PACKER.errors.additionalMacros.missing'),
+      );
+    }
+
+    this.additionalMacros = macros;
     return this;
   }
 
@@ -1456,17 +1495,20 @@ export default class ScenePacker {
       );
 
       if (content.length > 0) {
-        // Check if a folder for our adventure and entity type already exists, otherwise create it
-        let folderId = game.folders.find(
-          (folder) => folder.name === this.adventureName && folder.type === entity,
-        )?.id;
-        if (!folderId) {
-          const folder = await Folder.create({
-            name: this.adventureName,
-            type: entity,
-            parent: null,
-          });
-          folderId = folder.id;
+        let folderId = null;
+        if (CONST.FOLDER_ENTITY_TYPES.includes(type)) {
+          // Check if a folder for our adventure and entity type already exists, otherwise create it
+          folderId = game.folders.find(
+            (folder) => folder.name === this.adventureName && folder.type === entity,
+          )?.id;
+          if (!folderId) {
+            const folder = await Folder.create({
+              name: this.adventureName,
+              type: entity,
+              parent: null,
+            });
+            folderId = folder.id;
+          }
         }
 
         // Append the entities found in this pack to the growing list to import
@@ -1474,13 +1516,17 @@ export default class ScenePacker {
           content.map((c) => {
             if (isNewerVersion(game.data.version, '0.7.9')) {
               const createData = collection.fromCompendium(c);
-              createData.folder = folderId;
+              if (folderId) {
+                createData.folder = folderId;
+              }
               createData['flags.core.sourceId'] = c.uuid;
               return createData;
             }
 
             c.data['flags.core.sourceId'] = c.uuid;
-            c.data.folder = folderId;
+            if (folderId) {
+              c.data.folder = folderId;
+            }
             return c.data;
           }),
         );
@@ -1606,6 +1652,72 @@ export default class ScenePacker {
         .filter((info) => {
           // Filter for only the entries that are missing, or are in a different folder.
           const j = game.journal.getName(info?.journalName);
+          return j == null || (folderIDs.length && !folderIDs.includes(j.data.folder));
+        }),
+      );
+    }
+
+    return missing;
+  }
+
+  /**
+   * Find macros that do not exist in the world.
+   * @param {Object[]} macroInfo data written during PackScene()
+   * @see PackScene
+   * @private
+   * @returns Object[] The unique set of Macros needing to be imported.
+   */
+  findMissingMacros(macroInfo) {
+    if (!macroInfo?.length) {
+      return [];
+    }
+
+    const exact_matches = [];
+    const missing_macros = new Set();
+    const missing_name_matches = new Set();
+    // Check for exact matches first
+    for (let i = 0; i < macroInfo.length; i++) {
+      const macro = macroInfo[i];
+      if (!macro?.sourceId) {
+        missing_name_matches.add(macro);
+        continue;
+      }
+      let matches = [];
+      if (isNewerVersion(game.data.version, '0.7.9')) {
+        matches = game.macros.contents.filter(a => a.getFlag(MODULE_NAME, 'sourceId') === macro.sourceId);
+      } else {
+        matches = game.macros.entities.filter(a => a.getFlag(MODULE_NAME, 'sourceId') === macro.sourceId);
+      }
+      if (matches.length) {
+        exact_matches.push(macro);
+      } else {
+        missing_macros.add(macro);
+      }
+    }
+
+    if (macroInfo.length === exact_matches.length) {
+      // All macros exist with a direct match, no missing Macros
+      return [];
+    }
+
+    let missing = Array.from(missing_macros);
+
+    if (missing_name_matches.size) {
+      // Support multiple folder names by compendium names
+      const folderNames = [this.adventureName];
+      this.packs.macros.forEach(j => {
+        const pack = game.packs.get(j);
+        if (pack?.metadata?.label) {
+          folderNames.push(pack.metadata.label);
+        }
+      });
+      const folderIDs = game.folders.filter(
+        (j) => j.data.type === 'Macro' && folderNames.includes(j.data.name),
+      ).map((f) => f.id);
+      missing = missing.concat(Array.from(missing_name_matches)
+        .filter((info) => {
+          // Filter for only the entries that are missing, or are in a different folder.
+          const j = game.macros.getName(info?.name);
           return j == null || (folderIDs.length && !folderIDs.includes(j.data.folder));
         }),
       );
@@ -2083,6 +2195,16 @@ export default class ScenePacker {
           return {journalName: d};
         })),
         'journals',
+      );
+    }
+    if (this.additionalMacros.length > 0) {
+      // Import any additional Macros
+      await this.ImportEntities(
+        this.packs.macros,
+        this.findMissingMacros(this.additionalMacros.map(d => {
+          return {name: d};
+        })),
+        'macros',
       );
     }
 

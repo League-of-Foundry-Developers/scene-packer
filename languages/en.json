@@ -120,6 +120,11 @@
         "details": "You must pass an array of strings to \"SetAdditionalJournalsToImport()\". They must be the names of journals. Received: {journal}",
         "missing": "SetAdditionalJournalsToImport() called with no value. This disables importing of additional journals. Only those journals linked to the scene by a map pin will be imported."
       },
+      "additionalMacros": {
+        "ui": "Invalid call to SetAdditionalMacrosToImport(). See console for details.",
+        "details": "You must pass an array of strings to \"SetAdditionalMacrosToImport()\". They must be the names of macros. Received: {macro}",
+        "missing": "SetAdditionalMacrosToImport() called with no value. This disables importing of additional macros."
+      },
       "creaturePacks": {
         "ui": "Invalid call to SetCreaturePacks(). See console for details.",
         "details": "You must pass an array of strings to \"SetCreaturePacks()\". They must be the names of Actor Packs. Received: {pack}",

@@ -3,6 +3,7 @@
 ## v2.2.0
 
 - Added support for packing Scenes that have embedded [Quick Encounters](https://foundryvtt.com/packages/quick-encounters).
+- Added support for automatically importing Macros to the world via the `additionalMacros` variable. See [readme](https://github.com/League-of-Foundry-Developers/scene-packer#module-code-requirements) or embedded journal entries for details.
 - Vastly changed the way that entities are referenced to rarely rely on name based matching.
   - *Please re-pack your adventures to ensure that `sourceId` values are set.*
     1. Re-export everything to your compendiums.
@@ -11,6 +12,9 @@
   - This change is backwards compatible for now.
 - After unpacking a Scene you will return to the Scenes tab in the sidebar.
   - It was somewhat frustrating ending up on the Actors, Journals or Playlists tab - whatever was the last thing to be imported.
+- Improved Journal entries distributed with Scene Packer to provide more guidance and support.
+- Added link to module showcasing features:
+  - https://github.com/sneat/example-scene-packer
 
 ## v2.1.2
 
