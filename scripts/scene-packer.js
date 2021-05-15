@@ -165,8 +165,15 @@ export default class ScenePacker {
             icon: '<i class="fas fa-check-double"></i>',
             label: game.i18n.localize('SCENE-PACKER.welcome.yes-all'),
             callback: async () => {
-              const packs = game.packs.filter(
-                (p) => p.metadata.package === this.moduleName && p.entity === 'Scene',
+              const packs = game.packs.filter((p) => {
+                  let type;
+                  if (isNewerVersion(game.data.version, '0.7.9')) {
+                    type = p.documentClass?.documentName;
+                  } else {
+                    type = p.entity;
+                  }
+                  return p.metadata.package === this.moduleName && type === 'Scene';
+                },
               );
               for (let i = 0; i < packs.length; i++) {
                 const c = packs[i];
@@ -179,7 +186,7 @@ export default class ScenePacker {
                     type: 'Scene',
                     parent: null,
                   });
-                  folderId = folder._id;
+                  folderId = folder.id || folder._id;
                 }
                 const scenes = await c.importAll({folderId: folderId, folderName: this.adventureName});
                 if (!scenes) {
