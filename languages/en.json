@@ -29,18 +29,18 @@
         "no-journal-pins": "No journal pins detected on the scene.",
         "writing-tokens": "Writing {number} tokens to scene: {name}",
         "no-tokens": "No tokens detected on the scene.",
-        "already-shown-welcome": "The welcome journal \"{journal}\" has already been shown for this version \"{version\"."
+        "already-shown-welcome": "The welcome journal \"{journal}\" has already been shown for this version \"{version}\"."
       },
-      "import-by-name": {
+      "import-entities": {
         "creating-data": "Importing {count} new {type}.",
         "missing-name": "Tried to find an actor for a token with no name.",
         "invalid-packs": {
           "error": "Invalid pack configuration. Cannot import {type}. Check console for more details.",
-          "short": "ImportByName was called with no searchPacks defined.",
-          "details": "ImportByName was called with no valid searchPacks defined. Received the following call details:",
-          "reference": "ImportByName was called with a reference that is not registered with Foundry. Received the following call details:",
+          "short": "ImportEntities was called with no searchPacks defined.",
+          "details": "ImportEntities was called with no valid searchPacks defined. Double check for typos between your manifest.json and module initialisation files. Received the following call details:",
+          "reference": "ImportEntities was called with a reference that is not registered with Foundry. Double check for typos between your manifest.json and module initialisation files. Received the following call details:",
           "missing-pack": "Invalid pack configuration. Cannot find compendium {packName}. Check console for more details.",
-          "missing-pack-details": "ImportByName was called to search for pack \"{packName}\" which is not found. Check for typos in your module setup."
+          "missing-pack-details": "ImportEntities was called to search for pack \"{packName}\" which is not found. Check for typos in your module setup."
         }
       },
       "find-journal-compendium": {
@@ -120,6 +120,11 @@
         "details": "You must pass an array of strings to \"SetAdditionalJournalsToImport()\". They must be the names of journals. Received: {journal}",
         "missing": "SetAdditionalJournalsToImport() called with no value. This disables importing of additional journals. Only those journals linked to the scene by a map pin will be imported."
       },
+      "additionalMacros": {
+        "ui": "Invalid call to SetAdditionalMacrosToImport(). See console for details.",
+        "details": "You must pass an array of strings to \"SetAdditionalMacrosToImport()\". They must be the names of macros. Received: {macro}",
+        "missing": "SetAdditionalMacrosToImport() called with no value. This disables importing of additional macros."
+      },
       "creaturePacks": {
         "ui": "Invalid call to SetCreaturePacks(). See console for details.",
         "details": "You must pass an array of strings to \"SetCreaturePacks()\". They must be the names of Actor Packs. Received: {pack}",
@@ -159,7 +164,12 @@
         "completed-journal": "Completed journal \"{journal}\" {entryId}.",
         "no-references": "There were no references that needed updating in journal  \"{journal}\" {entryId}.",
         "checking-journal": "Checking contents of journal \"{journal}\" {entryId}.",
-        "completed": "Completed!"
+        "completed": "Completed!",
+        "quick-encounters": {
+          "could-not-parse": "Could not parse quick encounter data for journal \"{journal}\". Error: {error}",
+          "updating-references": "Changing {count} Quick Encounter references in: \"{journal}\"",
+          "updating-references-console": "Changing {type} {name} reference {oldRef} -> {newRef}"
+        }
       }
     },
     "instance-prompt": {

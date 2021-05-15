@@ -2,14 +2,16 @@
 
 # Scene Packer
 
-A library to help other developers package up Scenes and Adventures to solve the following:
+A library to help other developers package up Scenes and Adventures to solve several frustrations when importing Scenes from a module. With Scene Packer the following works:
 
-- Scene Journal Pins link to the correct Journal
-- Actor tokens on a Scene link to the correct Actor
-- Journals configured for the Scene aren't linked
-- Playlists configured for the Scene aren't linked/don't work
-- Imported Journals link to their correct Journal entry/don't work
-- Relink journal entries to compendium entities (to automatically fix the broken links after exporting from your World to your Compendium)
+- Scene Journal Pins link to the correct Journal.
+- Actor tokens on a Scene link to the correct Actor.
+- Journals configured for the Scene link correctly.
+- Playlists configured for the Scene link correctly.
+- Imported Journals link correctly to other Journal entries.
+- Actors, Journals and Playlists referenced by a Scene are automatically imported.
+- [Quick Encounters](https://foundryvtt.com/packages/quick-encounters) work, creating actors you can double-click on.
+- You can provide a list of Journals and/or Macros that you want to ensure are imported to the world.
 
 In summary, it makes importing a Scene from a Compendium (via an "adventure module") work as though you build it in your world.
 
@@ -17,7 +19,7 @@ Scene Packer is system agnostic, it doesn't matter whether you're packaging up a
 
 ## Installation
 
-In the setup screen, use the URL <https://raw.githubusercontent.com/League-of-Foundry-Developers/scene-packer/master/module.json> to install the module.
+In the setup screen, find the module `Library: Scene Packer` under the "Add-on Modules" tab. Alternatively, use the URL https://github.com/League-of-Foundry-Developers/scene-packer/releases/latest/download/module.json to install the module.
 
 ## Usage
 
@@ -29,7 +31,7 @@ To use the Scene Packer as part of your module you will need to add it as a depe
 "dependencies": [
   {
     "name": "scene-packer",
-    "manifest": "https://raw.githubusercontent.com/League-of-Foundry-Developers/scene-packer/master/module.json",
+    "manifest": "https://github.com/League-of-Foundry-Developers/scene-packer/releases/latest/download/module.json",
     "type": "module"
   }
 ]
@@ -55,6 +57,12 @@ const welcomeJournal = 'A1. Adventure Introduction';
  *   const additionalJournals = [];
  */
 const additionalJournals = ['A2. Adventure Overview'];
+/**
+ * additionalMacros will automatically be imported.
+ * Set to the following to disable:
+ *   const additionalMacros = [];
+ */
+const additionalMacros = [];
 /**
  * creaturePacks is a list of compendium packs to look in for Actors by name (in prioritised order).
  * The first entry here assumes that you have an Actor pack in your module with the "name" of "actors".
@@ -95,6 +103,7 @@ Hooks.once('scenePackerReady', ScenePacker => {
     playlistPacks,
     welcomeJournal,
     additionalJournals,
+    additionalMacros,
     allowImportPrompts: true, // Set to false if you don't want the popup
   });
 });
@@ -106,10 +115,10 @@ To pack your scene ready for distribution:
 
 1. Enable the `Scene Packer context menu` in Module Settings.
 2. Build your scene as normal, adding Actors and Journal Pins where you'd like.
-3. Export your Actors/Journals/Roll Tables/Items/Macros to your compendiums as normal. 
+3. Export your Scenes/Actors/Journals/Roll Tables/Items/Macros/Playlists to your compendiums as normal. 
 4. Run the script to Update Journal links to fix up the journal compendium linking (see section below)
 5. Right click on your Scene in the Scenes Directory and choose `Pack Scene Data`.
-6. Export your Scene to your compendium.
+6. Export your Scene to your compendium (replacing your existing entry, merging by name to retain the ID reference).
 
 ![scene-context-menu](scene-context-menu.png)
 
@@ -125,9 +134,17 @@ Alternatively, you can run the macro `Relink compendium journal entries` that is
 
 This will automatically go through the Journal compendiums that belong to your module, and change the reference links to the compendium versions. For example, if you had a link to `@Actor[alvhCr52HIrWmoez]{Commoner}` it would change it to `@Compendium[your-module.actors.lOBiqShvkT83eGzY]{Commoner}` using your module and compendium names and ID references.
 
-## TODO
+## Macros
 
-- Provide complete example module
+There are several Macros included in the `Library: Scene Packer` compendium entry. Each macro has a comment at the top describing its purpose.
+
+## Quick Encounters
+
+Support for packing Scenes with embedded [Quick Encounters](https://foundryvtt.com/packages/quick-encounters) data was added in v2.2.0 of Scene Packer. There is a Journal Entry bundled in the Scene Packer compendium which describes how to pack these scenes.
+
+## Example module use
+
+You can view an example module that showcases Scene Packer's features at https://github.com/sneat/example-scene-packer
 
 ## Acknowledgements
 
@@ -139,7 +156,8 @@ Thanks to [Baileywiki](https://www.patreon.com/baileywiki) for their initial tes
 
 Please submit any issues via the [Bug Reporter](https://foundryvtt.com/packages/bug-reporter) module or via [GitHub Issues](https://github.com/League-of-Foundry-Developers/scene-packer/issues).
 
-You can contact me on Discord `blair#9056` if you have questions, comments, queries, concerns etc.
+You can contact me on Discord `blair#9056` in the [<img src="https://github.com/League-of-Foundry-Developers/scene-packer/raw/main/assets/icons/hand-truck.png" alt="icon" height="24" valign="middle">
+ Scene Packer server](https://discord.com/invite/HY3xhBEf2A) or the `Foundry VTT server` if you have questions, comments, queries, suggestions etc.
 
 If you are making money and utilising this module, please consider sending a few dollars my way and/or providing me with the cool adventures and modules you're building :)
 

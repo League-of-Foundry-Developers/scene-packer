@@ -2,21 +2,32 @@
   "name": "scene-packer",
   "title": "Library: Scene Packer",
   "description": "A module to assist with Scene and Adventure packing and unpacking.",
-  "version": "2.1.2",
+  "version": "2.2.0",
   "library": "true",
-  "manifestPlusVersion": "1.0.0",
+  "manifestPlusVersion": "1.1.0",
   "minimumCoreVersion": "0.7.9",
   "compatibleCoreVersion": "0.8.2",
-  "author": "The League of Extraordinary FVTT Developers",
+  "author": "Blair McMillan",
   "authors": [
-    {
-      "name": "The League of Extraordinary FVTT Developers",
-      "url": "https://github.com/League-of-Foundry-Developers"
-    },
     {
       "name": "Blair McMillan",
       "discord": "blair#9056",
-      "ko-fi": "blairm"
+      "ko-fi": "blairm",
+      "patreon": "blairm"
+    },
+    {
+      "name": "The League of Extraordinary FVTT Developers",
+      "url": "https://github.com/League-of-Foundry-Developers"
+    }
+  ],
+  "media": [
+    {
+      "type": "icon",
+      "url": "https://raw.githubusercontent.com/League-of-Foundry-Developers/scene-packer/main/assets/icons/hand-truck.png"
+    },
+    {
+      "type": "cover",
+      "url": "https://raw.githubusercontent.com/League-of-Foundry-Developers/scene-packer/main/assets/cover.png"
     }
   ],
   "packs": [
