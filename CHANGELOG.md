@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.2.1
+
+- Added compatibility with Foundry VTT v0.8.3
+- Made Scene Performance Report macro more robust when there isn't a scene active - thanks [arcanistzed](https://github.com/League-of-Foundry-Developers/scene-packer/issues/17) for the report.
+
 ## v2.2.0
 
 - Added support for packing Scenes that have embedded [Quick Encounters](https://foundryvtt.com/packages/quick-encounters).
