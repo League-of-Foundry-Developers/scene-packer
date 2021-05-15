@@ -81,16 +81,22 @@ export default class Report {
    * @returns {{Sounds: number, Tiles: number, Background: string, Lights: number, Dimensions: string, Walls: number, Notes: number, Name: string, Tokens: number, Drawings: number}}
    */
   static GetSceneDetails() {
+    if (!canvas || !canvas.scene) {
+      return {
+        Error: 'No scene active.'
+      }
+    }
+
     return {
-      Name: canvas.scene.name,
-      Walls: canvas.walls.placeables.length,
-      Lights: canvas.lighting.placeables.length,
-      Tokens: canvas.tokens.placeables.length,
-      Tiles: canvas.tiles.placeables.length,
-      Sounds: canvas.sounds.placeables.length,
-      Drawings: canvas.drawings.placeables.length,
-      Notes: canvas.notes.placeables.length,
-      Dimensions: `${canvas.dimensions.width} x ${canvas.dimensions.height}`,
+      Name: canvas.scene?.name,
+      Walls: canvas.walls?.placeables?.length,
+      Lights: canvas.lighting?.placeables?.length,
+      Tokens: canvas.tokens?.placeables?.length,
+      Tiles: canvas.tiles?.placeables?.length,
+      Sounds: canvas.sounds?.placeables?.length,
+      Drawings: canvas.drawings?.placeables?.length,
+      Notes: canvas.notes?.placeables?.length,
+      Dimensions: `${canvas.dimensions?.width} x ${canvas.dimensions?.height}`,
       Background: `${canvas.background?.img?.texture?.width} x ${canvas.background?.img?.texture?.height}`,
     };
   }
