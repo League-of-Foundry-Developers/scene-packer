@@ -4,13 +4,15 @@ import {libWrapper} from './shim.js';
  * Utilise libWrapper to ensure we get a sourceId for each of our compendium imports
  */
 Hooks.once('setup', function () {
-    // Only need to patch the sourceId in versions < 0.8.0
     if (!isNewerVersion(game.data.version, '0.7.9')) {
       libWrapper.register(
         'scene-packer',
         'Entity.prototype.toCompendium',
         async function (wrapped, ...args) {
           await this.setFlag(ScenePacker.MODULE_NAME, 'sourceId', this.uuid);
+          if (this.data?.permission?.default) {
+            await this.setFlag(ScenePacker.MODULE_NAME, ScenePacker.FLAGS_DEFAULT_PERMISSION, this.data.permission.default);
+          }
 
           return wrapped.bind(this)(...args);
         },
@@ -95,6 +97,9 @@ Hooks.once('setup', function () {
           async function (wrapped, ...args) {
             // const [ pack ] = args;
             await this.setFlag(ScenePacker.MODULE_NAME, 'sourceId', this.uuid);
+            if (this.data?.permission?.default) {
+              await this.setFlag(ScenePacker.MODULE_NAME, ScenePacker.FLAGS_DEFAULT_PERMISSION, this.data.permission.default);
+            }
 
             return wrapped.bind(this)(...args);
           },

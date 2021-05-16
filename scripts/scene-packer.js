@@ -2,6 +2,7 @@ import Report from './report.js';
 
 const MINIMUM_SUPPORTED_PACKER_VERSION = '2.0.0';
 const MODULE_NAME = 'scene-packer';
+const FLAGS_DEFAULT_PERMISSION = 'defaultPermission';
 const FLAGS_JOURNALS = 'journals';
 const FLAGS_TOKENS = 'tokens';
 const FLAGS_MACROS = 'macros';
@@ -21,6 +22,7 @@ const globalScenePacker = {
   ShowPerformanceReport: Report.RenderReport,
   MODULE_NAME: MODULE_NAME,
   MINIMUM_SUPPORTED_PACKER_VERSION: MINIMUM_SUPPORTED_PACKER_VERSION,
+  FLAGS_DEFAULT_PERMISSION: FLAGS_DEFAULT_PERMISSION,
 };
 
 /**
@@ -2476,6 +2478,29 @@ export default class ScenePacker {
   }
 
   /**
+   * Updates the default permission of an entity to the value stored by Scene Packer during export.
+   * @param {Object} entity
+   * @return {Promise<void>}
+   */
+  static async updateEntityDefaultPermission(entity) {
+    const sourceId = entity.getFlag('core', 'sourceId');
+    if (!sourceId) {
+      return;
+    }
+    const scenePackerInstances = Object.keys(globalScenePacker.instances);
+    if (!scenePackerInstances?.length) {
+      return;
+    }
+    if (sourceId.startsWith('Compendium.scene-packer') || scenePackerInstances.some(p => sourceId.startsWith(`Compendium.${p}`))) {
+      // Import was from an active Scene Packer compendium, update the default permission if possible
+      const defaultPermission = entity.getFlag(MODULE_NAME, FLAGS_DEFAULT_PERMISSION);
+      if (defaultPermission && typeof entity.data?.permission?.default !== 'undefined' && entity.data?.permission?.default !== defaultPermission) {
+        entity.update({permission: {default: defaultPermission}});
+      }
+    }
+  }
+
+  /**
    * Updates compendium journals to link to the compendium entries rather than the world references.
    * This method looks up references by sourceId, followed by Name and will warn you if it doesn't find a match, or finds more than one.
    * Supports relinking:
@@ -3289,4 +3314,31 @@ Hooks.on('ready', () => {
   }
 
   Hooks.callAll('scenePackerReady', globalThis.ScenePacker);
+});
+
+/**
+ * Hook into the create methods to set default permission levels for entities coming from Scene Packer
+ * enabled modules.
+ */
+
+Hooks.on('createActor', async function (a) {
+  await ScenePacker.updateEntityDefaultPermission(a);
+});
+Hooks.on('createItem', async function (i) {
+  await ScenePacker.updateEntityDefaultPermission(i);
+});
+Hooks.on('createJournalEntry', async function (j) {
+  await ScenePacker.updateEntityDefaultPermission(j);
+});
+Hooks.on('createMacro', async function (m) {
+  await ScenePacker.updateEntityDefaultPermission(m);
+});
+Hooks.on('createPlaylist', async function (p) {
+  await ScenePacker.updateEntityDefaultPermission(p);
+});
+Hooks.on('createRollTable', async function (r) {
+  await ScenePacker.updateEntityDefaultPermission(r);
+});
+Hooks.on('createScene', async function (s) {
+  await ScenePacker.updateEntityDefaultPermission(s);
 });

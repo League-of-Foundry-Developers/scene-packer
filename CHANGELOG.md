@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.2.2
+
+- Entity Default Permissions
+  - Entities exported to compendiums with a default permission of something other than "None" will now import back again with that default permission.
+  - This only applies to compendiums that are owned by a module registered with Scene Packer.
+
 ## v2.2.1
 
 - Added compatibility with Foundry VTT v0.8.3
