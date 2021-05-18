@@ -1431,17 +1431,17 @@ export default class ScenePacker {
         );
         continue;
       }
-      let entity = '';
+      let entityType;
       let packContent;
       let collection;
       if (isNewerVersion(game.data.version, '0.7.9')) {
-        entity = pack.documentClass.documentName;
+        entityType = pack.documentClass.documentName;
         packContent = await pack.getDocuments();
         collection = game[entityClass.collectionName];
       } else {
-        entity = pack.entity;
+        entityType = pack.entity;
         packContent = await pack.getContent();
-        switch (entity) {
+        switch (entityType) {
           case 'Actor':
             collection = game.actors;
             break;
@@ -1479,7 +1479,7 @@ export default class ScenePacker {
           game.i18n.localize(
             'SCENE-PACKER.notifications.import-entities.invalid-packs.reference',
           ),
-          {packName, entity, type},
+          {packName, entity: entityType, type},
         );
         throw game.i18n.format(
           'SCENE-PACKER.notifications.import-entities.invalid-packs.error',
@@ -1505,15 +1505,15 @@ export default class ScenePacker {
 
       if (content.length > 0) {
         let folderId = null;
-        if (CONST.FOLDER_ENTITY_TYPES.includes(type)) {
+        if (CONST.FOLDER_ENTITY_TYPES.includes(entityType)) {
           // Check if a folder for our adventure and entity type already exists, otherwise create it
           folderId = game.folders.find(
-            (folder) => folder.name === this.adventureName && folder.type === entity,
+            (folder) => folder.name === this.adventureName && folder.type === entityType,
           )?.id;
           if (!folderId) {
             const folder = await Folder.create({
               name: this.adventureName,
-              type: entity,
+              type: entityType,
               parent: null,
             });
             folderId = folder.id;
