@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.2.3
+
+- Added compatibility with Foundry VTT v0.8.4
+- Fixed welcome and introduction journals being imported multiple times (once for each scene).
+
 ## v2.2.2
 
 - Entity Default Permissions
