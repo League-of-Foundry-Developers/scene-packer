@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.4
+
+- Fixed error when Quick Encounters module was not installed on the server, rather than just not enabled.
+
 ## v2.2.3
 
 - Added compatibility with Foundry VTT v0.8.4
