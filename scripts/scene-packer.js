@@ -2871,6 +2871,17 @@ export default class ScenePacker {
       return;
     }
 
+    // Check if the quick encounters module exists at all and bail if it isn't.
+    let scopes = [];
+    if (isNewerVersion('0.8.0', game.data.version)) {
+      scopes = game.getPackageScopes();
+    } else {
+      scopes = SetupConfiguration.getPackageScopes();
+    }
+    if (!scopes.length || !scopes.includes(scope)) {
+      return;
+    }
+
     let quickEncounter = {};
     const quickEncounterData = journal.getFlag('quick-encounters', 'quickEncounter');
     if (quickEncounterData) {
