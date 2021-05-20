@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.5
+
+- Fix the logic condition for v2.2.4
+
 ## v2.2.4
 
 - Fixed error when Quick Encounters module was not installed on the server, rather than just not enabled.
