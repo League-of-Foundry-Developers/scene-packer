@@ -2873,7 +2873,7 @@ export default class ScenePacker {
 
     // Check if the quick encounters module exists at all and bail if it isn't.
     let scopes = [];
-    if (isNewerVersion('0.8.0', game.data.version)) {
+    if (!isNewerVersion('0.8.0', game.data.version)) {
       scopes = game.getPackageScopes();
     } else {
       scopes = SetupConfiguration.getPackageScopes();
