@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.6
+
+- Actually fix the logic condition for v2.2.4 for real this time.
+
 ## v2.2.5
 
 - Fix the logic condition for v2.2.4
