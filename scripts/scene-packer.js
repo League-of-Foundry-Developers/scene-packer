@@ -2878,7 +2878,7 @@ export default class ScenePacker {
     } else {
       scopes = SetupConfiguration.getPackageScopes();
     }
-    if (!scopes.length || !scopes.includes(scope)) {
+    if (!scopes.length || !scopes.includes('quick-encounters')) {
       return;
     }
 
