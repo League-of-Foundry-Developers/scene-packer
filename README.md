@@ -2,15 +2,20 @@
 
 # Scene Packer
 
-A library to help other developers package up Scenes and Adventures to solve several frustrations when importing Scenes from a module. With Scene Packer the following works:
+A library to help other developers package up Scenes and Adventures to solve several frustrations when importing Scenes from a module compendium. With Scene Packer the following works:
 
 - Scene Journal Pins link to the correct Journal.
+  - This is the feature that started this module. I was frustrated that I could put a Scene into a compendium with journal pins and then when I imported from a compendium, the journal pin was there, but didn't load anything. This module gives you portable compendium journal pins that link to the original journal entry. The journal links will persist when importing from compendiums.
 - Actor tokens on a Scene link to the correct Actor.
+  - The second frustration that prompted this module. Normally you would import a Scene with Actor tokens on it and they look correct, but don't open anything. So you would have to go through and link them all up again manually. This module gives you portable compendium actor tokens on a scene that link to the original actor data automatically.
 - Journals configured for the Scene link correctly.
+  - No longer will the Journal dropdown on the Scene configuration screen be empty when importing from a compendium.
 - Playlists configured for the Scene link correctly.
+  - No longer will the Playlist dropdown on the Scene configuration screen be empty when importing from a compendium.
 - Imported Journals link correctly to other Journal entries.
+  - By using the automatic link fixer, you won't have broken links due to Journals referencing World entities, rather than compendium entities.
 - Actors, Journals and Playlists referenced by a Scene are automatically imported.
-- [Quick Encounters](https://foundryvtt.com/packages/quick-encounters) work, creating actors you can double-click on.
+- [Quick Encounters](https://foundryvtt.com/packages/quick-encounters) work, creating working journal pins that you can double-click on and actors that are linked correctly.
 - You can provide a list of Journals and/or Macros that you want to ensure are imported to the world.
 
 In summary, it makes importing a Scene from a Compendium (via an "adventure module") work as though you build it in your world.
@@ -25,7 +30,7 @@ In the setup screen, find the module `Library: Scene Packer` under the "Add-on M
 
 There are several `Journal entries` bundled with Scene Packer. In them, you can find references on how to use Scene Packer both as a Developer and as a GM.
 
-To use the Scene Packer as part of your module you will need to add it as a dependency in your `module.json` file.
+To use the Scene Packer as part of your module you will need to add it as a dependency in your `module.json` file as well as add/update your module javascript (see [Module code requirements](#module-code-requirements) below).
 
 ```json
 "dependencies": [
@@ -39,14 +44,17 @@ To use the Scene Packer as part of your module you will need to add it as a depe
 
 ### Module code requirements
 
-To unpack your scenes automatically when first viewed by a user, include the following in your module javascript, updating the variable names where appropriate.
+Once you have added Scene Packer as a dependency you need to add some initialisation code to register your module with Scene Packer.
+
+Include the following in your [module javascript](https://foundryvtt.com/article/module-development/#includes), updating the variable names where appropriate.
 
 ```javascript
 const adventureName = 'The Name of Your Adventure or Collection';
 const moduleName = 'your-module-name-as-defined-in-your-manifest-file';
 
 /**
- * welcomeJournal (if set) will automatically be imported and opened after the first activation of a scene imported from the module compendium.
+ * welcomeJournal (if set) will automatically be imported and opened after the first activation of a scene imported
+ * from the module compendium.
  * Set to the following to disable:
  *   const welcomeJournal = '';
  */
@@ -136,7 +144,7 @@ This will automatically go through the Journal compendiums that belong to your m
 
 ## Macros
 
-There are several Macros included in the `Library: Scene Packer` compendium entry. Each macro has a comment at the top describing its purpose.
+There are several Macros included in the `Library: Scene Packer` compendium entry. Each macro has a comment at the top describing its purpose. It is well worth having a look at what is available there.
 
 ## Quick Encounters
 
