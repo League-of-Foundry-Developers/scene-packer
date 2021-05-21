@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.7
+
+- Added additional gates to ensure we only process data if there's valid data to process.
+
 ## v2.2.6
 
 - Actually fix the logic condition for v2.2.4 for real this time.

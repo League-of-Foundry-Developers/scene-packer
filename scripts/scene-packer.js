@@ -2156,7 +2156,7 @@ export default class ScenePacker {
     const sceneJournalInfo = scene.getFlag(this.moduleName, FLAGS_SCENE_JOURNAL);
     const sceneInitialPosition = scene.getFlag(this.moduleName, FLAGS_SCENE_POSITION);
     const scenePlaylist = scene.getFlag(this.moduleName, FLAGS_PLAYLIST);
-    if (sceneInitialPosition) {
+    if (sceneInitialPosition && Object.keys(sceneInitialPosition).length) {
       await scene.update({initial: sceneInitialPosition});
     }
 
@@ -2167,7 +2167,7 @@ export default class ScenePacker {
       }
     }
 
-    if (tokenInfo) {
+    if (tokenInfo?.length) {
       // Import tokens that don't yet exist in the world
       await this.ImportEntities(
         this.packs.creatures,
@@ -2176,14 +2176,16 @@ export default class ScenePacker {
       );
     }
 
-    if (journalInfo) {
+    if (journalInfo?.length) {
       // Import Journal Pins
       const journals = await this.ImportEntities(
         this.packs.journals,
         this.findMissingJournals(journalInfo),
         'journals',
       );
-      await this.unpackQuickEncounters(scene, journals, this.moduleName);
+      if (journals?.length) {
+        await this.unpackQuickEncounters(scene, journals, this.moduleName);
+      }
     }
 
     if (this.welcomeJournal) {
@@ -2217,7 +2219,7 @@ export default class ScenePacker {
       );
     }
 
-    if (sceneJournalInfo) {
+    if (sceneJournalInfo && Object.keys(sceneJournalInfo).length) {
       // Ensure the scene journal is imported
       await this.ImportEntities(
         this.packs.journals,
@@ -2234,8 +2236,12 @@ export default class ScenePacker {
     }
 
     // Relink the tokens and spawn the pins
-    await this.relinkTokens(scene, tokenInfo);
-    await this.spawnNotes(scene, journalInfo);
+    if (tokenInfo?.length) {
+      await this.relinkTokens(scene, tokenInfo);
+    }
+    if (journalInfo?.length) {
+      await this.spawnNotes(scene, journalInfo);
+    }
 
     // Display the Scene's journal note if it has one
     if (showLinkedJournal && scene.journal) {
@@ -2263,6 +2269,17 @@ export default class ScenePacker {
     }
     const instance = new ScenePacker({moduleName});
     if (!instance) {
+      return;
+    }
+
+    // Check if the quick encounters module exists at all and bail if it isn't.
+    let scopes = [];
+    if (!isNewerVersion('0.8.0', game.data.version)) {
+      scopes = game.getPackageScopes();
+    } else {
+      scopes = SetupConfiguration.getPackageScopes();
+    }
+    if (!scopes.length || !scopes.includes('quick-encounters')) {
       return;
     }
 
