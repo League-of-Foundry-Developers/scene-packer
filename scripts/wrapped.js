@@ -8,11 +8,16 @@ Hooks.once('setup', function () {
       libWrapper.register(
         'scene-packer',
         'Entity.prototype.toCompendium',
-        async function (wrapped, ...args) {
-          await this.setFlag(ScenePacker.MODULE_NAME, 'sourceId', this.uuid);
+        function (wrapped, ...args) {
+          const newFlags = {};
+          newFlags[ScenePacker.MODULE_NAME] = {sourceId: this.uuid};
           if (this.data?.permission?.default) {
-            await this.setFlag(ScenePacker.MODULE_NAME, ScenePacker.FLAGS_DEFAULT_PERMISSION, this.data.permission.default);
+            newFlags[ScenePacker.MODULE_NAME][ScenePacker.FLAGS_DEFAULT_PERMISSION] = this.data.permission.default;
           }
+          if (!this.data.flags) {
+            this.data.flags = {};
+          }
+          mergeObject(this.data.flags, newFlags);
 
           return wrapped.bind(this)(...args);
         },
@@ -94,12 +99,17 @@ Hooks.once('setup', function () {
         libWrapper.register(
           'scene-packer',
           `${item}.prototype.toCompendium`,
-          async function (wrapped, ...args) {
+          function (wrapped, ...args) {
             // const [ pack ] = args;
-            await this.setFlag(ScenePacker.MODULE_NAME, 'sourceId', this.uuid);
+            const newFlags = {};
+            newFlags[ScenePacker.MODULE_NAME] = {sourceId: this.uuid};
             if (this.data?.permission?.default) {
-              await this.setFlag(ScenePacker.MODULE_NAME, ScenePacker.FLAGS_DEFAULT_PERMISSION, this.data.permission.default);
+              newFlags[ScenePacker.MODULE_NAME][ScenePacker.FLAGS_DEFAULT_PERMISSION] = this.data.permission.default;
             }
+            if (!this.data.flags) {
+              this.data.flags = {};
+            }
+            mergeObject(this.data.flags, newFlags);
 
             return wrapped.bind(this)(...args);
           },
