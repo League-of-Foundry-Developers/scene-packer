@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.2.8
+
+- Fixed bug with exporting entities to Compendiums.
+  - Thanks Charlie for the report.
+- Added compatibility with Foundry VTT v0.8.5
+
 ## v2.2.7
 
 - Added additional gates to ensure we only process data if there's valid data to process.
