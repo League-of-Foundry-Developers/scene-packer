@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.2.9
+
+- Updated example module register code to explicitly wrap in a self-invoking anonymous function `(() => { ... })()`.
+  - This prevents clashes with JS constants if more than one Scene Packed module is enabled.
+  - **Please update your registration/initialisation code.**
+
 ## v2.2.8
 
 - Fixed bug with exporting entities to Compendiums.
