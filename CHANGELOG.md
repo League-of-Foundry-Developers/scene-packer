@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.10
+
+- Compatibility with Core v0.7.10
+
 ## v2.2.9
 
 - Updated example module register code to explicitly wrap in a self-invoking anonymous function `(() => { ... })()`.
