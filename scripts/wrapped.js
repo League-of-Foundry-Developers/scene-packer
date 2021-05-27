@@ -4,7 +4,8 @@ import {libWrapper} from './shim.js';
  * Utilise libWrapper to ensure we get a sourceId for each of our compendium imports
  */
 Hooks.once('setup', function () {
-    if (!isNewerVersion(game.data.version, '0.7.9')) {
+    if (isNewerVersion('0.8.0', game.data.version)) {
+      // Wrap things < 0.8.0
       libWrapper.register(
         'scene-packer',
         'Entity.prototype.toCompendium',

@@ -169,7 +169,7 @@ export default class ScenePacker {
             callback: async () => {
               const packs = game.packs.filter((p) => {
                   let type;
-                  if (isNewerVersion(game.data.version, '0.7.9')) {
+                  if (!isNewerVersion('0.8.0', game.data.version)) {
                     type = p.documentClass?.documentName;
                   } else {
                     type = p.entity;
@@ -1345,7 +1345,7 @@ export default class ScenePacker {
     let createData = [];
 
     let exampleEntity = '';
-    if (isNewerVersion(game.data.version, '0.7.9')) {
+    if (!isNewerVersion('0.8.0', game.data.version)) {
       exampleEntity = game.packs.get(searchPacks[0])?.documentClass?.documentName;
     } else {
       exampleEntity = game.packs.get(searchPacks[0])?.entity;
@@ -1374,7 +1374,7 @@ export default class ScenePacker {
       );
     }
     let entityClass;
-    if (isNewerVersion(game.data.version, '0.7.9')) {
+    if (!isNewerVersion('0.8.0', game.data.version)) {
       entityClass = CONFIG[exampleEntity]?.documentClass;
     } else {
       entityClass = CONFIG[exampleEntity]?.entityClass;
@@ -1434,7 +1434,7 @@ export default class ScenePacker {
       let entityType;
       let packContent;
       let collection;
-      if (isNewerVersion(game.data.version, '0.7.9')) {
+      if (!isNewerVersion('0.8.0', game.data.version)) {
         entityType = pack.documentClass.documentName;
         packContent = await pack.getDocuments();
         collection = game[entityClass.collectionName];
@@ -1523,7 +1523,7 @@ export default class ScenePacker {
         // Append the entities found in this pack to the growing list to import
         createData = createData.concat(
           content.map((c) => {
-            if (isNewerVersion(game.data.version, '0.7.9')) {
+            if (!isNewerVersion('0.8.0', game.data.version)) {
               const createData = collection.fromCompendium(c);
               if (folderId) {
                 createData.folder = folderId;
@@ -1583,7 +1583,7 @@ export default class ScenePacker {
         continue;
       }
       let matches = [];
-      if (isNewerVersion(game.data.version, '0.7.9')) {
+      if (!isNewerVersion('0.8.0', game.data.version)) {
         matches = game.actors.contents.filter(a => a.getFlag(MODULE_NAME, 'sourceId') === token.sourceId || a.getFlag('core', 'sourceId') === token.sourceId);
       } else {
         matches = game.actors.entities.filter(a => a.getFlag(MODULE_NAME, 'sourceId') === token.sourceId || a.getFlag('core', 'sourceId') === token.sourceId);
@@ -1626,7 +1626,7 @@ export default class ScenePacker {
         continue;
       }
       let matches = [];
-      if (isNewerVersion(game.data.version, '0.7.9')) {
+      if (!isNewerVersion('0.8.0', game.data.version)) {
         matches = game.journal.contents.filter(a => a.getFlag(MODULE_NAME, 'sourceId') === journal.sourceId);
       } else {
         matches = game.journal.entities.filter(a => a.getFlag(MODULE_NAME, 'sourceId') === journal.sourceId);
@@ -1692,7 +1692,7 @@ export default class ScenePacker {
         continue;
       }
       let matches = [];
-      if (isNewerVersion(game.data.version, '0.7.9')) {
+      if (!isNewerVersion('0.8.0', game.data.version)) {
         matches = game.macros.contents.filter(a => a.getFlag(MODULE_NAME, 'sourceId') === macro.sourceId);
       } else {
         matches = game.macros.entities.filter(a => a.getFlag(MODULE_NAME, 'sourceId') === macro.sourceId);
@@ -1755,7 +1755,7 @@ export default class ScenePacker {
     }
 
     if (folder?.id) {
-      if (isNewerVersion(game.data.version, '0.7.9')) {
+      if (!isNewerVersion('0.8.0', game.data.version)) {
         actor = game.actors.contents.find(
           (a) => a.data.name === tokenName && a.data.folder === folder.id,
         );
@@ -1770,7 +1770,7 @@ export default class ScenePacker {
       }
     }
 
-    if (isNewerVersion(game.data.version, '0.7.9')) {
+    if (!isNewerVersion('0.8.0', game.data.version)) {
       actor = game.actors.contents.find((a) => a.data.name === tokenName);
     } else {
       actor = game.actors.entities.find((a) => a.data.name === tokenName);
@@ -1802,7 +1802,7 @@ export default class ScenePacker {
       const tData = tokenWorldData.find(t => t.sourceId === `Actor.${token.actorId}` && t.compendiumSourceId);
       if (tData) {
         let actor;
-        if (isNewerVersion(game.data.version, '0.7.9')) {
+        if (!isNewerVersion('0.8.0', game.data.version)) {
           actor = game.actors.contents.find(a => a.getFlag('core', 'sourceId') === tData.compendiumSourceId);
         } else {
           actor = game.actors.entities.find(a => a.getFlag('core', 'sourceId') === tData.compendiumSourceId);
@@ -1870,7 +1870,7 @@ export default class ScenePacker {
     scene.data.tokens.forEach((t) => {
       let actor = this.findActorForToken(t, tokenInfo, folder);
       if (actor) {
-        if (isNewerVersion(game.data.version, '0.7.9')) {
+        if (!isNewerVersion('0.8.0', game.data.version)) {
           updates.push({
             _id: t.id,
             actorId: actor.id,
@@ -1909,7 +1909,7 @@ export default class ScenePacker {
           adventureName: this.adventureName,
         }),
       );
-      if (isNewerVersion(game.data.version, '0.7.9')) {
+      if (!isNewerVersion('0.8.0', game.data.version)) {
         return scene.updateEmbeddedDocuments('Token', updates);
       } else {
         return scene.updateEmbeddedEntity('Token', updates);
@@ -2026,7 +2026,7 @@ export default class ScenePacker {
           count: updates.length,
         }),
       );
-      if (isNewerVersion(game.data.version, '0.7.9')) {
+      if (!isNewerVersion('0.8.0', game.data.version)) {
         if (isNewerVersion(scene.getFlag(MODULE_NAME, FLAGS_PACKED_VERSION), '2.1.99')) {
           // Packed with a version >= 2.2.0 that supports updating the notes
           return scene.updateEmbeddedDocuments('Note', updates);
@@ -2073,7 +2073,7 @@ export default class ScenePacker {
 
     let type = '';
     let collection;
-    if (isNewerVersion(game.data.version, '0.7.9')) {
+    if (!isNewerVersion('0.8.0', game.data.version)) {
       type = entity.documentName;
       collection = game[entity.collectionName];
     } else {
@@ -2137,7 +2137,7 @@ export default class ScenePacker {
       }
     }
 
-    if (isNewerVersion(game.data.version, '0.7.9')) {
+    if (!isNewerVersion('0.8.0', game.data.version)) {
       return collection.importFromCompendium(game.packs.get(entity.compendium.collection), entity.id, update);
     }
     return collection.importFromCollection(entity.compendium.collection, entity.id, update);
@@ -2333,7 +2333,7 @@ export default class ScenePacker {
         const possiblePins = journalInfo.filter(n => n.x === originalData.coords.x && n.y === originalData.coords.y && n.compendiumSourceId === originalData.journalEntryId);
         if (possiblePins.length) {
           update._id = possiblePins[0]._id;
-          if (isNewerVersion(game.data.version, '0.7.9')) {
+          if (!isNewerVersion('0.8.0', game.data.version)) {
             await scene.updateEmbeddedDocuments('Note', [update]);
           } else {
             await scene.updateEmbeddedEntity('Note', update);
@@ -2370,7 +2370,7 @@ export default class ScenePacker {
             continue;
           }
           let match;
-          if (isNewerVersion(game.data.version, '0.7.9')) {
+          if (!isNewerVersion('0.8.0', game.data.version)) {
             match = game.actors.contents.find(a => a.getFlag('core', 'sourceId') === actor.actorID);
           } else {
             match = game.actors.entities.find(a => a.getFlag('core', 'sourceId') === actor.actorID);
@@ -2549,7 +2549,7 @@ export default class ScenePacker {
     for (let i = 0; i < CONST.COMPENDIUM_ENTITY_TYPES.length; i++) {
       const type = CONST.COMPENDIUM_ENTITY_TYPES[i];
       const uniquePacks = new Set(allPacks.filter((p) => {
-        if (isNewerVersion(game.data.version, '0.7.9')) {
+        if (!isNewerVersion('0.8.0', game.data.version)) {
           return p.documentClass.documentName === type;
         }
         return p.entity === type;
