@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.2.12
+
+- Updated `Asset Report`
+  - Handle inconsistencies in data formats between core v0.7.x and v0.8.x
+  - Support Playlists created by Bellows.
+
 ## v2.2.11
 
 - Added `Asset Report`.
