@@ -22,6 +22,10 @@ In summary, it makes importing a Scene from a Compendium (via an "adventure modu
 
 Scene Packer is system agnostic, it doesn't matter whether you're packaging up a D&D5e module, or a Pathfinder one, or an Alien RPG one, Scene Packer doesn't mind.
 
+Additionally, `Scene Packer` contains an `Asset Report` (accessible via the bundled Macro) which details which assets will have broken references when imported into someone else's world.
+
+[![Asset Report](http://img.youtube.com/vi/eBLbUCNfsmk/0.jpg)](http://www.youtube.com/watch?v=eBLbUCNfsmk "Asset Report")
+
 ## Installation
 
 In the setup screen, find the module `Library: Scene Packer` under the "Add-on Modules" tab. Alternatively, use the URL https://github.com/League-of-Foundry-Developers/scene-packer/releases/latest/download/module.json to install the module.

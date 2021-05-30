@@ -1,4 +1,5 @@
 import Report from './report.js';
+import AssetReport from './asset-report.js';
 
 const MINIMUM_SUPPORTED_PACKER_VERSION = '2.0.0';
 const MODULE_NAME = 'scene-packer';
@@ -20,6 +21,7 @@ const FLAGS_IMPORTED_VERSION = 'imported';
 const globalScenePacker = {
   instances: {},
   ShowPerformanceReport: Report.RenderReport,
+  AssetReport: AssetReport,
   MODULE_NAME: MODULE_NAME,
   MINIMUM_SUPPORTED_PACKER_VERSION: MINIMUM_SUPPORTED_PACKER_VERSION,
   FLAGS_DEFAULT_PERMISSION: FLAGS_DEFAULT_PERMISSION,
@@ -740,6 +742,67 @@ export default class ScenePacker {
   }
 
   /**
+   * Renders a dialog showing which Scenes in the world contain data that would benefit from being Packed.
+   */
+  static ShowScenesWorthPacking() {
+    if (!game.user.isGM) {
+      return;
+    }
+
+    const sceneInfo = new Map();
+    const scenes = [];
+    if (!isNewerVersion('0.8.0', game.data.version)) {
+      scenes.push(...game.scenes.contents);
+    } else {
+      scenes.push(...game.scenes.entities);
+    }
+
+    for (let i = 0; i < scenes.length; i++) {
+      const scene = scenes[i];
+      const sceneData = {
+        id: scene.id,
+        name: scene.name,
+      }
+
+      if (scene.journal || scene.playlist) {
+        sceneInfo.set(scene.id, sceneData);
+        continue;
+      }
+
+      if (!isNewerVersion('0.8.0', game.data.version)) {
+        if (scene.data?.notes?.size || scene.data?.tokens?.size) {
+          sceneInfo.set(scene.id, sceneData);
+        }
+      } else {
+        if (scene.data?.notes?.length || scene.data?.tokens?.length) {
+          sceneInfo.set(scene.id, sceneData);
+        }
+      }
+    }
+
+    let content = `<p>${game.i18n.format('SCENE-PACKER.worth-packing.intro', {
+      count: sceneInfo.size,
+      total: scenes.length,
+    })}</p>`;
+    if (sceneInfo.size) {
+      content += '<ul>';
+      for (const scene of sceneInfo.values()) {
+        content += `<li>${scene.name}</li>`;
+      }
+      content += '</ul>';
+    } else {
+      content = `<p>${game.i18n.localize('SCENE-PACKER.worth-packing.none')}</p>`;
+    }
+    Dialog.prompt({
+      title: game.i18n.localize('SCENE-PACKER.worth-packing.title'),
+      content: content,
+      label: game.i18n.localize('Close'),
+      callback: () => {
+      },
+    });
+  }
+
+  /**
    * PackScene() will write the following information to the Scene data for later retrieval:
    *   Journal Note Pins
    *   Actor Tokens
@@ -783,7 +846,7 @@ export default class ScenePacker {
     /**
      * journalInfo is the data that gets passed to findMissingJournals
      */
-    const journalInfo = await Promise.all(scene.data.notes.map(async note => {
+    const journalInfo = await Promise.allSettled(scene.data.notes.map(async note => {
       const journalData = game.journal.get(note.entryId);
       const compendiumJournal = await this.FindJournalInCompendiums(journalData, this.packs.journals);
 
@@ -822,7 +885,7 @@ export default class ScenePacker {
     /**
      * tokenInfo is the data that gets passed to findMissingTokens
      */
-    const tokenInfo = await Promise.all(scene.data.tokens.map(async token => {
+    const tokenInfo = await Promise.allSettled(scene.data.tokens.map(async token => {
       // Pull the sourceId of the actor, preferring the Actor entry in the module's compendium.
       let sourceId = '';
       let compendiumSourceId = '';
@@ -1887,11 +1950,6 @@ export default class ScenePacker {
     });
 
     if (missing.length > 0) {
-      ui.notifications.error(
-        game.i18n.format('SCENE-PACKER.notifications.link-tokens.missing', {
-          count: missing.length,
-        }),
-      );
       this.logError(
         true,
         game.i18n.format('SCENE-PACKER.notifications.link-tokens.missing', {

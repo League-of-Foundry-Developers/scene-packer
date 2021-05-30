@@ -1,0 +1,27 @@
+<li class="location flexcol" data-scene-id="{{id}}">
+  <div class="overview flexrow">
+    {{#if hasDependencies}}
+    <a class="entity-link" data-entity="{{entityType}}" data-id="{{id}}"><i class="fas {{css}}"></i> {{name}}</a>
+    <span class="tag toggle-dependencies"><i class="fas fa-exclamation-triangle"></i> <span>{{localize 'SCENE-PACKER.asset-report.show'}}</span></span>
+    {{else}}
+    <span>{{name}}</span>
+    <span class="tag"><i class="fas fa-check-circle"></i></span>
+    {{/if}}
+  </div>
+
+  {{#if hasDependencies}}
+  <div class="dependencies hidden">
+    <ul>
+      {{#each assetDetails}}
+      {{#if hasDependency}}
+      <li>
+        <strong>Location:</strong> {{location}}<br>
+        <strong>Asset:</strong> {{asset}}
+        <a href="{{asset}}" target="_blank"><i class="fas fa-external-link-alt"></i></a>
+      </li>
+      {{/if}}
+      {{/each}}
+    </ul>
+  </div>
+  {{/if}}
+</li>

@@ -1,5 +1,18 @@
 # Changelog
 
+## v2.2.11
+
+- Added `Asset Report`.
+  - Displays a report showing which assets in your world would not render correctly if they were loaded by someone else via your module.
+  - For example, did you miss updating a reference to an asset that exists in your `/worlds` folder?
+- Added new bundled Macros.
+  - *Show Asset Report*
+    - [View an example video](https://www.youtube.com/watch?v=eBLbUCNfsmk) running against the [Example Scene Packer](https://github.com/sneat/example-scene-packer) module.
+  - *Show Scenes Worth Packing*
+    - Displays a dialog that lists which Scenes contain data that would benefit from being packed by Scene Packer (e.g. which Scenes have Actors or Journal Pins on them).
+- Fixed incorrectly showing Pack Scene Data context menu option.
+  - `Pack Scene Data` context menu wasn't respecting the setting flag correctly. This menu item is once again off by default.
+
 ## v2.2.10
 
 - Compatibility with Core v0.7.10
