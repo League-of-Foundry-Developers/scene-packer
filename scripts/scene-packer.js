@@ -3240,7 +3240,7 @@ Hooks.once('setup', () => {
                 game.user.isGM &&
                 game.settings.get(MODULE_NAME, 'enableContextMenu');
             }
-            return true;
+            return false;
           },
           callback: (li) => {
             let scene = game.scenes.get(li.data('entityId'));
