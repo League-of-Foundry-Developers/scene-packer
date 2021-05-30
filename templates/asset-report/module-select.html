@@ -1,0 +1,63 @@
+<form autocomplete="off">
+  <h1>{{localize 'SCENE-PACKER.asset-report.name'}}</h1>
+  <p class="notes">
+    {{localize 'SCENE-PACKER.asset-report.module-select.instructions'}}
+  </p>
+
+  <nav class="list-filters">
+    <input type="text" name="search" placeholder="{{localize 'SCENE-PACKER.asset-report.module-select.search'}}"
+           value=""/>
+    <button type="button" class="expand">
+      <i class="fa {{#if expanded}}fa-angle-double-down{{ else }}fa-angle-double-up{{/if}}"></i>
+    </button>
+  </nav>
+
+  <ul id="module-list" class="directory-list package-list">
+    {{#each modules}}
+    <li class="package flexcol{{css}}" data-module-name="{{this.name}}">
+      <div class="package-overview flexrow">
+        <label class="package-title checkbox">
+          <input type="checkbox" class="active" name="{{this.name}}" data-dtype="Boolean" {{checked this.active}}/>
+          {{~this.title~}}
+        </label>
+        {{#if this.packs}}
+        <span class="tag compendium">Compendium</span>
+        {{/if}}
+        <span class="tag version">Version {{ this.version }}</span>
+      </div>
+
+      {{#if ../expanded}}
+      <div class="package-description">
+        {{{this.description}}}
+        <ul class="package-metadata">
+          <li><strong>{{localize "Author"}}:</strong> <span class="author">{{this.author}}</span></li>
+          {{#if this.url}}
+          <li><strong>{{localize "URL"}}:</strong> <a href="{{this.url}}" target="_blank">{{this.url}}</a></li>
+          {{/if}}
+        </ul>
+      </div>
+      {{/if}}
+    </li>
+    {{ else }}
+    <p class="notes">{{ localize "SCENE-PACKER.asset-report.module-select.none" }}</p>
+    {{/each}}
+  </ul>
+
+  <footer class="options flexrow">
+    <p>
+      <label class="checkbox">
+        <input type="checkbox" class="active" id="scene-packer-module-select-web-external" name="__scene-packer-web-external" data-dtype="Boolean" {{checked this.webExternal}}/>
+        {{ localize "SCENE-PACKER.asset-report.module-select.web-external" }}
+      </label>
+    </p>
+  </footer>
+
+  <footer class="flexrow">
+    <button type="submit" name="submit" value="1">
+      <i class="fas fa-check"></i> {{localize 'Next'}}
+    </button>
+    <button type="button" name="cancel">
+      <i class="fas fa-times"></i> {{localize 'Cancel'}}
+    </button>
+  </footer>
+</form>

@@ -1,0 +1,94 @@
+<form autocomplete="off">
+  <h1>{{localize 'SCENE-PACKER.asset-report.name'}}</h1>
+  <p class="notes">
+    {{localize 'SCENE-PACKER.asset-report.notes'}}
+  </p>
+
+  <div class="report-details">
+    {{#if scenes}}
+    <section>
+      <h2>{{localize 'SCENE-PACKER.asset-report.scenes'}}</h2>
+      <ul class="asset-list">
+        {{#each scenes}}
+        {{> "modules/scene-packer/templates/asset-report/partials/details.html" entityType="Scene"}}
+        {{/each}}
+      </ul>
+    </section>
+    {{/if}}
+
+    {{#if journals}}
+    <section>
+      <h2>{{localize 'SCENE-PACKER.asset-report.journals'}}</h2>
+      <ul class="asset-list">
+        {{#each journals}}
+        {{> "modules/scene-packer/templates/asset-report/partials/details.html" entityType="JournalEntry"}}
+        {{/each}}
+      </ul>
+    </section>
+    {{/if}}
+
+    {{#if actors}}
+    <section>
+      <h2>{{localize 'SCENE-PACKER.asset-report.actors'}}</h2>
+      <ul class="asset-list">
+        {{#each actors}}
+        {{> "modules/scene-packer/templates/asset-report/partials/details.html" entityType="Actor"}}
+        {{/each}}
+      </ul>
+    </section>
+    {{/if}}
+
+    {{#if items}}
+    <section>
+      <h2>{{localize 'SCENE-PACKER.asset-report.items'}}</h2>
+      <ul class="asset-list">
+        {{#each items}}
+        {{> "modules/scene-packer/templates/asset-report/partials/details.html" entityType="Item"}}
+        {{/each}}
+      </ul>
+    </section>
+    {{/if}}
+
+    {{#if macros}}
+    <section>
+      <h2>{{localize 'SCENE-PACKER.asset-report.macros'}}</h2>
+      <ul class="asset-list">
+        {{#each macros}}
+        {{> "modules/scene-packer/templates/asset-report/partials/details.html" entityType="Macro"}}
+        {{/each}}
+      </ul>
+    </section>
+    {{/if}}
+
+    {{#if playlists}}
+    <section>
+      <h2>{{localize 'SCENE-PACKER.asset-report.playlists'}}</h2>
+      <ul class="asset-list">
+        {{#each playlists}}
+        {{> "modules/scene-packer/templates/asset-report/partials/details.html" entityType="Playlist"}}
+        {{/each}}
+      </ul>
+    </section>
+    {{/if}}
+
+    {{#if tables}}
+    <section>
+      <h2>{{localize 'SCENE-PACKER.asset-report.tables'}}</h2>
+      <ul class="asset-list">
+        {{#each tables}}
+        {{> "modules/scene-packer/templates/asset-report/partials/details.html" entityType="RollTable"}}
+        {{/each}}
+      </ul>
+    </section>
+    {{/if}}
+  </div>
+
+  <footer class="footer flexrow">
+    <button type="button" name="close">
+      <i class="fas fa-times"></i> {{localize 'Close'}}
+    </button>
+    <button type="button" name="copy">
+      <i class="fas fa-copy"></i> {{localize 'SCENE-PACKER.asset-report.copy'}}
+    </button>
+  </footer>
+</form>

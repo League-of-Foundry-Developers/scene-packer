@@ -21,6 +21,37 @@
       "no": "No",
       "dont-ask": "Don't ask me again"
     },
+    "worth-packing": {
+      "title": "Scenes worth packing",
+      "intro": "The following {count} of {total} Scene/s are worth packing:",
+      "none": "There are no Scenes that contain data worth packing."
+    },
+    "asset-report": {
+      "name": "Asset Report",
+      "notes": "Below is the Asset Report showing which entities in your world have assets that depend on external locations.",
+      "copy": "Copy JSON to clipboard",
+      "copied-to-clipboard": "Asset Report copied to clipboard!",
+      "scenes": "Scenes",
+      "actors": "Actors",
+      "journals": "Journals",
+      "items": "Items",
+      "playlists": "Playlists",
+      "macros": "Macros",
+      "tables": "RollTables",
+      "show": "Show dependencies",
+      "hide": "Hide dependencies",
+      "module-select": {
+        "title": "Module Selection",
+        "instructions": "The asset report will list all of the assets in the world which have dependencies outside of your module. Use this report to help determine what images will be broken when you distribute your module to others. Use this form to select which modules you want to treat as a data source. In most cases this should just be your module and any dependencies of your module.",
+        "none": "No Modules are available within this World.",
+        "search": "Filter Modules",
+        "web-external": "Treat web URLs as \"external\" when calculating dependencies."
+      },
+      "no-assets": "No Assets",
+      "no-assets-details": "There are no assets in this world.",
+      "processing-assets": "Processing assets",
+      "processing-assets-count": "Processing {count} assets..."
+    },
     "notifications": {
       "first-launch": "First launch of this Scene! Unpacking scene...",
       "done": "All done!",

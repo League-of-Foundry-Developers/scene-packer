@@ -2,7 +2,7 @@
   "name": "scene-packer",
   "title": "Library: Scene Packer",
   "description": "A module to assist with Scene and Adventure packing and unpacking.",
-  "version": "2.2.10",
+  "version": "2.2.11",
   "library": "true",
   "manifestPlusVersion": "1.1.0",
   "minimumCoreVersion": "0.7.9",
@@ -49,6 +49,9 @@
   "esmodules": [
     "/scripts/scene-packer.js",
     "/scripts/wrapped.js"
+  ],
+  "styles": [
+    "./styles/scene-packer.css"
   ],
   "languages": [
     {
