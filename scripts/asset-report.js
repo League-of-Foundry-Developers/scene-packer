@@ -106,7 +106,7 @@ export default class AssetReport extends FormApplication {
         for (let i = 0; i < responses.length; i++) {
           const response = responses[i];
           const request = assetRequests[i];
-          this.assetResolver.set(request, response.value.ok);
+          this.assetResolver.set(request, response?.value?.ok || false);
         }
         // Update each asset reference with the new dependency value.
         this.toProcess.forEach(assetDetail => {
@@ -502,28 +502,32 @@ export default class AssetReport extends FormApplication {
       }
 
       notes.forEach(note => {
-        if (note?.data?.icon) {
-          this.CheckAsset(scene.id, AssetReport.Sources.Scene, note.data.icon, AssetReport.Locations.SceneNoteIcon);
+        const icon = note?.data?.icon || note?.icon;
+        if (icon) {
+          this.CheckAsset(scene.id, AssetReport.Sources.Scene, icon, AssetReport.Locations.SceneNoteIcon);
         }
       });
 
       tiles.forEach(tile => {
-        if (tile?.data?.img) {
-          this.CheckAsset(scene.id, AssetReport.Sources.Scene, tile.data.img, AssetReport.Locations.SceneTileImage);
+        const img = tile?.data?.img || tile?.img;
+        if (img) {
+          this.CheckAsset(scene.id, AssetReport.Sources.Scene, img, AssetReport.Locations.SceneTileImage);
         }
       });
 
       drawings.forEach(drawing => {
-        if (drawing?.data?.texture) {
-          this.CheckAsset(scene.id, AssetReport.Sources.Scene, drawing.data.texture, AssetReport.Locations.SceneDrawingImage);
+        const texture = drawing?.data?.texture || drawing?.texture;
+        if (texture) {
+          this.CheckAsset(scene.id, AssetReport.Sources.Scene, texture, AssetReport.Locations.SceneDrawingImage);
         }
       });
 
       tokens.forEach(token => {
-        if (token?.data?.img) {
-          this.CheckAsset(scene.id, AssetReport.Sources.Scene, token.data.img, AssetReport.Locations.SceneTokenImage);
+        const img = token?.data?.img || token?.img;
+        if (img) {
+          this.CheckAsset(scene.id, AssetReport.Sources.Scene, img, AssetReport.Locations.SceneTokenImage);
         }
-        const effects = token?.data?.actorData?.effects || [];
+        const effects = token?.data?.actorData?.effects || token?.actorData?.effects || [];
         for (let j = 0; j < effects.length; j++) {
           const effect = effects[j];
           if (effect?.icon) {
@@ -569,8 +573,9 @@ export default class AssetReport extends FormApplication {
         this.CheckAsset(actor.id, AssetReport.Sources.Actor, actor.data.img, AssetReport.Locations.ActorImage);
       }
 
-      if (actor.token?.img) {
-        this.CheckAsset(actor.id, AssetReport.Sources.Actor, actor.token.img, AssetReport.Locations.ActorTokenImage);
+      const tokenImage = actor.token?.img || actor.data?.token?.img;
+      if (tokenImage) {
+        this.CheckAsset(actor.id, AssetReport.Sources.Actor, tokenImage, AssetReport.Locations.ActorTokenImage);
       }
 
       const items = [];
@@ -593,14 +598,16 @@ export default class AssetReport extends FormApplication {
       }
 
       items.forEach(item => {
-        if (item?.data?.img) {
-          this.CheckAsset(actor.id, AssetReport.Sources.Actor, item.data.img, AssetReport.Locations.ActorItemImage);
+        const img = item?.data?.img || item?.img;
+        if (img) {
+          this.CheckAsset(actor.id, AssetReport.Sources.Actor, img, AssetReport.Locations.ActorItemImage);
         }
       });
 
       effects.forEach(effect => {
-        if (effect?.data?.img) {
-          this.CheckAsset(actor.id, AssetReport.Sources.Actor, effect.data.img, AssetReport.Locations.ActorEffectImage);
+        const img = effect?.data?.img || effect?.icon;
+        if (img) {
+          this.CheckAsset(actor.id, AssetReport.Sources.Actor, img, AssetReport.Locations.ActorEffectImage);
         }
       });
 
@@ -700,13 +707,15 @@ export default class AssetReport extends FormApplication {
       }
 
       effects.forEach(effect => {
-        if (effect?.data?.img) {
-          this.CheckAsset(item.id, AssetReport.Sources.Item, effect.data.img, AssetReport.Locations.ItemEffectImage);
+        const icon = effect?.data?.icon || effect?.icon;
+        if (icon) {
+          this.CheckAsset(item.id, AssetReport.Sources.Item, icon, AssetReport.Locations.ItemEffectImage);
         }
       });
 
-      if (item.data.description?.value) {
-        const doc = this.domParser.parseFromString(item.data.description.value, 'text/html');
+      const itemDescription = item.data?.description?.value || item.data?.data?.description?.value;
+      if (itemDescription) {
+        const doc = this.domParser.parseFromString(itemDescription, 'text/html');
         const images = doc.getElementsByTagName('img');
         for (const image of images) {
           if (image?.src) {
@@ -761,8 +770,14 @@ export default class AssetReport extends FormApplication {
       }
 
       sounds.forEach(sound => {
-        if (sound?.data?.path) {
-          this.CheckAsset(playlist.id, AssetReport.Sources.Playlist, sound.data.path, AssetReport.Locations.PlaylistPath);
+        let path = sound?.data?.path || sound?.path;
+        if (path) {
+          const flags = sound?.data?.flags || sound?.flags;
+          if (flags?.bIsStreamed && flags?.streamingApi === 'youtube' && flags?.streamingId) {
+            // This is a streaming sound from youtube
+            path = `https://www.youtube.com/watch?v=${flags.streamingId}`;
+          }
+          this.CheckAsset(playlist.id, AssetReport.Sources.Playlist, path, AssetReport.Locations.PlaylistPath);
         }
       });
 
@@ -853,8 +868,9 @@ export default class AssetReport extends FormApplication {
       }
 
       results.forEach(tableResult => {
-        if (tableResult?.data?.path) {
-          this.CheckAsset(table.id, AssetReport.Sources.RollTable, tableResult.data.path, AssetReport.Locations.RollTableResultImage);
+        const img = tableResult?.data?.img || tableResult?.img;
+        if (img) {
+          this.CheckAsset(table.id, AssetReport.Sources.RollTable, img, AssetReport.Locations.RollTableResultImage);
         }
       });
 
