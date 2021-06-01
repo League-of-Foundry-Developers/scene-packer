@@ -2,8 +2,8 @@
 
 ## v2.2.14
 
-- Scene thumbnails generate are now generated for tile only Scenes
-  - Core v0.7.x normally require a Scene Background to generate a thumbnail.
+- Scene thumbnails are now generated for tile only Scenes when exporting to a Compendium
+  - Core v0.7.x normally requires a Scene Background to generate a thumbnail.
 - Added additional spacing to the Instance Prompt dialog.
 - Downgraded several Errors to Warnings.
 
