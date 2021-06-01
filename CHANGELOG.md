@@ -1,6 +1,6 @@
 # Changelog
 
-## v2.2.12
+## v2.2.13
 
 - Compatibility with Core v0.8.6
 - Fixed further data incompatibilities between Core v0.7.x and Core v0.8.x
