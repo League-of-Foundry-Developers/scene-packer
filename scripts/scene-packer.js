@@ -231,7 +231,7 @@ export default class ScenePacker {
           },
         },
       }, {
-        // Set the width to somewhere between 400 and 620 pixels.
+        // Set the width to somewhere between 400 and 640 pixels.
         width: Math.max(400, Math.min(640, Math.floor(window.innerWidth / 2))),
       });
       d.render(true);
@@ -762,7 +762,7 @@ export default class ScenePacker {
       const sceneData = {
         id: scene.id,
         name: scene.name,
-      }
+      };
 
       if (scene.journal || scene.playlist) {
         sceneInfo.set(scene.id, sceneData);
@@ -846,7 +846,11 @@ export default class ScenePacker {
     /**
      * journalInfo is the data that gets passed to findMissingJournals
      */
-    const journalInfo = await Promise.allSettled(scene.data.notes.map(async note => {
+    const journalInfoResults = await Promise.allSettled(scene.data.notes.map(async note => {
+      if (!isNewerVersion('0.8.0', game.data.version)) {
+        // v0.8.0+ notes are documents now and stored in data
+        note = note.data;
+      }
       const journalData = game.journal.get(note.entryId);
       const compendiumJournal = await this.FindJournalInCompendiums(journalData, this.packs.journals);
 
@@ -862,6 +866,7 @@ export default class ScenePacker {
         {inplace: false},
       );
     }));
+    const journalInfo = journalInfoResults.filter(result => result.status === 'fulfilled').map(result => result.value);
 
     if (journalInfo.length > 0) {
       ui.notifications.info(
@@ -885,7 +890,7 @@ export default class ScenePacker {
     /**
      * tokenInfo is the data that gets passed to findMissingTokens
      */
-    const tokenInfo = await Promise.allSettled(scene.data.tokens.map(async token => {
+    const tokenInfoResults = await Promise.allSettled(scene.data.tokens.map(async token => {
       // Pull the sourceId of the actor, preferring the Actor entry in the module's compendium.
       let sourceId = '';
       let compendiumSourceId = '';
@@ -893,8 +898,9 @@ export default class ScenePacker {
       if (typeof token.getFlag === 'function') {
         sourceId = token.getFlag(MODULE_NAME, 'sourceId');
       }
-      if (token?.actorId) {
-        const actor = game.actors.get(token.actorId);
+      const actorId = token?.actorId || token?.data?.actorId;
+      if (actorId) {
+        const actor = game.actors.get(actorId);
         if (actor) {
           if (!sourceId) {
             sourceId = actor.uuid;
@@ -918,10 +924,11 @@ export default class ScenePacker {
         compendiumSourceId: compendiumSourceId,
         tokenName: token?.name,
         actorName: actorName,
-        x: token.x,
-        y: token.y,
+        x: token?.x || token?.data?.x,
+        y: token?.y || token?.data?.y,
       };
     }));
+    const tokenInfo = tokenInfoResults.filter(result => result.status === 'fulfilled').map(result => result.value);
 
     if (tokenInfo.length > 0) {
       ui.notifications.info(
@@ -988,7 +995,12 @@ export default class ScenePacker {
       const matchingIndexes = pack.index.filter(p => p.name === journal.name);
       for (let i = 0; i < matchingIndexes.length; i++) {
         let id = matchingIndexes[i]?._id;
-        const entity = await pack.getEntity(id);
+        let entity;
+        if (!isNewerVersion('0.8.0', game.data.version)) {
+          entity = await pack.getDocument(id);
+        } else {
+          entity = await pack.getEntity(id);
+        }
         if (entity) {
           possibleMatches.push(entity);
           if (sourceId && entity.getFlag(MODULE_NAME, 'sourceId') === sourceId) {
@@ -1110,12 +1122,17 @@ export default class ScenePacker {
       const matchingIndexes = pack.index.filter(p => p.name === actor.name);
       for (let i = 0; i < matchingIndexes.length; i++) {
         let id = matchingIndexes[i]?._id;
-        const entity = await pack.getEntity(id);
+        let entity;
+        if (!isNewerVersion('0.8.0', game.data.version)) {
+          entity = await pack.getDocument(id);
+        } else {
+          entity = await pack.getEntity(id);
+        }
         if (entity) {
           possibleMatches.push(entity);
-        }
-        if (sourceId && entity.getFlag(MODULE_NAME, 'sourceId') === sourceId) {
-          return entity;
+          if (sourceId && entity.getFlag(MODULE_NAME, 'sourceId') === sourceId) {
+            return entity;
+          }
         }
       }
     }
@@ -1230,7 +1247,12 @@ export default class ScenePacker {
       const matchingIndexes = pack.index.filter(p => p.name === playlist.name);
       for (let i = 0; i < matchingIndexes.length; i++) {
         let id = matchingIndexes[i]?._id;
-        const entity = await pack.getEntity(id);
+        let entity;
+        if (!isNewerVersion('0.8.0', game.data.version)) {
+          entity = await pack.getDocument(id);
+        } else {
+          entity = await pack.getEntity(id);
+        }
         if (entity) {
           if (entity.getFlag(MODULE_NAME, 'sourceId') === `Playlist.${playlist.id}`) {
             // Exact match
@@ -1271,9 +1293,16 @@ export default class ScenePacker {
     // There is more than one possible match, check the Playlist contents for an exact match.
     for (let i = 0; i < possibleMatches.length; i++) {
       const entity = possibleMatches[i];
-      if (Object.keys(playlist.audio) === Object.keys(entity.audio)) {
-        compendiumPlaylist = entity;
-        break;
+      if (!isNewerVersion('0.8.0', game.data.version)) {
+        if (Array.from(playlist.data.sounds.keys()) === Array.from(entity.data.sounds.keys())) {
+          compendiumPlaylist = entity;
+          break;
+        }
+      } else {
+        if (Object.keys(playlist.audio) === Object.keys(entity.audio)) {
+          compendiumPlaylist = entity;
+          break;
+        }
       }
     }
 
@@ -1861,8 +1890,9 @@ export default class ScenePacker {
    */
   findActorForToken(token, tokenWorldData, folder) {
     // Check if we have a direct match within the token world data and game actors
-    if (token?.actorId) {
-      const tData = tokenWorldData.find(t => t.sourceId === `Actor.${token.actorId}` && t.compendiumSourceId);
+    const actorId = token?.actorId || token?.data?.actorId;
+    if (actorId) {
+      const tData = tokenWorldData.find(t => t.sourceId === `Actor.${actorId}` && t.compendiumSourceId);
       if (tData) {
         let actor;
         if (!isNewerVersion('0.8.0', game.data.version)) {
@@ -1898,9 +1928,11 @@ export default class ScenePacker {
 
     // No direct name lookup found, get the Actor name from the token world data at the same
     // coordinates with the same Token name
-    let actorRef = tokenWorldData.find(
-      (a) => a.x === token.x && a.y === token.y && a.tokenName === token.name,
-    );
+    let actorRef = tokenWorldData.find((a) => {
+      let tokenX = token?.x || token?.data?.x;
+      let tokenY = token?.y || token?.data?.y;
+      return a.x === tokenX && a.y === tokenY && a.tokenName === token?.name;
+    });
     if (actorRef) {
       actor = this.findActorForTokenName(actorRef.actorName, folder);
       if (actor) {
@@ -2603,6 +2635,9 @@ export default class ScenePacker {
       await allPacks[i].getIndex();
     }
     const instance = new ScenePacker({moduleName});
+    /**
+     * @type {{ActorPacks: *[], ItemPacks: *[], ScenePacks: *[], JournalEntryPacks: *[], MacroPacks: *[], RollTablePacks: *[], PlaylistPacks: *[]}}
+     */
     const packs = {};
     for (let i = 0; i < CONST.COMPENDIUM_ENTITY_TYPES.length; i++) {
       const type = CONST.COMPENDIUM_ENTITY_TYPES[i];

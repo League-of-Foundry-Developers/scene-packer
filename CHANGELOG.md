@@ -2,6 +2,11 @@
 
 ## v2.2.12
 
+- Compatibility with Core v0.8.6
+- Fixed further data incompatibilities between Core v0.7.x and Core v0.8.x
+
+## v2.2.12
+
 - Updated `Asset Report`
   - Handle inconsistencies in data formats between core v0.7.x and v0.8.x
   - Support Playlists created by Bellows.
