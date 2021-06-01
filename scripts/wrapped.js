@@ -27,6 +27,21 @@ Hooks.once('setup', function () {
 
       libWrapper.register(
         'scene-packer',
+        'Scene.prototype.toCompendium',
+        async function (wrapped, ...args) {
+          const data = await wrapped.bind(this)(...args);
+          if (!data.thumb) {
+            // Create a thumbnail even if there is no background image
+            const t = await this.createThumbnail({img: data.img});
+            data.thumb = t?.thumb;
+          }
+          return data;
+        },
+        'WRAPPER',
+      );
+
+      libWrapper.register(
+        'scene-packer',
         'EntityCollection.prototype.importFromCollection',
         async function (wrapped, ...args) {
           // const [ collection, entryId, updateData, options ] = args;

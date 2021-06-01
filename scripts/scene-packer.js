@@ -1146,7 +1146,7 @@ export default class ScenePacker {
     }
 
     if (!possibleMatches.length) {
-      ui.notifications.error(
+      ui.notifications.warn(
         game.i18n.format(
           'SCENE-PACKER.notifications.find-actor-compendium.no-match',
           {
@@ -1154,7 +1154,7 @@ export default class ScenePacker {
           },
         ),
       );
-      this.logError(
+      this.logWarn(
         true,
         game.i18n.format(
           'SCENE-PACKER.notifications.find-actor-compendium.no-match',
@@ -1183,7 +1183,7 @@ export default class ScenePacker {
     }
 
     if (!compendiumActor) {
-      ui.notifications.error(
+      ui.notifications.warn(
         game.i18n.format(
           'SCENE-PACKER.notifications.find-actor-compendium.no-match',
           {
@@ -1191,7 +1191,7 @@ export default class ScenePacker {
           },
         ),
       );
-      this.logError(
+      this.logWarn(
         true,
         game.i18n.format(
           'SCENE-PACKER.notifications.find-actor-compendium.no-match',
@@ -1264,7 +1264,7 @@ export default class ScenePacker {
     }
 
     if (!possibleMatches.length) {
-      ui.notifications.error(
+      ui.notifications.warn(
         game.i18n.format(
           'SCENE-PACKER.notifications.find-playlist-compendium.no-match',
           {
@@ -1272,7 +1272,7 @@ export default class ScenePacker {
           },
         ),
       );
-      this.logError(
+      this.logWarn(
         true,
         game.i18n.format(
           'SCENE-PACKER.notifications.find-playlist-compendium.no-match',
@@ -1307,7 +1307,7 @@ export default class ScenePacker {
     }
 
     if (!compendiumPlaylist) {
-      ui.notifications.error(
+      ui.notifications.warn(
         game.i18n.format(
           'SCENE-PACKER.notifications.find-playlist-compendium.no-match',
           {
@@ -1315,7 +1315,7 @@ export default class ScenePacker {
           },
         ),
       );
-      this.logError(
+      this.logWarn(
         true,
         game.i18n.format(
           'SCENE-PACKER.notifications.find-playlist-compendium.no-match',
@@ -1982,7 +1982,7 @@ export default class ScenePacker {
     });
 
     if (missing.length > 0) {
-      this.logError(
+      this.logWarn(
         true,
         game.i18n.format('SCENE-PACKER.notifications.link-tokens.missing', {
           count: missing.length,
@@ -2092,12 +2092,7 @@ export default class ScenePacker {
 
     const missing = updates.filter((info) => !info.entryId);
     if (missing.length > 0) {
-      ui.notifications.error(
-        game.i18n.format('SCENE-PACKER.notifications.spawn-notes.missing', {
-          count: missing.length,
-        }),
-      );
-      this.logError(
+      this.logWarn(
         true,
         game.i18n.format(
           'SCENE-PACKER.notifications.spawn-notes.missing-details',
@@ -3123,6 +3118,7 @@ export default class ScenePacker {
     content += '</select>';
     content += `<p><label>${game.i18n.localize('SCENE-PACKER.relink-prompt.make-changes')} <input type="checkbox" id="make-changes"></label></p>`;
     content += `<p>${game.i18n.localize('SCENE-PACKER.relink-prompt.make-changes-info')}</p>`;
+    content += '<p><hr></p>';
     let d = new Dialog({
       title: game.i18n.localize('SCENE-PACKER.relink-prompt.title'),
       content: content,
@@ -3179,6 +3175,7 @@ export default class ScenePacker {
         content += `<option value="${m}">${m}</option>`;
       });
       content += '</select>';
+      content += '<p><hr></p>';
       let d = new Dialog({
         title: game.i18n.localize('SCENE-PACKER.instance-prompt.title'),
         content: content,
@@ -3275,7 +3272,7 @@ Hooks.once('setup', () => {
                 game.user.isGM &&
                 game.settings.get(MODULE_NAME, 'enableContextMenu');
             }
-            return false;
+            return game.user.isGM && game.settings.get(MODULE_NAME, 'enableContextMenu');
           },
           callback: (li) => {
             let scene = game.scenes.get(li.data('entityId'));
