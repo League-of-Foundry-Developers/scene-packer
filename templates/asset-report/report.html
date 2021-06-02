@@ -7,8 +7,8 @@
   <div class="report-details">
     {{#if scenes}}
     <section>
-      <h2>{{localize 'SCENE-PACKER.asset-report.scenes'}}</h2>
-      <ul class="asset-list">
+      <h2><i class="fas fa-angle-double-down"></i> {{localize 'SCENE-PACKER.asset-report.scenes'}} ({{ dependencies.scenes }}/{{ scenes.length }})</h2>
+      <ul class="asset-list hidden">
         {{#each scenes}}
         {{> "modules/scene-packer/templates/asset-report/partials/details.html" entityType="Scene"}}
         {{/each}}
@@ -18,8 +18,8 @@
 
     {{#if journals}}
     <section>
-      <h2>{{localize 'SCENE-PACKER.asset-report.journals'}}</h2>
-      <ul class="asset-list">
+      <h2><i class="fas fa-angle-double-down"></i> {{localize 'SCENE-PACKER.asset-report.journals'}} ({{ dependencies.journals }}/{{ journals.length }})</h2>
+      <ul class="asset-list hidden">
         {{#each journals}}
         {{> "modules/scene-packer/templates/asset-report/partials/details.html" entityType="JournalEntry"}}
         {{/each}}
@@ -29,8 +29,8 @@
 
     {{#if actors}}
     <section>
-      <h2>{{localize 'SCENE-PACKER.asset-report.actors'}}</h2>
-      <ul class="asset-list">
+      <h2><i class="fas fa-angle-double-down"></i> {{localize 'SCENE-PACKER.asset-report.actors'}} ({{ dependencies.actors }}/{{ actors.length }})</h2>
+      <ul class="asset-list hidden">
         {{#each actors}}
         {{> "modules/scene-packer/templates/asset-report/partials/details.html" entityType="Actor"}}
         {{/each}}
@@ -40,8 +40,8 @@
 
     {{#if items}}
     <section>
-      <h2>{{localize 'SCENE-PACKER.asset-report.items'}}</h2>
-      <ul class="asset-list">
+      <h2><i class="fas fa-angle-double-down"></i> {{localize 'SCENE-PACKER.asset-report.items'}} ({{ dependencies.items }}/{{ items.length }})</h2>
+      <ul class="asset-list hidden">
         {{#each items}}
         {{> "modules/scene-packer/templates/asset-report/partials/details.html" entityType="Item"}}
         {{/each}}
@@ -51,8 +51,8 @@
 
     {{#if macros}}
     <section>
-      <h2>{{localize 'SCENE-PACKER.asset-report.macros'}}</h2>
-      <ul class="asset-list">
+      <h2><i class="fas fa-angle-double-down"></i> {{localize 'SCENE-PACKER.asset-report.macros'}} ({{ dependencies.macros }}/{{ macros.length }})</h2>
+      <ul class="asset-list hidden">
         {{#each macros}}
         {{> "modules/scene-packer/templates/asset-report/partials/details.html" entityType="Macro"}}
         {{/each}}
@@ -62,8 +62,8 @@
 
     {{#if playlists}}
     <section>
-      <h2>{{localize 'SCENE-PACKER.asset-report.playlists'}}</h2>
-      <ul class="asset-list">
+      <h2><i class="fas fa-angle-double-down"></i> {{localize 'SCENE-PACKER.asset-report.playlists'}} ({{ dependencies.playlists }}/{{ playlists.length }})</h2>
+      <ul class="asset-list hidden">
         {{#each playlists}}
         {{> "modules/scene-packer/templates/asset-report/partials/details.html" entityType="Playlist"}}
         {{/each}}
@@ -73,8 +73,8 @@
 
     {{#if tables}}
     <section>
-      <h2>{{localize 'SCENE-PACKER.asset-report.tables'}}</h2>
-      <ul class="asset-list">
+      <h2><i class="fas fa-angle-double-down"></i> {{localize 'SCENE-PACKER.asset-report.tables'}} ({{ dependencies.tables }}/{{ tables.length }})</h2>
+      <ul class="asset-list hidden">
         {{#each tables}}
         {{> "modules/scene-packer/templates/asset-report/partials/details.html" entityType="RollTable"}}
         {{/each}}

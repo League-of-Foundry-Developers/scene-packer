@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.2.15
+
+- Enhanced the `Asset Report`.
+  - Now limits asset validation to 10 concurrent requests to prevent server overloading/timing out requests.
+  - The report is now collapsed by default and will show a summary. Click on the heading to expand the section.
+  - Copying the report as JSON will now only copy the assets that have dependencies.
+
 ## v2.2.14
 
 - Scene thumbnails are now generated for tile only Scenes when exporting to a Compendium
