@@ -75,38 +75,50 @@ export default class AssetReport extends FormApplication {
       }
       const d = new Dialog({
         title: game.i18n.localize('SCENE-PACKER.asset-report.processing-assets'),
-        content: `<p>${game.i18n.format('SCENE-PACKER.asset-report.processing-assets-count', {count: totalToResolve})}</p>`,
+        content: `<p>${game.i18n.format('SCENE-PACKER.asset-report.processing-assets-count', {
+          count: 0,
+          total: totalToResolve,
+        })}</p>`,
         buttons: {
-          ok: {
+          close: {
             icon: '<i class="fas fa-check"></i>',
-            label: game.i18n.localize('Ok'),
+            label: game.i18n.localize('Close'),
             callback: () => {
+              this.close();
             },
           },
         },
-        default: 'ok',
+        default: 'close',
       });
       d.render(true);
 
-      for (const assetRequest of this.assetResolver.keys()) {
-        assetRequests.push(assetRequest);
-        assetResponses.push(AssetReport.FetchWithTimeout(assetRequest, {
-          method: 'HEAD',
-          headers: {
-            'request-url': assetRequest,
-          },
-        }));
-      }
+      const resolveAsset = async (iterator) => {
+        for (let [index, assetRequest] of iterator) {
+          d.data.content = `<p>${game.i18n.format('SCENE-PACKER.asset-report.processing-assets-count', {
+            count: index + 1,
+            total: totalToResolve,
+          })}</p>`;
+          d.render();
+          assetRequests.push(assetRequest);
+          assetResponses.push(await AssetReport.FetchWithTimeout(assetRequest, {
+            method: 'HEAD',
+          }));
+        }
+      };
 
-      Promise.allSettled(assetResponses).then(responses => {
+      const iterator = Array.from(this.assetResolver.keys()).entries();
+      const workers = new Array(Math.min(10, totalToResolve)).fill(iterator)
+        .map(resolveAsset);
+
+      Promise.allSettled(workers).then(() => {
         if (d && typeof d.close === 'function') {
           d.close();
         }
         // Store whether the asset resolves.
-        for (let i = 0; i < responses.length; i++) {
-          const response = responses[i];
+        for (let i = 0; i < assetResponses.length; i++) {
+          const response = assetResponses[i];
           const request = assetRequests[i];
-          this.assetResolver.set(request, response?.value?.ok || false);
+          this.assetResolver.set(request, response?.ok || false);
         }
         // Update each asset reference with the new dependency value.
         this.toProcess.forEach(assetDetail => {
@@ -148,9 +160,15 @@ export default class AssetReport extends FormApplication {
 
   /** @inheritdoc */
   getData(options) {
+    const assetData = this.getAssetData();
+    const dependencies = {};
+    for (const [key, value] of Object.entries(assetData)) {
+      dependencies[key] = value.filter(d => d.hasDependencies).length;
+    }
     return {
       sources: AssetReport.Sources,
-      ...this.getAssetData(),
+      dependencies,
+      ...assetData,
     };
   }
 
@@ -159,13 +177,20 @@ export default class AssetReport extends FormApplication {
    */
   getAssetData() {
     return {
-      actors: Array.from(this.assetMaps[AssetReport.Sources.Actor].values()).sort((a, b) => a.name.localeCompare(b.name)),
-      items: Array.from(this.assetMaps[AssetReport.Sources.Item].values()).sort((a, b) => a.name.localeCompare(b.name)),
-      journals: Array.from(this.assetMaps[AssetReport.Sources.JournalEntry].values()).sort((a, b) => a.name.localeCompare(b.name)),
-      macros: Array.from(this.assetMaps[AssetReport.Sources.Macro].values()).sort((a, b) => a.name.localeCompare(b.name)),
-      playlists: Array.from(this.assetMaps[AssetReport.Sources.Playlist].values()).sort((a, b) => a.name.localeCompare(b.name)),
-      tables: Array.from(this.assetMaps[AssetReport.Sources.RollTable].values()).sort((a, b) => a.name.localeCompare(b.name)),
-      scenes: Array.from(this.assetMaps[AssetReport.Sources.Scene].values()).sort((a, b) => a.name.localeCompare(b.name)),
+      actors: Array.from(this.assetMaps[AssetReport.Sources.Actor].values())
+        .sort((a, b) => a.name.localeCompare(b.name)),
+      items: Array.from(this.assetMaps[AssetReport.Sources.Item].values())
+        .sort((a, b) => a.name.localeCompare(b.name)),
+      journals: Array.from(this.assetMaps[AssetReport.Sources.JournalEntry].values())
+        .sort((a, b) => a.name.localeCompare(b.name)),
+      macros: Array.from(this.assetMaps[AssetReport.Sources.Macro].values())
+        .sort((a, b) => a.name.localeCompare(b.name)),
+      playlists: Array.from(this.assetMaps[AssetReport.Sources.Playlist].values())
+        .sort((a, b) => a.name.localeCompare(b.name)),
+      tables: Array.from(this.assetMaps[AssetReport.Sources.RollTable].values())
+        .sort((a, b) => a.name.localeCompare(b.name)),
+      scenes: Array.from(this.assetMaps[AssetReport.Sources.Scene].values())
+        .sort((a, b) => a.name.localeCompare(b.name)),
     };
   }
 
@@ -174,7 +199,8 @@ export default class AssetReport extends FormApplication {
     super.activateListeners(html);
     html.find('button[name="close"]').click(this.close.bind(this));
     html.find('button[name="copy"]').click(this._onCopy.bind(this));
-    html.find('span.tag.toggle-dependencies').click(this._onToggleDependencies.bind(this));
+    html.find('.asset-list span.tag.toggle-dependencies').click(this._onToggleDependencies.bind(this));
+    html.find('h2').click(this._onToggleDependenciesList.bind(this));
   }
 
   /** @inheritdoc */
@@ -182,13 +208,24 @@ export default class AssetReport extends FormApplication {
   }
 
   /**
-   * Handle copying to clipboard
+   * Handle copy button
    * @private
    */
   _onCopy(event) {
     event.preventDefault();
 
-    const text = JSON.stringify(this.getAssetData(), null, 2);
+    const assetData = this.getAssetData();
+    const data = {};
+    Object.keys(assetData).forEach(k => {
+      const entities = assetData[k].filter(d => d.hasDependencies);
+      if (entities.length) {
+        entities.forEach(entity => {
+          entity.assetDetails = entity.assetDetails.filter(d => d.hasDependency);
+        });
+        data[k] = entities;
+      }
+    });
+    const text = JSON.stringify(data, null, 2);
 
     const el = document.createElement('textarea');
     el.value = text;
@@ -204,8 +241,6 @@ export default class AssetReport extends FormApplication {
       game.i18n.localize('SCENE-PACKER.asset-report.copied-to-clipboard'),
       {},
     );
-
-    this.close();
   }
 
   /**
@@ -223,22 +258,14 @@ export default class AssetReport extends FormApplication {
   }
 
   /**
-   * LazyValue returns a function that can be executed at a later stage.
-   * @param {function} func The function to execute lazily
-   * @return {function(): *}
+   * Handle showing or hiding the list of dependencies
+   * @private
    */
-  static LazyValue(func) {
-    let isCalled = false;
-    let result;
-
-    return () => {
-      if (!isCalled) {
-        isCalled = true;
-        result = func();
-      }
-
-      return result;
-    };
+  _onToggleDependenciesList(event) {
+    event.preventDefault();
+    const $tag = $(event.currentTarget);
+    const $icon = $tag.find('i.fas').toggleClass('fa-angle-double-down fa-angle-double-up');
+    $tag.siblings('ul').toggle();
   }
 
   /**
