@@ -30,10 +30,14 @@ Hooks.once('setup', function () {
         'Scene.prototype.toCompendium',
         async function (wrapped, ...args) {
           const data = await wrapped.bind(this)(...args);
-          if (!data.thumb) {
-            // Create a thumbnail even if there is no background image
-            const t = await this.createThumbnail({img: data.img});
-            data.thumb = t?.thumb;
+          if (!data.thumb?.startsWith('data:')) {
+            // Try to generate a thumbnail if it isn't already a data image
+            try {
+              const t = await this.createThumbnail({img: data.img || undefined});
+              data.thumb = t?.thumb;
+            } catch (e) {
+              console.error(`Could not regenerate thumbnail for ${data?.name}.`, e);
+            }
           }
           return data;
         },
