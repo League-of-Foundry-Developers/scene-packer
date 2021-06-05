@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.2.16
+
+- Updated the thumbnail generation for core Foundry VTT v0.7.x when exporting to a compendium.
+  - Regenerate thumbnail image if there isn't already a valid compendium compatible image.
+  - This patches v0.7.x to be more in line with how v0.8.x works.
+
 ## v2.2.15
 
 - Enhanced the `Asset Report`.
