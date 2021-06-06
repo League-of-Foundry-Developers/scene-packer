@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.2.17
+
+- Enhanced the `Asset Report`.
+  - Fixed asset concurrency sometimes generating incorrect reports.
+
 ## v2.2.16
 
 - Updated the thumbnail generation for core Foundry VTT v0.7.x when exporting to a compendium.

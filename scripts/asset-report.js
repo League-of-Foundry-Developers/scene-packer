@@ -99,10 +99,11 @@ export default class AssetReport extends FormApplication {
             total: totalToResolve,
           })}</p>`;
           d.render();
-          assetRequests.push(assetRequest);
-          assetResponses.push(await AssetReport.FetchWithTimeout(assetRequest, {
+          // Set via index position due to concurrency
+          assetRequests[index] = assetRequest;
+          assetResponses[index] = await AssetReport.FetchWithTimeout(assetRequest, {
             method: 'HEAD',
-          }));
+          });
         }
       };
 
