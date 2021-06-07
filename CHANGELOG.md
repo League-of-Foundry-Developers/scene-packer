@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.2.18
+
+- Fixed `Relink compendium journal entries` macro in v0.8.x
+  - It now correctly locks and unlocks the compendium entries. Thanks Manfred.
+
 ## v2.2.17
 
 - Enhanced the `Asset Report`.
