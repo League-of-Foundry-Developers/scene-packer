@@ -2575,7 +2575,8 @@ export default class ScenePacker {
           locked: locked,
         }),
       );
-      await game.settings.set('core', Compendium.CONFIG_SETTING, settings);
+      let configsetting = Compendium?.CONFIG_SETTING || CompendiumCollection?.CONFIG_SETTING || 'compendiumConfiguration';
+      await game.settings.set('core', configsetting, settings);
     }
   }
 
