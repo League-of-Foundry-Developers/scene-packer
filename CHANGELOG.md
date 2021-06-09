@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.19
+
+- Re-added support for [Bug Reporter](https://foundryvtt.com/packages/bug-reporter) module in Core v0.8.3+.
+
 ## v2.2.18
 
 - Fixed `Relink compendium journal entries` macro in v0.8.x
