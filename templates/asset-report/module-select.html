@@ -3,10 +3,12 @@
     {{localize 'SCENE-PACKER.asset-report.name'}}
     {{#if sceneName}}
     - {{sceneName}}
+    {{else}}
+    - {{mode}}
     {{/if}}
   </h1>
   <p class="notes">
-    {{localize 'SCENE-PACKER.asset-report.module-select.instructions'}}
+    {{localize 'SCENE-PACKER.asset-report.module-select.instructions' mode=mode}}
   </p>
 
   <nav class="list-filters">

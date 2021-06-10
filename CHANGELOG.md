@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.2.20
+
+- Added ability to run the `Asset Report` against a module that contains compendium packs.
+  - See [walkthrough video](https://www.youtube.com/watch?v=GgEQgl4fAjw) for a full rundown.
+
 ## v2.2.19
 
 - Added ability to run the `Asset Report` against a single Scene.

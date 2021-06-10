@@ -29,7 +29,7 @@
     "asset-report": {
       "name": "Asset Report",
       "selector": "Select whether to run the Asset Report against the local World or against a Module's compendiums.",
-      "notes": "Below is the Asset Report showing which entities in your world have assets that depend on external locations.",
+      "notes": "Below is the Asset Report showing which entities in your world have assets that depend on external locations. It does not support wildcard tokens.",
       "copy": "Copy JSON to clipboard",
       "copied-to-clipboard": "Asset Report copied to clipboard!",
       "scenes": "Scenes",
@@ -41,12 +41,15 @@
       "tables": "RollTables",
       "show": "Show dependencies",
       "hide": "Hide dependencies",
+      "hide-ok": "Only show entries that have dependencies:",
+      "wait": "Please wait... Loading {type}...",
       "module-select": {
         "title": "Module Selection",
-        "instructions": "The asset report will list all of the assets in the world which have dependencies outside of your module. Use this report to help determine what images will be broken when you distribute your module to others. Use this form to select which modules you want to treat as a data source. In most cases this should just be your module and any dependencies of your module.",
+        "instructions": "The asset report will list all of the assets in the {mode} which have dependencies outside of your module. Use this report to help determine what images will be broken when you distribute your module to others. Use this form to select which modules you want to treat as a data source. In most cases this should just be your module and any dependencies of your module.",
         "none": "No Modules are available within this World.",
         "search": "Filter Modules",
-        "web-external": "Treat web URLs as \"external\" when calculating dependencies."
+        "web-external": "Treat web URLs as \"external\" when calculating dependencies.",
+        "mini": "Select which module you wish to run the Asset Report against. Only modules with Packs are available."
       },
       "no-assets": "No Assets",
       "no-assets-details": "There are no assets in this world.",
