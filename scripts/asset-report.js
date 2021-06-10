@@ -38,121 +38,148 @@ export default class AssetReport extends FormApplication {
     templates = templates.map(t => `modules/scene-packer/${t}`);
     loadTemplates(templates);
 
+    if (scene) {
+      this.runReport({scene: scene, mode: AssetReport.Modes.Scene});
+    } else {
+      new Dialog({
+        title: game.i18n.localize('SCENE-PACKER.asset-report.name'),
+        content: `<p>${game.i18n.localize('SCENE-PACKER.asset-report.selector')}</p><hr>`,
+        buttons: {
+          world: {
+            icon: '<i class="fas fa-globe"></i>',
+            label: game.i18n.localize('World'),
+            callback: () => {
+              this.runReport({mode: AssetReport.Modes.World});
+              this.close();
+            },
+          },
+          module: {
+            icon: '<i class="fas fa-atlas"></i>',
+            label: game.i18n.localize('Module'),
+            callback: () => {
+              //this.runReport({mode: AssetReport.Modes.Module});
+              this.close();
+            },
+          },
+        },
+        default: 'world',
+      }).render(true);
+    }
+  }
+
+  /**
+   * Runs the Asset Report
+   * @param {Modes} mode - The mode to operate in.
+   * @param {Object|null} scene - The specific Scene to run a report on or null to report on everything.
+   */
+  runReport({mode = AssetReport.Modes.World, scene = null} = {}) {
     const selectModules = new Promise((resolve, reject) => new ModuleSelect(resolve, reject, scene).render(true));
     selectModules.then(({selections, webExternal} = result) => {
       this.allowedModules = selections;
       this._webExternal = webExternal;
-      this.renderReport({scene: scene});
-    }).catch(() => {
-      // NOOP
-    });
-  }
+      this.ParseSceneAssets(scene);
+      if (!scene) {
+        this.ParseActorAssets();
+        this.ParseJournalAssets();
+        this.ParseItemAssets();
+        this.ParsePlaylistAssets();
+        this.ParseMacroAssets();
+        this.ParseRollTableAssets();
+      }
 
-  /**
-   * Renders the Asset Report
-   * @param {Object|null} scene - The specific Scene to run a report on or null to report on
-   */
-  renderReport({scene = null} = {}) {
-    this.ParseSceneAssets(scene);
-    if (!scene) {
-      this.ParseActorAssets();
-      this.ParseJournalAssets();
-      this.ParseItemAssets();
-      this.ParsePlaylistAssets();
-      this.ParseMacroAssets();
-      this.ParseRollTableAssets();
-    }
+      /**
+       * Keep track of the original request URL in an ordered array.
+       * @type {string[]}
+       */
+      const assetRequests = [];
+      /**
+       * Keep track of the asset responses in the same order as the asset requests.
+       * @type {Promise<Response>[]}
+       */
+      const assetResponses = [];
 
-    /**
-     * Keep track of the original request URL in an ordered array.
-     * @type {string[]}
-     */
-    const assetRequests = [];
-    /**
-     * Keep track of the asset responses in the same order as the asset requests.
-     * @type {Promise<Response>[]}
-     */
-    const assetResponses = [];
-
-    // Resolve all of the assets to see if they exist on the server.
-    const totalToResolve = this.assetResolver.size;
-    if (!totalToResolve) {
-      Dialog.prompt({
-        title: game.i18n.localize('SCENE-PACKER.asset-report.no-assets'),
-        content: `<p>${game.i18n.localize('SCENE-PACKER.asset-report.no-assets-details')}</p>`,
-        label: game.i18n.localize('Close'),
-        callback: () => {
-        },
-      });
-      return;
-    }
-    const d = new Dialog({
-      title: game.i18n.localize('SCENE-PACKER.asset-report.processing-assets'),
-      content: `<p>${game.i18n.format('SCENE-PACKER.asset-report.processing-assets-count', {
-        count: 0,
-        total: totalToResolve,
-      })}</p>`,
-      buttons: {
-        close: {
-          icon: '<i class="fas fa-check"></i>',
+      // Resolve all of the assets to see if they exist on the server.
+      const totalToResolve = this.assetResolver.size;
+      if (!totalToResolve) {
+        Dialog.prompt({
+          title: game.i18n.localize('SCENE-PACKER.asset-report.no-assets'),
+          content: `<p>${game.i18n.localize('SCENE-PACKER.asset-report.no-assets-details')}</p>`,
           label: game.i18n.localize('Close'),
           callback: () => {
-            this.close();
+          },
+        });
+        return;
+      }
+      const d = new Dialog({
+        title: game.i18n.localize('SCENE-PACKER.asset-report.processing-assets'),
+        content: `<p>${game.i18n.format('SCENE-PACKER.asset-report.processing-assets-count', {
+          count: 0,
+          total: totalToResolve,
+        })}</p>`,
+        buttons: {
+          close: {
+            icon: '<i class="fas fa-check"></i>',
+            label: game.i18n.localize('Close'),
+            callback: () => {
+              this.close();
+            },
           },
         },
-      },
-      default: 'close',
-    });
-    d.render(true);
+        default: 'close',
+      });
+      d.render(true);
 
-    const resolveAsset = async (iterator) => {
-      for (let [index, assetRequest] of iterator) {
-        d.data.content = `<p>${game.i18n.format('SCENE-PACKER.asset-report.processing-assets-count', {
-          count: index + 1,
-          total: totalToResolve,
-        })}</p>`;
-        d.render();
-        // Set via index position due to concurrency
-        assetRequests[index] = assetRequest;
-        assetResponses[index] = await AssetReport.FetchWithTimeout(assetRequest, {
-          method: 'HEAD',
-          mode: 'no-cors',
+      const resolveAsset = async (iterator) => {
+        for (let [index, assetRequest] of iterator) {
+          d.data.content = `<p>${game.i18n.format('SCENE-PACKER.asset-report.processing-assets-count', {
+            count: index + 1,
+            total: totalToResolve,
+          })}</p>`;
+          d.render();
+          // Set via index position due to concurrency
+          assetRequests[index] = assetRequest;
+          assetResponses[index] = await AssetReport.FetchWithTimeout(assetRequest, {
+            method: 'HEAD',
+            mode: 'no-cors',
+          });
+        }
+      };
+
+      const iterator = Array.from(this.assetResolver.keys()).entries();
+      const workers = new Array(Math.min(10, totalToResolve)).fill(iterator).map(resolveAsset);
+
+      Promise.allSettled(workers).then(() => {
+        if (d && typeof d.close === 'function') {
+          d.close();
+        }
+        // Store whether the asset resolves.
+        for (let i = 0; i < assetResponses.length; i++) {
+          const response = assetResponses[i];
+          const request = assetRequests[i];
+          this.assetResolver.set(request, response?.ok || false);
+        }
+        // Update each asset reference with the new dependency value.
+        this.toProcess.forEach(assetDetail => {
+          if (this.assetResolver.has(assetDetail.asset)) {
+            assetDetail.hasDependency = assetDetail.hasDependency || !this.assetResolver.get(assetDetail.asset);
+          }
+          const entityData = this.assetMaps[assetDetail.parentType].get(assetDetail.parentID);
+          if (entityData) {
+            entityData.assetDetails.push(assetDetail);
+          }
         });
-      }
-    };
+        // Calculate the overall dependency values.
+        Object.values(AssetReport.Sources).forEach(type => {
+          for (const entry of this.assetMaps[type].values()) {
+            entry.hasDependencies = entry.assetDetails.some(a => a.hasDependency);
+          }
+        });
 
-    const iterator = Array.from(this.assetResolver.keys()).entries();
-    const workers = new Array(Math.min(10, totalToResolve)).fill(iterator).map(resolveAsset);
-
-    Promise.allSettled(workers).then(() => {
-      if (d && typeof d.close === 'function') {
-        d.close();
-      }
-      // Store whether the asset resolves.
-      for (let i = 0; i < assetResponses.length; i++) {
-        const response = assetResponses[i];
-        const request = assetRequests[i];
-        this.assetResolver.set(request, response?.ok || false);
-      }
-      // Update each asset reference with the new dependency value.
-      this.toProcess.forEach(assetDetail => {
-        if (this.assetResolver.has(assetDetail.asset)) {
-          assetDetail.hasDependency = assetDetail.hasDependency || !this.assetResolver.get(assetDetail.asset);
-        }
-        const entityData = this.assetMaps[assetDetail.parentType].get(assetDetail.parentID);
-        if (entityData) {
-          entityData.assetDetails.push(assetDetail);
-        }
+        // Render the Asset Report details
+        this.render(true);
       });
-      // Calculate the overall dependency values.
-      Object.values(AssetReport.Sources).forEach(type => {
-        for (const entry of this.assetMaps[type].values()) {
-          entry.hasDependencies = entry.assetDetails.some(a => a.hasDependency);
-        }
-      });
-
-      // Render the Asset Report details
-      this.render(true);
+    }).catch(() => {
+      // NOOP
     });
   }
 
@@ -301,6 +328,15 @@ export default class AssetReport extends FormApplication {
 
     return response;
   }
+
+  /**
+   * The mode that the Asset Report is operating in.
+   */
+  static Modes = {
+    Scene: 'scene',
+    Module: 'module',
+    World: 'world',
+  };
 
   /**
    * Sources of assets within the world.
