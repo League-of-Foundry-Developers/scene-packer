@@ -4,11 +4,12 @@ import ModuleSelect from './asset-report/module-select.js';
  * Report on assets
  */
 export default class AssetReport extends FormApplication {
-  constructor(...args) {
-    super(...args);
+  constructor({scene = null} = {}) {
+    super();
     this.allowedModules = [];
     this.domParser = new DOMParser();
     this._webExternal = true;
+    this.sceneName = scene?.name || '';
 
     this.assetMaps = {
       [AssetReport.Sources.Actor]: new Map(),
@@ -37,18 +38,20 @@ export default class AssetReport extends FormApplication {
     templates = templates.map(t => `modules/scene-packer/${t}`);
     loadTemplates(templates);
 
-    const selectModules = new Promise((resolve, reject) => new ModuleSelect(resolve, reject).render(true));
+    const selectModules = new Promise((resolve, reject) => new ModuleSelect(resolve, reject, scene).render(true));
     selectModules.then(({selections, webExternal} = result) => {
       this.allowedModules = selections;
       this._webExternal = webExternal;
 
-      this.ParseSceneAssets();
-      this.ParseActorAssets();
-      this.ParseJournalAssets();
-      this.ParseItemAssets();
-      this.ParsePlaylistAssets();
-      this.ParseMacroAssets();
-      this.ParseRollTableAssets();
+      this.ParseSceneAssets(scene);
+      if (!scene) {
+        this.ParseActorAssets();
+        this.ParseJournalAssets();
+        this.ParseItemAssets();
+        this.ParsePlaylistAssets();
+        this.ParseMacroAssets();
+        this.ParseRollTableAssets();
+      }
 
       /**
        * Keep track of the original request URL in an ordered array.
@@ -103,6 +106,7 @@ export default class AssetReport extends FormApplication {
           assetRequests[index] = assetRequest;
           assetResponses[index] = await AssetReport.FetchWithTimeout(assetRequest, {
             method: 'HEAD',
+            mode: 'no-cors',
           });
         }
       };
@@ -168,6 +172,7 @@ export default class AssetReport extends FormApplication {
     }
     return {
       sources: AssetReport.Sources,
+      sceneName: this.sceneName,
       dependencies,
       ...assetData,
     };
@@ -464,11 +469,14 @@ export default class AssetReport extends FormApplication {
   /**
    * Parses world Scenes for all of their assets.
    * Sets the {@link EntityData} for the world Scenes, keyed by scene.id
+   * @param {Object} scene The scene to parse. Will parse all Scenes if none are provided.
    * @return {Number} The number of Scenes checked.
    */
-  ParseSceneAssets() {
+  ParseSceneAssets(scene) {
     const entities = [];
-    if (!isNewerVersion('0.8.0', game.data.version)) {
+    if (scene) {
+      entities.push(scene);
+    } else if (!isNewerVersion('0.8.0', game.data.version)) {
       entities.push(...game[AssetReport.Sources.Scene].contents);
     } else {
       entities.push(...game[AssetReport.Sources.Scene].entities);

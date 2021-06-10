@@ -1,5 +1,10 @@
 <form autocomplete="off">
-  <h1>{{localize 'SCENE-PACKER.asset-report.name'}}</h1>
+  <h1>
+    {{localize 'SCENE-PACKER.asset-report.name'}}
+    {{#if sceneName}}
+    - {{sceneName}}
+    {{/if}}
+  </h1>
   <p class="notes">
     {{localize 'SCENE-PACKER.asset-report.module-select.instructions'}}
   </p>

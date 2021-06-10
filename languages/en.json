@@ -50,7 +50,8 @@
       "no-assets": "No Assets",
       "no-assets-details": "There are no assets in this world.",
       "processing-assets": "Processing assets",
-      "processing-assets-count": "Validating {count} of {total} assets..."
+      "processing-assets-count": "Validating {count} of {total} assets...",
+      "run": "Run Asset Report"
     },
     "notifications": {
       "first-launch": "First launch of this Scene! Unpacking scene...",

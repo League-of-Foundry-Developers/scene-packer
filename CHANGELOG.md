@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.2.19
+
+- Added ability to run the `Asset Report` against a single Scene.
+  - Right click on a Scene in the sidebar to access `Run Asset Report`. Be sure to have enabled the `Show Context Menu` option for Scene Packer in settings.
+- Re-added support for [Bug Reporter](https://foundryvtt.com/packages/bug-reporter) module in Core v0.8.3+.
+
 ## v2.2.18
 
 - Fixed `Relink compendium journal entries` macro in v0.8.x

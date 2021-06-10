@@ -1,5 +1,10 @@
 <form autocomplete="off">
-  <h1>{{localize 'SCENE-PACKER.asset-report.name'}}</h1>
+  <h1>
+    {{localize 'SCENE-PACKER.asset-report.name'}}
+    {{#if sceneName}}
+    - {{sceneName}}
+    {{/if}}
+  </h1>
   <p class="notes">
     {{localize 'SCENE-PACKER.asset-report.notes'}}
   </p>
@@ -8,7 +13,7 @@
     {{#if scenes}}
     <section>
       <h2><i class="fas fa-angle-double-down"></i> {{localize 'SCENE-PACKER.asset-report.scenes'}} ({{ dependencies.scenes }}/{{ scenes.length }})</h2>
-      <ul class="asset-list hidden">
+      <ul class="asset-list{{#unless sceneName}} hidden{{/unless}}">
         {{#each scenes}}
         {{> "modules/scene-packer/templates/asset-report/partials/details.html" entityType="Scene"}}
         {{/each}}

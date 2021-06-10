@@ -4,7 +4,7 @@
 
 # Scene Packer
 
-A library to help other developers package up Scenes and Adventures to solve several frustrations when importing Scenes from a module compendium. With Scene Packer the following works:
+A library to help content creators package up Scenes and Adventures to solve several frustrations when importing Scenes from a module compendium. With Scene Packer the following works:
 
 - Scene Journal Pins link to the correct Journal.
   - This is the feature that started this module. I was frustrated that I could put a Scene into a compendium with journal pins and then when I imported from a compendium, the journal pin was there, but didn't load anything. This module gives you portable compendium journal pins that link to the original journal entry. The journal links will persist when importing from compendiums.
@@ -24,7 +24,9 @@ In summary, it makes importing a Scene from a Compendium (via an "adventure modu
 
 Scene Packer is system agnostic, it doesn't matter whether you're packaging up a D&D5e module, or a Pathfinder one, or an Alien RPG one, Scene Packer doesn't mind.
 
-Additionally, `Scene Packer` contains an `Asset Report` (accessible via the bundled Macro) which details which assets will have broken references when imported into someone else's world.
+### Asset Report
+
+Additionally, `Scene Packer` contains an `Asset Report` (accessible via the bundled Macro or by right clicking on a Scene in the sidebar) which details which assets will have broken references when imported into someone else's world.
 
 [![Asset Report](http://img.youtube.com/vi/eBLbUCNfsmk/0.jpg)](http://www.youtube.com/watch?v=eBLbUCNfsmk "Asset Report")
 
@@ -34,9 +36,12 @@ In the setup screen, find the module `Library: Scene Packer` under the "Add-on M
 
 ## Usage
 
-There are several `Journal entries` bundled with Scene Packer. In them, you can find references on how to use Scene Packer both as a Developer and as a GM.
+There are several `Journal entries` bundled with Scene Packer. In them, you can find references on how to use Scene Packer both as a Content Creator and as a GM.
 
 To use the Scene Packer as part of your module you will need to add it as a dependency in your `module.json` file as well as add/update your module javascript (see [Module code requirements](#module-code-requirements) below).
+
+If you would like some help packing your module, feel free to stop by my [<img src="https://github.com/League-of-Foundry-Developers/scene-packer/raw/main/assets/icons/hand-truck.png" alt="icon" height="24" valign="middle">
+discord server](https://discord.com/invite/HY3xhBEf2A) and I'll happily help.
 
 ```json
 "dependencies": [
