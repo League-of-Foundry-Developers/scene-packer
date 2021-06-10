@@ -28,7 +28,7 @@ Scene Packer is system agnostic, it doesn't matter whether you're packaging up a
 
 Additionally, `Scene Packer` contains an `Asset Report` (accessible via the bundled Macro or by right clicking on a Scene in the sidebar) which details which assets will have broken references when imported into someone else's world.
 
-[![Asset Report](http://img.youtube.com/vi/eBLbUCNfsmk/0.jpg)](http://www.youtube.com/watch?v=eBLbUCNfsmk "Asset Report")
+[![Asset Report](http://img.youtube.com/vi/GgEQgl4fAjw/0.jpg)](https://www.youtube.com/watch?v=GgEQgl4fAjw "Asset Report")
 
 ## Installation
 

@@ -10,6 +10,9 @@ export default class AssetReport extends FormApplication {
     this.domParser = new DOMParser();
     this._webExternal = true;
     this.sceneName = scene?.name || '';
+    this.mode = scene ? AssetReport.Modes.Scene : AssetReport.Modes.World;
+    /** @type {Object} */
+    this.moduleToCheck = null;
 
     this.assetMaps = {
       [AssetReport.Sources.Actor]: new Map(),
@@ -38,19 +41,150 @@ export default class AssetReport extends FormApplication {
     templates = templates.map(t => `modules/scene-packer/${t}`);
     loadTemplates(templates);
 
-    const selectModules = new Promise((resolve, reject) => new ModuleSelect(resolve, reject, scene).render(true));
-    selectModules.then(({selections, webExternal} = result) => {
+    if (scene) {
+      this.runReport({scene: scene});
+    } else {
+      new Dialog({
+        title: game.i18n.localize('SCENE-PACKER.asset-report.name'),
+        content: `<p>${game.i18n.localize('SCENE-PACKER.asset-report.selector')}</p><hr>`,
+        buttons: {
+          world: {
+            icon: '<i class="fas fa-globe"></i>',
+            label: game.i18n.localize('World'),
+            callback: () => {
+              this.runReport();
+              this.close();
+            },
+          },
+          module: {
+            icon: '<i class="fas fa-atlas"></i>',
+            label: game.i18n.localize('Module'),
+            callback: () => {
+              this.close();
+
+              let modules = game.data.modules.filter(m => m.packs?.length && m.active);
+              let content = `<p>${game.i18n.localize('SCENE-PACKER.asset-report.module-select.mini')}</p>`;
+              if (!modules.length) {
+                content += `<p>${game.i18n.localize('SCENE-PACKER.asset-report.module-select.none')}</p>`;
+              } else {
+                content += '<select id="module-name">';
+                modules.forEach(m => {
+                  content += `<option value="${m.id}">${m.id}</option>`;
+                });
+                content += '</select>';
+              }
+              content += '<hr>';
+              new Dialog({
+                title: game.i18n.localize('SCENE-PACKER.asset-report.name'),
+                content: content,
+                buttons: {
+                  world: {
+                    icon: '<i class="fas fa-check"></i>',
+                    label: game.i18n.localize('Next'),
+                    callback: (html) => {
+                      this.close();
+
+                      let moduleName = html.find('#module-name')[0]?.value;
+                      if (moduleName) {
+                        this.runReport({moduleName});
+                      }
+                    },
+                  },
+                  cancel: {
+                    icon: '<i class="fas fa-times"></i>',
+                    label: game.i18n.localize('Cancel'),
+                    callback: () => {
+                      this.close();
+                    },
+                  },
+                },
+                default: 'world',
+              }).render(true);
+            },
+          },
+        },
+        default: 'world',
+      }).render(true);
+    }
+  }
+
+  /**
+   * Runs the Asset Report
+   * @param {Object|null} scene - The specific Scene to run a report against or null to report on everything.
+   * @param {String} moduleName - The module name to run the report against.
+   */
+  runReport({scene = null, moduleName = ''} = {}) {
+    if (moduleName) {
+      this.mode = AssetReport.Modes.Module;
+      const module = game.modules.get(moduleName);
+      if (module) {
+        this.moduleToCheck = module;
+      } else {
+        return;
+      }
+    }
+    const selectModules = new Promise((resolve, reject) => new ModuleSelect(resolve, reject, {
+      mode: this.mode,
+      scene,
+    }).render(true));
+    selectModules.then(async ({selections, webExternal} = result) => {
       this.allowedModules = selections;
       this._webExternal = webExternal;
-
-      this.ParseSceneAssets(scene);
+      const di = new Dialog({
+        title: game.i18n.localize('SCENE-PACKER.asset-report.name'),
+        content: `<p>${game.i18n.format('SCENE-PACKER.asset-report.wait', {
+          type: AssetReport.Sources.Scene,
+        })}</p>`,
+        buttons: {
+          close: {
+            icon: '<i class="fas fa-check"></i>',
+            label: game.i18n.localize('Close'),
+            callback: () => {
+              this.close();
+            },
+          },
+        },
+        default: 'close',
+      });
+      di.render(true);
+      await this.ParseSceneAssets(scene);
       if (!scene) {
-        this.ParseActorAssets();
-        this.ParseJournalAssets();
-        this.ParseItemAssets();
-        this.ParsePlaylistAssets();
-        this.ParseMacroAssets();
-        this.ParseRollTableAssets();
+        di.data.content = `<p>${game.i18n.format('SCENE-PACKER.asset-report.wait', {
+          type: AssetReport.Sources.Actor,
+        })}</p>`;
+        di.render();
+        await this.ParseActorAssets();
+        di.data.content = `<p>${game.i18n.format('SCENE-PACKER.asset-report.wait', {
+          type: AssetReport.Sources.JournalEntry,
+        })}</p>`;
+        di.render();
+        await this.ParseJournalAssets();
+        di.data.content = `<p>${game.i18n.format('SCENE-PACKER.asset-report.wait', {
+          type: AssetReport.Sources.Item,
+        })}</p>`;
+        di.render();
+        await this.ParseItemAssets();
+        di.data.content = `<p>${game.i18n.format('SCENE-PACKER.asset-report.wait', {
+          type: AssetReport.Sources.Playlist,
+        })}</p>`;
+        di.render();
+        await this.ParsePlaylistAssets();
+        di.data.content = `<p>${game.i18n.format('SCENE-PACKER.asset-report.wait', {
+          type: AssetReport.Sources.Macro,
+        })}</p>`;
+        di.render();
+        await this.ParseMacroAssets();
+        di.data.content = `<p>${game.i18n.format('SCENE-PACKER.asset-report.wait', {
+          type: AssetReport.Sources.RollTable,
+        })}</p>`;
+        di.render();
+        await this.ParseRollTableAssets();
+      }
+      if (di && typeof di.close === 'function') {
+        // Wrap in a setTimeout to make sure the application has finished rendering it, otherwise it won't close.
+        setTimeout(() => {
+          di.close({force: true});
+        }, 0)
       }
 
       /**
@@ -112,12 +246,14 @@ export default class AssetReport extends FormApplication {
       };
 
       const iterator = Array.from(this.assetResolver.keys()).entries();
-      const workers = new Array(Math.min(10, totalToResolve)).fill(iterator)
-        .map(resolveAsset);
+      const workers = new Array(Math.min(10, totalToResolve)).fill(iterator).map(resolveAsset);
 
       Promise.allSettled(workers).then(() => {
         if (d && typeof d.close === 'function') {
-          d.close();
+          // Wrap in a setTimeout to make sure the application has finished rendering it, otherwise it won't close.
+          setTimeout(() => {
+            d.close({force: true});
+          }, 0)
         }
         // Store whether the asset resolves.
         for (let i = 0; i < assetResponses.length; i++) {
@@ -207,6 +343,7 @@ export default class AssetReport extends FormApplication {
     html.find('button[name="copy"]').click(this._onCopy.bind(this));
     html.find('.asset-list span.tag.toggle-dependencies').click(this._onToggleDependencies.bind(this));
     html.find('h2').click(this._onToggleDependenciesList.bind(this));
+    html.find('#hide-ok').change(this._onToggleHideOk.bind(this));
   }
 
   /** @inheritdoc */
@@ -275,6 +412,14 @@ export default class AssetReport extends FormApplication {
   }
 
   /**
+   * Handle showing or hiding the list of dependencies
+   * @private
+   */
+  _onToggleHideOk(event) {
+    $(event.currentTarget).closest('footer').siblings('div.report-details').find('ul.asset-list > li:not(.has-dependencies)').toggle();
+  }
+
+  /**
    * Wrapper around {@link fetch} to include a timeout.
    * Defaults to 5sec.
    * @param {RequestInfo} resource
@@ -295,6 +440,15 @@ export default class AssetReport extends FormApplication {
 
     return response;
   }
+
+  /**
+   * The mode that the Asset Report is operating in.
+   */
+  static Modes = {
+    Scene: 'scene',
+    Module: 'module',
+    World: 'world',
+  };
 
   /**
    * Sources of assets within the world.
@@ -341,6 +495,7 @@ export default class AssetReport extends FormApplication {
    * @property {string} name - The name of the document entity.
    * @property {string} type - The type of the document entity.
    * @property {string} css - CSS class to apply to links.
+   * @property {string} pack - The pack this entity belongs to.
    * @property {AssetDetails[]} assetDetails - Asset details of the document entity.
    * @property {boolean} hasDependencies - Whether the AssetDetails in this EntityData has dependencies on other worlds/modules etc.
    */
@@ -467,15 +622,44 @@ export default class AssetReport extends FormApplication {
   }
 
   /**
+   * Gets the contents of `type` for the packs beloging to {@link moduleToCheck}
+   * @param {String} type
+   * @return {String[]}
+   */
+  async getPackContents(type) {
+    const entities = [];
+    const modules = this.moduleToCheck.packs.filter(p => p.entity === type);
+    for (let i = 0; i < modules.length; i++) {
+      const module = modules[i];
+      const pack = game.packs.get(`${module.package}.${module.name}`);
+      if (!pack) {
+        continue;
+      }
+      if (!isNewerVersion('0.8.0', game.data.version)) {
+        const contents = await pack.getDocuments();
+        entities.push(...contents.filter(s => s.name !== '#[CF_tempEntity]'));
+      } else {
+        const contents = await pack.getContent();
+        entities.push(...contents.filter(s => s.name !== '#[CF_tempEntity]'));
+      }
+    }
+
+    return entities;
+  }
+
+  /**
    * Parses world Scenes for all of their assets.
    * Sets the {@link EntityData} for the world Scenes, keyed by scene.id
    * @param {Object} scene The scene to parse. Will parse all Scenes if none are provided.
    * @return {Number} The number of Scenes checked.
    */
-  ParseSceneAssets(scene) {
+  async ParseSceneAssets(scene) {
     const entities = [];
     if (scene) {
       entities.push(scene);
+    } else if (this.moduleToCheck) {
+      const contents = await this.getPackContents('Scene');
+      entities.push(...contents);
     } else if (!isNewerVersion('0.8.0', game.data.version)) {
       entities.push(...game[AssetReport.Sources.Scene].contents);
     } else {
@@ -494,6 +678,7 @@ export default class AssetReport extends FormApplication {
         css: 'fa-map',
         assetDetails: [],
         hasDependencies: false,
+        pack: scene.pack,
       };
 
       if (scene.data.img) {
@@ -583,9 +768,12 @@ export default class AssetReport extends FormApplication {
    * Sets the {@link EntityData} for the world Actors, keyed by actor.id
    * @return {Number} The number of Actors checked.
    */
-  ParseActorAssets() {
+  async ParseActorAssets() {
     const entities = [];
-    if (!isNewerVersion('0.8.0', game.data.version)) {
+    if (this.moduleToCheck) {
+      const contents = await this.getPackContents('Actor');
+      entities.push(...contents);
+    } else if (!isNewerVersion('0.8.0', game.data.version)) {
       entities.push(...game[AssetReport.Sources.Actor].contents);
     } else {
       entities.push(...game[AssetReport.Sources.Actor].entities);
@@ -603,6 +791,7 @@ export default class AssetReport extends FormApplication {
         css: 'fa-user',
         assetDetails: [],
         hasDependencies: false,
+        pack: actor.pack,
       };
 
       if (actor.data.img) {
@@ -658,9 +847,12 @@ export default class AssetReport extends FormApplication {
    * Sets the {@link EntityData} for the world Journals, keyed by journal.id
    * @return {Number} The number of Journals checked.
    */
-  ParseJournalAssets() {
+  async ParseJournalAssets() {
     const entities = [];
-    if (!isNewerVersion('0.8.0', game.data.version)) {
+    if (this.moduleToCheck) {
+      const contents = await this.getPackContents('JournalEntry');
+      entities.push(...contents);
+    } else if (!isNewerVersion('0.8.0', game.data.version)) {
       entities.push(...game[AssetReport.Sources.JournalEntry].contents);
     } else {
       entities.push(...game[AssetReport.Sources.JournalEntry].entities);
@@ -678,6 +870,7 @@ export default class AssetReport extends FormApplication {
         css: 'fa-book-open',
         assetDetails: [],
         hasDependencies: false,
+        pack: journal.pack,
       };
 
       if (journal.data.img) {
@@ -705,9 +898,12 @@ export default class AssetReport extends FormApplication {
    * Sets the {@link EntityData} for the world Items, keyed by item.id
    * @return {Number} The number of Items checked.
    */
-  ParseItemAssets() {
+  async ParseItemAssets() {
     const entities = [];
-    if (!isNewerVersion('0.8.0', game.data.version)) {
+    if (this.moduleToCheck) {
+      const contents = await this.getPackContents('Item');
+      entities.push(...contents);
+    } else if (!isNewerVersion('0.8.0', game.data.version)) {
       entities.push(...game[AssetReport.Sources.Item].contents);
     } else {
       entities.push(...game[AssetReport.Sources.Item].entities);
@@ -725,6 +921,7 @@ export default class AssetReport extends FormApplication {
         css: 'fa-suitcase',
         assetDetails: [],
         hasDependencies: false,
+        pack: item.pack,
       };
 
       if (item.data.img) {
@@ -771,9 +968,12 @@ export default class AssetReport extends FormApplication {
    * Sets the {@link EntityData} for the world Playlists, keyed by playlist.id
    * @return {Number} The number of Playlists checked.
    */
-  ParsePlaylistAssets() {
+  async ParsePlaylistAssets() {
     const entities = [];
-    if (!isNewerVersion('0.8.0', game.data.version)) {
+    if (this.moduleToCheck) {
+      const contents = await this.getPackContents('Playlist');
+      entities.push(...contents);
+    } else if (!isNewerVersion('0.8.0', game.data.version)) {
       entities.push(...game[AssetReport.Sources.Playlist].contents);
     } else {
       entities.push(...game[AssetReport.Sources.Playlist].entities);
@@ -791,6 +991,7 @@ export default class AssetReport extends FormApplication {
         css: 'fa-music',
         assetDetails: [],
         hasDependencies: false,
+        pack: playlist.pack,
       };
 
       const sounds = [];
@@ -828,9 +1029,12 @@ export default class AssetReport extends FormApplication {
    * Sets the {@link EntityData} for the world Macros, keyed by macro.id
    * @return {Number} The number of Macros checked.
    */
-  ParseMacroAssets() {
+  async ParseMacroAssets() {
     const entities = [];
-    if (!isNewerVersion('0.8.0', game.data.version)) {
+    if (this.moduleToCheck) {
+      const contents = await this.getPackContents('Macro');
+      entities.push(...contents);
+    } else if (!isNewerVersion('0.8.0', game.data.version)) {
       entities.push(...game[AssetReport.Sources.Macro].contents);
     } else {
       entities.push(...game[AssetReport.Sources.Macro].entities);
@@ -848,6 +1052,7 @@ export default class AssetReport extends FormApplication {
         css: 'fa-terminal',
         assetDetails: [],
         hasDependencies: false,
+        pack: macro.pack,
       };
 
       if (macro.data.img) {
@@ -865,9 +1070,12 @@ export default class AssetReport extends FormApplication {
    * Sets the {@link EntityData} for the world RollTables, keyed by table.id
    * @return {Number} The number of RollTables checked.
    */
-  ParseRollTableAssets() {
+  async ParseRollTableAssets() {
     const entities = [];
-    if (!isNewerVersion('0.8.0', game.data.version)) {
+    if (this.moduleToCheck) {
+      const contents = await this.getPackContents('RollTable');
+      entities.push(...contents);
+    } else if (!isNewerVersion('0.8.0', game.data.version)) {
       entities.push(...game[AssetReport.Sources.RollTable].contents);
     } else {
       entities.push(...game[AssetReport.Sources.RollTable].entities);
@@ -885,6 +1093,7 @@ export default class AssetReport extends FormApplication {
         css: 'fa-th-list',
         assetDetails: [],
         hasDependencies: false,
+        pack: table.pack,
       };
 
       if (table.data.img) {

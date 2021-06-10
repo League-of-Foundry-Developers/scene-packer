@@ -1,7 +1,7 @@
-<li class="location flexcol" data-scene-id="{{id}}">
+<li class="location flexcol{{#if hasDependencies}} has-dependencies{{else}} hidden{{/if}}">
   <div class="overview flexrow">
     {{#if hasDependencies}}
-    <a class="entity-link" data-entity="{{entityType}}" data-id="{{id}}"><i class="fas {{css}}"></i> {{name}}</a>
+    <a class="entity-link"{{#if pack}} data-pack="{{pack}}"{{else}} data-entity="{{entityType}}" {{/if}}data-id="{{id}}"><i class="fas {{css}}"></i> {{name}}</a>
     <span class="tag toggle-dependencies"><i class="fas fa-exclamation-triangle"></i> <span>{{localize 'SCENE-PACKER.asset-report.show'}}</span></span>
     {{else}}
     <span>{{name}}</span>
