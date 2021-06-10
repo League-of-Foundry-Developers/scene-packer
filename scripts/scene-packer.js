@@ -3331,6 +3331,20 @@ Hooks.once('setup', () => {
             }
           },
         },
+        {
+          name: game.i18n.localize(
+            'SCENE-PACKER.asset-report.run',
+          ),
+          icon: '<i class="fas fa-search"></i>',
+          condition: (li) => {
+            return game.user.isGM &&
+              game.settings.get(MODULE_NAME, 'enableContextMenu');
+          },
+          callback: (li) => {
+            let scene = game.scenes.get(li.data('entityId'));
+            new globalScenePacker.AssetReport({scene});
+          },
+        },
       );
     }
   });

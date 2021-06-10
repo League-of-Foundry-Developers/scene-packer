@@ -5,10 +5,12 @@ export default class ModuleSelect extends FormApplication {
   constructor(...args) {
     const resolve = args.shift();
     const reject = args.shift();
+    const scene = args.shift();
 
-    super(...args);
+    super();
     this.resolve = resolve;
     this.reject = reject;
+    this.sceneName = scene?.name || '';
     this._filter = 'all';
     this._expanded = false;
     this._checked = {};
@@ -77,7 +79,7 @@ export default class ModuleSelect extends FormApplication {
     });
 
     // Return data for rendering
-    return {modules, expanded: this._expanded, webExternal: this._webExternal};
+    return {modules, expanded: this._expanded, webExternal: this._webExternal, sceneName: this.sceneName};
   }
 
 
