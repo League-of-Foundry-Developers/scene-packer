@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.2.21
+
+- Fixed packing Journal Pins in Core v0.8.3+
+  - Document validation added in v0.8.3 broke the additional data that gets added to the scene notes. Now fixed again. Thanks Bradfordly :)
+
 ## v2.2.20
 
 - Added ability to run the `Asset Report` against a module that contains compendium packs.
