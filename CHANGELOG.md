@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.22
+
+- Fixed `Relink compendium journal entries` macro on core v0.8.6
+
 ## v2.2.21
 
 - Fixed packing Journal Pins in Core v0.8.3+

@@ -2722,9 +2722,14 @@ export default class ScenePacker {
         ),
       );
       // Check each of the Journals in the pack
-      for (let j = 0; j < pack.index.length; j++) {
+      let packValues;
+      if (!isNewerVersion('0.8.0', game.data.version)) {
+        packValues = pack.index.values();
+      } else {
+        packValues = pack.index;
+      }
+      for (const entry of packValues) {
         const references = new Set();
-        const entry = pack.index[j];
         const journal = await pack.getEntity(entry._id);
         if (!journal?.data?.content) {
           continue;
