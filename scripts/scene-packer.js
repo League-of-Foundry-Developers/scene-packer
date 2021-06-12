@@ -849,7 +849,7 @@ export default class ScenePacker {
     const journalInfoResults = await Promise.allSettled(scene.data.notes.map(async note => {
       if (!isNewerVersion('0.8.0', game.data.version)) {
         // v0.8.0+ notes are documents now and stored in data
-        note = note.data;
+        note = note.data.toObject();
       }
       const journalData = game.journal.get(note.entryId);
       const compendiumJournal = await this.FindJournalInCompendiums(journalData, this.packs.journals);
