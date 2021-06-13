@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.2.23
+
+- Enhanced the `Asset Report`
+  - Ambient sounds in a scene are now validated as well.
+
 ## v2.2.22
 
 - Fixed `Relink compendium journal entries` macro on core v0.8.6
