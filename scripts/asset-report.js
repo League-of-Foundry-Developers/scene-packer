@@ -487,6 +487,7 @@ export default class AssetReport extends FormApplication {
     SceneDrawingImage: 'scene-drawing-texture',
     SceneTokenImage: 'scene-token-image',
     SceneTokenEffectIcon: 'scene-token-effect-icon',
+    SceneAmbientSound: 'scene-ambient-sound-path',
   };
 
   /**
@@ -693,6 +694,7 @@ export default class AssetReport extends FormApplication {
       const tiles = [];
       const drawings = [];
       const tokens = [];
+      const sounds = [];
 
       if (!isNewerVersion('0.8.0', game.data.version)) {
         if (scene.data.notes?.size) {
@@ -707,6 +709,9 @@ export default class AssetReport extends FormApplication {
         if (scene.data.tokens?.size) {
           tokens.push(...Array.from(scene.data.tokens.values()));
         }
+        if (scene.data.sounds?.size) {
+          sounds.push(...Array.from(scene.data.sounds.values()));
+        }
       } else {
         if (scene.data.notes?.length) {
           notes.push(...scene.data.notes);
@@ -719,6 +724,9 @@ export default class AssetReport extends FormApplication {
         }
         if (scene.data.tokens?.length) {
           tokens.push(...scene.data.tokens);
+        }
+        if (scene.data.sounds?.length) {
+          sounds.push(...scene.data.sounds);
         }
       }
 
@@ -754,6 +762,18 @@ export default class AssetReport extends FormApplication {
           if (effect?.icon) {
             this.CheckAsset(scene.id, AssetReport.Sources.Scene, effect.icon, AssetReport.Locations.SceneTokenEffectIcon);
           }
+        }
+      });
+
+      sounds.forEach(sound => {
+        let path = sound?.data?.path || sound?.path;
+        if (path) {
+          const flags = sound?.data?.flags || sound?.flags;
+          if (flags?.bIsStreamed && flags?.streamingApi === 'youtube' && flags?.streamingId) {
+            // This is a streaming sound from youtube
+            path = `https://www.youtube.com/watch?v=${flags.streamingId}`;
+          }
+          this.CheckAsset(scene.id, AssetReport.Sources.Scene, path, AssetReport.Locations.SceneAmbientSound);
         }
       });
 

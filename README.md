@@ -140,6 +140,7 @@ To pack your scene ready for distribution:
 4. Run the script to Update Journal links to fix up the journal compendium linking (see section below)
 5. Right click on your Scene in the Scenes Directory and choose `Pack Scene Data`.
 6. Export your Scene to your compendium (replacing your existing entry, merging by name to retain the ID reference).
+7. Run the `Asset Report` macro (see above) against your module to verify that all of your assets will work for your users when imported into their world.
 
 ![scene-context-menu](scene-context-menu.png)
 
