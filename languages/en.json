@@ -70,6 +70,7 @@
       "import-entities": {
         "creating-data": "Importing {count} new {type}.",
         "missing-name": "Tried to find an actor for a token with no name.",
+        "could-not-import": "Error importing entity",
         "invalid-packs": {
           "error": "Invalid pack configuration. Cannot import {type}. Check console for more details.",
           "short": "ImportEntities was called with no searchPacks defined.",

@@ -1403,19 +1403,29 @@ export default class ScenePacker {
     });
 
     for (let i = 0; i < entities.length; i++) {
-      const entity = entities[i];
-      if (entity.uuid) {
-        const createdEntity = await this.ImportByUuid(entity.uuid);
-        if (createdEntity) {
-          createdEntities.push(createdEntity);
-          continue;
+      try {
+        const entity = entities[i];
+        if (entity.compendiumSourceId) {
+          const createdEntity = await this.ImportByUuid(entity.compendiumSourceId);
+          if (createdEntity) {
+            createdEntities.push(createdEntity);
+            continue;
+          }
         }
-      }
-      if (entity.compendiumSourceId) {
-        const createdEntity = await this.ImportByUuid(entity.compendiumSourceId);
-        if (createdEntity) {
-          createdEntities.push(createdEntity);
+        if (entity.uuid) {
+          const createdEntity = await this.ImportByUuid(entity.uuid);
+          if (createdEntity) {
+            createdEntities.push(createdEntity);
+          }
         }
+      } catch (e) {
+        this.logError(
+          true,
+          game.i18n.localize(
+            'SCENE-PACKER.notifications.import-entities.could-not-import',
+          ),
+          {entity: entities[i], type},
+        );
       }
     }
     if (createdEntities.length) {
