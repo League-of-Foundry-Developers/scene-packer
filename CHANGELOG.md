@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.2.24
+
+- Compatibility with Core v0.8.7
+- Better error handling when unpacking and importing entities.
+- Ensure Scene Packer flags are correctly saving when exporting to compendiums.
+
 ## v2.2.23
 
 - Enhanced the `Asset Report`
