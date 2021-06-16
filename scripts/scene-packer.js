@@ -2717,7 +2717,7 @@ export default class ScenePacker {
         game.i18n.format(
           'SCENE-PACKER.world-conversion.compendiums.checking-and-updating',
           {
-            count: pack.index.length,
+            count: pack.index.length || pack.index.size,
           },
         ),
       );
