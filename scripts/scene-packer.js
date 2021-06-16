@@ -2706,7 +2706,12 @@ export default class ScenePacker {
         if (possibleMatches.length) {
           for (let m = 0; m < possibleMatches.length; m++) {
             const possibleMatch = possibleMatches[m];
-            const entity = await p.getEntity(possibleMatch._id);
+            let entity;
+            if (!isNewerVersion('0.8.0', game.data.version)) {
+              entity = await p.getDocument(possibleMatch._id);;
+            } else {
+              entity = await p.getEntity(possibleMatch._id);;
+            }
             if (entity) {
               if (sourceId && entity.getFlag(MODULE_NAME, 'sourceId') === sourceId) {
                 // Direct match
@@ -2740,7 +2745,12 @@ export default class ScenePacker {
       }
       for (const entry of packValues) {
         const references = new Set();
-        const journal = await pack.getEntity(entry._id);
+        let journal;
+        if (!isNewerVersion('0.8.0', game.data.version)) {
+          journal = await pack.getDocument(entry._id);;
+        } else {
+          journal = await pack.getEntity(entry._id);;
+        }
         if (!journal?.data?.content) {
           continue;
         }
@@ -2936,7 +2946,12 @@ export default class ScenePacker {
 
           // Update the journal entry with the fully replaced content
           if (!dryRun) {
-            await pack.updateEntity({_id: entry._id, content: newContent});
+            if (!isNewerVersion('0.8.0', game.data.version)) {
+              const document = await pack.getDocument(entry._id);
+              await document.update({content: newContent}, {pack: pack.collection});
+            } else {
+              await pack.updateEntity({_id: entry._id, content: newContent});
+            }
           }
         } else {
           ScenePacker.logType(
