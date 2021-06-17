@@ -890,7 +890,7 @@ export default class ScenePacker {
     /**
      * tokenInfo is the data that gets passed to findMissingTokens
      */
-    const tokenInfoResults = await Promise.allSettled(scene.data.tokens.map(async token => {
+    const tokenInfoResults = await Promise.allSettled(scene.data.tokens.filter(a => a?.actorId || a?.data?.actorId).map(async token => {
       // Pull the sourceId of the actor, preferring the Actor entry in the module's compendium.
       let sourceId = '';
       let compendiumSourceId = '';
