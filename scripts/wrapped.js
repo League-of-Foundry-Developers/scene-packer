@@ -121,17 +121,19 @@ Hooks.once('setup', function () {
           `${item}.prototype.toCompendium`,
           function (wrapped, ...args) {
             // const [ pack ] = args;
+            let data = wrapped.bind(this)(...args);
+
             const newFlags = {};
             newFlags[ScenePacker.MODULE_NAME] = {sourceId: this.uuid};
-            if (this.data?.permission?.default) {
-              newFlags[ScenePacker.MODULE_NAME][ScenePacker.FLAGS_DEFAULT_PERMISSION] = this.data.permission.default;
+            if (data?.permission?.default) {
+              newFlags[ScenePacker.MODULE_NAME][ScenePacker.FLAGS_DEFAULT_PERMISSION] = data.permission.default;
             }
-            if (!this.data.flags) {
-              this.data.flags = {};
+            if (!data.flags) {
+              data.flags = {};
             }
-            mergeObject(this.data.flags, newFlags);
+            mergeObject(data.flags, newFlags);
 
-            return wrapped.bind(this)(...args);
+            return data;
           },
           'WRAPPER',
         );
