@@ -3,6 +3,8 @@
 ## v2.2.24
 
 - Compatibility with Core v0.8.7
+- Improved the actor and journal matching that occurs when packing a Scene.
+  - This should help with cases where you have imported an Actor from a compendium, modified the Actor and then exported it to your compendium.
 - Better error handling when unpacking and importing entities.
 - Ensure Scene Packer flags are correctly saving when exporting to compendiums.
 
