@@ -12,7 +12,9 @@ const FLAGS_SCENE_JOURNAL = 'scene-journal';
 const FLAGS_SCENE_POSITION = 'scene-position';
 const FLAGS_SOURCE_MODULE = 'source-module';
 const FLAGS_PACKED_VERSION = 'packed-with-version';
-const FLAGS_IMPORTED_VERSION = 'imported';
+const SETTING_IMPORTED_VERSION = 'imported';
+const SETTING_PROMPTED = 'prompted';
+const SETTING_SHOW_WELCOME_PROMPTS = 'showWelcomePrompts';
 
 /**
  * Tracks the initialised instances of Scene Packer and also exposes some methods to globalThis.
@@ -120,30 +122,30 @@ export default class ScenePacker {
       window.DEV.registerPackageDebugFlag(this.moduleName);
     }
 
-    game.settings.register(this.moduleName, 'imported', {
+    game.settings.register(this.moduleName, SETTING_IMPORTED_VERSION, {
       scope: 'world',
       config: false,
       type: String,
       default: '0.0.0',
     });
 
-    game.settings.register(this.moduleName, 'prompted', {
+    game.settings.register(this.moduleName, SETTING_PROMPTED, {
       scope: 'world',
       config: false,
       type: String,
       default: '0.0.0',
     });
 
-    game.settings.register(this.moduleName, 'showWelcomePrompts', {
+    game.settings.register(this.moduleName, SETTING_SHOW_WELCOME_PROMPTS, {
       scope: 'world',
       config: false,
       type: Boolean,
       default: true,
     });
 
-    let promptedVersion = game.settings.get(this.moduleName, 'prompted') || '0.0.0';
+    let promptedVersion = game.settings.get(this.moduleName, SETTING_PROMPTED) || '0.0.0';
     let moduleVersion = game.modules.get(this.moduleName)?.data?.version || '0.0.0';
-    if (this.allowImportPrompts && isNewerVersion(moduleVersion, promptedVersion) && game.settings.get(this.moduleName, 'showWelcomePrompts')) {
+    if (this.allowImportPrompts && isNewerVersion(moduleVersion, promptedVersion) && game.settings.get(this.moduleName, SETTING_SHOW_WELCOME_PROMPTS)) {
       // A newer version of the module is installed from what was last prompted
       let content = game.i18n.format('SCENE-PACKER.welcome.intro', {
         adventure: this.adventureName,
@@ -225,7 +227,7 @@ export default class ScenePacker {
             callback: () =>
               game.settings.set(
                 this.moduleName,
-                'showWelcomePrompts',
+                SETTING_SHOW_WELCOME_PROMPTS,
                 false,
               ),
           },
@@ -236,7 +238,7 @@ export default class ScenePacker {
       });
       d.render(true);
     }
-    game.settings.set(this.moduleName, 'prompted', moduleVersion);
+    game.settings.set(this.moduleName, SETTING_PROMPTED, moduleVersion);
 
     globalScenePacker.instances[this.moduleName] = this;
   }
@@ -340,7 +342,7 @@ export default class ScenePacker {
       game.i18n.localize('SCENE-PACKER.notifications.done'),
     );
 
-    let importedVersion = game.settings.get(this.moduleName, 'imported') || '0.0.0';
+    let importedVersion = game.settings.get(this.moduleName, SETTING_IMPORTED_VERSION) || '0.0.0';
     let moduleVersion = game.modules.get(this.moduleName)?.data?.version || '0.0.0';
     if (this.welcomeJournal) {
       // Display the welcome journal once per new module version
@@ -366,8 +368,8 @@ export default class ScenePacker {
       }
     }
     // Set both world and scene imported version flags
-    game.settings.set(this.moduleName, 'imported', moduleVersion || '0.0.0');
-    scene.setFlag(this.moduleName, FLAGS_IMPORTED_VERSION, moduleVersion || '0.0.0');
+    game.settings.set(this.moduleName, SETTING_IMPORTED_VERSION, moduleVersion || '0.0.0');
+    scene.setFlag(this.moduleName, SETTING_IMPORTED_VERSION, moduleVersion || '0.0.0');
 
     return this;
   }
@@ -724,24 +726,6 @@ export default class ScenePacker {
   }
 
   /**
-   * Ensure that each of the packs are loaded
-   * @returns {Promise<void>}
-   */
-  async loadPacks() {
-    for (let packName of [
-      ...this.packs.journals,
-      ...this.packs.creatures,
-      ...this.packs.macros,
-      ...this.packs.playlists,
-    ]) {
-      const pack = game.packs.get(packName);
-      if (pack) {
-        await pack.getIndex();
-      }
-    }
-  }
-
-  /**
    * Renders a dialog showing which Scenes in the world contain data that would benefit from being Packed.
    */
   static ShowScenesWorthPacking() {
@@ -815,10 +799,8 @@ export default class ScenePacker {
       return;
     }
 
-    await this.loadPacks();
-
     // Remove the flag that tracks what version of the module imported the Scene, as it doesn't make sense to ship that out in the module.
-    await scene.unsetFlag(this.moduleName, FLAGS_IMPORTED_VERSION);
+    await scene.unsetFlag(this.moduleName, SETTING_IMPORTED_VERSION);
 
     // Store details about which module and version packed the Scene
     await scene.setFlag(MODULE_NAME, FLAGS_SOURCE_MODULE, this.moduleName);
@@ -990,8 +972,6 @@ export default class ScenePacker {
         continue;
       }
 
-      await pack.getIndex();
-
       const matchingIndexes = pack.index.filter(p => p.name === journal.name);
       for (let i = 0; i < matchingIndexes.length; i++) {
         let id = matchingIndexes[i]?._id;
@@ -1132,8 +1112,6 @@ export default class ScenePacker {
         );
         continue;
       }
-
-      await pack.getIndex();
 
       const matchingIndexes = pack.index.filter(p => p.name === actor.name);
       for (let i = 0; i < matchingIndexes.length; i++) {
@@ -1281,8 +1259,6 @@ export default class ScenePacker {
         );
         continue;
       }
-
-      await pack.getIndex();
 
       const matchingIndexes = pack.index.filter(p => p.name === playlist.name);
       for (let i = 0; i < matchingIndexes.length; i++) {
@@ -2284,8 +2260,6 @@ export default class ScenePacker {
    * @param {Boolean} showLinkedJournal Whether to show any Journals linked to the Scene.
    */
   async UnpackScene(scene = game.scenes.get(game.user.viewedScene), {showLinkedJournal = true} = {}) {
-    await this.loadPacks();
-
     const tokenInfo = scene.getFlag(this.moduleName, FLAGS_TOKENS);
     const journalInfo = scene.getFlag(this.moduleName, FLAGS_JOURNALS);
     const sceneJournalInfo = scene.getFlag(this.moduleName, FLAGS_SCENE_JOURNAL);
@@ -2676,10 +2650,6 @@ export default class ScenePacker {
     const allPacks = game.packs.filter(
       (p) => p.metadata.package === moduleName,
     );
-    for (let i = 0; i < allPacks.length; i++) {
-      // Ensure that all of the packs' indexes are loaded
-      await allPacks[i].getIndex();
-    }
     const instance = new ScenePacker({moduleName});
     /**
      * @type {{ActorPacks: *[], ItemPacks: *[], ScenePacks: *[], JournalEntryPacks: *[], MacroPacks: *[], RollTablePacks: *[], PlaylistPacks: *[]}}
@@ -2700,7 +2670,6 @@ export default class ScenePacker {
           for (let j = 0; j < instance.packs.creatures.length; j++) {
             const pack = game.packs.get(instance.packs.creatures[j]);
             if (pack) {
-              await pack.getIndex();
               uniquePacks.add(pack);
             }
           }
@@ -2709,7 +2678,6 @@ export default class ScenePacker {
           for (let j = 0; j < instance.packs.journals.length; j++) {
             const pack = game.packs.get(instance.packs.journals[j]);
             if (pack) {
-              await pack.getIndex();
               uniquePacks.add(pack);
             }
           }
@@ -2718,7 +2686,6 @@ export default class ScenePacker {
           for (let j = 0; j < instance.packs.macros.length; j++) {
             const pack = game.packs.get(instance.packs.macros[j]);
             if (pack) {
-              await pack.getIndex();
               uniquePacks.add(pack);
             }
           }

@@ -98,17 +98,15 @@ Hooks.once('init', () => {
 			const DONT_REMIND_AGAIN_KEY = "libwrapper-dont-remind-again";
 
 			// Dialog code
-			console.warn(`${PACKAGE_TITLE}: libWrapper not present, using fallback implementation.`);
 			game.settings.register(PACKAGE_ID, DONT_REMIND_AGAIN_KEY, { name: '', default: false, type: Boolean, scope: 'world', config: false });
-			if(game.user.isGM && !game.settings.get(PACKAGE_ID, DONT_REMIND_AGAIN_KEY)) {
-				new Dialog({
-					title: FALLBACK_MESSAGE_TITLE,
-					content: FALLBACK_MESSAGE, buttons: {
-						ok: { icon: '<i class="fas fa-check"></i>', label: 'Understood' },
-						dont_remind: { icon: '<i class="fas fa-times"></i>', label: "Don't remind me again", callback: () => game.settings.set(PACKAGE_ID, DONT_REMIND_AGAIN_KEY, true) }
-					}
-				}).render(true);
-			}
+      if(game.user.isGM && !game.settings.get(PACKAGE_ID, DONT_REMIND_AGAIN_KEY)) {
+        ui.notifications.warn(`${PACKAGE_TITLE}: libWrapper not present, using fallback implementation. See console for more details.`)
+        console.group(`${PACKAGE_TITLE} warning: libWrapper not present`)
+        console.warn('A fallback implementation will be used, which increases the chance of compatibility issues with other modules. If you find that some functionality if not working correctly, please consider installing the "libWrapper" module.');
+        console.info("'libWrapper' is a library which provides package developers with a simple way to modify core Foundry VTT code, while reducing the likelihood of conflict with other packages.");
+        console.info('You can install it from the "Add-on Modules" tab in Foundry VTT Setup.');
+        console.groupEnd();
+      }
 		});
 	}
 });

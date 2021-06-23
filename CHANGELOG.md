@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.2.25
+
+- As part of testing the upcoming [compendium index changes](https://gitlab.com/foundrynet/foundryvtt/-/issues/5453) in Core v0.8.8 it became clear that there were calls to `.getIndex()` that were not needed. These have been removed.
+  - End users may experience a minor performance improvement.
+- Disabled the in-your-face `libWrapper` warning and replaced it with a warning notification.
+
 ## v2.2.24
 
 - Compatibility with Core v0.8.7
