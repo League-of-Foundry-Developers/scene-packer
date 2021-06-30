@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.3.0
+
+- Added support for taking into account the folder structure that the [Compendium Folders](https://foundryvtt.com/packages/compendium-folders) module provides.
+  - When automatically importing entities from compendiums (such as Actors and Journals), Scene Packer will check for the entity for embedded Compendium Folder data.
+    - If present, Scene Packer will create folders with the same names and depth that the content creator intended.
+    - As a content creator, simply export to your compendiums using the Compendium Folder `Export Folder Structure` functionality.
+  - See the embedded Journal Entry for additional information.
+  - *The end user does not need to install the Compendium Folder module.*
+- Compatibility with Core v0.8.8
+
 ## v2.2.25
 
 - As part of testing the upcoming [compendium index changes](https://gitlab.com/foundrynet/foundryvtt/-/issues/5453) in Core v0.8.8 it became clear that there were calls to `.getIndex()` that were not needed. These have been removed.

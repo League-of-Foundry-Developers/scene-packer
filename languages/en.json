@@ -6,9 +6,6 @@
       "context-menu": {
         "name": "Enable Scene Packer context menu",
         "hint": "Adds context menu items to assist with packing a Scene. You should only need to enable this while actively developing and packing a module with scenes."
-      },
-      "compendium": {
-        "name": "Show the dialog information when opening a compendium"
       }
     },
     "welcome": {

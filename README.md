@@ -19,6 +19,7 @@ A library to help content creators package up Scenes and Adventures to solve sev
 - Actors, Journals and Playlists referenced by a Scene are automatically imported.
 - [Quick Encounters](https://foundryvtt.com/packages/quick-encounters) work, creating working journal pins that you can double-click on and actors that are linked correctly.
 - You can provide a list of Journals and/or Macros that you want to ensure are imported to the world.
+- Entities can be imported with deep folder structures, allowing you as a content creator to have additional folders for journal handouts for instance. (Makes use of the [Compendium Folders](https://foundryvtt.com/packages/compendium-folders) module during packing. End users do not need the Compendium Folders module installed. See the bundled journal entry for more information).
 
 In summary, it makes importing a Scene from a Compendium (via an "adventure module") work as though you build it in your world.
 

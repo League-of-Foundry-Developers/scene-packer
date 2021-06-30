@@ -15,6 +15,9 @@ const FLAGS_PACKED_VERSION = 'packed-with-version';
 const SETTING_IMPORTED_VERSION = 'imported';
 const SETTING_PROMPTED = 'prompted';
 const SETTING_SHOW_WELCOME_PROMPTS = 'showWelcomePrompts';
+const SETTING_ENABLE_CONTEXT_MENU = 'enableContextMenu';
+
+const CF_SEPARATOR = '#/CF_SEP/';
 
 /**
  * Tracks the initialised instances of Scene Packer and also exposes some methods to globalThis.
@@ -1610,7 +1613,7 @@ export default class ScenePacker {
       // Filter down to those that are still missing
       entities = entities.filter(e => !collection.find(f => f.getFlag(MODULE_NAME, 'sourceId') === e.sourceId));
 
-      // Filter to just the needed actors
+      // Filter to just the needed entities
       const content = packContent.filter((entity) =>
         entityNames.includes(entity.name),
       );
@@ -1623,8 +1626,12 @@ export default class ScenePacker {
 
       if (content.length > 0) {
         let folderId = null;
-        if (CONST.FOLDER_ENTITY_TYPES.includes(entityType)) {
-          // Check if a folder for our adventure and entity type already exists, otherwise create it
+        const hasCFData = content.some(p => p.data?.flags?.cf?.path);
+        const allHaveCFData = content.every(p => p.data?.flags?.cf?.path);
+        if (CONST.FOLDER_ENTITY_TYPES.includes(entityType) && !allHaveCFData) {
+          // Check if a folder for our adventure and entity type already exists, otherwise create it if we
+          // don't have Compendium Folder module data or have been told not to import the Compendium Folder
+          // module folder structure.
           folderId = game.folders.find(
             (folder) => folder.name === this.adventureName && folder.type === entityType,
           )?.id;
@@ -1638,23 +1645,70 @@ export default class ScenePacker {
           }
         }
 
+        // Build the Compendium Folder structure paths
+        const cfFolderMap = new Map();
+        for (let i = 0; i < content.length; i++) {
+          const entity = content[i];
+          const cfPath = entity.data?.flags?.cf?.path;
+          if (!cfPath) {
+            continue;
+          }
+          if (cfFolderMap.has(cfPath)) {
+            continue;
+          }
+          const pathParts = cfPath.split(CF_SEPARATOR);
+          for (let j = 0; j < pathParts.length; j++) {
+            const pathPart = pathParts[j];
+            if (cfFolderMap.has(pathPart)) {
+              continue;
+            }
+            // See if a folder already exists
+            let folder = game.folders.find(
+              (folder) => folder.name === pathPart && folder.type === entityType,
+            );
+            if (folder) {
+              cfFolderMap.set(pathPart, folder);
+              continue;
+            }
+            // Need to create the folder.
+            let parent = null;
+            if (j > 0) {
+              // Not the first folder in the path, find the parent.
+              let parentPart = pathParts[j - 1];
+              if (parentPart && cfFolderMap.has(parentPart)) {
+                parent = cfFolderMap.get(parentPart);
+              }
+            }
+            folder = await Folder.create({
+              name: pathPart,
+              type: entityType,
+              parent: parent?.id,
+            });
+            cfFolderMap.set(pathPart, folder);
+          }
+          let lastFolder = cfFolderMap.get(pathParts.pop());
+          if (lastFolder) {
+            cfFolderMap.set(cfPath, lastFolder);
+          }
+        }
+
         // Append the entities found in this pack to the growing list to import
         createData = createData.concat(
           content.map((c) => {
+            let cData = c.data;
             if (!isNewerVersion('0.8.0', game.data.version)) {
-              const createData = collection.fromCompendium(c);
-              if (folderId) {
-                createData.folder = folderId;
-              }
-              createData['flags.core.sourceId'] = c.uuid;
-              return createData;
+              cData = collection.fromCompendium(c);
             }
-
-            c.data['flags.core.sourceId'] = c.uuid;
-            if (folderId) {
-              c.data.folder = folderId;
+            // Utilise the folder structure as defined by the Compendium Folder if it exists, otherwise
+            // fall back to the default folder.
+            const cfPath = cData.flags?.cf?.path;
+            if (cfPath && cfFolderMap.has(cfPath)) {
+              cData.folder = cfFolderMap.get(cfPath)?.id;
+            } else if (folderId) {
+              cData.folder = folderId;
             }
-            return c.data;
+            cData['flags.core.sourceId'] = c.uuid;
+            return cData;
           }),
         );
       }
@@ -3308,9 +3362,9 @@ Hooks.once('setup', () => {
             if (instance) {
               return !ScenePacker.HasPackedData(scene, instance.GetModuleName()) &&
                 game.user.isGM &&
-                game.settings.get(MODULE_NAME, 'enableContextMenu');
+                game.settings.get(MODULE_NAME, SETTING_ENABLE_CONTEXT_MENU);
             }
-            return game.user.isGM && game.settings.get(MODULE_NAME, 'enableContextMenu');
+            return game.user.isGM && game.settings.get(MODULE_NAME, SETTING_ENABLE_CONTEXT_MENU);
           },
           callback: (li) => {
             let scene = game.scenes.get(li.data('entityId'));
@@ -3337,7 +3391,7 @@ Hooks.once('setup', () => {
             return instance &&
               ScenePacker.HasPackedData(scene, instance.GetModuleName()) &&
               game.user.isGM &&
-              game.settings.get(MODULE_NAME, 'enableContextMenu');
+              game.settings.get(MODULE_NAME, SETTING_ENABLE_CONTEXT_MENU);
           },
           callback: (li) => {
             let scene = game.scenes.get(li.data('entityId'));
@@ -3358,7 +3412,7 @@ Hooks.once('setup', () => {
             return instance &&
               ScenePacker.HasPackedData(scene, instance.GetModuleName()) &&
               game.user.isGM &&
-              game.settings.get(MODULE_NAME, 'enableContextMenu');
+              game.settings.get(MODULE_NAME, SETTING_ENABLE_CONTEXT_MENU);
           },
           callback: (li) => {
             let scene = game.scenes.get(li.data('entityId'));
@@ -3375,7 +3429,7 @@ Hooks.once('setup', () => {
           icon: '<i class="fas fa-search"></i>',
           condition: (li) => {
             return game.user.isGM &&
-              game.settings.get(MODULE_NAME, 'enableContextMenu');
+              game.settings.get(MODULE_NAME, SETTING_ENABLE_CONTEXT_MENU);
           },
           callback: (li) => {
             let scene = game.scenes.get(li.data('entityId'));
@@ -3399,7 +3453,7 @@ Hooks.once('setup', () => {
     await instance.ProcessScene(readyCanvas.scene);
   });
 
-  game.settings.register(MODULE_NAME, 'enableContextMenu', {
+  game.settings.register(MODULE_NAME, SETTING_ENABLE_CONTEXT_MENU, {
     name: game.i18n.localize('SCENE-PACKER.settings.context-menu.name'),
     hint: game.i18n.localize('SCENE-PACKER.settings.context-menu.hint'),
     scope: 'client',
