@@ -17,6 +17,10 @@ const SETTING_PROMPTED = 'prompted';
 const SETTING_SHOW_WELCOME_PROMPTS = 'showWelcomePrompts';
 const SETTING_ENABLE_CONTEXT_MENU = 'enableContextMenu';
 
+/**
+ * The folder separator used by the Compendium Folders module.
+ * @type {string}
+ */
 const CF_SEPARATOR = '#/CF_SEP/';
 
 /**
