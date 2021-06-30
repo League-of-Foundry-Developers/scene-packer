@@ -1663,15 +1663,6 @@ export default class ScenePacker {
             if (cfFolderMap.has(pathPart)) {
               continue;
             }
-            // See if a folder already exists
-            let folder = game.folders.find(
-              (folder) => folder.name === pathPart && folder.type === entityType,
-            );
-            if (folder) {
-              cfFolderMap.set(pathPart, folder);
-              continue;
-            }
-            // Need to create the folder.
             let parent = null;
             if (j > 0) {
               // Not the first folder in the path, find the parent.
@@ -1680,6 +1671,15 @@ export default class ScenePacker {
                 parent = cfFolderMap.get(parentPart);
               }
             }
+            // See if a folder already exists
+            let folder = game.folders.find(
+              (folder) => folder.name === pathPart && folder.type === entityType && folder.data.parent === (parent?.id || null),
+            );
+            if (folder) {
+              cfFolderMap.set(pathPart, folder);
+              continue;
+            }
+            // Need to create the folder.
             folder = await Folder.create({
               name: pathPart,
               type: entityType,
@@ -2289,7 +2289,11 @@ export default class ScenePacker {
     }
 
     const update = {};
-    if (CONST.FOLDER_ENTITY_TYPES.includes(type)) {
+
+    // Check for Compendium Folder structure data
+    const cfPath = entity.data?.flags?.cf?.path;
+
+    if (CONST.FOLDER_ENTITY_TYPES.includes(type) && !cfPath) {
       const folder = game.folders.find(
         (folder) => folder.name === this.adventureName && folder.type === type,
       ) || await Folder.create({
@@ -2300,6 +2304,41 @@ export default class ScenePacker {
 
       if (folder) {
         update.folder = folder.id;
+      }
+    } else if (hasCFData) {
+      // Build the Compendium Folder structure paths
+      const cfFolderMap = new Map();
+      const pathParts = cfPath.split(CF_SEPARATOR);
+      for (let j = 0; j < pathParts.length; j++) {
+        const pathPart = pathParts[j];
+        let parent = null;
+        if (j > 0) {
+          // Not the first folder in the path, find the parent.
+          let parentPart = pathParts[j - 1];
+          if (parentPart && cfFolderMap.has(parentPart)) {
+            parent = cfFolderMap.get(parentPart);
+          }
+        }
+        // See if a folder already exists
+        let folder = game.folders.find(
+          (folder) => folder.name === pathPart && folder.type === type && folder.data.parent === (parent?.id || null),
+        );
+        if (folder) {
+          cfFolderMap.set(pathPart, folder);
+          continue;
+        }
+        // Need to create the folder.
+        folder = await Folder.create({
+          name: pathPart,
+          type: entityType,
+          parent: parent?.id,
+        });
+        cfFolderMap.set(pathPart, folder);
+      }
+      let lastFolder = cfFolderMap.get(pathParts.pop());
+      if (lastFolder) {
+        cfFolderMap.set(cfPath, lastFolder);
+        update.folder = lastFolder.id;
       }
     }
 
