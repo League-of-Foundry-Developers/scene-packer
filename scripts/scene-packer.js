@@ -768,8 +768,8 @@ export default class ScenePacker {
     }
 
     let content = `<p>${game.i18n.format('SCENE-PACKER.worth-packing.intro', {
-      count: sceneInfo.size,
-      total: scenes.length,
+      count: new Intl.NumberFormat().format(sceneInfo.size),
+      total: new Intl.NumberFormat().format(scenes.length),
     })}</p>`;
     if (sceneInfo.size) {
       content += '<ul>';
@@ -1453,7 +1453,7 @@ export default class ScenePacker {
         game.i18n.format(
           'SCENE-PACKER.notifications.import-entities.creating-data',
           {
-            count: createdEntities.length,
+            count: new Intl.NumberFormat().format(createdEntities.length),
             type,
           },
         ),
@@ -1720,7 +1720,7 @@ export default class ScenePacker {
         game.i18n.format(
           'SCENE-PACKER.notifications.import-entities.creating-data',
           {
-            count: createData.length,
+            count: new Intl.NumberFormat().format(createData.length),
             type,
           },
         ),
@@ -2066,7 +2066,7 @@ export default class ScenePacker {
       this.logWarn(
         true,
         game.i18n.format('SCENE-PACKER.notifications.link-tokens.missing', {
-          count: missing.length,
+          count: new Intl.NumberFormat().format(missing.length),
           adventureName: this.adventureName,
         }),
         missing,
@@ -2076,7 +2076,7 @@ export default class ScenePacker {
     if (updates.length > 0) {
       ui.notifications.info(
         game.i18n.format('SCENE-PACKER.notifications.link-tokens.linking', {
-          count: updates.length,
+          count: new Intl.NumberFormat().format(updates.length),
           adventureName: this.adventureName,
         }),
       );
@@ -2178,7 +2178,7 @@ export default class ScenePacker {
         game.i18n.format(
           'SCENE-PACKER.notifications.spawn-notes.missing-details',
           {
-            count: missing.length,
+            count: new Intl.NumberFormat().format(missing.length),
           },
         ),
         missing,
@@ -2189,7 +2189,7 @@ export default class ScenePacker {
     if (updates.length > 0) {
       ui.notifications.info(
         game.i18n.format('SCENE-PACKER.notifications.spawn-notes.spawning', {
-          count: updates.length,
+          count: new Intl.NumberFormat().format(updates.length),
         }),
       );
       if (!isNewerVersion('0.8.0', game.data.version)) {
@@ -2619,7 +2619,7 @@ export default class ScenePacker {
           game.i18n.format(
             'SCENE-PACKER.world-conversion.compendiums.quick-encounters.updating-references',
             {
-              count: updates.length,
+              count: new Intl.NumberFormat().format(updates.length),
               journal: journal.name,
             },
           ),
@@ -2833,7 +2833,7 @@ export default class ScenePacker {
         game.i18n.format(
           'SCENE-PACKER.world-conversion.compendiums.checking-and-updating',
           {
-            count: pack.index.length || pack.index.size,
+            count: new Intl.NumberFormat().format(pack.index.length || pack.index.size),
           },
         ),
       );
@@ -2997,7 +2997,7 @@ export default class ScenePacker {
             game.i18n.format(
               'SCENE-PACKER.world-conversion.compendiums.updating-journal-references',
               {
-                count: references.size,
+                count: new Intl.NumberFormat().format(references.size),
                 journal: journal.name,
               },
             ),
@@ -3039,7 +3039,7 @@ export default class ScenePacker {
             game.i18n.format(
               'SCENE-PACKER.world-conversion.compendiums.updating-reference',
               {
-                count: references.size,
+                count: new Intl.NumberFormat().format(references.size),
                 journal: journal.name,
               },
             ),
@@ -3206,7 +3206,7 @@ export default class ScenePacker {
         game.i18n.format(
           'SCENE-PACKER.world-conversion.compendiums.quick-encounters.updating-references',
           {
-            count: updates.length,
+            count: new Intl.NumberFormat().format(updates.length),
             journal: journal.name,
           },
         ),
