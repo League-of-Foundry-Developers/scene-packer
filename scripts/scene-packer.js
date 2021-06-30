@@ -875,44 +875,45 @@ export default class ScenePacker {
     /**
      * tokenInfo is the data that gets passed to findMissingTokens
      */
-    const tokenInfoResults = await Promise.allSettled(scene.data.tokens.filter(a => a?.actorId || a?.data?.actorId).map(async token => {
-      // Pull the sourceId of the actor, preferring the Actor entry in the module's compendium.
-      let sourceId = '';
-      let compendiumSourceId = '';
-      let actorName = token?.name;
-      if (typeof token.getFlag === 'function') {
-        sourceId = token.getFlag(MODULE_NAME, 'sourceId');
-      }
-      const actorId = token?.actorId || token?.data?.actorId;
-      if (actorId) {
-        const actor = game.actors.get(actorId);
-        if (actor) {
-          if (!sourceId) {
-            sourceId = actor.uuid;
-          }
-          if (actor.data?.name) {
-            actorName = actor.data.name;
-          }
-          compendiumSourceId = actor.getFlag('core', 'sourceId');
-          if (!compendiumSourceId || !compendiumSourceId.startsWith(`Compendium.${this.moduleName}.`)) {
-            // The actor source isn't the module's compendium, see if we have a direct match in a different compendium
-            const compendiumActor = await this.FindActorInCompendiums(actor, this.packs.creatures);
-            if (compendiumActor?.uuid) {
-              compendiumSourceId = compendiumActor.uuid;
+    const tokenInfoResults = await Promise.allSettled(scene.data.tokens.filter(a => a?.actorId || a?.data?.actorId)
+      .map(async token => {
+        // Pull the sourceId of the actor, preferring the Actor entry in the module's compendium.
+        let sourceId = '';
+        let compendiumSourceId = '';
+        let actorName = token?.name;
+        if (typeof token.getFlag === 'function') {
+          sourceId = token.getFlag(MODULE_NAME, 'sourceId');
+        }
+        const actorId = token?.actorId || token?.data?.actorId;
+        if (actorId) {
+          const actor = game.actors.get(actorId);
+          if (actor) {
+            if (!sourceId) {
+              sourceId = actor.uuid;
+            }
+            if (actor.data?.name) {
+              actorName = actor.data.name;
+            }
+            compendiumSourceId = actor.getFlag('core', 'sourceId');
+            if (!compendiumSourceId || !compendiumSourceId.startsWith(`Compendium.${this.moduleName}.`)) {
+              // The actor source isn't the module's compendium, see if we have a direct match in a different compendium
+              const compendiumActor = await this.FindActorInCompendiums(actor, this.packs.creatures);
+              if (compendiumActor?.uuid) {
+                compendiumSourceId = compendiumActor.uuid;
+              }
             }
           }
         }
-      }
 
-      return {
-        sourceId: sourceId,
-        compendiumSourceId: compendiumSourceId,
-        tokenName: token?.name,
-        actorName: actorName,
-        x: token?.x || token?.data?.x,
-        y: token?.y || token?.data?.y,
-      };
-    }));
+        return {
+          sourceId: sourceId,
+          compendiumSourceId: compendiumSourceId,
+          tokenName: token?.name,
+          actorName: actorName,
+          x: token?.x || token?.data?.x,
+          y: token?.y || token?.data?.y,
+        };
+      }));
     const tokenInfo = tokenInfoResults.filter(result => result.status === 'fulfilled').map(result => result.value);
 
     if (tokenInfo.length > 0) {
