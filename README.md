@@ -175,6 +175,10 @@ A portion of the code is based on code created by [honeybadger](https://github.c
 
 Thanks to [Baileywiki](https://www.patreon.com/baileywiki) for their initial testing and feedback.
 
+The following libraries are utilised within the code:
+- [fast-json-stable-stringify](https://github.com/epoberezkin/fast-json-stable-stringify) (MIT License)
+- [jsHashes](https://github.com/h2non/jshashes) (BSD-3-Clause License)
+
 ## Support
 
 Please submit any issues via the [Bug Reporter](https://foundryvtt.com/packages/bug-reporter) module or via [GitHub Issues](https://github.com/League-of-Foundry-Developers/scene-packer/issues).

@@ -12,6 +12,11 @@
   - Selecting this option will import everything from all of the compendiums that belong to the registered module.
   - This option combined with the above `Compendium Folders` support allows end-users to have the same entities and folder structure as the content creator.
 - Patched 0.7.x `"Sight angle must be between 1 and 360 degrees."` error message when importing from some compendium packs.
+- Added automatic hash functionality when importing from compendiums, allowing for future update functionality.
+  - This will allow content creators to update Journal Entries etc. in the future.
+  - Utilises:
+    - [fast-json-stable-stringify](https://github.com/epoberezkin/fast-json-stable-stringify) (MIT License)
+    - [jsHashes](https://github.com/h2non/jshashes) (BSD-3-Clause License)
 - Compatibility with Core v0.8.8
 
 ## v2.2.25

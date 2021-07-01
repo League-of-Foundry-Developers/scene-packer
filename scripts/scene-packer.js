@@ -1,5 +1,6 @@
 import Report from './report.js';
 import AssetReport from './asset-report.js';
+import Hash from './hash.js';
 
 const MINIMUM_SUPPORTED_PACKER_VERSION = '2.0.0';
 const MODULE_NAME = 'scene-packer';
@@ -332,12 +333,21 @@ export default class ScenePacker {
 
           // Append the entities found in this pack to the growing list to import
           createData = createData.concat(
-            packContent.map((c) => {
+            packContent.map(c => {
               let cData = c.data;
+              const newFlags = {};
+              newFlags['core'] = {sourceId: c.uuid};
               if (!isNewerVersion('0.8.0', game.data.version)) {
                 cData = collection.fromCompendium(c);
               }
-              cData['flags.core.sourceId'] = c.uuid;
+              if (!cData.flags) {
+                cData.flags = {};
+              }
+              mergeObject(cData.flags, newFlags);
+              if (!cData.flags[ScenePacker.MODULE_NAME]) {
+                cData.flags[ScenePacker.MODULE_NAME] = {};
+              }
+              cData.flags[ScenePacker.MODULE_NAME].hash = Hash.SHA1(cData);
 
               if (CONST.FOLDER_ENTITY_TYPES.includes(packType)) {
                 // Utilise the folder structure as defined by the Compendium Folder if it exists, otherwise
