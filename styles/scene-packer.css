@@ -67,3 +67,9 @@
   border-top: 1px solid #7a7971;
   padding-top: 5px;
 }
+.dialog.welcome-prompt .dialog-buttons button.dialog-button {
+  flex-basis: 43%;
+}
+.dialog.welcome-prompt .dialog-buttons button.dialog-button.close {
+  flex-basis: 75px;
+}

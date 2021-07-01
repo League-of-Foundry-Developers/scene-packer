@@ -65,6 +65,13 @@ Hooks.once('setup', function () {
             const source = await pack.getEntity(args[1]);
             args[2]['flags.core.sourceId'] = source.uuid;
           }
+          // Patch "Sight angle must be between 1 and 360 degrees." error
+          if (args[2].token?.sightAngle === 0) {
+            args[2].token.sightAngle = 360;
+          }
+          if (args[2].token?.lightAngle === 0) {
+            args[2].token.lightAngle = 360;
+          }
 
           return wrapped.bind(this)(...args);
         },
@@ -100,6 +107,15 @@ Hooks.once('setup', function () {
           const created = await this.cls.create(entities.map(e => {
             e.data['flags.core.sourceId'] = e.uuid; // Modified from original source
             e.data.folder = folderId;
+
+            // Patch "Sight angle must be between 1 and 360 degrees." error
+            if (e.data.token?.sightAngle === 0) {
+              e.data.token.sightAngle = 360;
+            }
+            if (e.data.token?.lightAngle === 0) {
+              e.data.token.lightAngle = 360;
+            }
+
             return e.data;
           }));
           ui.notifications.info(game.i18n.format('COMPENDIUM.ImportAllFinish', {

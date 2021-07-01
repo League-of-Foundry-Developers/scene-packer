@@ -18,10 +18,34 @@ const SETTING_SHOW_WELCOME_PROMPTS = 'showWelcomePrompts';
 const SETTING_ENABLE_CONTEXT_MENU = 'enableContextMenu';
 
 /**
+ * The order of types to import when importing all content from compendiums.
+ * @type {string[]}
+ */
+const PACK_IMPORT_ORDER = ['Playlist', 'Macro', 'Item', 'Actor', 'RollTable', 'JournalEntry', 'Scene'];
+/**
+ * Lookup entity types and get their common language strings.
+ * @type {{Item: string, Playlist: string, Macro: string, RollTable: string, Actor: string, Scene: string, JournalEntry: string}}
+ */
+const TYPE_HUMANISE = {
+  Playlist: 'playlists',
+  Macro: 'macros',
+  Item: 'items',
+  Actor: 'actors',
+  RollTable: 'roll tables',
+  JournalEntry: 'journal entries',
+  Scene: 'scenes',
+};
+
+/**
  * The folder separator used by the Compendium Folders module.
  * @type {string}
  */
 const CF_SEPARATOR = '#/CF_SEP/';
+/**
+ * The name of entities created by the Compendium Folders module.
+ * @type {string}
+ */
+const CF_TEMP_ENTITY_NAME = '#[CF_tempEntity]';
 
 /**
  * Tracks the initialised instances of Scene Packer and also exposes some methods to globalThis.
@@ -168,86 +192,316 @@ export default class ScenePacker {
           version: moduleVersion,
         });
       }
+      let label = game.i18n.localize('SCENE-PACKER.welcome.yes-all-fallback');
+      if (!isNewerVersion('0.8.0', game.data.version)) {
+        let totalCount = game.packs.filter(
+          (p) => p.metadata.package === this.moduleName,
+        ).reduce((a, currentValue) => a + (currentValue?.index?.size || currentValue?.index?.length || 0), 0);
+        label = game.i18n.format('SCENE-PACKER.welcome.yes-all', {
+          count: new Intl.NumberFormat().format(totalCount),
+        });
+      }
       let d = new Dialog({
-        title: game.i18n.format('SCENE-PACKER.welcome.title', {
-          title: this.adventureName,
-        }),
+        title: game.i18n.localize('SCENE-PACKER.welcome.title'),
         content: content,
         buttons: {
           yesAll: {
             icon: '<i class="fas fa-check-double"></i>',
-            label: game.i18n.localize('SCENE-PACKER.welcome.yes-all'),
+            label: label,
             callback: async () => {
-              const packs = game.packs.filter((p) => {
-                  let type;
-                  if (!isNewerVersion('0.8.0', game.data.version)) {
-                    type = p.documentClass?.documentName;
-                  } else {
-                    type = p.entity;
-                  }
-                  return p.metadata.package === this.moduleName && type === 'Scene';
-                },
-              );
-              for (let i = 0; i < packs.length; i++) {
-                const c = packs[i];
-                let folderId = game.folders.find(
-                  (folder) => folder.name === this.adventureName && folder.type === 'Scene',
-                )?._id;
-                if (!folderId) {
-                  const folder = await Folder.create({
-                    name: this.adventureName,
-                    type: 'Scene',
-                    parent: null,
-                  });
-                  folderId = folder.id || folder._id;
-                }
-                const scenes = await c.importAll({folderId: folderId, folderName: this.adventureName});
-                if (!scenes) {
-                  continue;
-                }
-                if (Array.isArray(scenes) && scenes.length) {
-                  for (let j = 0; j < scenes.length; j++) {
-                    await this.ProcessScene(scenes[j], {showLinkedJournal: false});
-                  }
-                } else {
-                  await this.ProcessScene(scenes, {showLinkedJournal: false});
-                }
-              }
+              await this.importAllContent();
             },
           },
           choose: {
-            icon: '<i class="fas fa-check"></i>',
+            icon: '<i class="fas fa-clipboard-check"></i>',
             label: game.i18n.localize('SCENE-PACKER.welcome.let-me-choose'),
             callback: () => {
               game.packs.filter(
-                (p) => p.metadata.package === this.moduleName && p.entity === 'Scene',
+                (p) => p.metadata.package === this.moduleName && (p.documentName || p.entity) === 'Scene',
               ).forEach(c => c.render(true));
             },
+            condition: game.packs.filter((p) => p.metadata.package === this.moduleName && (p.documentName || p.entity) === 'Scene').length,
           },
-          no: {
+          close: {
             icon: '<i class="fas fa-times"></i>',
-            label: game.i18n.localize('SCENE-PACKER.welcome.no'),
-          },
-          dontAsk: {
-            icon: '<i class="fas fa-times"></i>',
-            label: game.i18n.localize('SCENE-PACKER.welcome.dont-ask'),
-            callback: () =>
-              game.settings.set(
-                this.moduleName,
-                SETTING_SHOW_WELCOME_PROMPTS,
-                false,
-              ),
+            label: game.i18n.localize('SCENE-PACKER.welcome.close'),
           },
         },
       }, {
         // Set the width to somewhere between 400 and 640 pixels.
         width: Math.max(400, Math.min(640, Math.floor(window.innerWidth / 2))),
+        classes: ['dialog', 'welcome-prompt'],
       });
       d.render(true);
     }
     game.settings.set(this.moduleName, SETTING_PROMPTED, moduleVersion);
 
     globalScenePacker.instances[this.moduleName] = this;
+  }
+
+  /**
+   * Imports all of the content for the current adventure module. Skipping items which already exist in the world.
+   */
+  async importAllContent() {
+    const di = new Dialog({
+      title: game.i18n.localize('SCENE-PACKER.welcome.import-all.title'),
+      content: `<p>${game.i18n.localize('SCENE-PACKER.welcome.import-all.title')}</p>`,
+      buttons: {
+        close: {
+          icon: '<i class="fas fa-times"></i>',
+          label: game.i18n.localize('Close'),
+        },
+      },
+      default: 'close',
+    });
+    di.render(true);
+    for (let i = 0; i < PACK_IMPORT_ORDER.length; i++) {
+      let createData = [];
+      const packType = PACK_IMPORT_ORDER[i];
+      di.data.content = `<p>${game.i18n.format('SCENE-PACKER.welcome.import-all.wait', {
+        type: game.i18n.format(TYPE_HUMANISE[packType]),
+      })}</p>`;
+      di.render();
+      const packs = game.packs.filter((p) => {
+          let type;
+          if (!isNewerVersion('0.8.0', game.data.version)) {
+            type = p.documentClass?.documentName;
+          } else {
+            type = p.entity;
+          }
+          return p.metadata.package === this.moduleName && type === packType;
+        },
+      );
+      for (let i = 0; i < packs.length; i++) {
+        const pack = packs[i];
+        try {
+          let entityClass;
+          let packContent;
+          let collection;
+
+          if (!isNewerVersion('0.8.0', game.data.version)) {
+            entityClass = pack.documentClass;
+            packContent = await pack.getDocuments();
+            collection = game[entityClass.collectionName];
+          } else {
+            entityClass = CONFIG[pack.entity].entityClass;
+            packContent = await pack.getContent();
+            switch (packType) {
+              case 'Actor':
+                collection = game.actors;
+                break;
+              case 'JournalEntry':
+                collection = game.journal;
+                break;
+              case 'RollTable':
+                collection = game.tables;
+                break;
+              case 'Item':
+                collection = game.items;
+                break;
+              case 'Scene':
+                collection = game.scenes;
+                break;
+              case 'Macro':
+                collection = game.macros;
+                break;
+              case 'Playlist':
+                collection = game.playlists;
+                break;
+            }
+          }
+
+          // Filter down to those that are still missing
+          packContent = packContent.filter(e => {
+            if (e.name === CF_TEMP_ENTITY_NAME) {
+              // Exclude Compendium Folder temporary entities
+              return false;
+            }
+            let sourceId = e.getFlag(MODULE_NAME, 'sourceId');
+            let coreSourceId = e.getFlag('core', 'sourceId');
+            if (sourceId || coreSourceId) {
+              return !collection.find(f => f.getFlag(MODULE_NAME, 'sourceId') === sourceId || f.getFlag('core', 'sourceId') === sourceId);
+            }
+            return true;
+          });
+          if (!packContent.length) {
+            continue;
+          }
+
+          let folderData = await this.buildFolderStructureForPackContent(packContent, packType, this.adventureName);
+
+          // Append the entities found in this pack to the growing list to import
+          createData = createData.concat(
+            packContent.map((c) => {
+              let cData = c.data;
+              if (!isNewerVersion('0.8.0', game.data.version)) {
+                cData = collection.fromCompendium(c);
+              }
+              cData['flags.core.sourceId'] = c.uuid;
+
+              if (CONST.FOLDER_ENTITY_TYPES.includes(packType)) {
+                // Utilise the folder structure as defined by the Compendium Folder if it exists, otherwise
+                // fall back to the default folder.
+                const cfPath = cData.flags?.cf?.path;
+                if (cfPath && folderData.folderMap.has(cfPath)) {
+                  cData.folder = folderData.folderMap.get(cfPath)?.id || null;
+                } else if (folderData.folderId) {
+                  cData.folder = folderData.folderId;
+                }
+              }
+
+              // Patch "Sight angle must be between 1 and 360 degrees." error
+              if (packType === 'Actor') {
+                if (cData.token?.sightAngle === 0) {
+                  cData.token.sightAngle = 360;
+                }
+                if (cData.token?.lightAngle === 0) {
+                  cData.token.lightAngle = 360;
+                }
+              }
+              return cData;
+            }),
+          );
+
+          if (createData.length > 0) {
+            di.data.content = `<p>${game.i18n.format('SCENE-PACKER.welcome.import-all.creating-data', {
+              count: new Intl.NumberFormat().format(createData.length),
+              type: game.i18n.format(TYPE_HUMANISE[packType]),
+              label: pack.metadata.label,
+            })}</p>`;
+            di.render();
+            let createdEntities = await entityClass.create(createData);
+            if (!Array.isArray(createdEntities)) {
+              createdEntities = [createdEntities];
+            }
+
+            if (packType === 'Scene' && createdEntities.length) {
+              // Unpack scenes
+              for (let j = 0; j < createdEntities.length; j++) {
+                const scene = createdEntities[j];
+                if (isNewerVersion('0.8.0', game.data.version)) {
+                  // v0.7.x of Core had a bug where thumbnails would all be a single image incorrectly.
+                  const t = await scene.createThumbnail({img: scene.data.img || undefined});
+                  if (t?.thumb) {
+                    await scene.update({thumb: t.thumb});
+                  }
+                }
+                await this.ProcessScene(scene, {showLinkedJournal: false, contentPreImported: true});
+              }
+            }
+          }
+        } catch (e) {
+          console.error(`Error processing ${pack.title}`, e);
+        }
+      }
+    }
+    if (!di.rendered) {
+      ui.notifications.info(
+        game.i18n.format('SCENE-PACKER.welcome.import-all.complete', {
+          name: this.adventureName,
+        }),
+      );
+    }
+    if (di && typeof di.close === 'function') {
+      // Wrap in a setTimeout to make sure the application has finished rendering it, otherwise it won't close.
+      setTimeout(() => {
+        di.close({force: true});
+      }, 0);
+    }
+  }
+
+  /**
+   * Loops through the provided entity content and creates folders for them if they are missing.
+   * Will utilise Compendium Folders data to create folder structures if possible, falling back to the provided name.
+   * @param {Object[]} content - The content needing folders
+   * @param {String} entityType - The type of entity
+   * @param {String} fallbackFolderName - The name to use for the fallback folder if Compendium Folders is not used
+   * @return {Promise<{folderId: null|String, folderMap: Map<String, Object>}>}
+   */
+  async buildFolderStructureForPackContent(content, entityType, fallbackFolderName) {
+    const response = {
+      folderId: null,
+      folderMap: new Map(),
+    };
+
+    if (!content.length) {
+      return response;
+    }
+    if (!CONST.FOLDER_ENTITY_TYPES.includes(entityType)) {
+      // Entity type does not support folders
+      return response;
+    }
+
+    const hasCFData = content.some(p => p.data?.flags?.cf?.path);
+    const allHaveCFData = content.every(p => p.data?.flags?.cf?.path);
+
+    if (!allHaveCFData && fallbackFolderName) {
+      // Need the fallback folder to exist
+      let folder = game.folders.find(
+        (folder) => folder.name === fallbackFolderName && folder.type === entityType && folder.parent === null,
+      );
+      if (!folder) {
+        folder = await Folder.create({
+          name: fallbackFolderName,
+          type: entityType,
+          parent: null,
+        });
+      }
+      response.folderId = folder.id;
+
+      if (!hasCFData) {
+        // Only the fallback folder is needed
+        return response;
+      }
+    }
+
+    // Build the Compendium Folder structure paths
+    for (let i = 0; i < content.length; i++) {
+      const entity = content[i];
+      const cfPath = entity.data?.flags?.cf?.path;
+      if (!cfPath) {
+        continue;
+      }
+      if (response.folderMap.has(cfPath)) {
+        continue;
+      }
+      const pathParts = cfPath.split(CF_SEPARATOR);
+      for (let j = 0; j < pathParts.length; j++) {
+        const pathPart = pathParts[j];
+        if (response.folderMap.has(pathPart)) {
+          continue;
+        }
+        let parent = null;
+        if (j > 0) {
+          // Not the first folder in the path, find the parent.
+          let parentPart = pathParts[j - 1];
+          if (parentPart && response.folderMap.has(parentPart)) {
+            parent = response.folderMap.get(parentPart);
+          }
+        }
+        // See if a folder already exists
+        let folder = game.folders.find(
+          (folder) => folder.name === pathPart && folder.type === entityType && folder.data.parent === (parent?.id || null),
+        );
+        if (folder) {
+          response.folderMap.set(pathPart, folder);
+          continue;
+        }
+        // Need to create the folder.
+        folder = await Folder.create({
+          name: pathPart,
+          type: entityType,
+          parent: parent?.id || null,
+        });
+        response.folderMap.set(pathPart, folder);
+      }
+      let lastFolder = response.folderMap.get(pathParts.pop());
+      if (lastFolder) {
+        response.folderMap.set(cfPath, lastFolder);
+      }
+    }
+
+    return response;
   }
 
   /**
@@ -311,7 +565,10 @@ export default class ScenePacker {
    */
   async ProcessScene(
     scene = game.scenes.get(game.user.viewedScene),
-    {showLinkedJournal: showLinkedJournal = this.allowImportPrompts} = {},
+    {
+      showLinkedJournal: showLinkedJournal = this.allowImportPrompts,
+      contentPreImported: contentPreImported = false,
+    } = {},
   ) {
     if (!game.user.isGM) {
       return;
@@ -343,7 +600,7 @@ export default class ScenePacker {
     ui.notifications.info(
       game.i18n.localize('SCENE-PACKER.notifications.first-launch'),
     );
-    await this.UnpackScene(scene, {showLinkedJournal});
+    await this.UnpackScene(scene, {showLinkedJournal, contentPreImported});
     await this.ClearPackedData(scene);
     ui.notifications.info(
       game.i18n.localize('SCENE-PACKER.notifications.done'),
@@ -1630,72 +1887,7 @@ export default class ScenePacker {
       );
 
       if (content.length > 0) {
-        let folderId = null;
-        const hasCFData = content.some(p => p.data?.flags?.cf?.path);
-        const allHaveCFData = content.every(p => p.data?.flags?.cf?.path);
-        if (CONST.FOLDER_ENTITY_TYPES.includes(entityType) && !allHaveCFData) {
-          // Check if a folder for our adventure and entity type already exists, otherwise create it if we
-          // don't have Compendium Folder module data or have been told not to import the Compendium Folder
-          // module folder structure.
-          folderId = game.folders.find(
-            (folder) => folder.name === this.adventureName && folder.type === entityType,
-          )?.id;
-          if (!folderId) {
-            const folder = await Folder.create({
-              name: this.adventureName,
-              type: entityType,
-              parent: null,
-            });
-            folderId = folder.id;
-          }
-        }
-
-        // Build the Compendium Folder structure paths
-        const cfFolderMap = new Map();
-        for (let i = 0; i < content.length; i++) {
-          const entity = content[i];
-          const cfPath = entity.data?.flags?.cf?.path;
-          if (!cfPath) {
-            continue;
-          }
-          if (cfFolderMap.has(cfPath)) {
-            continue;
-          }
-          const pathParts = cfPath.split(CF_SEPARATOR);
-          for (let j = 0; j < pathParts.length; j++) {
-            const pathPart = pathParts[j];
-            if (cfFolderMap.has(pathPart)) {
-              continue;
-            }
-            let parent = null;
-            if (j > 0) {
-              // Not the first folder in the path, find the parent.
-              let parentPart = pathParts[j - 1];
-              if (parentPart && cfFolderMap.has(parentPart)) {
-                parent = cfFolderMap.get(parentPart);
-              }
-            }
-            // See if a folder already exists
-            let folder = game.folders.find(
-              (folder) => folder.name === pathPart && folder.type === entityType && folder.data.parent === (parent?.id || null),
-            );
-            if (folder) {
-              cfFolderMap.set(pathPart, folder);
-              continue;
-            }
-            // Need to create the folder.
-            folder = await Folder.create({
-              name: pathPart,
-              type: entityType,
-              parent: parent?.id,
-            });
-            cfFolderMap.set(pathPart, folder);
-          }
-          let lastFolder = cfFolderMap.get(pathParts.pop());
-          if (lastFolder) {
-            cfFolderMap.set(cfPath, lastFolder);
-          }
-        }
+        let folderData = await this.buildFolderStructureForPackContent(content, entityType, this.adventureName);
 
         // Append the entities found in this pack to the growing list to import
         createData = createData.concat(
@@ -1707,12 +1899,20 @@ export default class ScenePacker {
             // Utilise the folder structure as defined by the Compendium Folder if it exists, otherwise
             // fall back to the default folder.
             const cfPath = cData.flags?.cf?.path;
-            if (cfPath && cfFolderMap.has(cfPath)) {
-              cData.folder = cfFolderMap.get(cfPath)?.id;
-            } else if (folderId) {
-              cData.folder = folderId;
+            if (cfPath && folderData.folderMap.has(cfPath)) {
+              cData.folder = folderData.folderMap.get(cfPath)?.id || null;
+            } else if (folderData.folderId) {
+              cData.folder = folderData.folderId;
             }
             cData['flags.core.sourceId'] = c.uuid;
+
+            // Patch "Sight angle must be between 1 and 360 degrees." error
+            if (cData.token?.sightAngle === 0) {
+              cData.token.sightAngle = 360;
+            }
+            if (cData.token?.lightAngle === 0) {
+              cData.token.lightAngle = 360;
+            }
             return cData;
           }),
         );
@@ -1804,14 +2004,14 @@ export default class ScenePacker {
       }
       let matches = [];
       if (!isNewerVersion('0.8.0', game.data.version)) {
-        matches = game.journal.contents.filter(a => a.getFlag(MODULE_NAME, 'sourceId') === journal.sourceId);
+        matches = game.journal.contents.filter(a => a.getFlag(MODULE_NAME, 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.compendiumSourceId);
       } else {
-        matches = game.journal.entities.filter(a => a.getFlag(MODULE_NAME, 'sourceId') === journal.sourceId);
+        matches = game.journal.entities.filter(a => a.getFlag(MODULE_NAME, 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.compendiumSourceId);
       }
       if (matches.length) {
         exact_matches.push(journal);
       } else {
-        missing_journals.add(journal);
+        missing_name_matches.add(journal);
       }
     }
 
@@ -1820,7 +2020,7 @@ export default class ScenePacker {
       return [];
     }
 
-    let missing = Array.from(missing_journals);
+    let missing = [];
 
     if (missing_name_matches.size) {
       // Support multiple folder names by compendium names
@@ -1834,13 +2034,12 @@ export default class ScenePacker {
       const folderIDs = game.folders.filter(
         (j) => j.data.type === 'JournalEntry' && folderNames.includes(j.data.name),
       ).map((f) => f.id);
-      missing = missing.concat(Array.from(missing_name_matches)
+      missing = Array.from(missing_name_matches)
         .filter((info) => {
           // Filter for only the entries that are missing, or are in a different folder.
           const j = game.journal.getName(info?.journalName);
           return j == null || (folderIDs.length && !folderIDs.includes(j.data.folder));
-        }),
-      );
+        });
     }
 
     return missing;
@@ -1877,7 +2076,7 @@ export default class ScenePacker {
       if (matches.length) {
         exact_matches.push(macro);
       } else {
-        missing_macros.add(macro);
+        missing_name_matches.add(macro);
       }
     }
 
@@ -1886,7 +2085,7 @@ export default class ScenePacker {
       return [];
     }
 
-    let missing = Array.from(missing_macros);
+    let missing = [];
 
     if (missing_name_matches.size) {
       // Support multiple folder names by compendium names
@@ -1900,13 +2099,12 @@ export default class ScenePacker {
       const folderIDs = game.folders.filter(
         (j) => j.data.type === 'Macro' && folderNames.includes(j.data.name),
       ).map((f) => f.id);
-      missing = missing.concat(Array.from(missing_name_matches)
+      missing = Array.from(missing_name_matches)
         .filter((info) => {
           // Filter for only the entries that are missing, or are in a different folder.
           const j = game.macros.getName(info?.name);
           return j == null || (folderIDs.length && !folderIDs.includes(j.data.folder));
-        }),
-      );
+        });
     }
 
     return missing;
@@ -2069,9 +2267,10 @@ export default class ScenePacker {
     if (missing.length > 0) {
       this.logWarn(
         true,
-        game.i18n.format('SCENE-PACKER.notifications.link-tokens.missing', {
+        game.i18n.format('SCENE-PACKER.notifications.link-tokens.missing-details', {
           count: new Intl.NumberFormat().format(missing.length),
           adventureName: this.adventureName,
+          scene: scene.name,
         }),
         missing,
       );
@@ -2183,6 +2382,7 @@ export default class ScenePacker {
           'SCENE-PACKER.notifications.spawn-notes.missing-details',
           {
             count: new Intl.NumberFormat().format(missing.length),
+            scene: scene.name,
           },
         ),
         missing,
@@ -2294,61 +2494,34 @@ export default class ScenePacker {
 
     const update = {};
 
+    let folderData = await this.buildFolderStructureForPackContent([entity], type, this.adventureName);
+
     // Check for Compendium Folder structure data
     const cfPath = entity.data?.flags?.cf?.path;
-
-    if (CONST.FOLDER_ENTITY_TYPES.includes(type) && !cfPath) {
-      const folder = game.folders.find(
-        (folder) => folder.name === this.adventureName && folder.type === type,
-      ) || await Folder.create({
-        name: this.adventureName,
-        type: type,
-        parent: null,
-      });
-
-      if (folder) {
-        update.folder = folder.id;
-      }
-    } else if (hasCFData) {
-      // Build the Compendium Folder structure paths
-      const cfFolderMap = new Map();
-      const pathParts = cfPath.split(CF_SEPARATOR);
-      for (let j = 0; j < pathParts.length; j++) {
-        const pathPart = pathParts[j];
-        let parent = null;
-        if (j > 0) {
-          // Not the first folder in the path, find the parent.
-          let parentPart = pathParts[j - 1];
-          if (parentPart && cfFolderMap.has(parentPart)) {
-            parent = cfFolderMap.get(parentPart);
-          }
-        }
-        // See if a folder already exists
-        let folder = game.folders.find(
-          (folder) => folder.name === pathPart && folder.type === type && folder.data.parent === (parent?.id || null),
-        );
-        if (folder) {
-          cfFolderMap.set(pathPart, folder);
-          continue;
-        }
-        // Need to create the folder.
-        folder = await Folder.create({
-          name: pathPart,
-          type: entityType,
-          parent: parent?.id,
-        });
-        cfFolderMap.set(pathPart, folder);
-      }
-      let lastFolder = cfFolderMap.get(pathParts.pop());
-      if (lastFolder) {
-        cfFolderMap.set(cfPath, lastFolder);
-        update.folder = lastFolder.id;
-      }
+    if (cfPath && folderData.folderMap.has(cfPath)) {
+      update.folder = folderData.folderMap.get(cfPath)?.id || null;
+    } else if (folderData.folderId) {
+      update.folder = folderData.folderId;
     }
 
     if (!isNewerVersion('0.8.0', game.data.version)) {
       return collection.importFromCompendium(game.packs.get(entity.compendium.collection), entity.id, update);
     }
+
+    // Patch "Sight angle must be between 1 and 360 degrees." error
+    if (entity.data.token?.sightAngle === 0) {
+      if (!update.token) {
+        update.token = {};
+      }
+      update.token.sightAngle = 360;
+    }
+    if (entity.data.token?.lightAngle === 0) {
+      if (!update.token) {
+        update.token = {};
+      }
+      update.token.lightAngle = 360;
+    }
+
     return collection.importFromCollection(entity.compendium.collection, entity.id, update);
   }
 
@@ -2357,7 +2530,10 @@ export default class ScenePacker {
    * @param {Object} scene The scene to unpack. Defaults to the currently viewed scene.
    * @param {Boolean} showLinkedJournal Whether to show any Journals linked to the Scene.
    */
-  async UnpackScene(scene = game.scenes.get(game.user.viewedScene), {showLinkedJournal = true} = {}) {
+  async UnpackScene(
+    scene = game.scenes.get(game.user.viewedScene),
+    {showLinkedJournal = true, contentPreImported = false} = {},
+  ) {
     const tokenInfo = scene.getFlag(this.moduleName, FLAGS_TOKENS);
     const journalInfo = scene.getFlag(this.moduleName, FLAGS_JOURNALS);
     const sceneJournalInfo = scene.getFlag(this.moduleName, FLAGS_SCENE_JOURNAL);
@@ -2374,7 +2550,7 @@ export default class ScenePacker {
       }
     }
 
-    if (tokenInfo?.length) {
+    if (tokenInfo?.length && !contentPreImported) {
       // Import tokens that don't yet exist in the world
       await this.ImportEntities(
         this.packs.creatures,
@@ -2384,18 +2560,25 @@ export default class ScenePacker {
     }
 
     if (journalInfo?.length) {
-      // Import Journal Pins
-      const journals = await this.ImportEntities(
-        this.packs.journals,
-        this.findMissingJournals(journalInfo),
-        'journals',
-      );
+      let journals = [];
+      if (!contentPreImported) {
+        // Import Journal Pins
+        journals = await this.ImportEntities(
+          this.packs.journals,
+          this.findMissingJournals(journalInfo),
+          'journals',
+        );
+      } else {
+        // List all of the journals belonging to this module's packs
+        journals = game.journal.filter(j => this.packs.journals.some(p => j.getFlag('core', 'sourceId')
+          ?.startsWith(`Compendium.${p}.`)));
+      }
       if (journals?.length) {
         await this.unpackQuickEncounters(scene, journals, this.moduleName);
       }
     }
 
-    if (this.welcomeJournal) {
+    if (this.welcomeJournal && !contentPreImported) {
       // Import the "Welcome Journal"
       await this.ImportEntities(
         this.packs.journals,
@@ -2405,7 +2588,7 @@ export default class ScenePacker {
         'journals',
       );
     }
-    if (this.additionalJournals.length > 0) {
+    if (this.additionalJournals.length > 0 && !contentPreImported) {
       // Import any additional Journals
       await this.ImportEntities(
         this.packs.journals,
@@ -2415,7 +2598,7 @@ export default class ScenePacker {
         'journals',
       );
     }
-    if (this.additionalMacros.length > 0) {
+    if (this.additionalMacros.length > 0 && !contentPreImported) {
       // Import any additional Macros
       await this.ImportEntities(
         this.packs.macros,
@@ -2427,12 +2610,14 @@ export default class ScenePacker {
     }
 
     if (sceneJournalInfo && Object.keys(sceneJournalInfo).length) {
-      // Ensure the scene journal is imported
-      await this.ImportEntities(
-        this.packs.journals,
-        this.findMissingJournals([sceneJournalInfo]),
-        'journals',
-      );
+      if (!contentPreImported) {
+        // Ensure the scene journal is imported
+        await this.ImportEntities(
+          this.packs.journals,
+          this.findMissingJournals([sceneJournalInfo]),
+          'journals',
+        );
+      }
       if (!scene.journal) {
         // Relink the journal to the correct entry
         const newSceneJournal = game.journal.find(j => j.getFlag(MODULE_NAME, 'sourceId') === sceneJournalInfo.sourceId);

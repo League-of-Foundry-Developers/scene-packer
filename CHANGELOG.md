@@ -8,6 +8,10 @@
     - As a content creator, simply export to your compendiums using the Compendium Folder `Export Folder Structure` functionality.
   - See the embedded Journal Entry for additional information.
   - *The end user does not need to install the Compendium Folder module.*
+- Added an "Import all entities" option to the initial import dialog.
+  - Selecting this option will import everything from all of the compendiums that belong to the registered module.
+  - This option combined with the above `Compendium Folders` support allows end-users to have the same entities and folder structure as the content creator.
+- Patched 0.7.x `"Sight angle must be between 1 and 360 degrees."` error message when importing from some compendium packs.
 - Compatibility with Core v0.8.8
 
 ## v2.2.25
