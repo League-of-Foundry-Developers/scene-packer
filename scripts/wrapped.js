@@ -60,16 +60,16 @@ Hooks.once('setup', function () {
           if (!args[2]) {
             args[2] = {};
           }
+          const source = await pack.getEntity(args[1]);
           // Set the source uuid of the entity if it isn't already set in updateData
           if (!args[2]['flags.core.sourceId'] && !args[2].flags?.core?.sourceId) {
-            const source = await pack.getEntity(args[1]);
             args[2]['flags.core.sourceId'] = source.uuid;
           }
           // Patch "Sight angle must be between 1 and 360 degrees." error
-          if (args[2].token?.sightAngle === 0) {
+          if (source.data.token?.sightAngle === 0) {
             args[2].token.sightAngle = 360;
           }
-          if (args[2].token?.lightAngle === 0) {
+          if (source.data.token?.lightAngle === 0) {
             args[2].token.lightAngle = 360;
           }
 
