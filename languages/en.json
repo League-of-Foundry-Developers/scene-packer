@@ -81,7 +81,9 @@
           "reference": "ImportEntities was called with a reference that is not registered with Foundry. Double check for typos between your manifest.json and module initialisation files. Received the following call details:",
           "missing-pack": "Invalid pack configuration. Cannot find compendium {packName}. Check console for more details.",
           "missing-pack-details": "ImportEntities was called to search for pack \"{packName}\" which is not found. Check for typos in your module setup."
-        }
+        },
+        "cf-clean-up-title": "Clean up {name} entities?",
+        "cf-clean-up": "<p>You just imported {count} entites with the name <code style=\"display:inline-block;\">{name}</code> that belong to the <a href=\"https://foundryvtt.com/packages/compendium-folders\" target=\"_blank\">Compendium Folders</a> module which you do not have enabled.</p><p>Do you want to run the <a class=\"entity-link\" draggable=\"true\" data-pack=\"scene-packer.macros\" data-id=\"D0GsPqV3zglJ9w7V\"><i class=\"fas fa-terminal\"></i> Clean up {name} entries</a> macro?</p>"
       },
       "find-journal-compendium": {
         "no-match": "Could not find a Journal entry named \"{journal}\" in the compendiums.",

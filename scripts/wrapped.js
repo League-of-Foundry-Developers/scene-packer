@@ -228,10 +228,14 @@ Hooks.once('setup', function () {
 
           let tempEntities = data.filter(e => e.name === CONSTANTS.CF_TEMP_ENTITY_NAME);
           if (tempEntities.length) {
-            let content = `<p>You just imported ${tempEntities.length} entites with the name <code style="display:inline-block;">${CONSTANTS.CF_TEMP_ENTITY_NAME}</code> that belong to the <a href="https://foundryvtt.com/packages/compendium-folders" target="_blank">Compendium Folders</a> module which you do not have enabled.</p><p>Do you want to run the <a class="entity-link" draggable="true" data-pack="scene-packer.macros" data-id="D0GsPqV3zglJ9w7V"><i class="fas fa-terminal"></i> Clean up #[CF_tempEntity] entries</a> macro?</p>`;
             Dialog.confirm({
-              title: `Clean up ${CONSTANTS.CF_TEMP_ENTITY_NAME} entities?`,
-              content: content,
+              title: game.i18n.format('SCENE-PACKER.notifications.import-entities.cf-clean-up-title', {
+                name: CONSTANTS.CF_TEMP_ENTITY_NAME,
+              }),
+              content: game.i18n.format('SCENE-PACKER.notifications.import-entities.cf-clean-up', {
+                name: CONSTANTS.CF_TEMP_ENTITY_NAME,
+                count: tempEntities.length,
+              }),
               yes: () => {
                 game.packs.get('scene-packer.macros')?.getName('Clean up #[CF_tempEntity] entries')?.execute();
               }
