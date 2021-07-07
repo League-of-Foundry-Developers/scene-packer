@@ -87,17 +87,26 @@ export default class Report {
       }
     }
 
+    let background = `${canvas.background?.img?.texture?.width} x ${canvas.background?.img?.texture?.height}`;
+    let tiles = canvas.tiles?.placeables?.length || 0;
+
+    if (!isNewerVersion('0.8.0', game.data.version)) {
+      tiles = canvas.background?.placeables?.length
+      background = `${canvas.background?.bg?.texture?.width} x ${canvas.background?.bg?.texture?.height}`;
+    }
+
     return {
       Name: canvas.scene?.name,
       Walls: canvas.walls?.placeables?.length,
       Lights: canvas.lighting?.placeables?.length,
       Tokens: canvas.tokens?.placeables?.length,
-      Tiles: canvas.tiles?.placeables?.length,
+      Tiles: tiles,
       Sounds: canvas.sounds?.placeables?.length,
       Drawings: canvas.drawings?.placeables?.length,
       Notes: canvas.notes?.placeables?.length,
       Dimensions: `${canvas.dimensions?.width} x ${canvas.dimensions?.height}`,
-      Background: `${canvas.background?.img?.texture?.width} x ${canvas.background?.img?.texture?.height}`,
+      Background: background,
+      Foreground: `${canvas.foreground?.img?.texture?.width || 0} x ${canvas.foreground?.img?.texture?.height || 0}`,
     };
   }
 
