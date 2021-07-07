@@ -642,8 +642,8 @@ export default class ScenePacker {
       }
     }
     // Set both world and scene imported version flags
-    game.settings.set(this.moduleName, SETTING_IMPORTED_VERSION, moduleVersion || '0.0.0');
-    scene.setFlag(this.moduleName, SETTING_IMPORTED_VERSION, moduleVersion || '0.0.0');
+    await game.settings.set(this.moduleName, SETTING_IMPORTED_VERSION, moduleVersion || '0.0.0');
+    await scene.setFlag(this.moduleName, SETTING_IMPORTED_VERSION, moduleVersion || '0.0.0');
 
     return this;
   }
@@ -2832,7 +2832,7 @@ export default class ScenePacker {
           );
         });
 
-        journal.setFlag('quick-encounters', 'quickEncounter', JSON.stringify(quickEncounter));
+        await journal.setFlag('quick-encounters', 'quickEncounter', JSON.stringify(quickEncounter));
       }
     }
   }
@@ -3057,7 +3057,7 @@ export default class ScenePacker {
         ScenePacker.logType(
           moduleName,
           'info',
-          dryRun, // Force a log if operating in dry-run mode
+          true,
           game.i18n.format(
             'SCENE-PACKER.world-conversion.compendiums.checking-journal',
             {
@@ -3192,7 +3192,7 @@ export default class ScenePacker {
           ScenePacker.logType(
             moduleName,
             'info',
-            dryRun, // Force a log if operating in dry-run mode
+            true,
             game.i18n.format(
               'SCENE-PACKER.world-conversion.compendiums.updating-journal-references',
               {
@@ -3212,7 +3212,7 @@ export default class ScenePacker {
             ScenePacker.logType(
               moduleName,
               'info',
-              dryRun, // Force a log if operating in dry-run mode
+              true,
               game.i18n.format(
                 'SCENE-PACKER.world-conversion.compendiums.updating-reference-console',
                 {
@@ -3257,7 +3257,7 @@ export default class ScenePacker {
           ScenePacker.logType(
             moduleName,
             'info',
-            dryRun, // Force a log if operating in dry-run mode
+            true,
             game.i18n.format(
               'SCENE-PACKER.world-conversion.compendiums.no-references',
               {
@@ -3270,7 +3270,7 @@ export default class ScenePacker {
         ScenePacker.logType(
           moduleName,
           'info',
-          dryRun, // Force a log if operating in dry-run mode
+          true,
           game.i18n.format(
             'SCENE-PACKER.world-conversion.compendiums.completed-journal',
             {
@@ -3354,7 +3354,7 @@ export default class ScenePacker {
       if (worldJournal) {
         // Add a back reference
         if (!dryRun) {
-          worldJournal.setFlag(MODULE_NAME, 'quickEncounter', journal.uuid);
+          await worldJournal.setFlag(MODULE_NAME, 'quickEncounter', journal.uuid);
         }
       }
       quickEncounter.journalEntryId = journal.uuid;
@@ -3401,7 +3401,7 @@ export default class ScenePacker {
       ScenePacker.logType(
         moduleName,
         'info',
-        dryRun, // Force a log if operating in dry-run mode
+        true,
         game.i18n.format(
           'SCENE-PACKER.world-conversion.compendiums.quick-encounters.updating-references',
           {
@@ -3414,13 +3414,13 @@ export default class ScenePacker {
         ScenePacker.logType(
           moduleName,
           'info',
-          dryRun, // Force a log if operating in dry-run mode
+          true,
           game.i18n.format('SCENE-PACKER.world-conversion.compendiums.quick-encounters.updating-references-console', update),
         );
       });
 
       if (!dryRun) {
-        journal.setFlag('quick-encounters', 'quickEncounter', JSON.stringify(quickEncounter));
+        await journal.setFlag('quick-encounters', 'quickEncounter', JSON.stringify(quickEncounter));
       }
     }
   }
