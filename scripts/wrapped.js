@@ -1,3 +1,4 @@
+import { CONSTANTS } from './constants.js';
 import {libWrapper} from './shim.js';
 import Hash from './hash.js';
 
@@ -132,7 +133,7 @@ Hooks.once('setup', function () {
           }));
 
           // Step 3 - import all content
-          const created = await this.cls.create(entities.map(e => {
+          const created = await this.cls.create(entities.filter(e => e.name !== CONSTANTS.CF_TEMP_ENTITY_NAME).map(e => {
             e.data.folder = folderId;
 
             // Patch "Sight angle must be between 1 and 360 degrees." error
@@ -193,6 +194,7 @@ Hooks.once('setup', function () {
         );
       });
 
+      // Add hashes to entities imported from compendiums to support upgrade diffs.
       libWrapper.register(
         'scene-packer',
         'WorldCollection.prototype.fromCompendium',
@@ -208,6 +210,33 @@ Hooks.once('setup', function () {
           }
           data.flags[ScenePacker.MODULE_NAME].hash = Hash.SHA1(data);
 
+          return data;
+        },
+        'WRAPPER',
+      );
+
+      // Clean up temporary compendium folder entities when importing all from a compendium.
+      libWrapper.register(
+        'scene-packer',
+        'CompendiumCollection.prototype.importAll',
+        async function (wrapped, ...args) {
+          const data = await wrapped.bind(this)(...args);
+          if (game.modules.get('compendium-folders')?.active)  {
+            // Compendium folders is active, it will handle the cleanup
+            return data;
+          }
+
+          let tempEntities = data.filter(e => e.name === CONSTANTS.CF_TEMP_ENTITY_NAME);
+          if (tempEntities.length) {
+            let content = `<p>You just imported ${tempEntities.length} entites with the name <code style="display:inline-block;">${CONSTANTS.CF_TEMP_ENTITY_NAME}</code> that belong to the Compendium Folders module which you do not have enabled.</p><p>Do you want to run the <a class="entity-link" draggable="true" data-pack="scene-packer.macros" data-id="D0GsPqV3zglJ9w7V"><i class="fas fa-terminal"></i> Clean up #[CF_tempEntity] entries</a> macro?</p>`;
+            Dialog.confirm({
+              title: `Clean up ${CONSTANTS.CF_TEMP_ENTITY_NAME} entities?`,
+              content: content,
+              yes: () => {
+                game.packs.get('scene-packer.macros')?.getName('Clean up #[CF_tempEntity] entries')?.execute();
+              }
+            });
+          }
           return data;
         },
         'WRAPPER',
