@@ -1,3 +1,4 @@
+import { CONSTANTS } from './constants.js';
 import ModuleSelect from './asset-report/module-select.js';
 
 /**
@@ -638,10 +639,10 @@ export default class AssetReport extends FormApplication {
       }
       if (!isNewerVersion('0.8.0', game.data.version)) {
         const contents = await pack.getDocuments();
-        entities.push(...contents.filter(s => s.name !== '#[CF_tempEntity]'));
+        entities.push(...contents.filter(s => s.name !== CONSTANTS.CF_TEMP_ENTITY_NAME));
       } else {
         const contents = await pack.getContent();
-        entities.push(...contents.filter(s => s.name !== '#[CF_tempEntity]'));
+        entities.push(...contents.filter(s => s.name !== CONSTANTS.CF_TEMP_ENTITY_NAME));
       }
     }
 
