@@ -1,4 +1,4 @@
-import { CONSTANTS } from './constants.js';
+import {CONSTANTS} from './constants.js';
 import {libWrapper} from './shim.js';
 import Hash from './hash.js';
 
@@ -221,7 +221,7 @@ Hooks.once('setup', function () {
         'CompendiumCollection.prototype.importAll',
         async function (wrapped, ...args) {
           const data = await wrapped.bind(this)(...args);
-          if (game.modules.get('compendium-folders')?.active)  {
+          if (game.modules.get('compendium-folders')?.active) {
             // Compendium folders is active, it will handle the cleanup
             return data;
           }
@@ -237,8 +237,10 @@ Hooks.once('setup', function () {
                 count: tempEntities.length,
               }),
               yes: () => {
-                game.packs.get('scene-packer.macros')?.getName('Clean up #[CF_tempEntity] entries')?.execute();
-              }
+                game.packs.get('scene-packer.macros')
+                  .getContent()
+                  .then(m => m.find(e => e.name === 'Clean up #[CF_tempEntity] entries')?.execute());
+              },
             });
           }
           return data;
