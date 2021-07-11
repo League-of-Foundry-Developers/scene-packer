@@ -1,20 +1,7 @@
+import { CONSTANTS } from './constants.js';
 import Report from './report.js';
 import AssetReport from './asset-report.js';
-
-const MINIMUM_SUPPORTED_PACKER_VERSION = '2.0.0';
-const MODULE_NAME = 'scene-packer';
-const FLAGS_DEFAULT_PERMISSION = 'defaultPermission';
-const FLAGS_JOURNALS = 'journals';
-const FLAGS_TOKENS = 'tokens';
-const FLAGS_MACROS = 'macros';
-const FLAGS_PLAYLIST = 'playlist';
-const FLAGS_SCENE_JOURNAL = 'scene-journal';
-const FLAGS_SCENE_POSITION = 'scene-position';
-const FLAGS_SOURCE_MODULE = 'source-module';
-const FLAGS_PACKED_VERSION = 'packed-with-version';
-const SETTING_IMPORTED_VERSION = 'imported';
-const SETTING_PROMPTED = 'prompted';
-const SETTING_SHOW_WELCOME_PROMPTS = 'showWelcomePrompts';
+import Hash from './hash.js';
 
 /**
  * Tracks the initialised instances of Scene Packer and also exposes some methods to globalThis.
@@ -24,9 +11,9 @@ const globalScenePacker = {
   instances: {},
   ShowPerformanceReport: Report.RenderReport,
   AssetReport: AssetReport,
-  MODULE_NAME: MODULE_NAME,
-  MINIMUM_SUPPORTED_PACKER_VERSION: MINIMUM_SUPPORTED_PACKER_VERSION,
-  FLAGS_DEFAULT_PERMISSION: FLAGS_DEFAULT_PERMISSION,
+  MODULE_NAME: CONSTANTS.MODULE_NAME,
+  MINIMUM_SUPPORTED_PACKER_VERSION: CONSTANTS.MINIMUM_SUPPORTED_PACKER_VERSION,
+  FLAGS_DEFAULT_PERMISSION: CONSTANTS.FLAGS_DEFAULT_PERMISSION,
 };
 
 /**
@@ -122,30 +109,30 @@ export default class ScenePacker {
       window.DEV.registerPackageDebugFlag(this.moduleName);
     }
 
-    game.settings.register(this.moduleName, SETTING_IMPORTED_VERSION, {
+    game.settings.register(this.moduleName, CONSTANTS.SETTING_IMPORTED_VERSION, {
       scope: 'world',
       config: false,
       type: String,
       default: '0.0.0',
     });
 
-    game.settings.register(this.moduleName, SETTING_PROMPTED, {
+    game.settings.register(this.moduleName, CONSTANTS.SETTING_PROMPTED, {
       scope: 'world',
       config: false,
       type: String,
       default: '0.0.0',
     });
 
-    game.settings.register(this.moduleName, SETTING_SHOW_WELCOME_PROMPTS, {
+    game.settings.register(this.moduleName, CONSTANTS.SETTING_SHOW_WELCOME_PROMPTS, {
       scope: 'world',
       config: false,
       type: Boolean,
       default: true,
     });
 
-    let promptedVersion = game.settings.get(this.moduleName, SETTING_PROMPTED) || '0.0.0';
+    let promptedVersion = game.settings.get(this.moduleName, CONSTANTS.SETTING_PROMPTED) || '0.0.0';
     let moduleVersion = game.modules.get(this.moduleName)?.data?.version || '0.0.0';
-    if (this.allowImportPrompts && isNewerVersion(moduleVersion, promptedVersion) && game.settings.get(this.moduleName, SETTING_SHOW_WELCOME_PROMPTS)) {
+    if (this.allowImportPrompts && isNewerVersion(moduleVersion, promptedVersion) && game.settings.get(this.moduleName, CONSTANTS.SETTING_SHOW_WELCOME_PROMPTS)) {
       // A newer version of the module is installed from what was last prompted
       let content = game.i18n.format('SCENE-PACKER.welcome.intro', {
         adventure: this.adventureName,
@@ -161,86 +148,325 @@ export default class ScenePacker {
           version: moduleVersion,
         });
       }
+      let label = game.i18n.localize('SCENE-PACKER.welcome.yes-all-fallback');
+      if (!isNewerVersion('0.8.0', game.data.version)) {
+        let totalCount = game.packs.filter(
+          (p) => p.metadata.package === this.moduleName,
+        ).reduce((a, currentValue) => a + (currentValue?.index?.size || currentValue?.index?.length || 0), 0);
+        label = game.i18n.format('SCENE-PACKER.welcome.yes-all', {
+          count: new Intl.NumberFormat().format(totalCount),
+        });
+      }
       let d = new Dialog({
-        title: game.i18n.format('SCENE-PACKER.welcome.title', {
-          title: this.adventureName,
-        }),
+        title: game.i18n.localize('SCENE-PACKER.welcome.title'),
         content: content,
         buttons: {
           yesAll: {
             icon: '<i class="fas fa-check-double"></i>',
-            label: game.i18n.localize('SCENE-PACKER.welcome.yes-all'),
+            label: label,
             callback: async () => {
-              const packs = game.packs.filter((p) => {
-                  let type;
-                  if (!isNewerVersion('0.8.0', game.data.version)) {
-                    type = p.documentClass?.documentName;
-                  } else {
-                    type = p.entity;
-                  }
-                  return p.metadata.package === this.moduleName && type === 'Scene';
-                },
-              );
-              for (let i = 0; i < packs.length; i++) {
-                const c = packs[i];
-                let folderId = game.folders.find(
-                  (folder) => folder.name === this.adventureName && folder.type === 'Scene',
-                )?._id;
-                if (!folderId) {
-                  const folder = await Folder.create({
-                    name: this.adventureName,
-                    type: 'Scene',
-                    parent: null,
-                  });
-                  folderId = folder.id || folder._id;
-                }
-                const scenes = await c.importAll({folderId: folderId, folderName: this.adventureName});
-                if (!scenes) {
-                  continue;
-                }
-                if (Array.isArray(scenes) && scenes.length) {
-                  for (let j = 0; j < scenes.length; j++) {
-                    await this.ProcessScene(scenes[j], {showLinkedJournal: false});
-                  }
-                } else {
-                  await this.ProcessScene(scenes, {showLinkedJournal: false});
-                }
-              }
+              await this.importAllContent();
             },
           },
           choose: {
-            icon: '<i class="fas fa-check"></i>',
+            icon: '<i class="fas fa-clipboard-check"></i>',
             label: game.i18n.localize('SCENE-PACKER.welcome.let-me-choose'),
             callback: () => {
               game.packs.filter(
-                (p) => p.metadata.package === this.moduleName && p.entity === 'Scene',
+                (p) => p.metadata.package === this.moduleName && (p.documentName || p.entity) === 'Scene',
               ).forEach(c => c.render(true));
             },
+            condition: game.packs.filter((p) => p.metadata.package === this.moduleName && (p.documentName || p.entity) === 'Scene').length,
           },
-          no: {
+          close: {
             icon: '<i class="fas fa-times"></i>',
-            label: game.i18n.localize('SCENE-PACKER.welcome.no'),
-          },
-          dontAsk: {
-            icon: '<i class="fas fa-times"></i>',
-            label: game.i18n.localize('SCENE-PACKER.welcome.dont-ask'),
-            callback: () =>
-              game.settings.set(
-                this.moduleName,
-                SETTING_SHOW_WELCOME_PROMPTS,
-                false,
-              ),
+            label: game.i18n.localize('SCENE-PACKER.welcome.close'),
           },
         },
       }, {
         // Set the width to somewhere between 400 and 640 pixels.
         width: Math.max(400, Math.min(640, Math.floor(window.innerWidth / 2))),
+        classes: ['dialog', 'welcome-prompt'],
       });
       d.render(true);
     }
-    game.settings.set(this.moduleName, SETTING_PROMPTED, moduleVersion);
+    game.settings.set(this.moduleName, CONSTANTS.SETTING_PROMPTED, moduleVersion);
 
     globalScenePacker.instances[this.moduleName] = this;
+  }
+
+  /**
+   * Imports all of the content for the current adventure module. Skipping items which already exist in the world.
+   */
+  async importAllContent() {
+    const di = new Dialog({
+      title: game.i18n.localize('SCENE-PACKER.welcome.import-all.title'),
+      content: `<p>${game.i18n.localize('SCENE-PACKER.welcome.import-all.title')}</p>`,
+      buttons: {
+        close: {
+          icon: '<i class="fas fa-times"></i>',
+          label: game.i18n.localize('Close'),
+        },
+      },
+      default: 'close',
+    });
+    di.render(true);
+    for (let i = 0; i < CONSTANTS.PACK_IMPORT_ORDER.length; i++) {
+      let createData = [];
+      const packType = CONSTANTS.PACK_IMPORT_ORDER[i];
+      di.data.content = `<p>${game.i18n.format('SCENE-PACKER.welcome.import-all.wait', {
+        type: game.i18n.format(CONSTANTS.TYPE_HUMANISE[packType]),
+      })}</p>`;
+      di.render();
+      const packs = game.packs.filter((p) => {
+          let type;
+          if (!isNewerVersion('0.8.0', game.data.version)) {
+            type = p.documentClass?.documentName;
+          } else {
+            type = p.entity;
+          }
+          return p.metadata.package === this.moduleName && type === packType;
+        },
+      );
+      for (let i = 0; i < packs.length; i++) {
+        const pack = packs[i];
+        try {
+          let entityClass;
+          let packContent;
+          let collection;
+
+          if (!isNewerVersion('0.8.0', game.data.version)) {
+            entityClass = pack.documentClass;
+            packContent = await pack.getDocuments();
+            collection = game[entityClass.collectionName];
+          } else {
+            entityClass = CONFIG[pack.entity].entityClass;
+            packContent = await pack.getContent();
+            switch (packType) {
+              case 'Actor':
+                collection = game.actors;
+                break;
+              case 'JournalEntry':
+                collection = game.journal;
+                break;
+              case 'RollTable':
+                collection = game.tables;
+                break;
+              case 'Item':
+                collection = game.items;
+                break;
+              case 'Scene':
+                collection = game.scenes;
+                break;
+              case 'Macro':
+                collection = game.macros;
+                break;
+              case 'Playlist':
+                collection = game.playlists;
+                break;
+            }
+          }
+
+          // Filter down to those that are still missing
+          packContent = packContent.filter(e => {
+            if (e.name === CONSTANTS.CF_TEMP_ENTITY_NAME) {
+              // Exclude Compendium Folder temporary entities
+              return false;
+            }
+            let sourceId = e.getFlag(CONSTANTS.MODULE_NAME, 'sourceId');
+            let coreSourceId = e.getFlag('core', 'sourceId');
+            if (sourceId || coreSourceId) {
+              return !collection.find(f => f.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === sourceId || f.getFlag('core', 'sourceId') === sourceId);
+            }
+            return true;
+          });
+          if (!packContent.length) {
+            continue;
+          }
+
+          let folderData = await this.buildFolderStructureForPackContent(packContent, packType, this.adventureName);
+
+          // Append the entities found in this pack to the growing list to import
+          createData = createData.concat(
+            packContent.map(c => {
+              let cData = c.data;
+              const newFlags = {};
+              newFlags['core'] = {sourceId: c.uuid};
+              if (!isNewerVersion('0.8.0', game.data.version)) {
+                cData = collection.fromCompendium(c);
+              }
+              if (!cData.flags) {
+                cData.flags = {};
+              }
+              mergeObject(cData.flags, newFlags);
+              if (!cData.flags[ScenePacker.MODULE_NAME]) {
+                cData.flags[ScenePacker.MODULE_NAME] = {};
+              }
+              cData.flags[ScenePacker.MODULE_NAME].hash = Hash.SHA1(cData);
+
+              if (CONST.FOLDER_ENTITY_TYPES.includes(packType)) {
+                // Utilise the folder structure as defined by the Compendium Folder if it exists, otherwise
+                // fall back to the default folder.
+                const cfPath = cData.flags?.cf?.path;
+                if (cfPath && folderData.folderMap.has(cfPath)) {
+                  cData.folder = folderData.folderMap.get(cfPath)?.id || null;
+                } else if (folderData.folderId) {
+                  cData.folder = folderData.folderId;
+                }
+              }
+
+              // Patch "Sight angle must be between 1 and 360 degrees." error
+              if (packType === 'Actor') {
+                if (cData.token?.sightAngle === 0) {
+                  cData.token.sightAngle = 360;
+                }
+                if (cData.token?.lightAngle === 0) {
+                  cData.token.lightAngle = 360;
+                }
+              }
+              return cData;
+            }),
+          );
+
+          if (createData.length > 0) {
+            di.data.content = `<p>${game.i18n.format('SCENE-PACKER.welcome.import-all.creating-data', {
+              count: new Intl.NumberFormat().format(createData.length),
+              type: game.i18n.format(CONSTANTS.TYPE_HUMANISE[packType]),
+              label: pack.metadata.label,
+            })}</p>`;
+            di.render();
+            let createdEntities = await entityClass.create(createData);
+            if (!Array.isArray(createdEntities)) {
+              createdEntities = [createdEntities];
+            }
+
+            if (packType === 'Scene' && createdEntities.length) {
+              // Unpack scenes
+              for (let j = 0; j < createdEntities.length; j++) {
+                const scene = createdEntities[j];
+                if (isNewerVersion('0.8.0', game.data.version)) {
+                  // v0.7.x of Core had a bug where thumbnails would all be a single image incorrectly.
+                  const t = await scene.createThumbnail({img: scene.data.img || undefined});
+                  if (t?.thumb) {
+                    await scene.update({thumb: t.thumb});
+                  }
+                }
+                await this.ProcessScene(scene, {showLinkedJournal: false, contentPreImported: true});
+              }
+            }
+          }
+        } catch (e) {
+          console.error(`Error processing ${pack.title}`, e);
+        }
+      }
+    }
+    if (!di.rendered) {
+      ui.notifications.info(
+        game.i18n.format('SCENE-PACKER.welcome.import-all.complete', {
+          name: this.adventureName,
+        }),
+      );
+    }
+    if (di && typeof di.close === 'function') {
+      // Wrap in a setTimeout to make sure the application has finished rendering it, otherwise it won't close.
+      setTimeout(() => {
+        di.close({force: true});
+      }, 0);
+    }
+  }
+
+  /**
+   * Loops through the provided entity content and creates folders for them if they are missing.
+   * Will utilise Compendium Folders data to create folder structures if possible, falling back to the provided name.
+   * @param {Object[]} content - The content needing folders
+   * @param {String} entityType - The type of entity
+   * @param {String} fallbackFolderName - The name to use for the fallback folder if Compendium Folders is not used
+   * @return {Promise<{folderId: null|String, folderMap: Map<String, Object>}>}
+   */
+  async buildFolderStructureForPackContent(content, entityType, fallbackFolderName) {
+    const response = {
+      folderId: null,
+      folderMap: new Map(),
+    };
+
+    if (!content.length) {
+      return response;
+    }
+    if (!CONST.FOLDER_ENTITY_TYPES.includes(entityType)) {
+      // Entity type does not support folders
+      return response;
+    }
+
+    const hasCFData = content.some(p => p.data?.flags?.cf?.path);
+    const allHaveCFData = content.every(p => p.data?.flags?.cf?.path);
+
+    if (!allHaveCFData && fallbackFolderName) {
+      // Need the fallback folder to exist
+      let folder = game.folders.find(
+        (folder) => folder.name === fallbackFolderName && folder.type === entityType && folder.parent === null,
+      );
+      if (!folder) {
+        folder = await Folder.create({
+          name: fallbackFolderName,
+          type: entityType,
+          parent: null,
+        });
+      }
+      response.folderId = folder.id;
+
+      if (!hasCFData) {
+        // Only the fallback folder is needed
+        return response;
+      }
+    }
+
+    // Build the Compendium Folder structure paths
+    for (let i = 0; i < content.length; i++) {
+      const entity = content[i];
+      const cfPath = entity.data?.flags?.cf?.path;
+      if (!cfPath) {
+        continue;
+      }
+      if (response.folderMap.has(cfPath)) {
+        continue;
+      }
+      const pathParts = cfPath.split(CONSTANTS.CF_SEPARATOR);
+      for (let j = 0; j < pathParts.length; j++) {
+        const pathPart = pathParts[j];
+        if (response.folderMap.has(pathPart)) {
+          continue;
+        }
+        let parent = null;
+        if (j > 0) {
+          // Not the first folder in the path, find the parent.
+          let parentPart = pathParts[j - 1];
+          if (parentPart && response.folderMap.has(parentPart)) {
+            parent = response.folderMap.get(parentPart);
+          }
+        }
+        // See if a folder already exists
+        let folder = game.folders.find(
+          (folder) => folder.name === pathPart && folder.type === entityType && folder.data.parent === (parent?.id || null),
+        );
+        if (folder) {
+          response.folderMap.set(pathPart, folder);
+          continue;
+        }
+        // Need to create the folder.
+        folder = await Folder.create({
+          name: pathPart,
+          type: entityType,
+          parent: parent?.id || null,
+        });
+        response.folderMap.set(pathPart, folder);
+      }
+      let lastFolder = response.folderMap.get(pathParts.pop());
+      if (lastFolder) {
+        response.folderMap.set(cfPath, lastFolder);
+      }
+    }
+
+    return response;
   }
 
   /**
@@ -256,10 +482,10 @@ export default class ScenePacker {
   static HasPackedData(
     scene,
     moduleName,
-    tokenFlag = FLAGS_TOKENS,
-    journalFlag = FLAGS_JOURNALS,
-    macroFlag = FLAGS_MACROS,
-    playlistFlag = FLAGS_PLAYLIST,
+    tokenFlag = CONSTANTS.FLAGS_TOKENS,
+    journalFlag = CONSTANTS.FLAGS_JOURNALS,
+    macroFlag = CONSTANTS.FLAGS_MACROS,
+    playlistFlag = CONSTANTS.FLAGS_PLAYLIST,
   ) {
     if (!game.user.isGM) {
       return false;
@@ -304,26 +530,29 @@ export default class ScenePacker {
    */
   async ProcessScene(
     scene = game.scenes.get(game.user.viewedScene),
-    {showLinkedJournal: showLinkedJournal = this.allowImportPrompts} = {},
+    {
+      showLinkedJournal: showLinkedJournal = this.allowImportPrompts,
+      contentPreImported: contentPreImported = false,
+    } = {},
   ) {
     if (!game.user.isGM) {
       return;
     }
 
-    const packedVersion = await scene.getFlag(MODULE_NAME, FLAGS_PACKED_VERSION);
-    const sourceModule = await scene.getFlag(MODULE_NAME, FLAGS_SOURCE_MODULE);
-    if (packedVersion && isNewerVersion(MINIMUM_SUPPORTED_PACKER_VERSION, packedVersion)) {
+    const packedVersion = await scene.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_PACKED_VERSION);
+    const sourceModule = await scene.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_SOURCE_MODULE);
+    if (packedVersion && isNewerVersion(CONSTANTS.MINIMUM_SUPPORTED_PACKER_VERSION, packedVersion)) {
       ui.notifications.error(
         game.i18n.format('SCENE-PACKER.errors.version.packed-low', {
           version: packedVersion,
-          supportedVersion: MINIMUM_SUPPORTED_PACKER_VERSION,
+          supportedVersion: CONSTANTS.MINIMUM_SUPPORTED_PACKER_VERSION,
           sourceModule,
           scene: scene.name,
         }),
       );
       throw game.i18n.format('SCENE-PACKER.errors.version.packed-low', {
         version: packedVersion,
-        supportedVersion: MINIMUM_SUPPORTED_PACKER_VERSION,
+        supportedVersion: CONSTANTS.MINIMUM_SUPPORTED_PACKER_VERSION,
         sourceModule,
         scene: scene.name,
       });
@@ -336,13 +565,13 @@ export default class ScenePacker {
     ui.notifications.info(
       game.i18n.localize('SCENE-PACKER.notifications.first-launch'),
     );
-    await this.UnpackScene(scene, {showLinkedJournal});
+    await this.UnpackScene(scene, {showLinkedJournal, contentPreImported});
     await this.ClearPackedData(scene);
     ui.notifications.info(
       game.i18n.localize('SCENE-PACKER.notifications.done'),
     );
 
-    let importedVersion = game.settings.get(this.moduleName, SETTING_IMPORTED_VERSION) || '0.0.0';
+    let importedVersion = game.settings.get(this.moduleName, CONSTANTS.SETTING_IMPORTED_VERSION) || '0.0.0';
     let moduleVersion = game.modules.get(this.moduleName)?.data?.version || '0.0.0';
     if (this.welcomeJournal) {
       // Display the welcome journal once per new module version
@@ -368,8 +597,8 @@ export default class ScenePacker {
       }
     }
     // Set both world and scene imported version flags
-    game.settings.set(this.moduleName, SETTING_IMPORTED_VERSION, moduleVersion || '0.0.0');
-    scene.setFlag(this.moduleName, SETTING_IMPORTED_VERSION, moduleVersion || '0.0.0');
+    await game.settings.set(this.moduleName, CONSTANTS.SETTING_IMPORTED_VERSION, moduleVersion || '0.0.0');
+    await scene.setFlag(this.moduleName, CONSTANTS.SETTING_IMPORTED_VERSION, moduleVersion || '0.0.0');
 
     return this;
   }
@@ -428,7 +657,7 @@ export default class ScenePacker {
         );
       }
 
-      const isDebugging = window.DEV?.getPackageDebugValue(moduleName);
+      const isDebugging = game.modules.get('_dev-mode')?.api?.getPackageDebugValue(CONSTANTS.MODULE_NAME);
 
       if (force || isDebugging) {
         switch (type) {
@@ -765,8 +994,8 @@ export default class ScenePacker {
     }
 
     let content = `<p>${game.i18n.format('SCENE-PACKER.worth-packing.intro', {
-      count: sceneInfo.size,
-      total: scenes.length,
+      count: new Intl.NumberFormat().format(sceneInfo.size),
+      total: new Intl.NumberFormat().format(scenes.length),
     })}</p>`;
     if (sceneInfo.size) {
       content += '<ul>';
@@ -800,28 +1029,28 @@ export default class ScenePacker {
     }
 
     // Remove the flag that tracks what version of the module imported the Scene, as it doesn't make sense to ship that out in the module.
-    await scene.unsetFlag(this.moduleName, SETTING_IMPORTED_VERSION);
+    await scene.unsetFlag(this.moduleName, CONSTANTS.SETTING_IMPORTED_VERSION);
 
     // Store details about which module and version packed the Scene
-    await scene.setFlag(MODULE_NAME, FLAGS_SOURCE_MODULE, this.moduleName);
-    await scene.setFlag(MODULE_NAME, FLAGS_PACKED_VERSION, game.modules.get(MODULE_NAME).data.version);
+    await scene.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_SOURCE_MODULE, this.moduleName);
+    await scene.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_PACKED_VERSION, game.modules.get(CONSTANTS.MODULE_NAME).data.version);
 
 
     const sceneJournalInfo = {};
     if (scene.journal) {
       sceneJournalInfo.journalName = scene.journal.name;
-      sceneJournalInfo.sourceId = scene.journal.getFlag(MODULE_NAME, 'sourceId') || scene.journal.getFlag('core', 'sourceId') || scene.journal.uuid;
+      sceneJournalInfo.sourceId = scene.journal.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') || scene.journal.getFlag('core', 'sourceId') || scene.journal.uuid;
       const compendiumJournal = await this.FindJournalInCompendiums(scene.journal, this.packs.journals);
       if (compendiumJournal?.uuid) {
         sceneJournalInfo.compendiumSourceId = compendiumJournal.uuid;
       }
     }
-    await scene.setFlag(this.moduleName, FLAGS_SCENE_JOURNAL, sceneJournalInfo);
-    await scene.setFlag(this.moduleName, FLAGS_SCENE_POSITION, scene.data?.initial);
+    await scene.setFlag(this.moduleName, CONSTANTS.FLAGS_SCENE_JOURNAL, sceneJournalInfo);
+    await scene.setFlag(this.moduleName, CONSTANTS.FLAGS_SCENE_POSITION, scene.data?.initial);
     if (scene.playlist) {
       const compendiumPlaylist = await this.FindPlaylistInCompendiums(scene.playlist, this.packs.playlists);
       if (compendiumPlaylist) {
-        await scene.setFlag(this.moduleName, FLAGS_PLAYLIST, compendiumPlaylist?.uuid);
+        await scene.setFlag(this.moduleName, CONSTANTS.FLAGS_PLAYLIST, compendiumPlaylist?.uuid);
       }
     }
 
@@ -860,7 +1089,7 @@ export default class ScenePacker {
           },
         ),
       );
-      await scene.setFlag(this.moduleName, FLAGS_JOURNALS, journalInfo);
+      await scene.setFlag(this.moduleName, CONSTANTS.FLAGS_JOURNALS, journalInfo);
     } else {
       ui.notifications.info(
         game.i18n.localize(
@@ -872,44 +1101,45 @@ export default class ScenePacker {
     /**
      * tokenInfo is the data that gets passed to findMissingTokens
      */
-    const tokenInfoResults = await Promise.allSettled(scene.data.tokens.filter(a => a?.actorId || a?.data?.actorId).map(async token => {
-      // Pull the sourceId of the actor, preferring the Actor entry in the module's compendium.
-      let sourceId = '';
-      let compendiumSourceId = '';
-      let actorName = token?.name;
-      if (typeof token.getFlag === 'function') {
-        sourceId = token.getFlag(MODULE_NAME, 'sourceId');
-      }
-      const actorId = token?.actorId || token?.data?.actorId;
-      if (actorId) {
-        const actor = game.actors.get(actorId);
-        if (actor) {
-          if (!sourceId) {
-            sourceId = actor.uuid;
-          }
-          if (actor.data?.name) {
-            actorName = actor.data.name;
-          }
-          compendiumSourceId = actor.getFlag('core', 'sourceId');
-          if (!compendiumSourceId || !compendiumSourceId.startsWith(`Compendium.${this.moduleName}.`)) {
-            // The actor source isn't the module's compendium, see if we have a direct match in a different compendium
-            const compendiumActor = await this.FindActorInCompendiums(actor, this.packs.creatures);
-            if (compendiumActor?.uuid) {
-              compendiumSourceId = compendiumActor.uuid;
+    const tokenInfoResults = await Promise.allSettled(scene.data.tokens.filter(a => a?.actorId || a?.data?.actorId)
+      .map(async token => {
+        // Pull the sourceId of the actor, preferring the Actor entry in the module's compendium.
+        let sourceId = '';
+        let compendiumSourceId = '';
+        let actorName = token?.name;
+        if (typeof token.getFlag === 'function') {
+          sourceId = token.getFlag(CONSTANTS.MODULE_NAME, 'sourceId');
+        }
+        const actorId = token?.actorId || token?.data?.actorId;
+        if (actorId) {
+          const actor = game.actors.get(actorId);
+          if (actor) {
+            if (!sourceId) {
+              sourceId = actor.uuid;
+            }
+            if (actor.data?.name) {
+              actorName = actor.data.name;
+            }
+            compendiumSourceId = actor.getFlag('core', 'sourceId');
+            if (!compendiumSourceId || !compendiumSourceId.startsWith(`Compendium.${this.moduleName}.`)) {
+              // The actor source isn't the module's compendium, see if we have a direct match in a different compendium
+              const compendiumActor = await this.FindActorInCompendiums(actor, this.packs.creatures);
+              if (compendiumActor?.uuid) {
+                compendiumSourceId = compendiumActor.uuid;
+              }
             }
           }
         }
-      }
 
-      return {
-        sourceId: sourceId,
-        compendiumSourceId: compendiumSourceId,
-        tokenName: token?.name,
-        actorName: actorName,
-        x: token?.x || token?.data?.x,
-        y: token?.y || token?.data?.y,
-      };
-    }));
+        return {
+          sourceId: sourceId,
+          compendiumSourceId: compendiumSourceId,
+          tokenName: token?.name,
+          actorName: actorName,
+          x: token?.x || token?.data?.x,
+          y: token?.y || token?.data?.y,
+        };
+      }));
     const tokenInfo = tokenInfoResults.filter(result => result.status === 'fulfilled').map(result => result.value);
 
     if (tokenInfo.length > 0) {
@@ -922,7 +1152,7 @@ export default class ScenePacker {
           },
         ),
       );
-      return scene.setFlag(this.moduleName, FLAGS_TOKENS, tokenInfo);
+      return scene.setFlag(this.moduleName, CONSTANTS.FLAGS_TOKENS, tokenInfo);
     } else {
       ui.notifications.info(
         game.i18n.localize('SCENE-PACKER.notifications.pack-scene.no-tokens'),
@@ -944,7 +1174,7 @@ export default class ScenePacker {
       return null;
     }
 
-    const sourceId = journal.getFlag(MODULE_NAME, 'sourceId');
+    const sourceId = journal.getFlag(CONSTANTS.MODULE_NAME, 'sourceId');
 
     let compendiumJournal = null;
     let possibleMatches = [];
@@ -984,12 +1214,12 @@ export default class ScenePacker {
         if (entity) {
           possibleMatches.push(entity);
 
-          if (entity.getFlag(MODULE_NAME, 'sourceId') === journal.uuid) {
+          if (entity.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === journal.uuid) {
             // Entity in the pack originated in this world and is the exact journal
             return entity;
           }
 
-          if (sourceId && entity.getFlag(MODULE_NAME, 'sourceId') === sourceId) {
+          if (sourceId && entity.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === sourceId) {
             return entity;
           }
         }
@@ -1085,7 +1315,7 @@ export default class ScenePacker {
       return null;
     }
 
-    const sourceId = actor.getFlag(MODULE_NAME, 'sourceId');
+    const sourceId = actor.getFlag(CONSTANTS.MODULE_NAME, 'sourceId');
 
     let compendiumActor = null;
     let possibleMatches = [];
@@ -1125,12 +1355,12 @@ export default class ScenePacker {
         if (entity) {
           possibleMatches.push(entity);
 
-          if (entity.getFlag(MODULE_NAME, 'sourceId') === actor.uuid) {
+          if (entity.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === actor.uuid) {
             // Entity in the pack originated in this world and is the exact actor
             return entity;
           }
 
-          if (sourceId && entity.getFlag(MODULE_NAME, 'sourceId') === sourceId) {
+          if (sourceId && entity.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === sourceId) {
             return entity;
           }
         }
@@ -1270,7 +1500,7 @@ export default class ScenePacker {
           entity = await pack.getEntity(id);
         }
         if (entity) {
-          if (entity.getFlag(MODULE_NAME, 'sourceId') === `Playlist.${playlist.id}`) {
+          if (entity.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === `Playlist.${playlist.id}`) {
             // Exact match
             return entity;
           }
@@ -1449,7 +1679,7 @@ export default class ScenePacker {
         game.i18n.format(
           'SCENE-PACKER.notifications.import-entities.creating-data',
           {
-            count: createdEntities.length,
+            count: new Intl.NumberFormat().format(createdEntities.length),
             type,
           },
         ),
@@ -1608,9 +1838,9 @@ export default class ScenePacker {
       }
 
       // Filter down to those that are still missing
-      entities = entities.filter(e => !collection.find(f => f.getFlag(MODULE_NAME, 'sourceId') === e.sourceId));
+      entities = entities.filter(e => !collection.find(f => f.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === e.sourceId));
 
-      // Filter to just the needed actors
+      // Filter to just the needed entities
       const content = packContent.filter((entity) =>
         entityNames.includes(entity.name),
       );
@@ -1622,39 +1852,33 @@ export default class ScenePacker {
       );
 
       if (content.length > 0) {
-        let folderId = null;
-        if (CONST.FOLDER_ENTITY_TYPES.includes(entityType)) {
-          // Check if a folder for our adventure and entity type already exists, otherwise create it
-          folderId = game.folders.find(
-            (folder) => folder.name === this.adventureName && folder.type === entityType,
-          )?.id;
-          if (!folderId) {
-            const folder = await Folder.create({
-              name: this.adventureName,
-              type: entityType,
-              parent: null,
-            });
-            folderId = folder.id;
-          }
-        }
+        let folderData = await this.buildFolderStructureForPackContent(content, entityType, this.adventureName);
 
         // Append the entities found in this pack to the growing list to import
         createData = createData.concat(
           content.map((c) => {
+            let cData = c.data;
             if (!isNewerVersion('0.8.0', game.data.version)) {
-              const createData = collection.fromCompendium(c);
-              if (folderId) {
-                createData.folder = folderId;
-              }
-              createData['flags.core.sourceId'] = c.uuid;
-              return createData;
+              cData = collection.fromCompendium(c);
             }
+            // Utilise the folder structure as defined by the Compendium Folder if it exists, otherwise
+            // fall back to the default folder.
+            const cfPath = cData.flags?.cf?.path;
+            if (cfPath && folderData.folderMap.has(cfPath)) {
+              cData.folder = folderData.folderMap.get(cfPath)?.id || null;
+            } else if (folderData.folderId) {
+              cData.folder = folderData.folderId;
+            }
+            cData['flags.core.sourceId'] = c.uuid;
 
-            c.data['flags.core.sourceId'] = c.uuid;
-            if (folderId) {
-              c.data.folder = folderId;
+            // Patch "Sight angle must be between 1 and 360 degrees." error
+            if (cData.token?.sightAngle === 0) {
+              cData.token.sightAngle = 360;
             }
-            return c.data;
+            if (cData.token?.lightAngle === 0) {
+              cData.token.lightAngle = 360;
+            }
+            return cData;
           }),
         );
       }
@@ -1665,7 +1889,7 @@ export default class ScenePacker {
         game.i18n.format(
           'SCENE-PACKER.notifications.import-entities.creating-data',
           {
-            count: createData.length,
+            count: new Intl.NumberFormat().format(createData.length),
             type,
           },
         ),
@@ -1702,9 +1926,9 @@ export default class ScenePacker {
       }
       let matches = [];
       if (!isNewerVersion('0.8.0', game.data.version)) {
-        matches = game.actors.contents.filter(a => a.getFlag(MODULE_NAME, 'sourceId') === token.sourceId || a.getFlag('core', 'sourceId') === token.sourceId);
+        matches = game.actors.contents.filter(a => a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === token.sourceId || a.getFlag('core', 'sourceId') === token.sourceId);
       } else {
-        matches = game.actors.entities.filter(a => a.getFlag(MODULE_NAME, 'sourceId') === token.sourceId || a.getFlag('core', 'sourceId') === token.sourceId);
+        matches = game.actors.entities.filter(a => a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === token.sourceId || a.getFlag('core', 'sourceId') === token.sourceId);
       }
       if (matches.length) {
         exact_matches.push(token);
@@ -1745,14 +1969,14 @@ export default class ScenePacker {
       }
       let matches = [];
       if (!isNewerVersion('0.8.0', game.data.version)) {
-        matches = game.journal.contents.filter(a => a.getFlag(MODULE_NAME, 'sourceId') === journal.sourceId);
+        matches = game.journal.contents.filter(a => a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.compendiumSourceId);
       } else {
-        matches = game.journal.entities.filter(a => a.getFlag(MODULE_NAME, 'sourceId') === journal.sourceId);
+        matches = game.journal.entities.filter(a => a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.compendiumSourceId);
       }
       if (matches.length) {
         exact_matches.push(journal);
       } else {
-        missing_journals.add(journal);
+        missing_name_matches.add(journal);
       }
     }
 
@@ -1761,7 +1985,7 @@ export default class ScenePacker {
       return [];
     }
 
-    let missing = Array.from(missing_journals);
+    let missing = [];
 
     if (missing_name_matches.size) {
       // Support multiple folder names by compendium names
@@ -1775,13 +1999,12 @@ export default class ScenePacker {
       const folderIDs = game.folders.filter(
         (j) => j.data.type === 'JournalEntry' && folderNames.includes(j.data.name),
       ).map((f) => f.id);
-      missing = missing.concat(Array.from(missing_name_matches)
+      missing = Array.from(missing_name_matches)
         .filter((info) => {
           // Filter for only the entries that are missing, or are in a different folder.
           const j = game.journal.getName(info?.journalName);
           return j == null || (folderIDs.length && !folderIDs.includes(j.data.folder));
-        }),
-      );
+        });
     }
 
     return missing;
@@ -1811,14 +2034,14 @@ export default class ScenePacker {
       }
       let matches = [];
       if (!isNewerVersion('0.8.0', game.data.version)) {
-        matches = game.macros.contents.filter(a => a.getFlag(MODULE_NAME, 'sourceId') === macro.sourceId);
+        matches = game.macros.contents.filter(a => a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === macro.sourceId);
       } else {
-        matches = game.macros.entities.filter(a => a.getFlag(MODULE_NAME, 'sourceId') === macro.sourceId);
+        matches = game.macros.entities.filter(a => a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === macro.sourceId);
       }
       if (matches.length) {
         exact_matches.push(macro);
       } else {
-        missing_macros.add(macro);
+        missing_name_matches.add(macro);
       }
     }
 
@@ -1827,7 +2050,7 @@ export default class ScenePacker {
       return [];
     }
 
-    let missing = Array.from(missing_macros);
+    let missing = [];
 
     if (missing_name_matches.size) {
       // Support multiple folder names by compendium names
@@ -1841,13 +2064,12 @@ export default class ScenePacker {
       const folderIDs = game.folders.filter(
         (j) => j.data.type === 'Macro' && folderNames.includes(j.data.name),
       ).map((f) => f.id);
-      missing = missing.concat(Array.from(missing_name_matches)
+      missing = Array.from(missing_name_matches)
         .filter((info) => {
           // Filter for only the entries that are missing, or are in a different folder.
           const j = game.macros.getName(info?.name);
           return j == null || (folderIDs.length && !folderIDs.includes(j.data.folder));
-        }),
-      );
+        });
     }
 
     return missing;
@@ -2010,9 +2232,10 @@ export default class ScenePacker {
     if (missing.length > 0) {
       this.logWarn(
         true,
-        game.i18n.format('SCENE-PACKER.notifications.link-tokens.missing', {
-          count: missing.length,
+        game.i18n.format('SCENE-PACKER.notifications.link-tokens.missing-details', {
+          count: new Intl.NumberFormat().format(missing.length),
           adventureName: this.adventureName,
+          scene: scene.name,
         }),
         missing,
       );
@@ -2021,7 +2244,7 @@ export default class ScenePacker {
     if (updates.length > 0) {
       ui.notifications.info(
         game.i18n.format('SCENE-PACKER.notifications.link-tokens.linking', {
-          count: updates.length,
+          count: new Intl.NumberFormat().format(updates.length),
           adventureName: this.adventureName,
         }),
       );
@@ -2058,14 +2281,14 @@ export default class ScenePacker {
       const hasSourceId = !!note.sourceId;
       const existingEntities = game.journal.filter(p => {
         return (hasUuid && p.getFlag('core', 'sourceId') === note.compendiumSourceId) ||
-          (hasSourceId && p.getFlag(MODULE_NAME, 'sourceId') === note.sourceId);
+          (hasSourceId && p.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === note.sourceId);
       });
       if (existingEntities.length) {
         if (existingEntities.length === 1) {
           return existingEntities[0].id;
         }
         // Multiple matches exist, prefer a local source
-        const existingEntity = game.journal.find(p => p.getFlag(MODULE_NAME, 'sourceId') === note.sourceId);
+        const existingEntity = game.journal.find(p => p.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === note.sourceId);
         if (existingEntity) {
           return existingEntity.id;
         }
@@ -2091,7 +2314,7 @@ export default class ScenePacker {
       return icon;
     }
 
-    if (isNewerVersion(scene.getFlag(MODULE_NAME, FLAGS_PACKED_VERSION), '2.1.99')) {
+    if (isNewerVersion(scene.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_PACKED_VERSION), '2.1.99')) {
       // Packed with a version >= 2.2.0 that supports updating the notes
       journalInfo.forEach((note) => {
         updates.push({
@@ -2123,7 +2346,8 @@ export default class ScenePacker {
         game.i18n.format(
           'SCENE-PACKER.notifications.spawn-notes.missing-details',
           {
-            count: missing.length,
+            count: new Intl.NumberFormat().format(missing.length),
+            scene: scene.name,
           },
         ),
         missing,
@@ -2134,11 +2358,11 @@ export default class ScenePacker {
     if (updates.length > 0) {
       ui.notifications.info(
         game.i18n.format('SCENE-PACKER.notifications.spawn-notes.spawning', {
-          count: updates.length,
+          count: new Intl.NumberFormat().format(updates.length),
         }),
       );
       if (!isNewerVersion('0.8.0', game.data.version)) {
-        if (isNewerVersion(scene.getFlag(MODULE_NAME, FLAGS_PACKED_VERSION), '2.1.99')) {
+        if (isNewerVersion(scene.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_PACKED_VERSION), '2.1.99')) {
           // Packed with a version >= 2.2.0 that supports updating the notes
           return scene.updateEmbeddedDocuments('Note', updates);
         } else {
@@ -2149,7 +2373,7 @@ export default class ScenePacker {
           return scene.createEmbeddedDocuments('Note', updates);
         }
       } else {
-        if (isNewerVersion(scene.getFlag(MODULE_NAME, FLAGS_PACKED_VERSION), '2.1.99')) {
+        if (isNewerVersion(scene.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_PACKED_VERSION), '2.1.99')) {
           // Packed with a version >= 2.2.0 that supports updating the notes
           return scene.updateEmbeddedEntity('Note', updates);
         } else {
@@ -2215,17 +2439,17 @@ export default class ScenePacker {
     }
 
     const hasUuid = !!entity.uuid;
-    const hasSourceId = !!entity.getFlag(MODULE_NAME, 'sourceId');
+    const hasSourceId = !!entity.getFlag(CONSTANTS.MODULE_NAME, 'sourceId');
     const existingEntities = collection.filter(p => {
       return (hasUuid && p.getFlag('core', 'sourceId') === entity.uuid) ||
-        (hasSourceId && p.getFlag(MODULE_NAME, 'sourceId') === entity.getFlag(MODULE_NAME, 'sourceId'));
+        (hasSourceId && p.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === entity.getFlag(CONSTANTS.MODULE_NAME, 'sourceId'));
     });
     if (existingEntities.length) {
       if (existingEntities.length === 1) {
         return existingEntities[0];
       }
       // Multiple matches exist, prefer a local source
-      const existingEntity = collection.find(p => p.getFlag(MODULE_NAME, 'sourceId') === entity.getFlag(MODULE_NAME, 'sourceId'));
+      const existingEntity = collection.find(p => p.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === entity.getFlag(CONSTANTS.MODULE_NAME, 'sourceId'));
       if (existingEntity) {
         return existingEntity;
       }
@@ -2234,23 +2458,35 @@ export default class ScenePacker {
     }
 
     const update = {};
-    if (CONST.FOLDER_ENTITY_TYPES.includes(type)) {
-      const folder = game.folders.find(
-        (folder) => folder.name === this.adventureName && folder.type === type,
-      ) || await Folder.create({
-        name: this.adventureName,
-        type: type,
-        parent: null,
-      });
 
-      if (folder) {
-        update.folder = folder.id;
-      }
+    let folderData = await this.buildFolderStructureForPackContent([entity], type, this.adventureName);
+
+    // Check for Compendium Folder structure data
+    const cfPath = entity.data?.flags?.cf?.path;
+    if (cfPath && folderData.folderMap.has(cfPath)) {
+      update.folder = folderData.folderMap.get(cfPath)?.id || null;
+    } else if (folderData.folderId) {
+      update.folder = folderData.folderId;
     }
 
     if (!isNewerVersion('0.8.0', game.data.version)) {
       return collection.importFromCompendium(game.packs.get(entity.compendium.collection), entity.id, update);
     }
+
+    // Patch "Sight angle must be between 1 and 360 degrees." error
+    if (entity.data.token?.sightAngle === 0) {
+      if (!update.token) {
+        update.token = {};
+      }
+      update.token.sightAngle = 360;
+    }
+    if (entity.data.token?.lightAngle === 0) {
+      if (!update.token) {
+        update.token = {};
+      }
+      update.token.lightAngle = 360;
+    }
+
     return collection.importFromCollection(entity.compendium.collection, entity.id, update);
   }
 
@@ -2259,12 +2495,15 @@ export default class ScenePacker {
    * @param {Object} scene The scene to unpack. Defaults to the currently viewed scene.
    * @param {Boolean} showLinkedJournal Whether to show any Journals linked to the Scene.
    */
-  async UnpackScene(scene = game.scenes.get(game.user.viewedScene), {showLinkedJournal = true} = {}) {
-    const tokenInfo = scene.getFlag(this.moduleName, FLAGS_TOKENS);
-    const journalInfo = scene.getFlag(this.moduleName, FLAGS_JOURNALS);
-    const sceneJournalInfo = scene.getFlag(this.moduleName, FLAGS_SCENE_JOURNAL);
-    const sceneInitialPosition = scene.getFlag(this.moduleName, FLAGS_SCENE_POSITION);
-    const scenePlaylist = scene.getFlag(this.moduleName, FLAGS_PLAYLIST);
+  async UnpackScene(
+    scene = game.scenes.get(game.user.viewedScene),
+    {showLinkedJournal = true, contentPreImported = false} = {},
+  ) {
+    const tokenInfo = scene.getFlag(this.moduleName, CONSTANTS.FLAGS_TOKENS);
+    const journalInfo = scene.getFlag(this.moduleName, CONSTANTS.FLAGS_JOURNALS);
+    const sceneJournalInfo = scene.getFlag(this.moduleName, CONSTANTS.FLAGS_SCENE_JOURNAL);
+    const sceneInitialPosition = scene.getFlag(this.moduleName, CONSTANTS.FLAGS_SCENE_POSITION);
+    const scenePlaylist = scene.getFlag(this.moduleName, CONSTANTS.FLAGS_PLAYLIST);
     if (sceneInitialPosition && Object.keys(sceneInitialPosition).length) {
       await scene.update({initial: sceneInitialPosition});
     }
@@ -2276,7 +2515,7 @@ export default class ScenePacker {
       }
     }
 
-    if (tokenInfo?.length) {
+    if (tokenInfo?.length && !contentPreImported) {
       // Import tokens that don't yet exist in the world
       await this.ImportEntities(
         this.packs.creatures,
@@ -2286,18 +2525,25 @@ export default class ScenePacker {
     }
 
     if (journalInfo?.length) {
-      // Import Journal Pins
-      const journals = await this.ImportEntities(
-        this.packs.journals,
-        this.findMissingJournals(journalInfo),
-        'journals',
-      );
+      let journals = [];
+      if (!contentPreImported) {
+        // Import Journal Pins
+        journals = await this.ImportEntities(
+          this.packs.journals,
+          this.findMissingJournals(journalInfo),
+          'journals',
+        );
+      } else {
+        // List all of the journals belonging to this module's packs
+        journals = game.journal.filter(j => this.packs.journals.some(p => j.getFlag('core', 'sourceId')
+          ?.startsWith(`Compendium.${p}.`)));
+      }
       if (journals?.length) {
         await this.unpackQuickEncounters(scene, journals, this.moduleName);
       }
     }
 
-    if (this.welcomeJournal) {
+    if (this.welcomeJournal && !contentPreImported) {
       // Import the "Welcome Journal"
       await this.ImportEntities(
         this.packs.journals,
@@ -2307,7 +2553,7 @@ export default class ScenePacker {
         'journals',
       );
     }
-    if (this.additionalJournals.length > 0) {
+    if (this.additionalJournals.length > 0 && !contentPreImported) {
       // Import any additional Journals
       await this.ImportEntities(
         this.packs.journals,
@@ -2317,7 +2563,7 @@ export default class ScenePacker {
         'journals',
       );
     }
-    if (this.additionalMacros.length > 0) {
+    if (this.additionalMacros.length > 0 && !contentPreImported) {
       // Import any additional Macros
       await this.ImportEntities(
         this.packs.macros,
@@ -2329,15 +2575,17 @@ export default class ScenePacker {
     }
 
     if (sceneJournalInfo && Object.keys(sceneJournalInfo).length) {
-      // Ensure the scene journal is imported
-      await this.ImportEntities(
-        this.packs.journals,
-        this.findMissingJournals([sceneJournalInfo]),
-        'journals',
-      );
+      if (!contentPreImported) {
+        // Ensure the scene journal is imported
+        await this.ImportEntities(
+          this.packs.journals,
+          this.findMissingJournals([sceneJournalInfo]),
+          'journals',
+        );
+      }
       if (!scene.journal) {
         // Relink the journal to the correct entry
-        const newSceneJournal = game.journal.find(j => j.getFlag(MODULE_NAME, 'sourceId') === sceneJournalInfo.sourceId);
+        const newSceneJournal = game.journal.find(j => j.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === sceneJournalInfo.sourceId);
         if (newSceneJournal?.id) {
           await scene.update({journal: newSceneJournal.id});
         }
@@ -2392,7 +2640,7 @@ export default class ScenePacker {
       return;
     }
 
-    const journalInfo = scene.getFlag(this.moduleName, FLAGS_JOURNALS);
+    const journalInfo = scene.getFlag(this.moduleName, CONSTANTS.FLAGS_JOURNALS);
 
     for (let i = 0; i < journals.length; i++) {
       const journal = journals[i];
@@ -2525,7 +2773,7 @@ export default class ScenePacker {
           game.i18n.format(
             'SCENE-PACKER.world-conversion.compendiums.quick-encounters.updating-references',
             {
-              count: updates.length,
+              count: new Intl.NumberFormat().format(updates.length),
               journal: journal.name,
             },
           ),
@@ -2539,7 +2787,7 @@ export default class ScenePacker {
           );
         });
 
-        journal.setFlag('quick-encounters', 'quickEncounter', JSON.stringify(quickEncounter));
+        await journal.setFlag('quick-encounters', 'quickEncounter', JSON.stringify(quickEncounter));
       }
     }
   }
@@ -2554,12 +2802,12 @@ export default class ScenePacker {
       return;
     }
 
-    await scene.unsetFlag(this.moduleName, FLAGS_TOKENS);
-    await scene.unsetFlag(this.moduleName, FLAGS_JOURNALS);
-    await scene.unsetFlag(this.moduleName, FLAGS_SCENE_JOURNAL);
-    await scene.unsetFlag(this.moduleName, FLAGS_SCENE_POSITION);
-    await scene.unsetFlag(this.moduleName, FLAGS_PLAYLIST);
-    await scene.unsetFlag(this.moduleName, FLAGS_MACROS);
+    await scene.unsetFlag(this.moduleName, CONSTANTS.FLAGS_TOKENS);
+    await scene.unsetFlag(this.moduleName, CONSTANTS.FLAGS_JOURNALS);
+    await scene.unsetFlag(this.moduleName, CONSTANTS.FLAGS_SCENE_JOURNAL);
+    await scene.unsetFlag(this.moduleName, CONSTANTS.FLAGS_SCENE_POSITION);
+    await scene.unsetFlag(this.moduleName, CONSTANTS.FLAGS_PLAYLIST);
+    await scene.unsetFlag(this.moduleName, CONSTANTS.FLAGS_MACROS);
 
     // Old format cleanup
     await scene.unsetFlag(this.moduleName, 'aiJournals');
@@ -2620,7 +2868,7 @@ export default class ScenePacker {
     }
     if (sourceId.startsWith('Compendium.scene-packer') || scenePackerInstances.some(p => sourceId.startsWith(`Compendium.${p}.`))) {
       // Import was from an active Scene Packer compendium, update the default permission if possible
-      const defaultPermission = entity.getFlag(MODULE_NAME, FLAGS_DEFAULT_PERMISSION);
+      const defaultPermission = entity.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_DEFAULT_PERMISSION);
       if (defaultPermission && typeof entity.data?.permission?.default !== 'undefined' && entity.data?.permission?.default !== defaultPermission) {
         entity.update({permission: {default: defaultPermission}});
       }
@@ -2704,7 +2952,7 @@ export default class ScenePacker {
 
     async function findNewReferences(type, entity) {
       let name = entity.name;
-      let sourceId = entity.getFlag(MODULE_NAME, 'sourceId');
+      let sourceId = entity.getFlag(CONSTANTS.MODULE_NAME, 'sourceId');
       const matches = [];
 
       for (let l = 0; l < packs[`${type}Packs`].length; l++) {
@@ -2720,7 +2968,7 @@ export default class ScenePacker {
               entity = await p.getEntity(possibleMatch._id);
             }
             if (entity) {
-              if (sourceId && entity.getFlag(MODULE_NAME, 'sourceId') === sourceId) {
+              if (sourceId && entity.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === sourceId) {
                 // Direct match
                 return [{pack: p.collection, ref: possibleMatch._id}];
               }
@@ -2739,7 +2987,7 @@ export default class ScenePacker {
         game.i18n.format(
           'SCENE-PACKER.world-conversion.compendiums.checking-and-updating',
           {
-            count: pack.index.length || pack.index.size,
+            count: new Intl.NumberFormat().format(pack.index.length || pack.index.size),
           },
         ),
       );
@@ -2764,7 +3012,7 @@ export default class ScenePacker {
         ScenePacker.logType(
           moduleName,
           'info',
-          dryRun, // Force a log if operating in dry-run mode
+          true,
           game.i18n.format(
             'SCENE-PACKER.world-conversion.compendiums.checking-journal',
             {
@@ -2899,11 +3147,11 @@ export default class ScenePacker {
           ScenePacker.logType(
             moduleName,
             'info',
-            dryRun, // Force a log if operating in dry-run mode
+            true,
             game.i18n.format(
               'SCENE-PACKER.world-conversion.compendiums.updating-journal-references',
               {
-                count: references.size,
+                count: new Intl.NumberFormat().format(references.size),
                 journal: journal.name,
               },
             ),
@@ -2919,7 +3167,7 @@ export default class ScenePacker {
             ScenePacker.logType(
               moduleName,
               'info',
-              dryRun, // Force a log if operating in dry-run mode
+              true,
               game.i18n.format(
                 'SCENE-PACKER.world-conversion.compendiums.updating-reference-console',
                 {
@@ -2945,7 +3193,7 @@ export default class ScenePacker {
             game.i18n.format(
               'SCENE-PACKER.world-conversion.compendiums.updating-reference',
               {
-                count: references.size,
+                count: new Intl.NumberFormat().format(references.size),
                 journal: journal.name,
               },
             ),
@@ -2964,7 +3212,7 @@ export default class ScenePacker {
           ScenePacker.logType(
             moduleName,
             'info',
-            dryRun, // Force a log if operating in dry-run mode
+            true,
             game.i18n.format(
               'SCENE-PACKER.world-conversion.compendiums.no-references',
               {
@@ -2977,7 +3225,7 @@ export default class ScenePacker {
         ScenePacker.logType(
           moduleName,
           'info',
-          dryRun, // Force a log if operating in dry-run mode
+          true,
           game.i18n.format(
             'SCENE-PACKER.world-conversion.compendiums.completed-journal',
             {
@@ -3061,7 +3309,7 @@ export default class ScenePacker {
       if (worldJournal) {
         // Add a back reference
         if (!dryRun) {
-          worldJournal.setFlag(MODULE_NAME, 'quickEncounter', journal.uuid);
+          await worldJournal.setFlag(CONSTANTS.MODULE_NAME, 'quickEncounter', journal.uuid);
         }
       }
       quickEncounter.journalEntryId = journal.uuid;
@@ -3108,11 +3356,11 @@ export default class ScenePacker {
       ScenePacker.logType(
         moduleName,
         'info',
-        dryRun, // Force a log if operating in dry-run mode
+        true,
         game.i18n.format(
           'SCENE-PACKER.world-conversion.compendiums.quick-encounters.updating-references',
           {
-            count: updates.length,
+            count: new Intl.NumberFormat().format(updates.length),
             journal: journal.name,
           },
         ),
@@ -3121,13 +3369,13 @@ export default class ScenePacker {
         ScenePacker.logType(
           moduleName,
           'info',
-          dryRun, // Force a log if operating in dry-run mode
+          true,
           game.i18n.format('SCENE-PACKER.world-conversion.compendiums.quick-encounters.updating-references-console', update),
         );
       });
 
       if (!dryRun) {
-        journal.setFlag('quick-encounters', 'quickEncounter', JSON.stringify(quickEncounter));
+        await journal.setFlag('quick-encounters', 'quickEncounter', JSON.stringify(quickEncounter));
       }
     }
   }
@@ -3195,7 +3443,7 @@ export default class ScenePacker {
           game.i18n.localize('SCENE-PACKER.instance-prompt.none-found'),
         );
         ScenePacker.logType(
-          MODULE_NAME,
+          CONSTANTS.MODULE_NAME,
           'warn',
           true,
           game.i18n.localize('SCENE-PACKER.instance-prompt.none-found'),
@@ -3251,7 +3499,7 @@ export default class ScenePacker {
     if (!scene) {
       return null;
     }
-    const moduleName = scene.getFlag(MODULE_NAME, FLAGS_SOURCE_MODULE);
+    const moduleName = scene.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_SOURCE_MODULE);
     if (!moduleName) {
       // No packed data defined.
       return null;
@@ -3291,11 +3539,11 @@ export default class ScenePacker {
   }
 }
 
-Hooks.once('setup', () => {
-  if (typeof window.DEV?.registerPackageDebugFlag === 'function') {
-    window.DEV.registerPackageDebugFlag(MODULE_NAME);
-  }
+Hooks.once('devModeReady', ({ registerPackageDebugFlag }) => {
+  registerPackageDebugFlag(CONSTANTS.MODULE_NAME);
+});
 
+Hooks.once('setup', () => {
   Hooks.on('getSceneDirectoryEntryContext', function (app, html, data) {
     if (game.user.isGM) {
       html.push(
@@ -3308,9 +3556,9 @@ Hooks.once('setup', () => {
             if (instance) {
               return !ScenePacker.HasPackedData(scene, instance.GetModuleName()) &&
                 game.user.isGM &&
-                game.settings.get(MODULE_NAME, 'enableContextMenu');
+                game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_ENABLE_CONTEXT_MENU);
             }
-            return game.user.isGM && game.settings.get(MODULE_NAME, 'enableContextMenu');
+            return game.user.isGM && game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_ENABLE_CONTEXT_MENU);
           },
           callback: (li) => {
             let scene = game.scenes.get(li.data('entityId'));
@@ -3337,7 +3585,7 @@ Hooks.once('setup', () => {
             return instance &&
               ScenePacker.HasPackedData(scene, instance.GetModuleName()) &&
               game.user.isGM &&
-              game.settings.get(MODULE_NAME, 'enableContextMenu');
+              game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_ENABLE_CONTEXT_MENU);
           },
           callback: (li) => {
             let scene = game.scenes.get(li.data('entityId'));
@@ -3358,7 +3606,7 @@ Hooks.once('setup', () => {
             return instance &&
               ScenePacker.HasPackedData(scene, instance.GetModuleName()) &&
               game.user.isGM &&
-              game.settings.get(MODULE_NAME, 'enableContextMenu');
+              game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_ENABLE_CONTEXT_MENU);
           },
           callback: (li) => {
             let scene = game.scenes.get(li.data('entityId'));
@@ -3375,7 +3623,7 @@ Hooks.once('setup', () => {
           icon: '<i class="fas fa-search"></i>',
           condition: (li) => {
             return game.user.isGM &&
-              game.settings.get(MODULE_NAME, 'enableContextMenu');
+              game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_ENABLE_CONTEXT_MENU);
           },
           callback: (li) => {
             let scene = game.scenes.get(li.data('entityId'));
@@ -3399,7 +3647,7 @@ Hooks.once('setup', () => {
     await instance.ProcessScene(readyCanvas.scene);
   });
 
-  game.settings.register(MODULE_NAME, 'enableContextMenu', {
+  game.settings.register(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_ENABLE_CONTEXT_MENU, {
     name: game.i18n.localize('SCENE-PACKER.settings.context-menu.name'),
     hint: game.i18n.localize('SCENE-PACKER.settings.context-menu.hint'),
     scope: 'client',
@@ -3414,7 +3662,7 @@ Hooks.once('setup', () => {
  * @type {{relinkJournalEntries: (function(String, {dryRun?: Boolean}=): Promise<void>), showPerformanceReport: Report.RenderReport, getInstance: (function(...[*]): ScenePacker), promptRelinkJournalEntries: (function(): Promise<void>), hasPackedData: (function(Object, String, String, String): Boolean)}}
  * @deprecated Use the ScenePacker instance that is available globally (ScenePacker.PromptRelinkJournalEntries() etc.). This method will be removed in a future version.
  */
-window[MODULE_NAME] = {
+window[CONSTANTS.MODULE_NAME] = {
   getInstance: ScenePacker.GetInstance,
   relinkJournalEntries: ScenePacker.RelinkJournalEntries,
   hasPackedData: ScenePacker.HasPackedData,
@@ -3448,19 +3696,19 @@ globalThis.ScenePacker = new Proxy(globalScenePacker, {
     // Backwards compatibility. Remove once support for window[MODULE_NAME] is removed.
     switch (prop) {
       case 'getInstance':
-        ScenePacker.logType(MODULE_NAME, 'warn', true, game.i18n.format('SCENE-PACKER.deprecated.method', {method: prop}));
+        ScenePacker.logType(CONSTANTS.MODULE_NAME, 'warn', true, game.i18n.format('SCENE-PACKER.deprecated.method', {method: prop}));
         return ScenePacker.GetInstance;
       case 'relinkJournalEntries':
-        ScenePacker.logType(MODULE_NAME, 'warn', true, game.i18n.format('SCENE-PACKER.deprecated.method', {method: prop}));
+        ScenePacker.logType(CONSTANTS.MODULE_NAME, 'warn', true, game.i18n.format('SCENE-PACKER.deprecated.method', {method: prop}));
         return ScenePacker.RelinkJournalEntries;
       case 'hasPackedData':
-        ScenePacker.logType(MODULE_NAME, 'warn', true, game.i18n.format('SCENE-PACKER.deprecated.method', {method: prop}));
+        ScenePacker.logType(CONSTANTS.MODULE_NAME, 'warn', true, game.i18n.format('SCENE-PACKER.deprecated.method', {method: prop}));
         return ScenePacker.HasPackedData;
       case 'promptRelinkJournalEntries':
-        ScenePacker.logType(MODULE_NAME, 'warn', true, game.i18n.format('SCENE-PACKER.deprecated.method', {method: prop}));
+        ScenePacker.logType(CONSTANTS.MODULE_NAME, 'warn', true, game.i18n.format('SCENE-PACKER.deprecated.method', {method: prop}));
         return ScenePacker.PromptRelinkJournalEntries;
       case 'showPerformanceReport':
-        ScenePacker.logType(MODULE_NAME, 'warn', true, game.i18n.format('SCENE-PACKER.deprecated.method', {method: prop}));
+        ScenePacker.logType(CONSTANTS.MODULE_NAME, 'warn', true, game.i18n.format('SCENE-PACKER.deprecated.method', {method: prop}));
         return Report.RenderReport;
     }
 

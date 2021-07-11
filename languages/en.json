@@ -6,20 +6,23 @@
       "context-menu": {
         "name": "Enable Scene Packer context menu",
         "hint": "Adds context menu items to assist with packing a Scene. You should only need to enable this while actively developing and packing a module with scenes."
-      },
-      "compendium": {
-        "name": "Show the dialog information when opening a compendium"
       }
     },
     "welcome": {
-      "title": "{title} Importer",
+      "title": "Quick Start",
       "intro": "<h2>Welcome to <strong>{adventure}</strong>.</h2>",
-      "brand-new": "<p>Would you like to import and unpack the Scenes from this module?</p>",
-      "update-available": "<p>An update is available. You have <strong>{existing}</strong> installed, and <strong>{version}</strong> is available. Would you like to import and unpack the Scenes from this module?</p><p><strong>Note: If you choose to import all, you will end up with a second copy of the scenes, the bottom one is the newer version.</strong></p>",
-      "yes-all": "Yes import all",
-      "let-me-choose": "Let me choose",
-      "no": "No",
-      "dont-ask": "Don't ask me again"
+      "brand-new": "<p>Would you like to import and unpack the content from this module?</p>",
+      "update-available": "<p>An update is available. You have <strong>{existing}</strong> installed, and <strong>{version}</strong> is available. Would you like to import and unpack the content from this module?</p>",
+      "yes-all": "Yes import <strong>all {count} entities</strong>",
+      "yes-all-fallback": "Yes import <strong>all entities</strong>",
+      "let-me-choose": "Let me choose individual <strong>Scenes</strong>",
+      "close": "Close",
+      "import-all": {
+        "title": "Please wait...",
+        "wait": "Please wait... loading {type}...",
+        "creating-data": "Creating {count} {type} from {label}...",
+        "complete": "Finished importing all content from {name}."
+      }
     },
     "worth-packing": {
       "title": "Scenes worth packing",
@@ -78,7 +81,9 @@
           "reference": "ImportEntities was called with a reference that is not registered with Foundry. Double check for typos between your manifest.json and module initialisation files. Received the following call details:",
           "missing-pack": "Invalid pack configuration. Cannot find compendium {packName}. Check console for more details.",
           "missing-pack-details": "ImportEntities was called to search for pack \"{packName}\" which is not found. Check for typos in your module setup."
-        }
+        },
+        "cf-clean-up-title": "Clean up {name} entities?",
+        "cf-clean-up": "<p>You just imported {count} entites with the name <code style=\"display:inline-block;\">{name}</code> that belong to the <a href=\"https://foundryvtt.com/packages/compendium-folders\" target=\"_blank\">Compendium Folders</a> module which you do not have enabled.</p><p>Do you want to run the <a class=\"entity-link\" draggable=\"true\" data-pack=\"scene-packer.macros\" data-id=\"D0GsPqV3zglJ9w7V\"><i class=\"fas fa-terminal\"></i> Clean up {name} entries</a> macro?</p>"
       },
       "find-journal-compendium": {
         "no-match": "Could not find a Journal entry named \"{journal}\" in the compendiums.",
@@ -104,13 +109,13 @@
       },
       "link-tokens": {
         "missing": "Could not find {count} actors to link, they will remain unlinked. Check debug logs for details.",
-        "missing-details": "Could not find {count} actors to link. The following actor tokens were not found in the \"{adventureName}\" folder.",
+        "missing-details": "Could not find {count} actors to link in {scene}. The following actor tokens were not found in the \"{adventureName}\" folder.",
         "linking": "Relinking {count} Tokens linked to actors."
       },
       "spawn-notes": {
         "missing": "Could not find {count} journals to link. Check debug logs for details.",
-        "missing-details": "Could not find {count} notes to spawn. The following journals were not found.",
-        "spawning": "Spawning {count} journal notes."
+        "missing-details": "Could not find {count} notes to link in {scene}. The following journals were not found.",
+        "spawning": "Linking {count} journal notes."
       },
       "clear-data": {
         "done": "Finished clearing Packed Data."

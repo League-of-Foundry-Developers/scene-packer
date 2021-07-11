@@ -1,5 +1,24 @@
 # Changelog
 
+## v2.3.0
+
+- Added support for taking into account the folder structure that the [Compendium Folders](https://foundryvtt.com/packages/compendium-folders) module provides.
+  - When automatically importing entities from compendiums (such as Actors and Journals), Scene Packer will check for the entity for embedded Compendium Folder data.
+    - If present, Scene Packer will create folders with the same names and depth that the content creator intended.
+    - As a content creator, simply export to your compendiums using the Compendium Folder `Export Folder Structure` functionality.
+  - See the embedded Journal Entry for additional information.
+  - *The end user does not need to install the Compendium Folder module.*
+- Added an "Import all entities" option to the initial import dialog.
+  - Selecting this option will import everything from all of the compendiums that belong to the registered module.
+  - This option combined with the above `Compendium Folders` support allows end-users to have the same entities and folder structure as the content creator.
+- Patched 0.7.x `"Sight angle must be between 1 and 360 degrees."` error message when importing from some compendium packs.
+- Added automatic hash functionality when importing from compendiums, allowing for future update functionality.
+  - This will allow content creators to update Journal Entries etc. in the future.
+  - Utilises:
+    - [fast-json-stable-stringify](https://github.com/epoberezkin/fast-json-stable-stringify) (MIT License)
+    - [jsHashes](https://github.com/h2non/jshashes) (BSD-3-Clause License)
+- Compatibility with Core v0.8.8
+
 ## v2.2.25
 
 - As part of testing the upcoming [compendium index changes](https://gitlab.com/foundrynet/foundryvtt/-/issues/5453) in Core v0.8.8 it became clear that there were calls to `.getIndex()` that were not needed. These have been removed.

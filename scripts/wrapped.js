@@ -1,4 +1,6 @@
+import {CONSTANTS} from './constants.js';
 import {libWrapper} from './shim.js';
+import Hash from './hash.js';
 
 /**
  * Utilise libWrapper to ensure we get a sourceId for each of our compendium imports
@@ -60,13 +62,47 @@ Hooks.once('setup', function () {
           if (!args[2]) {
             args[2] = {};
           }
+          if (!args[2].flags) {
+            args[2].flags = {};
+          }
           // Set the source uuid of the entity if it isn't already set in updateData
-          if (!args[2]['flags.core.sourceId'] && !args[2].flags?.core?.sourceId) {
+          if (!args[2].flags?.core?.sourceId) {
             const source = await pack.getEntity(args[1]);
-            args[2]['flags.core.sourceId'] = source.uuid;
+            if (!args[2].flags.core) {
+              args[2].flags.core = {};
+            }
+            args[2].flags.core.sourceId = source.uuid;
           }
 
           return wrapped.bind(this)(...args);
+        },
+        'WRAPPER',
+      );
+
+      libWrapper.register(
+        'scene-packer',
+        'EntityCollection.prototype.fromCompendium',
+        function (wrapped, ...args) {
+          const data = wrapped.bind(this)(...args);
+
+          if (!data.flags) {
+            data.flags = {};
+          }
+          // Set the source hash for update functionality
+          if (!data.flags[ScenePacker.MODULE_NAME]) {
+            data.flags[ScenePacker.MODULE_NAME] = {};
+          }
+          data.flags[ScenePacker.MODULE_NAME].hash = Hash.SHA1(data);
+
+          // Patch "Sight angle must be between 1 and 360 degrees." error
+          if (data.token?.sightAngle === 0) {
+            data.token.sightAngle = 360;
+          }
+          if (data.token?.lightAngle === 0) {
+            data.token.lightAngle = 360;
+          }
+
+          return data;
         },
         'WRAPPER',
       );
@@ -97,9 +133,28 @@ Hooks.once('setup', function () {
           }));
 
           // Step 3 - import all content
-          const created = await this.cls.create(entities.map(e => {
-            e.data['flags.core.sourceId'] = e.uuid; // Modified from original source
+          const created = await this.cls.create(entities.filter(e => e.name !== CONSTANTS.CF_TEMP_ENTITY_NAME).map(e => {
             e.data.folder = folderId;
+
+            // Patch "Sight angle must be between 1 and 360 degrees." error
+            if (e.data.token?.sightAngle === 0) {
+              e.data.token.sightAngle = 360;
+            }
+            if (e.data.token?.lightAngle === 0) {
+              e.data.token.lightAngle = 360;
+            }
+
+            const newFlags = {};
+            newFlags['core'] = {sourceId: e.uuid};
+            if (!e.data.flags) {
+              e.data.flags = {};
+            }
+            mergeObject(e.data.flags, newFlags);
+            if (!e.data.flags[ScenePacker.MODULE_NAME]) {
+              e.data.flags[ScenePacker.MODULE_NAME] = {};
+            }
+            e.data.flags[ScenePacker.MODULE_NAME].hash = Hash.SHA1(e.data);
+
             return e.data;
           }));
           ui.notifications.info(game.i18n.format('COMPENDIUM.ImportAllFinish', {
@@ -138,6 +193,60 @@ Hooks.once('setup', function () {
           'WRAPPER',
         );
       });
+
+      // Add hashes to entities imported from compendiums to support upgrade diffs.
+      libWrapper.register(
+        'scene-packer',
+        'WorldCollection.prototype.fromCompendium',
+        function (wrapped, ...args) {
+          const data = wrapped.bind(this)(...args);
+
+          if (!data.flags) {
+            data.flags = {};
+          }
+          // Set the source hash for update functionality
+          if (!data.flags[ScenePacker.MODULE_NAME]) {
+            data.flags[ScenePacker.MODULE_NAME] = {};
+          }
+          data.flags[ScenePacker.MODULE_NAME].hash = Hash.SHA1(data);
+
+          return data;
+        },
+        'WRAPPER',
+      );
+
+      // Clean up temporary compendium folder entities when importing all from a compendium.
+      libWrapper.register(
+        'scene-packer',
+        'CompendiumCollection.prototype.importAll',
+        async function (wrapped, ...args) {
+          const data = await wrapped.bind(this)(...args);
+          if (game.modules.get('compendium-folders')?.active) {
+            // Compendium folders is active, it will handle the cleanup
+            return data;
+          }
+
+          let tempEntities = data.filter(e => e.name === CONSTANTS.CF_TEMP_ENTITY_NAME);
+          if (tempEntities.length) {
+            Dialog.confirm({
+              title: game.i18n.format('SCENE-PACKER.notifications.import-entities.cf-clean-up-title', {
+                name: CONSTANTS.CF_TEMP_ENTITY_NAME,
+              }),
+              content: game.i18n.format('SCENE-PACKER.notifications.import-entities.cf-clean-up', {
+                name: CONSTANTS.CF_TEMP_ENTITY_NAME,
+                count: tempEntities.length,
+              }),
+              yes: () => {
+                game.packs.get('scene-packer.macros')
+                  .getContent()
+                  .then(m => m.find(e => e.name === 'Clean up #[CF_tempEntity] entries')?.execute());
+              },
+            });
+          }
+          return data;
+        },
+        'WRAPPER',
+      );
     }
   },
 );
