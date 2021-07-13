@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.3.1
+
+- Enhanced `Relink compendium journal entries` macro to support hyperlink style references such as:
+  - `<a class="entity-link" data-entity="Actor" data-id="NzBhNmIwNTcxN2Y0">Commoner</a>`
+  - `<a class="entity-link" data-entity="JournalEntry" data-id="NTkwZjliZmMwNGQ2">The Approach</a>`
+
 ## v2.3.0
 
 - Added support for taking into account the folder structure that the [Compendium Folders](https://foundryvtt.com/packages/compendium-folders) module provides.

@@ -195,7 +195,7 @@
         "checking-and-updating": "Checking and updating {count} journal references from world links to compendium links.",
         "invalid-ref-type": "Found a journal reference that isn't handled: {type}. Skipping reference...",
         "invalid-no-name": "Found a journal reference but couldn't find its original name. Check debug logs for details.",
-        "invalid-no-matching-name": "Could not find reference name in world data",
+        "invalid-no-matching-name": "Could not find {type} reference in world data: {name}",
         "invalid-not-found": "Found a journal reference but couldn't find its compendium version by name. Check debug logs for details.",
         "invalid-not-found-console": "Could not find reference in compendium data. Skipping updating reference...",
         "invalid-too-many": "Found a journal reference but found more than one compendium version by name. Check debug logs for details.",
