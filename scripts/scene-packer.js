@@ -2947,13 +2947,59 @@ export default class ScenePacker {
       await ScenePacker.SetModuleCompendiumLockState(false, moduleName);
     }
 
-    // Matches things like: @Actor[obe2mDyYDXYmxHJb]{
-    const rex = /@(\w+)\[(\w+)\]\{/g;
+    // Matches things like: @Actor[obe2mDyYDXYmxHJb]{Something or other}
+    const rex = /@(\w+)\[(\w+)\]\{(\w+)\}/g;
+    const domParser = new DOMParser();
 
-    async function findNewReferences(type, entity) {
+    async function findNewReferences(type, oldRef, oldName, entry, journal) {
+      // Need to look up the in world reference to find the new compendium reference by name
+      const collection = game.collections.get(type);
+      if (!collection) {
+        ui.notifications.error(
+          game.i18n.format(
+            'SCENE-PACKER.world-conversion.compendiums.invalid-ref-type',
+            {
+              type: type,
+            },
+          ),
+        );
+        return [];
+      }
+      let entity = collection.get(oldRef);
+      if (!entity) {
+        // Try looking up by name
+        entity = collection.getName(oldRef);
+        if (!entity) {
+          ui.notifications.error(
+            game.i18n.format(
+              'SCENE-PACKER.world-conversion.compendiums.invalid-no-matching-name',
+              {
+                type,
+                name: oldName,
+              }
+            ),
+          );
+          ScenePacker.logType(
+            moduleName,
+            'error',
+            true,
+            journal.name,
+            game.i18n.format(
+              'SCENE-PACKER.world-conversion.compendiums.invalid-no-matching-name',
+              {
+                type,
+                name: oldName,
+              }
+            ),
+            entry,
+            oldRef,
+          );
+          return [];
+        }
+      }
       let name = entity.name;
       let sourceId = entity.getFlag(CONSTANTS.MODULE_NAME, 'sourceId');
-      const matches = [];
+      let matches = [];
 
       for (let l = 0; l < packs[`${type}Packs`].length; l++) {
         const p = packs[`${type}Packs`][l];
@@ -2975,6 +3021,54 @@ export default class ScenePacker {
             }
             matches.push({pack: p.collection, ref: possibleMatch._id});
           }
+        }
+      }
+
+      if (!matches.length) {
+        ui.notifications.error(
+          game.i18n.localize(
+            'SCENE-PACKER.world-conversion.compendiums.invalid-not-found',
+          ),
+        );
+        ScenePacker.logType(
+          moduleName,
+          'error',
+          true,
+          journal.name,
+          game.i18n.localize(
+            'SCENE-PACKER.world-conversion.compendiums.invalid-not-found-console',
+          ),
+          type,
+          name,
+          entry,
+          oldRef,
+        );
+        return [];
+      } else if (matches.length > 1) {
+        // More than one reference, see if only one matches this module
+        const thisModuleNewRef = matches.filter(r => r.pack.startsWith(moduleName));
+        if (thisModuleNewRef.length === 1) {
+          matches = thisModuleNewRef;
+        } else {
+          ui.notifications.error(
+            game.i18n.localize(
+              'SCENE-PACKER.world-conversion.compendiums.invalid-too-many',
+            ),
+          );
+          ScenePacker.logType(
+            moduleName,
+            'error',
+            true,
+            journal.name,
+            game.i18n.localize(
+              'SCENE-PACKER.world-conversion.compendiums.invalid-too-many-console',
+            ),
+            type,
+            name,
+            entry,
+            oldRef,
+            matches,
+          );
         }
       }
       return matches;
@@ -3021,115 +3115,59 @@ export default class ScenePacker {
             },
           ),
         );
+
+        // Replace hyperlink style links first
+        const doc = domParser.parseFromString(journal.data.content, 'text/html');
+        for (const link of doc.getElementsByTagName('a')) {
+          if (!link.classList.contains('entity-link') || !link.dataset.entity || !link.dataset.id) {
+            continue
+          }
+
+          // Build the links to the new references that exist within the compendium/s
+          let newRef = await findNewReferences(link.dataset.entity, link.dataset.id, link.text, entry, journal);
+
+          if (newRef.length !== 1) {
+            // Skip any reference update that isn't a one to one replacement
+            continue;
+          }
+          ScenePacker.logType(
+            moduleName,
+            'info',
+            true,
+            game.i18n.format(
+              'SCENE-PACKER.world-conversion.compendiums.updating-reference-console',
+              {
+                pack: pack.collection,
+                journalEntryId: entry._id,
+                type: link.dataset.entity,
+                oldRef: link.dataset.id,
+                newRefPack: newRef[0].pack,
+                newRef: newRef[0].ref,
+              },
+            ),
+          );
+
+          if (!dryRun) {
+            link.setAttribute('data-pack', newRef[0].pack);
+            link.setAttribute('data-id', newRef[0].ref);
+          }
+        }
+        if (!dryRun) {
+          journal.data.content = doc.body.innerHTML;
+        }
+
         const links = [...journal.data.content.matchAll(rex)];
         for (let k = 0; k < links.length; k++) {
           const link = links[k];
           const type = link[1];
           const oldRef = link[2];
-          // Need to look up the in world reference to find the new compendium reference by name
-          let entity = null;
-          switch (type) {
-            case 'Actor':
-              entity = game.actors.get(oldRef);
-              break;
-            case 'JournalEntry':
-              entity = game.journal.get(oldRef);
-              break;
-            case 'RollTable':
-              entity = game.tables.get(oldRef);
-              break;
-            case 'Item':
-              entity = game.items.get(oldRef);
-              break;
-            case 'Scene':
-              entity = game.scenes.get(oldRef);
-              break;
-            case 'Macro':
-              entity = game.macros.get(oldRef);
-              break;
-            case 'Playlist':
-              entity = game.playlists.get(oldRef);
-              break;
-            default:
-              ui.notifications.error(
-                game.i18n.format(
-                  'SCENE-PACKER.world-conversion.compendiums.invalid-ref-type',
-                  {
-                    type: type,
-                  },
-                ),
-              );
-              continue;
-          }
-          if (!entity) {
-            ui.notifications.error(
-              game.i18n.localize(
-                'SCENE-PACKER.world-conversion.compendiums.invalid-no-matching-name',
-              ),
-            );
-            ScenePacker.logType(
-              moduleName,
-              'error',
-              true,
-              journal.name,
-              game.i18n.localize(
-                'SCENE-PACKER.world-conversion.compendiums.invalid-no-matching-name',
-              ),
-              type,
-              entry,
-              oldRef,
-            );
-            continue;
-          }
-          let name = entity.name;
+          const oldName = link[3];
+
           // Build the links to the new references that exist within the compendium/s
-          let newRef = await findNewReferences(type, entity);
+          let newRef = await findNewReferences(type, oldRef, oldName, entry, journal);
 
           if (!newRef.length) {
-            ui.notifications.error(
-              game.i18n.localize(
-                'SCENE-PACKER.world-conversion.compendiums.invalid-not-found',
-              ),
-            );
-            ScenePacker.logType(
-              moduleName,
-              'error',
-              true,
-              journal.name,
-              game.i18n.localize(
-                'SCENE-PACKER.world-conversion.compendiums.invalid-not-found-console',
-              ),
-              type,
-              name,
-              entry,
-              oldRef,
-            );
-          } else if (newRef.length > 1) {
-            // More than one reference, see if only one matches this module
-            const thisModuleNewRef = newRef.filter(r => r.pack.startsWith(moduleName));
-            if (thisModuleNewRef.length === 1) {
-              newRef = thisModuleNewRef;
-            } else {
-              ui.notifications.error(
-                game.i18n.localize(
-                  'SCENE-PACKER.world-conversion.compendiums.invalid-too-many',
-                ),
-              );
-              ScenePacker.logType(
-                moduleName,
-                'error',
-                true,
-                journal.name,
-                game.i18n.localize(
-                  'SCENE-PACKER.world-conversion.compendiums.invalid-too-many-console',
-                ),
-                type,
-                name,
-                entry,
-                oldRef,
-                newRef,
-              );
-            }
+            continue;
           }
 
           references.add({
