@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.3.2
+
+- Fixed linking of Journal entries that contain spaces (was broken in v2.3.1).
+  - Thanks toastygm
+
 ## v2.3.1
 
 - Enhanced `Relink compendium journal entries` macro to support hyperlink style references such as:
