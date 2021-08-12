@@ -2948,7 +2948,7 @@ export default class ScenePacker {
     }
 
     // Matches things like: @Actor[obe2mDyYDXYmxHJb]{Something or other}
-    const rex = /@(\w+)\[(\w+)\]\{(\w+)\}/g;
+    const rex = /@(\w+)\[(\w+)\]\{([^}]+)\}/g;
     const domParser = new DOMParser();
 
     async function findNewReferences(type, oldRef, oldName, entry, journal) {
