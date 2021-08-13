@@ -3,6 +3,9 @@
 ## v2.3.3
 
 - Re-enable displaying the Welcome Journal when the "Import All" button is used.
+- Added `Bulk pack scenes` macro
+  - This macro will pack/repack all scenes in the requested scene folder.
+  - Handy if you have several scenes in a folder that you are wanting to pack prior to exporting them.
 
 ## v2.3.2
 
