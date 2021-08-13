@@ -340,19 +340,37 @@ export default class ScenePacker {
               createdEntities = [createdEntities];
             }
 
-            if (packType === 'Scene' && createdEntities.length) {
-              // Unpack scenes
-              for (let j = 0; j < createdEntities.length; j++) {
-                const scene = createdEntities[j];
-                if (isNewerVersion('0.8.0', game.data.version)) {
-                  // v0.7.x of Core had a bug where thumbnails would all be a single image incorrectly.
-                  const t = await scene.createThumbnail({img: scene.data.img || undefined});
-                  if (t?.thumb) {
-                    await scene.update({thumb: t.thumb});
+            switch (packType) {
+              case 'Scene':
+                // Unpack scenes
+                for (let j = 0; j < createdEntities.length; j++) {
+                  const scene = createdEntities[j];
+                  if (isNewerVersion('0.8.0', game.data.version)) {
+                    // v0.7.x of Core had a bug where thumbnails would all be a single image incorrectly.
+                    const t = await scene.createThumbnail({img: scene.data.img || undefined});
+                    if (t?.thumb) {
+                      await scene.update({thumb: t.thumb});
+                    }
+                  }
+                  await this.ProcessScene(scene, {showLinkedJournal: false, contentPreImported: true});
+                }
+                break;
+              case 'JournalEntry':
+                // Display the Welcome Journal once per new module version
+                if (this.welcomeJournal) {
+                  let importedVersion = game.settings.get(this.moduleName, CONSTANTS.SETTING_IMPORTED_VERSION) || '0.0.0';
+                  let moduleVersion = game.modules.get(this.moduleName)?.data?.version || '0.0.0';
+                  // Note that the imported version gets set during ProcessScene, but JournalEntries are processed before Scenes,
+                  // so the current version flag won't have been set yet.
+                  if (isNewerVersion(moduleVersion, importedVersion)) {
+                    let welcomeJournal = game.journal.find(j => j.name === this.welcomeJournal && j.getFlag('core', 'sourceId')
+                      .startsWith(`Compendium.${this.moduleName}.`));
+                    if (welcomeJournal) {
+                      welcomeJournal.sheet.render(true, {sheetMode: 'text'});
+                    }
                   }
                 }
-                await this.ProcessScene(scene, {showLinkedJournal: false, contentPreImported: true});
-              }
+                break;
             }
           }
         } catch (e) {
@@ -573,27 +591,12 @@ export default class ScenePacker {
 
     let importedVersion = game.settings.get(this.moduleName, CONSTANTS.SETTING_IMPORTED_VERSION) || '0.0.0';
     let moduleVersion = game.modules.get(this.moduleName)?.data?.version || '0.0.0';
-    if (this.welcomeJournal) {
+    if (this.welcomeJournal && isNewerVersion(moduleVersion, importedVersion)) {
       // Display the welcome journal once per new module version
-      const folder = game.folders.find(
-        (j) => j.data.type === 'JournalEntry' && j.data.name === this.adventureName,
-      );
-      const j =
-        folder &&
-        game.journal.filter(
-          (j) => j.data.name === this.welcomeJournal && j.data.folder === folder.id,
-        );
-      if (j?.length) {
-        if (isNewerVersion(moduleVersion, importedVersion)) {
-          j[0].sheet.render(true, {sheetMode: 'text'});
-        } else {
-          this.log(false,
-            game.i18n.format('SCENE-PACKER.notifications.pack-scene.already-shown-welcome', {
-              journal: j[0]?.name,
-              version: moduleVersion,
-            }),
-          );
-        }
+      const j = game.journal.find(j => j.name === this.welcomeJournal && j.getFlag('core', 'sourceId')
+        .startsWith(`Compendium.${this.moduleName}.`));
+      if (j) {
+        j.sheet.render(true, {sheetMode: 'text'});
       }
     }
     // Set both world and scene imported version flags

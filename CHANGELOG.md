@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.3
+
+- Re-enable displaying the Welcome Journal when the "Import All" button is used.
+
 ## v2.3.2
 
 - Fixed linking of Journal entries that contain spaces (was broken in v2.3.1).
