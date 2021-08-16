@@ -2,7 +2,7 @@
   "name": "scene-packer",
   "title": "Library: Scene Packer",
   "description": "A module to assist with Scene and Adventure packing and unpacking.",
-  "version": "2.3.3",
+  "version": "2.3.4",
   "library": "true",
   "manifestPlusVersion": "1.1.0",
   "minimumCoreVersion": "0.7.9",
@@ -14,10 +14,6 @@
       "discord": "blair#9056",
       "ko-fi": "blairm",
       "patreon": "blairm"
-    },
-    {
-      "name": "The League of Extraordinary FoundryVTT Developers",
-      "url": "https://github.com/League-of-Foundry-Developers"
     }
   ],
   "media": [
