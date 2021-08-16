@@ -1,5 +1,10 @@
 # Changelog
 
+## v.2.3.4
+
+- Add error message when a scene with Journal Pins or Actor Tokens tries to be packed, but there aren't valid `journalPacks`/`creaturePacks` values defined for the module.
+  - The console will try to suggest valid options for your module.
+
 ## v2.3.3
 
 - Re-enable displaying the Welcome Journal when the "Import All" button is used.

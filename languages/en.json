@@ -75,11 +75,11 @@
         "missing-name": "Tried to find an actor for a token with no name.",
         "could-not-import": "Error importing entity",
         "invalid-packs": {
-          "error": "Invalid pack configuration. Cannot import {type}. Check console for more details.",
+          "error": "Invalid pack configuration. Cannot import {type}. Check console (F12) for more details.",
           "short": "ImportEntities was called with no searchPacks defined.",
           "details": "ImportEntities was called with no valid searchPacks defined. Double check for typos between your manifest.json and module initialisation files. Received the following call details:",
           "reference": "ImportEntities was called with a reference that is not registered with Foundry. Double check for typos between your manifest.json and module initialisation files. Received the following call details:",
-          "missing-pack": "Invalid pack configuration. Cannot find compendium {packName}. Check console for more details.",
+          "missing-pack": "Invalid pack configuration. Cannot find compendium {packName}. Check console (F12) for more details.",
           "missing-pack-details": "ImportEntities was called to search for pack \"{packName}\" which is not found. Check for typos in your module setup."
         },
         "cf-clean-up-title": "Clean up {name} entities?",
@@ -88,19 +88,25 @@
       "find-journal-compendium": {
         "no-match": "Could not find a Journal entry named \"{journal}\" in the compendiums.",
         "invalid-index": "Error loading journal content from compendium. Check debug logs for details.",
-        "missing-pack": "Invalid pack configuration. Cannot find compendium {packName}. Check console for more details.",
-        "missing-pack-details": "FindJournalInCompendiums was called to search for pack \"{packName}\" which is not found. Check for typos in your module setup."
+        "missing-pack": "Invalid pack configuration. Cannot find compendium {packName}. Check console (F12) for more details.",
+        "missing-pack-details": "FindJournalInCompendiums was called to search for pack \"{packName}\" which is not found. Check for typos in your module setup.",
+        "no-packs": "Invalid pack configuration. Packing scene journal pins will not work. Check console (F12) for more details.",
+        "no-packs-details": "FindJournalInCompendiums was called but there are no \"journalPacks\" defined in the module initialisation script. See the \"Example module javascript\" JournalEntry for details on defining the constant. Possible values are: {packOptions}",
+        "no-packs-in-module": "Warning: there are no JournalEntry packs defined in your module.json"
       },
       "find-actor-compendium": {
         "no-match": "Could not find an Actor entry named \"{actor}\" in the compendiums.",
         "invalid-index": "Error loading actor content from compendium. Check debug logs for details.",
-        "missing-pack": "Invalid pack configuration. Cannot find compendium {packName}. Check console for more details.",
-        "missing-pack-details": "FindActorInCompendiums was called to search for pack \"{packName}\" which is not found. Check for typos in your module setup."
+        "missing-pack": "Invalid pack configuration. Cannot find compendium {packName}. Check console (F12) for more details.",
+        "missing-pack-details": "FindActorInCompendiums was called to search for pack \"{packName}\" which is not found. Check for typos in your module setup.",
+        "no-packs": "Invalid pack configuration. Packing scene actor tokens will not work. Check console (F12) for more details.",
+        "no-packs-details": "FindActorInCompendiums was called but there are no \"creaturePacks\" defined in the module initialisation script. See the \"Example module javascript\" JournalEntry for details on defining the constant. Possible values are: {packOptions}",
+        "no-packs-in-module": "Warning: there are no Actor packs defined in your module.json"
       },
       "find-playlist-compendium": {
         "no-match": "Could not find a Playlist entry named \"{playlist}\" in the compendiums.",
         "invalid-index": "Error loading playlist content from compendium. Check debug logs for details.",
-        "missing-pack": "Invalid pack configuration. Cannot find compendium {packName}. Check console for more details.",
+        "missing-pack": "Invalid pack configuration. Cannot find compendium {packName}. Check console (F12) for more details.",
         "missing-pack-details": "FindPlaylistInCompendiums was called to search for pack \"{packName}\" which is not found. Check for typos in your module setup."
       },
       "find-actor": {

@@ -1177,6 +1177,28 @@ export default class ScenePacker {
       return null;
     }
 
+    if (!searchPacks.length) {
+      ui.notifications.error(
+        game.i18n.localize('SCENE-PACKER.notifications.find-journal-compendium.no-packs'),
+      );
+      const packs = game.packs.filter(s => {
+        const type = s.documentName ?? s.entity;
+        return s.metadata.package === this.moduleName && type == 'JournalEntry';
+      });
+      const packOptions = packs.length ?
+                          `"${packs.map(p => p.collection).join('", "')}"` :
+                          game.i18n.localize('SCENE-PACKER.notifications.find-journal-compendium.no-packs-in-module');
+      this.logError(
+        true,
+        game.i18n.format(
+          'SCENE-PACKER.notifications.find-journal-compendium.no-packs-details',
+          {
+            packOptions,
+          },
+        ),
+      );
+    }
+
     const sourceId = journal.getFlag(CONSTANTS.MODULE_NAME, 'sourceId');
 
     let compendiumJournal = null;
@@ -1316,6 +1338,28 @@ export default class ScenePacker {
   async FindActorInCompendiums(actor, searchPacks) {
     if (!actor) {
       return null;
+    }
+
+    if (!searchPacks.length) {
+      ui.notifications.error(
+        game.i18n.localize('SCENE-PACKER.notifications.actor-journal-compendium.no-packs'),
+      );
+      const packs = game.packs.filter(s => {
+        const type = s.documentName ?? s.entity;
+        return s.metadata.package === this.moduleName && type == 'Actor';
+      });
+      const packOptions = packs.length ?
+                          `"${packs.map(p => p.collection).join('", "')}"` :
+                          game.i18n.localize('SCENE-PACKER.notifications.find-actor-compendium.no-packs-in-module');
+      this.logError(
+        true,
+        game.i18n.format(
+          'SCENE-PACKER.notifications.find-actor-compendium.no-packs-details',
+          {
+            packOptions,
+          },
+        ),
+      );
     }
 
     const sourceId = actor.getFlag(CONSTANTS.MODULE_NAME, 'sourceId');
