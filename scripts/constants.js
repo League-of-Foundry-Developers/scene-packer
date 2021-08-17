@@ -108,3 +108,12 @@ export const CONSTANTS = Object.freeze({
     Scene: 'scenes',
   },
 });
+
+/**
+ * Fake Entity is used in place of a real entity, for times where operating against a real entity would throw errors.
+ * @type {{update: FakeEntity.update}}
+ */
+export const FakeEntity = {
+  update: () => {
+  },
+};
