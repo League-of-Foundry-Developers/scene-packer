@@ -1,4 +1,4 @@
-import { CONSTANTS } from './constants.js';
+import {CONSTANTS, FakeEntity} from './constants.js';
 import Report from './report.js';
 import AssetReport from './asset-report.js';
 import Hash from './hash.js';
@@ -442,12 +442,22 @@ export default class ScenePacker {
     for (let i = 0; i < content.length; i++) {
       const entity = content[i];
       const cfPath = entity.data?.flags?.cf?.path;
+      const cfColor = entity.data?.flags?.cf?.color;
       if (!cfPath) {
         continue;
       }
       if (response.folderMap.has(cfPath)) {
         continue;
       }
+
+      // Utilise the Compendium Folders functionality if it exists to build the full folder path
+      if (typeof game.CF?.FICManager?.createFolderPath === 'function') {
+        // Utilise a Fake Entity so that Compendium Folders doesn't throw errors when trying to update its folder information.
+        // Compendium Folders normally operates on entities that have already been imported into the system,
+        // whereas Scene Packer imports the folders first.
+        await game.CF.FICManager.createFolderPath(cfPath, cfColor, entity.documentName ?? entity.entity, FakeEntity);
+      }
+
       const pathParts = cfPath.split(CONSTANTS.CF_SEPARATOR);
       for (let j = 0; j < pathParts.length; j++) {
         const pathPart = pathParts[j];
@@ -475,6 +485,7 @@ export default class ScenePacker {
           name: pathPart,
           type: entityType,
           parent: parent?.id || null,
+          color: cfColor || null,
         });
         response.folderMap.set(pathPart, folder);
       }

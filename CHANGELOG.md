@@ -1,6 +1,13 @@
 # Changelog
 
-## v.2.3.4
+## v2.3.5
+
+- If the [Compendium Folders](https://foundryvtt.com/packages/compendium-folders) module is enabled, make use of its internal functionality to create the folder structures if they exist.
+  - Will continue to do an approximation if `Compendium Folders` is not enabled.
+- Utilise the folder colour set via [Compendium Folders](https://foundryvtt.com/packages/compendium-folders).
+  - Note that if `Compendium Folders` is not enabled, the folder colours may not be quite as intended.
+
+## v2.3.4
 
 - Add error message when a scene with Journal Pins or Actor Tokens tries to be packed, but there aren't valid `journalPacks`/`creaturePacks` values defined for the module.
   - The console will try to suggest valid options for your module.
