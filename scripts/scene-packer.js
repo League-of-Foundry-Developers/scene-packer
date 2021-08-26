@@ -438,6 +438,37 @@ export default class ScenePacker {
       }
     }
 
+    // Sort the content so that folders are progressively built by building the shallow paths first and then
+    // non-compendium folder last (to make use of folders built by CF).
+    content.sort((e1, e2) => {
+      const cfPath1 = e1.data?.flags?.cf?.path;
+      const cfPath2 = e2.data?.flags?.cf?.path;
+      if (!cfPath1 && !cfPath2) {
+        // Neither have CF data
+        return 0;
+      }
+      if (cfPath1 && !cfPath2) {
+        // Sort e1 first as it has CF data
+        return -1;
+      }
+      if (!cfPath1 && cfPath2) {
+        // Sort e2 first as it has CF data
+        return 1;
+      }
+      const e1Segments = cfPath1.split(CONSTANTS.CF_SEPARATOR);
+      const e2Segments = cfPath2.split(CONSTANTS.CF_SEPARATOR);
+      if (e1Segments.length === e2Segments.length) {
+        // Both at the same depth
+        return 0;
+      }
+      if (e1Segments.length < e2Segments.length) {
+        // Sort e1 first as it has fewer segments
+        return -1;
+      }
+      // Sort e2 first as it has fewer segments
+      return 1;
+    });
+
     // Build the Compendium Folder structure paths
     for (let i = 0; i < content.length; i++) {
       const entity = content[i];

@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.6
+
+- Ensure that entries that are packed with [Compendium Folders](https://foundryvtt.com/packages/compendium-folders) data are imported in the appropriate order to ensure that folder colours are built progressively.
+
 ## v2.3.5
 
 - If the [Compendium Folders](https://foundryvtt.com/packages/compendium-folders) module is enabled, make use of its internal functionality to create the folder structures if they exist.
