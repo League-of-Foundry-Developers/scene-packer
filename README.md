@@ -60,6 +60,7 @@ discord server](https://discord.com/invite/HY3xhBEf2A) and I'll happily help.
 
 If you are new to making Foundry VTT modules, you may be interested in the following links to get you started:
 
+- [https://sneat.github.io/scene-packer-module-generator/](https://sneat.github.io/scene-packer-module-generator/) - Fill in the form and download your ready-to-go module.
 - [https://github.com/sneat/starter-scene-packer](https://github.com/sneat/starter-scene-packer) - A "quick start" style module integrated with Scene Packer functionality.
 - https://foundryvtt.com/article/module-development/
 - https://foundryvtt.com/article/content-creation-guide/
