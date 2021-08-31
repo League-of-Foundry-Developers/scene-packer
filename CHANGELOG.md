@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.3.7
+
+- Manually clearing a Scene's packed data will now also reset which module it is packed against.
+- Added bundled macro `Detach Scene from Scene Packer instance` to allow you to reset which module a Scene is packed against.
+- Added references to https://sneat.github.io/scene-packer-module-generator/ as a way to jump start creating a new module.
+  - Useful for those who:
+    - want to create a Scene Packer integrated module
+    - want to create a standard module
+    - want to create a Shared Compendium module
+
 ## v2.3.6
 
 - Ensure that entries that are packed with [Compendium Folders](https://foundryvtt.com/packages/compendium-folders) data are imported in the appropriate order to ensure that folder colours are built progressively.

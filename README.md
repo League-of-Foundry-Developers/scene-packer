@@ -45,9 +45,6 @@ There are several `Journal entries` bundled with Scene Packer. In them, you can 
 
 To use the Scene Packer as part of your module you will need to add it as a dependency in your `module.json` file as well as add/update your module javascript (see [Module code requirements](#module-code-requirements) below).
 
-If you would like some help packing your module, feel free to stop by my [<img src="https://github.com/League-of-Foundry-Developers/scene-packer/raw/main/assets/icons/hand-truck.png" alt="icon" height="24" valign="middle">
-discord server](https://discord.com/invite/HY3xhBEf2A) and I'll happily help.
-
 ```json
 "dependencies": [
   {
@@ -57,6 +54,18 @@ discord server](https://discord.com/invite/HY3xhBEf2A) and I'll happily help.
   }
 ]
 ```
+
+If you would like some help packing your module, feel free to stop by my [<img src="https://github.com/League-of-Foundry-Developers/scene-packer/raw/main/assets/icons/hand-truck.png" alt="icon" height="24" valign="middle">
+discord server](https://discord.com/invite/HY3xhBEf2A) and I'll happily help.
+
+If you are new to making Foundry VTT modules, you may be interested in the following links to get you started:
+
+- [https://sneat.github.io/scene-packer-module-generator/](https://sneat.github.io/scene-packer-module-generator/) - Fill in the form and download your ready-to-go module.
+- [https://github.com/sneat/starter-scene-packer](https://github.com/sneat/starter-scene-packer) - A "quick start" style module integrated with Scene Packer functionality.
+- https://foundryvtt.com/article/module-development/
+- https://foundryvtt.com/article/content-creation-guide/
+- https://foundryvtt.com/article/packaging-guide/
+- https://foundryvtt.com/article/media/
 
 ### Module code requirements
 
