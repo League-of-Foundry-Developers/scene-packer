@@ -3740,6 +3740,8 @@ Hooks.once('setup', () => {
             let instance = ScenePacker.GetInstanceForScene(scene);
             if (instance) {
               instance.ClearPackedData(scene);
+              // Manual clearing of packed data should also de-reference the instance
+              scene.unsetFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_SOURCE_MODULE);
             }
           },
         },
