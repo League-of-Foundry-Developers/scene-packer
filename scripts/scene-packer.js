@@ -212,7 +212,6 @@ export default class ScenePacker {
     });
     di.render(true);
     for (let i = 0; i < CONSTANTS.PACK_IMPORT_ORDER.length; i++) {
-      let createData = [];
       const packType = CONSTANTS.PACK_IMPORT_ORDER[i];
       di.data.content = `<p>${game.i18n.format('SCENE-PACKER.welcome.import-all.wait', {
         type: game.i18n.format(CONSTANTS.TYPE_HUMANISE[packType]),
@@ -229,6 +228,7 @@ export default class ScenePacker {
         },
       );
       for (let i = 0; i < packs.length; i++) {
+        let createData = [];
         const pack = packs[i];
         try {
           let entityClass;
