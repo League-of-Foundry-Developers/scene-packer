@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.3.9
+
+- Added ability to relink across modules.
+  - By setting the `additionalModulePacks` value in your initialisation script, you can specify additional modules to be considered as sources for the `Relink compendium journal entries` macro.
+  - You might want to do this as a way to quickly relink Items to a system compendium (such as those in the `dnd5e` system), or to another module that you have listed as a dependency.
+  - Feature suggested by `WarVisionary`.
+
 ## v2.3.8
 
 - Fixed bug where `Import All` would import entities multiple times when multiple packs of the same type existed in a module.

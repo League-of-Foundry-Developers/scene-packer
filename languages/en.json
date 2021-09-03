@@ -192,6 +192,11 @@
         "ui": "Invalid call to SetPlaylistPacks(). See console for details.",
         "details": "You must pass an array of strings to \"SetPlaylistPacks()\". They must be the names of Playlist Packs. Received: {pack}",
         "missing": "SetPlaylistPacks() called with no value. This disables importing of Playlists."
+      },
+      "modulePacks": {
+        "ui": "Invalid call to SetAdditionalModulePacks(). See console for details.",
+        "details": "You must pass an array of strings to \"SetAdditionalModulePacks()\". They must be the names of Modules. Received: {pack}",
+        "missing": "SetAdditionalModulePacks() called with no value."
       }
     },
     "world-conversion": {
