@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.3.8
+
+- Fixed bug where `Import All` would import entities multiple times when multiple packs of the same type existed in a module.
+- Fixed bug where Journals and Actors might be imported multiple times if an entry can't be found in the compendiums. Thanks `OwlbearAviary` and `WarVisionary` for the data to be able to replicate the issue.
+
 ## v2.3.7
 
 - Manually clearing a Scene's packed data will now also reset which module it is packed against.

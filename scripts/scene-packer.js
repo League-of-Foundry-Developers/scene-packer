@@ -212,7 +212,6 @@ export default class ScenePacker {
     });
     di.render(true);
     for (let i = 0; i < CONSTANTS.PACK_IMPORT_ORDER.length; i++) {
-      let createData = [];
       const packType = CONSTANTS.PACK_IMPORT_ORDER[i];
       di.data.content = `<p>${game.i18n.format('SCENE-PACKER.welcome.import-all.wait', {
         type: game.i18n.format(CONSTANTS.TYPE_HUMANISE[packType]),
@@ -229,6 +228,7 @@ export default class ScenePacker {
         },
       );
       for (let i = 0; i < packs.length; i++) {
+        let createData = [];
         const pack = packs[i];
         try {
           let entityClass;
@@ -1682,7 +1682,7 @@ export default class ScenePacker {
       // No missing entities
       return createdEntities;
     }
-    let entityNames = entities.map(e => e.name || e.journalName || e.tokenName || e.actorName);
+    let entityNames = entities.map(e => e.name || e.journalName || e.tokenName || e.actorName || e.text);
 
     if (!type) {
       type = 'entities';
@@ -1928,6 +1928,7 @@ export default class ScenePacker {
 
       // Filter down to those that are still missing
       entities = entities.filter(e => !collection.find(f => f.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === e.sourceId));
+      entityNames = entities.map(e => e.name || e.journalName || e.tokenName || e.actorName || e.text);
 
       // Filter to just the needed entities
       const content = packContent.filter((entity) =>
@@ -1937,7 +1938,7 @@ export default class ScenePacker {
       // Remove the entries that we found in this pack
       entities = entities.filter(
         (e) =>
-          content.find((entity) => entity.name === (e.name || e.journalName || e.tokenName || e.actorName)) == null,
+          content.find((entity) => entity.name === (e.name || e.journalName || e.tokenName || e.actorName || e.text)) == null,
       );
 
       if (content.length > 0) {
