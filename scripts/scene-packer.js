@@ -33,12 +33,13 @@ export default class ScenePacker {
   additionalJournals = [];
   /** @type {String[]} */
   additionalMacros = [];
-  /** @type {{creatures: String[], journals: String[], macros: String[], playlists: String[]}} */
+  /** @type {{creatures: String[], journals: String[], macros: String[], playlists: String[], modules: String[]}} */
   packs = {
     creatures: [],
     journals: [],
     macros: [],
     playlists: [],
+    modules: [],
   };
   allowImportPrompts = true;
 
@@ -48,6 +49,7 @@ export default class ScenePacker {
    * @param {String[]} creaturePacks Set which Actor packs should be used when searching for Actors.
    * @param {String[]} journalPacks Set which Journal packs should be used when searching for Journals.
    * @param {String[]} macroPacks Set which Macro packs should be used when searching for Macros.
+   * @param {String[]} additionalModulePacks Set which additional module's packs should be used when searching for entities.
    * @param {String[]} playlistPacks Set which Playlist packs should be used when searching for Playlists.
    * @param {String} welcomeJournal Set the name of the journal to be imported and automatically opened after activation.
    * @param {String[]} additionalJournals Set which journals (by name) should be automatically imported.
@@ -62,6 +64,7 @@ export default class ScenePacker {
       journalPacks = [],
       macroPacks = [],
       playlistPacks = [],
+      additionalModulePacks = [],
       welcomeJournal = '',
       additionalJournals = [],
       additionalMacros = [],
@@ -93,6 +96,9 @@ export default class ScenePacker {
     }
     if (playlistPacks?.length) {
       this.SetPlaylistPacks(playlistPacks);
+    }
+    if (additionalModulePacks?.length) {
+      this.SetAdditionalModulePacks(additionalModulePacks);
     }
     if (welcomeJournal) {
       this.SetWelcomeJournal(welcomeJournal);
@@ -217,16 +223,7 @@ export default class ScenePacker {
         type: game.i18n.format(CONSTANTS.TYPE_HUMANISE[packType]),
       })}</p>`;
       di.render();
-      const packs = game.packs.filter((p) => {
-          let type;
-          if (!isNewerVersion('0.8.0', game.data.version)) {
-            type = p.documentClass?.documentName;
-          } else {
-            type = p.entity;
-          }
-          return p.metadata.package === this.moduleName && type === packType;
-        },
-      );
+      const packs = game.packs.filter((p) => p.metadata.package === this.moduleName && (p.documentName || p.entity) === packType);
       for (let i = 0; i < packs.length; i++) {
         let createData = [];
         const pack = packs[i];
@@ -586,6 +583,7 @@ export default class ScenePacker {
    * Initialises the Scene Packer on the scene.
    * @param {Object} scene The scene to initialise. Defaults to the currently viewed scene.
    * @param {Boolean} showLinkedJournal Whether to show any Journals linked to the Scene.
+   * @param {Boolean} contentPreImported Whether the content for this scene has already been imported.
    * @returns ScenePacker for chaining
    */
   async ProcessScene(
@@ -1000,6 +998,35 @@ export default class ScenePacker {
   }
 
   /**
+   * Set which additional module's packs should be used when searching for entities.
+   * @param {String[]} packs
+   * @returns this to support chaining
+   */
+  SetAdditionalModulePacks(packs) {
+    if (packs) {
+      packs = packs instanceof Array ? packs : [packs];
+      packs.forEach((j) => {
+        if (typeof j !== 'string') {
+          ui.notifications.error(
+            game.i18n.localize('SCENE-PACKER.errors.modulePacks.ui'),
+          );
+          throw game.i18n.format('SCENE-PACKER.errors.modulePacks.details', {
+            pack: j,
+          });
+        }
+      });
+    } else {
+      this.log(
+        false,
+        game.i18n.localize('SCENE-PACKER.errors.modulePacks.missing'),
+      );
+    }
+
+    this.packs.modules = packs;
+    return this;
+  }
+
+  /**
    * Renders a dialog showing which Scenes in the world contain data that would benefit from being Packed.
    */
   static ShowScenesWorthPacking() {
@@ -1223,10 +1250,7 @@ export default class ScenePacker {
       ui.notifications.error(
         game.i18n.localize('SCENE-PACKER.notifications.find-journal-compendium.no-packs'),
       );
-      const packs = game.packs.filter(s => {
-        const type = s.documentName ?? s.entity;
-        return s.metadata.package === this.moduleName && type == 'JournalEntry';
-      });
+      const packs = game.packs.filter(p => p.metadata.package === this.moduleName && (p.documentName || p.entity) === 'JournalEntry');
       const packOptions = packs.length ?
                           `"${packs.map(p => p.collection).join('", "')}"` :
                           game.i18n.localize('SCENE-PACKER.notifications.find-journal-compendium.no-packs-in-module');
@@ -1386,10 +1410,7 @@ export default class ScenePacker {
       ui.notifications.error(
         game.i18n.localize('SCENE-PACKER.notifications.actor-journal-compendium.no-packs'),
       );
-      const packs = game.packs.filter(s => {
-        const type = s.documentName ?? s.entity;
-        return s.metadata.package === this.moduleName && type == 'Actor';
-      });
+      const packs = game.packs.filter(p => p.metadata.package === this.moduleName && (p.documentName || p.entity) === 'Actor');
       const packOptions = packs.length ?
                           `"${packs.map(p => p.collection).join('", "')}"` :
                           game.i18n.localize('SCENE-PACKER.notifications.find-actor-compendium.no-packs-in-module');
@@ -1781,7 +1802,7 @@ export default class ScenePacker {
 
     let createData = [];
 
-    let exampleEntity = '';
+    let exampleEntity;
     if (!isNewerVersion('0.8.0', game.data.version)) {
       exampleEntity = game.packs.get(searchPacks[0])?.documentClass?.documentName;
     } else {
@@ -2048,7 +2069,6 @@ export default class ScenePacker {
     }
 
     const exact_matches = [];
-    const missing_journals = new Set();
     const missing_name_matches = new Set();
     // Check for exact matches first
     for (let i = 0; i < journalInfo.length; i++) {
@@ -2113,7 +2133,6 @@ export default class ScenePacker {
     }
 
     const exact_matches = [];
-    const missing_macros = new Set();
     const missing_name_matches = new Set();
     // Check for exact matches first
     for (let i = 0; i < macroInfo.length; i++) {
@@ -2283,7 +2302,7 @@ export default class ScenePacker {
   }
 
   /**
-   * Relinks tokens with the actors they represent.
+   * Re-links tokens with the actors they represent.
    * @param {Object[]} tokenInfo data written during PackScene()
    * @param {Object} scene The scene to unpack. Defaults to the currently viewed scene.
    * @see PackScene
@@ -2411,6 +2430,7 @@ export default class ScenePacker {
           _id: note._id,
           icon: getIconForNote(note),
           entryId: findJournalIDForNote(note),
+          name: note.name || note.text,
         });
       });
     } else {
@@ -2496,7 +2516,7 @@ export default class ScenePacker {
       return;
     }
 
-    let type = '';
+    let type;
     let collection;
     if (!isNewerVersion('0.8.0', game.data.version)) {
       type = entity.documentName;
@@ -2584,6 +2604,7 @@ export default class ScenePacker {
    * Unpack the scene data and reconstruct the appropriate links.
    * @param {Object} scene The scene to unpack. Defaults to the currently viewed scene.
    * @param {Boolean} showLinkedJournal Whether to show any Journals linked to the Scene.
+   * @param {Boolean} contentPreImported Whether the content for this scene has already been imported.
    */
   async UnpackScene(
     scene = game.scenes.get(game.user.viewedScene),
@@ -2615,7 +2636,7 @@ export default class ScenePacker {
     }
 
     if (journalInfo?.length) {
-      let journals = [];
+      let journals;
       if (!contentPreImported) {
         // Import Journal Pins
         journals = await this.ImportEntities(
@@ -2720,7 +2741,7 @@ export default class ScenePacker {
     }
 
     // Check if the quick encounters module exists at all and bail if it isn't.
-    let scopes = [];
+    let scopes;
     if (!isNewerVersion('0.8.0', game.data.version)) {
       scopes = game.getPackageScopes();
     } else {
@@ -2920,9 +2941,7 @@ export default class ScenePacker {
     }
 
     locked = !!locked;
-    const compendiums = game.packs.filter(
-      (p) => p.metadata.package === moduleName,
-    );
+    const compendiums = game.packs.filter(p => p.metadata.package === moduleName);
     const settings = {};
     compendiums.forEach((p) => {
       settings[`${p.metadata.package}.${p.metadata.name}`] = {locked};
@@ -2937,8 +2956,8 @@ export default class ScenePacker {
           locked: locked,
         }),
       );
-      let configsetting = Compendium?.CONFIG_SETTING || CompendiumCollection?.CONFIG_SETTING || 'compendiumConfiguration';
-      await game.settings.set('core', configsetting, settings);
+      let configSetting = Compendium?.CONFIG_SETTING || CompendiumCollection?.CONFIG_SETTING || 'compendiumConfiguration';
+      await game.settings.set('core', configSetting, settings);
     }
   }
 
@@ -2985,9 +3004,7 @@ export default class ScenePacker {
     }
 
     // Get all of the compendium packs that belong to the requested module
-    const allPacks = game.packs.filter(
-      (p) => p.metadata.package === moduleName,
-    );
+    const allPacks = game.packs.filter(p => p.metadata.package === moduleName);
     const instance = new ScenePacker({moduleName});
     /**
      * @type {{ActorPacks: *[], ItemPacks: *[], ScenePacks: *[], JournalEntryPacks: *[], MacroPacks: *[], RollTablePacks: *[], PlaylistPacks: *[]}}
@@ -3001,6 +3018,18 @@ export default class ScenePacker {
         }
         return p.entity === type;
       }));
+
+      if (instance.packs.modules.length) {
+        const packs = game.packs.filter(p => {
+          const isCorrectType = (p.documentName || p.entity) === type;
+          const isCorrectModule = instance.packs.modules.includes(p.metadata.package);
+          const isCorrectSystem = typeof p.metadata.system === 'Undefined' || p.metadata.system === game.system.id;
+          return isCorrectType && isCorrectModule && isCorrectSystem;
+        });
+        for (const pack of packs) {
+          uniquePacks.add(pack);
+        }
+      }
 
       // Load additional search packs which may not belong to the module owning this scene
       switch (type) {
@@ -3038,7 +3067,7 @@ export default class ScenePacker {
     }
 
     // Matches things like: @Actor[obe2mDyYDXYmxHJb]{Something or other}
-    const rex = /@(\w+)\[(\w+)\]\{([^}]+)\}/g;
+    const rex = /@(\w+)\[(\w+)]{([^}]+)}/g;
     const domParser = new DOMParser();
 
     async function findNewReferences(type, oldRef, oldName, entry, journal) {
@@ -3066,7 +3095,7 @@ export default class ScenePacker {
               {
                 type,
                 name: oldName,
-              }
+              },
             ),
           );
           ScenePacker.logType(
@@ -3079,7 +3108,7 @@ export default class ScenePacker {
               {
                 type,
                 name: oldName,
-              }
+              },
             ),
             entry,
             oldRef,
@@ -3165,8 +3194,7 @@ export default class ScenePacker {
     }
 
     // Check each of the JournalEntry compendium packs in the requested module
-    for (let i = 0; i < packs.JournalEntryPacks.length; i++) {
-      const pack = packs.JournalEntryPacks[i];
+    for (const pack of packs.JournalEntryPacks.filter(p => p.metadata.package === moduleName)) {
       ui.notifications.info(
         game.i18n.format(
           'SCENE-PACKER.world-conversion.compendiums.checking-and-updating',
@@ -3210,7 +3238,7 @@ export default class ScenePacker {
         const doc = domParser.parseFromString(journal.data.content, 'text/html');
         for (const link of doc.getElementsByTagName('a')) {
           if (!link.classList.contains('entity-link') || !link.dataset.entity || !link.dataset.id) {
-            continue
+            continue;
           }
 
           // Build the links to the new references that exist within the compendium/s
@@ -3391,7 +3419,7 @@ export default class ScenePacker {
     }
 
     // Check if the quick encounters module exists at all and bail if it isn't.
-    let scopes = [];
+    let scopes;
     if (!isNewerVersion('0.8.0', game.data.version)) {
       scopes = game.getPackageScopes();
     } else {
@@ -3667,7 +3695,7 @@ export default class ScenePacker {
   }
 }
 
-Hooks.once('devModeReady', ({ registerPackageDebugFlag }) => {
+Hooks.once('devModeReady', ({registerPackageDebugFlag}) => {
   registerPackageDebugFlag(CONSTANTS.MODULE_NAME);
 });
 

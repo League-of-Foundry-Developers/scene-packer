@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.3.9
+
+- Added ability to relink entries across modules.
+  - By setting the `additionalModulePacks` value in your initialisation script, you can specify additional modules to be considered as sources for the `Relink compendium journal entries` macro.
+  - You might want to do this as a way to quickly relink Items to a system compendium (such as those in the `dnd5e` system), or to another module that you have listed as a dependency.
+  - Feature suggested by `WarVisionary`.
+- Added macro `Bulk replace asset references`.
+  - This tool will search for asset references **within your world** that start with the provided value and replace that portion with the other provided value.
+  - Includes a dry-run mode to see what it *would* do, without actually making changes.
+
 ## v2.3.8
 
 - Fixed bug where `Import All` would import entities multiple times when multiple packs of the same type existed in a module.
