@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.3.10
+
+- Scene Packer will no longer change valid note icons.
+  - Fixes issue [#60](https://github.com/League-of-Foundry-Developers/scene-packer/issues/60) reported by toastygm
+
 ## v2.3.9
 
 - Added ability to relink entries across modules.

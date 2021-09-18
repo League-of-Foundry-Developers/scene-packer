@@ -2409,17 +2409,10 @@ export default class ScenePacker {
     }
 
     function getIconForNote(note) {
-      // Replace icon with a Book if Automatic Journal Icon Numbers isn't installed or the image doesn't exist yet.
+      // Replace icon with a Book if the image doesn't exist.
       let icon = note.icon;
-      if (
-        (icon.startsWith('modules/journal-icon-numbers/') || note?.flags?.autoIconFlags) &&
-        !game.modules.get('journal-icon-numbers')?.active
-      ) {
-        icon = 'icons/svg/book.svg';
-      } else {
-        // Test the icon exists and replace it if it doesn't
-        $.get(icon).fail(() => icon = 'icons/svg/book.svg');
-      }
+      // Test the icon exists and replace it if it doesn't
+      $.get(icon).fail(() => icon = 'icons/svg/book.svg');
       return icon;
     }
 
