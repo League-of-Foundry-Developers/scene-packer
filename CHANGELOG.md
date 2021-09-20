@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.3.11
+
+- Updated the `Relink compendium entries` macro to now also search within Item descriptions for references to other entries.
+  - If your game system uses a non-standard item description field, then the macro will not work/throw errors. Please report any issues you experience.
+
 ## v2.3.10
 
 - Scene Packer will no longer change valid note icons.
