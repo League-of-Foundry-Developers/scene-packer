@@ -3142,6 +3142,7 @@ export default class ScenePacker {
         if (!content) {
           continue;
         }
+        const originalContent = content;
         ScenePacker.logType(
           moduleName,
           'info',
@@ -3157,6 +3158,7 @@ export default class ScenePacker {
         );
 
         // Replace hyperlink style links first
+        let hyperlinksChanged = 0;
         const doc = domParser.parseFromString(content, 'text/html');
         for (const link of doc.getElementsByTagName('a')) {
           if (!link.classList.contains('entity-link') || !link.dataset.entity || !link.dataset.id) {
@@ -3190,6 +3192,7 @@ export default class ScenePacker {
           if (!dryRun) {
             link.setAttribute('data-pack', newRef[0].pack);
             link.setAttribute('data-id', newRef[0].ref);
+            hyperlinksChanged++;
           }
         }
         if (!dryRun) {
@@ -3223,7 +3226,7 @@ export default class ScenePacker {
           await ScenePacker.RelinkQuickEncounterData(document, moduleName, dryRun);
         }
 
-        if (references.size) {
+        if (references.size || content !== originalContent) {
           ScenePacker.logType(
             moduleName,
             'info',
@@ -3231,7 +3234,7 @@ export default class ScenePacker {
             game.i18n.format(
               'SCENE-PACKER.world-conversion.compendiums.updating-references',
               {
-                count: new Intl.NumberFormat().format(references.size),
+                count: new Intl.NumberFormat().format(references.size + hyperlinksChanged),
                 name: document.name,
                 type: typeName,
               },
@@ -3274,7 +3277,7 @@ export default class ScenePacker {
             game.i18n.format(
               'SCENE-PACKER.world-conversion.compendiums.updating-reference',
               {
-                count: new Intl.NumberFormat().format(references.size),
+                count: new Intl.NumberFormat().format(references.size + hyperlinksChanged),
                 name: document.name,
               },
             ),
