@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.3.12
+
+- Updated the `Relink compendium entries` macro to handle the case where *only* hyperlink style links exist within a journal. 
+  - Previously the updates would only occur if at least one Foundry VTT style link existed.
+
 ## v2.3.11
 
 - Updated the `Relink compendium entries` macro to now also search within Item descriptions for references to other entries.
