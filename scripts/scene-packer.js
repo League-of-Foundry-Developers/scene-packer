@@ -2615,31 +2615,19 @@ export default class ScenePacker {
       return icon;
     }
 
-    if (isNewerVersion(scene.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_PACKED_VERSION), '2.1.99')) {
-      // Packed with a version >= 2.2.0 that supports updating the notes
-      journalInfo.forEach((note) => {
-        updates.push({
-          _id: note._id,
+    journalInfo.forEach((note) => {
+      updates.push(mergeObject(
+        note,
+        {
           icon: getIconForNote(note),
           entryId: findJournalIDForNote(note),
           name: note.journalName || note.name || note.text,
-        });
-      });
-    } else {
-      // Packed with a version that needs deleting and re-creating
-      journalInfo.forEach((note) => {
-        updates.push(mergeObject(
-          note,
-          {
-            icon: getIconForNote(note),
-            entryId: findJournalIDForNote(note),
-            '-=journalName': null,
-            '-=folderName': null,
-          },
-          {inplace: false},
-        ));
-      });
-    }
+          '-=journalName': null,
+          '-=folderName': null,
+        },
+        {inplace: false},
+      ));
+    });
 
     const missing = updates.filter((info) => !info.entryId);
     if (missing.length > 0) {
@@ -2664,14 +2652,16 @@ export default class ScenePacker {
         }),
       );
       if (!isNewerVersion('0.8.0', game.data.version)) {
-        if (isNewerVersion(scene.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_PACKED_VERSION), '2.1.99')) {
-          // Packed with a version >= 2.2.0 that supports updating the notes
+        const sceneNoteIDs = scene.data.notes.map((n) => n.id);
+        const updateIDs = updates.map((n) => n._id);
+        if (
+          isNewerVersion(scene.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_PACKED_VERSION), '2.1.99') &&
+          updateIDs.every((n) => sceneNoteIDs.includes(n))
+        ) {
+          // Packed with a version >= 2.2.0 that supports updating the notes and the embedded note ID remained consistent.
           return scene.updateEmbeddedDocuments('Note', updates);
         } else {
-          await scene.deleteEmbeddedDocuments(
-            'Note',
-            scene.data.notes.map((n) => n.id),
-          );
+          await scene.deleteEmbeddedDocuments('Note', scene.data.notes.map((n) => n.id));
           return scene.createEmbeddedDocuments('Note', updates, {keepId: true});
         }
       } else {
@@ -2772,7 +2762,7 @@ export default class ScenePacker {
     }
 
     if (!isNewerVersion('0.8.0', game.data.version)) {
-      return collection.importFromCompendium(game.packs.get(entity.compendium.collection), entity.id, update);
+      return collection.importFromCompendium(game.packs.get(entity.compendium.collection), entity.id, update, {keepId: true});
     }
 
     // Patch "Sight angle must be between 1 and 360 degrees." error
@@ -2789,7 +2779,7 @@ export default class ScenePacker {
       update.token.lightAngle = 360;
     }
 
-    return collection.importFromCollection(entity.compendium.collection, entity.id, update);
+    return collection.importFromCollection(entity.compendium.collection, entity.id, update, {keepId: true});
   }
 
   /**
