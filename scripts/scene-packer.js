@@ -484,7 +484,7 @@ export default class ScenePacker {
               }
               cData.flags[CONSTANTS.MODULE_NAME].hash = Hash.SHA1(cData);
 
-              if (CONST.FOLDER_ENTITY_TYPES.includes(packType)) {
+              if ((CONST.FOLDER_ENTITY_TYPES || CONST.FOLDER_DOCUMENT_TYPES).includes(packType)) {
                 // Utilise the folder structure as defined by the Compendium Folder if it exists, otherwise
                 // fall back to the default folder.
                 const cfPath = cData.flags?.cf?.path;
@@ -515,7 +515,7 @@ export default class ScenePacker {
               label: pack.metadata.label,
             })}</p>`;
             di.render();
-            let createdEntities = await entityClass.create(createData);
+            let createdEntities = await entityClass.create(createData, {keepId: true});
             if (!Array.isArray(createdEntities)) {
               createdEntities = [createdEntities];
             }
@@ -590,7 +590,7 @@ export default class ScenePacker {
     if (!content.length) {
       return response;
     }
-    if (!CONST.FOLDER_ENTITY_TYPES.includes(entityType)) {
+    if (!(CONST.FOLDER_ENTITY_TYPES || CONST.FOLDER_DOCUMENT_TYPES).includes(entityType)) {
       // Entity type does not support folders
       return response;
     }
@@ -2188,7 +2188,7 @@ export default class ScenePacker {
           },
         ),
       );
-      let createdEntity = await entityClass.create(createData);
+      let createdEntity = await entityClass.create(createData, {keepId: true});
       if (!Array.isArray(createdEntity)) {
         createdEntity = [createdEntity];
       }
@@ -2622,7 +2622,7 @@ export default class ScenePacker {
           _id: note._id,
           icon: getIconForNote(note),
           entryId: findJournalIDForNote(note),
-          name: note.name || note.text,
+          name: note.journalName || note.name || note.text,
         });
       });
     } else {
@@ -2672,7 +2672,7 @@ export default class ScenePacker {
             'Note',
             scene.data.notes.map((n) => n.id),
           );
-          return scene.createEmbeddedDocuments('Note', updates);
+          return scene.createEmbeddedDocuments('Note', updates, {keepId: true});
         }
       } else {
         if (isNewerVersion(scene.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_PACKED_VERSION), '2.1.99')) {
@@ -2683,7 +2683,7 @@ export default class ScenePacker {
             'Note',
             scene.data.notes.map((n) => n._id),
           );
-          return scene.createEmbeddedEntity('Note', updates);
+          return scene.createEmbeddedEntity('Note', updates, {keepId: true});
         }
       }
     }
