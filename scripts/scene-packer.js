@@ -145,6 +145,7 @@ export default class ScenePacker {
       });
 
       let yesCallback = async () => {
+        game.settings.set(this.moduleName, CONSTANTS.SETTING_PROMPTED, moduleVersion);
         await this.importAllContent();
       };
       if (promptedVersion === '0.0.0') {
@@ -160,13 +161,20 @@ export default class ScenePacker {
           // The yes callback during an upgrade of a module removes all existing entries that came from this module before
           // importing everything in again.
           // Folders are untouched.
-          const scenes = game.scenes.filter(s => s.getFlag('core', 'sourceId')?.startsWith(`Compendium.${this.moduleName}`));
-          const actors = game.actors.filter(s => s.getFlag('core', 'sourceId')?.startsWith(`Compendium.${this.moduleName}`));
-          const items = game.items.filter(s => s.getFlag('core', 'sourceId')?.startsWith(`Compendium.${this.moduleName}`));
-          const journals = game.journal.filter(s => s.getFlag('core', 'sourceId')?.startsWith(`Compendium.${this.moduleName}`));
-          const rollTables = game.tables.filter(s => s.getFlag('core', 'sourceId')?.startsWith(`Compendium.${this.moduleName}`));
-          const playlists = game.playlists.filter(s => s.getFlag('core', 'sourceId')?.startsWith(`Compendium.${this.moduleName}`));
-          const macros = game.macros.filter(s => s.getFlag('core', 'sourceId')?.startsWith(`Compendium.${this.moduleName}`));
+          const scenes = game.scenes.filter(s => s.getFlag('core', 'sourceId')
+            ?.startsWith(`Compendium.${this.moduleName}`));
+          const actors = game.actors.filter(s => s.getFlag('core', 'sourceId')
+            ?.startsWith(`Compendium.${this.moduleName}`));
+          const items = game.items.filter(s => s.getFlag('core', 'sourceId')
+            ?.startsWith(`Compendium.${this.moduleName}`));
+          const journals = game.journal.filter(s => s.getFlag('core', 'sourceId')
+            ?.startsWith(`Compendium.${this.moduleName}`));
+          const rollTables = game.tables.filter(s => s.getFlag('core', 'sourceId')
+            ?.startsWith(`Compendium.${this.moduleName}`));
+          const playlists = game.playlists.filter(s => s.getFlag('core', 'sourceId')
+            ?.startsWith(`Compendium.${this.moduleName}`));
+          const macros = game.macros.filter(s => s.getFlag('core', 'sourceId')
+            ?.startsWith(`Compendium.${this.moduleName}`));
 
           let listToDelete = '';
           if (scenes.length) {
@@ -195,7 +203,8 @@ export default class ScenePacker {
           }
 
           const doReplacement = async function () {
-            const sceneIDs = game.scenes.filter(s => s.getFlag('core', 'sourceId')?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
+            const sceneIDs = game.scenes.filter(s => s.getFlag('core', 'sourceId')
+              ?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
             if (sceneIDs.length) {
               if (!isNewerVersion('0.8.0', game.data.version)) {
                 await Scene.deleteDocuments(sceneIDs);
@@ -203,7 +212,8 @@ export default class ScenePacker {
                 await Scene.delete(sceneIDs);
               }
             }
-            const actorIDs = game.actors.filter(s => s.getFlag('core', 'sourceId')?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
+            const actorIDs = game.actors.filter(s => s.getFlag('core', 'sourceId')
+              ?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
             if (actorIDs.length) {
               if (!isNewerVersion('0.8.0', game.data.version)) {
                 await Actor.deleteDocuments(actorIDs);
@@ -211,7 +221,8 @@ export default class ScenePacker {
                 await Actor.delete(actorIDs);
               }
             }
-            const itemIDs = game.items.filter(s => s.getFlag('core', 'sourceId')?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
+            const itemIDs = game.items.filter(s => s.getFlag('core', 'sourceId')
+              ?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
             if (itemIDs.length) {
               if (!isNewerVersion('0.8.0', game.data.version)) {
                 await Item.deleteDocuments(itemIDs);
@@ -219,7 +230,8 @@ export default class ScenePacker {
                 await Item.delete(itemIDs);
               }
             }
-            const journalIDs = game.journal.filter(s => s.getFlag('core', 'sourceId')?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
+            const journalIDs = game.journal.filter(s => s.getFlag('core', 'sourceId')
+              ?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
             if (journalIDs.length) {
               if (!isNewerVersion('0.8.0', game.data.version)) {
                 await JournalEntry.deleteDocuments(journalIDs);
@@ -227,7 +239,8 @@ export default class ScenePacker {
                 await JournalEntry.delete(journalIDs);
               }
             }
-            const rollTableIDs = game.tables.filter(s => s.getFlag('core', 'sourceId')?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
+            const rollTableIDs = game.tables.filter(s => s.getFlag('core', 'sourceId')
+              ?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
             if (rollTableIDs.length) {
               if (!isNewerVersion('0.8.0', game.data.version)) {
                 await RollTable.deleteDocuments(rollTableIDs);
@@ -235,7 +248,8 @@ export default class ScenePacker {
                 await RollTable.delete(rollTableIDs);
               }
             }
-            const playlistIDs = game.playlists.filter(s => s.getFlag('core', 'sourceId')?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
+            const playlistIDs = game.playlists.filter(s => s.getFlag('core', 'sourceId')
+              ?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
             if (playlistIDs.length) {
               if (!isNewerVersion('0.8.0', game.data.version)) {
                 await Playlist.deleteDocuments(playlistIDs);
@@ -243,7 +257,8 @@ export default class ScenePacker {
                 await Playlist.delete(playlistIDs);
               }
             }
-            const macroIDs = game.macros.filter(s => s.getFlag('core', 'sourceId')?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
+            const macroIDs = game.macros.filter(s => s.getFlag('core', 'sourceId')
+              ?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
             if (macroIDs.length) {
               if (!isNewerVersion('0.8.0', game.data.version)) {
                 await Macro.deleteDocuments(macroIDs);
@@ -251,24 +266,43 @@ export default class ScenePacker {
                 await Macro.delete(macroIDs);
               }
             }
+            game.settings.set(this.moduleName, CONSTANTS.SETTING_PROMPTED, moduleVersion);
             await this.importAllContent();
           }.bind(this);
 
-          Dialog.confirm({
+          new Dialog({
             title: game.i18n.localize('SCENE-PACKER.welcome.update-warning-title'),
             content: game.i18n.format('SCENE-PACKER.welcome.update-warning-content', {
               module: moduleName,
               world: game.world.id,
               listToDelete: listToDelete,
             }),
-            yes: doReplacement,
-            no: () => this.logWarn(true, game.i18n.format('SCENE-PACKER.welcome.update-cancelled', {
-              from: promptedVersion,
-              to: moduleVersion,
-              module: moduleName,
-            })),
-            defaultYes: false
-          });
+            buttons: {
+              replace: {
+                icon: '<i class="fas fa-trash-restore"></i>',
+                label: game.i18n.localize('Replace'),
+                callback: doReplacement,
+              },
+              duplicate: {
+                icon: '<i class="fas fa-copy"></i>',
+                label: game.i18n.localize('Rename'),
+                callback: async () => {
+                  game.settings.set(this.moduleName, CONSTANTS.SETTING_PROMPTED, moduleVersion);
+                  await this.importAllContent({forceImport: true, renameOriginals: true});
+                },
+              },
+              cancel: {
+                icon: '<i class="fas fa-times"></i>',
+                label: game.i18n.localize('Cancel'),
+                callback: () => this.logWarn(true, game.i18n.format('SCENE-PACKER.welcome.update-cancelled', {
+                  from: promptedVersion,
+                  to: moduleVersion,
+                  module: moduleName,
+                })),
+              },
+            },
+            default: 'cancel',
+          }).render(true);
 
         };
       }
@@ -297,12 +331,16 @@ export default class ScenePacker {
               game.packs.filter(
                 (p) => p.metadata.package === this.moduleName && (p.documentName || p.entity) === 'Scene',
               ).forEach(c => c.render(true));
+              game.settings.set(this.moduleName, CONSTANTS.SETTING_PROMPTED, moduleVersion);
             },
             condition: game.packs.filter((p) => p.metadata.package === this.moduleName && (p.documentName || p.entity) === 'Scene').length,
           },
           close: {
             icon: '<i class="fas fa-times"></i>',
             label: game.i18n.localize('SCENE-PACKER.welcome.close'),
+            callback: () => {
+              game.settings.set(this.moduleName, CONSTANTS.SETTING_PROMPTED, moduleVersion);
+            },
           },
         },
       }, {
@@ -312,15 +350,18 @@ export default class ScenePacker {
       });
       d.render(true);
     }
-    game.settings.set(this.moduleName, CONSTANTS.SETTING_PROMPTED, moduleVersion);
 
     globalScenePacker.instances[this.moduleName] = this;
   }
 
   /**
-   * Imports all of the content for the current adventure module. Skipping items which already exist in the world.
+   * Imports all of the content for the current adventure module.
+   * @param {boolean} forceImport - Optional. Whether to force import all of the content in this module. The default false
+   *                                option will skip entries which already exist in the world.
+   * @param {boolean} renameOriginals - Optional. Whether to rename existing entries within the world to be able to distinguish
+   *                                    between the old and new versions. Only valid when "forceImport" is true.
    */
-  async importAllContent() {
+  async importAllContent({forceImport = false, renameOriginals = false} = {}) {
     const di = new Dialog({
       title: game.i18n.localize('SCENE-PACKER.welcome.import-all.title'),
       content: `<p>${game.i18n.localize('SCENE-PACKER.welcome.import-all.title')}</p>`,
@@ -380,19 +421,45 @@ export default class ScenePacker {
             }
           }
 
+          const existingEntriesToUpdate = [];
+
           // Filter down to those that are still missing
           packContent = packContent.filter(e => {
             if (e.name === CONSTANTS.CF_TEMP_ENTITY_NAME) {
               // Exclude Compendium Folder temporary entities
               return false;
             }
+            if (forceImport && !renameOriginals) {
+              return true;
+            }
             let sourceId = e.getFlag(CONSTANTS.MODULE_NAME, 'sourceId');
             let coreSourceId = e.getFlag('core', 'sourceId');
             if (sourceId || coreSourceId) {
-              return !collection.find(f => f.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === sourceId || f.getFlag('core', 'sourceId') === sourceId);
+              const existingEntries = collection.filter(f => f.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === sourceId || f.getFlag('core', 'sourceId') === sourceId);
+              if (existingEntries.length && forceImport && renameOriginals) {
+                // Update the existing entry names
+                const newFlags = {};
+                newFlags[CONSTANTS.MODULE_NAME] = {deprecated: true};
+                for (const existingEntry of existingEntries) {
+                  existingEntriesToUpdate.push({
+                    _id: existingEntry.id,
+                    name: `${existingEntry.name} (old)`,
+                    flags: newFlags,
+                  });
+                }
+              }
+              // Import the entry if we are forcing, or it doesn't already exist in the world.
+              return forceImport || !existingEntries.length;
             }
             return true;
           });
+          if (existingEntriesToUpdate.length) {
+            if (!isNewerVersion('0.8.0', game.data.version)) {
+              await entityClass.updateDocuments(existingEntriesToUpdate);
+            } else {
+              await entityClass.update(existingEntriesToUpdate);
+            }
+          }
           if (!packContent.length) {
             continue;
           }
@@ -412,10 +479,10 @@ export default class ScenePacker {
                 cData.flags = {};
               }
               mergeObject(cData.flags, newFlags);
-              if (!cData.flags[ScenePacker.MODULE_NAME]) {
-                cData.flags[ScenePacker.MODULE_NAME] = {};
+              if (!cData.flags[CONSTANTS.MODULE_NAME]) {
+                cData.flags[CONSTANTS.MODULE_NAME] = {};
               }
-              cData.flags[ScenePacker.MODULE_NAME].hash = Hash.SHA1(cData);
+              cData.flags[CONSTANTS.MODULE_NAME].hash = Hash.SHA1(cData);
 
               if (CONST.FOLDER_ENTITY_TYPES.includes(packType)) {
                 // Utilise the folder structure as defined by the Compendium Folder if it exists, otherwise
@@ -2153,9 +2220,17 @@ export default class ScenePacker {
       }
       let matches = [];
       if (!isNewerVersion('0.8.0', game.data.version)) {
-        matches = game.actors.contents.filter(a => a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === token.sourceId || a.getFlag('core', 'sourceId') === token.sourceId);
+        matches = game.actors.contents.filter(a => {
+          return (
+            a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === token.sourceId || a.getFlag('core', 'sourceId') === token.sourceId
+          ) && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated');
+        });
       } else {
-        matches = game.actors.entities.filter(a => a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === token.sourceId || a.getFlag('core', 'sourceId') === token.sourceId);
+        matches = game.actors.entities.filter(a => {
+          return (
+            a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === token.sourceId || a.getFlag('core', 'sourceId') === token.sourceId
+          ) && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated');
+        });
       }
       if (matches.length) {
         exact_matches.push(token);
@@ -2195,9 +2270,17 @@ export default class ScenePacker {
       }
       let matches = [];
       if (!isNewerVersion('0.8.0', game.data.version)) {
-        matches = game.journal.contents.filter(a => a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.compendiumSourceId);
+        matches = game.journal.contents.filter(a => {
+          return (
+            a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.compendiumSourceId
+          ) && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated');
+        });
       } else {
-        matches = game.journal.entities.filter(a => a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.compendiumSourceId);
+        matches = game.journal.entities.filter(a => {
+          return (
+            a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.compendiumSourceId
+          ) && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated');
+        });
       }
       if (matches.length) {
         exact_matches.push(journal);
@@ -2259,9 +2342,9 @@ export default class ScenePacker {
       }
       let matches = [];
       if (!isNewerVersion('0.8.0', game.data.version)) {
-        matches = game.macros.contents.filter(a => a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === macro.sourceId);
+        matches = game.macros.contents.filter(a => a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === macro.sourceId && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated'));
       } else {
-        matches = game.macros.entities.filter(a => a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === macro.sourceId);
+        matches = game.macros.entities.filter(a => a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === macro.sourceId && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated'));
       }
       if (matches.length) {
         exact_matches.push(macro);
@@ -2322,11 +2405,11 @@ export default class ScenePacker {
     if (folder?.id) {
       if (!isNewerVersion('0.8.0', game.data.version)) {
         actor = game.actors.contents.find(
-          (a) => a.data.name === tokenName && a.data.folder === folder.id,
+          (a) => a.data.name === tokenName && a.data.folder === folder.id && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated'),
         );
       } else {
         actor = game.actors.entities.find(
-          (a) => a.data.name === tokenName && a.data.folder === folder.id,
+          (a) => a.data.name === tokenName && a.data.folder === folder.id && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated'),
         );
       }
       if (actor) {
@@ -2336,9 +2419,9 @@ export default class ScenePacker {
     }
 
     if (!isNewerVersion('0.8.0', game.data.version)) {
-      actor = game.actors.contents.find((a) => a.data.name === tokenName);
+      actor = game.actors.contents.find((a) => a.data.name === tokenName && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated'));
     } else {
-      actor = game.actors.entities.find((a) => a.data.name === tokenName);
+      actor = game.actors.entities.find((a) => a.data.name === tokenName && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated'));
     }
     if (actor) {
       // Found a direct Token <-> Actor name match in world
@@ -2369,9 +2452,9 @@ export default class ScenePacker {
       if (tData) {
         let actor;
         if (!isNewerVersion('0.8.0', game.data.version)) {
-          actor = game.actors.contents.find(a => a.getFlag('core', 'sourceId') === tData.compendiumSourceId);
+          actor = game.actors.contents.find(a => a.getFlag('core', 'sourceId') === tData.compendiumSourceId && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated'));
         } else {
-          actor = game.actors.entities.find(a => a.getFlag('core', 'sourceId') === tData.compendiumSourceId);
+          actor = game.actors.entities.find(a => a.getFlag('core', 'sourceId') === tData.compendiumSourceId && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated'));
         }
         if (actor) {
           return actor;
@@ -2513,7 +2596,7 @@ export default class ScenePacker {
           return existingEntities[0].id;
         }
         // Multiple matches exist, prefer a local source
-        const existingEntity = game.journal.find(p => p.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === note.sourceId);
+        const existingEntity = game.journal.find(p => p.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === note.sourceId && !p.getFlag(CONSTANTS.MODULE_NAME, 'deprecated'));
         if (existingEntity) {
           return existingEntity.id;
         }
@@ -3214,7 +3297,7 @@ export default class ScenePacker {
     // Check each of the compendium packs in the requested module
     const entryPacks = packs[type];
     let typeName;
-    switch(type) {
+    switch (type) {
       case 'JournalEntryPacks':
         typeName = 'journal';
         break;
@@ -3247,7 +3330,7 @@ export default class ScenePacker {
           document = await pack.getEntity(entry._id);
         }
         let content;
-        switch(type) {
+        switch (type) {
           case 'JournalEntryPacks':
             content = document?.data?.content;
             break;

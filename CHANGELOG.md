@@ -3,7 +3,7 @@
 ## v2.3.13
 
 - Changed the way that the initial import dialog shows for module upgrades.
-  - Upgrading an existing Scene Packer packed module will now prompt the end-user to *replace* their imported content rather than importing beside it.
+  - Upgrading an existing Scene Packer packed module will now prompt the end-user to decide how they want the update to be imported.
   - Includes a big scary warning message to do backups first.
 
 ## v2.3.12
