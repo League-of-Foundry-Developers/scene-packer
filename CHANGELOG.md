@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.3.13
+
+- Changed the way that the initial import dialog shows for module upgrades.
+  - Upgrading an existing Scene Packer packed module will now prompt the end-user to decide how they want the update to be imported.
+  - Includes a big scary warning message to do backups first.
+- Adds backwards compatible support for upcoming core version 9 prototype 2 release.
+
 ## v2.3.12
 
 - Updated the `Relink compendium entries` macro to handle the case where *only* hyperlink style links exist within a journal. 
