@@ -3,6 +3,7 @@
 ## v2.3.14
 
 - Added support for packing and unpacking Macros embedded within [Monk's Active Tile Triggers](https://foundryvtt.com/packages/monks-active-tiles).
+  - Thanks to "Name Here" for the feature suggestion.
 
 ## v2.3.13
 
