@@ -1,6 +1,6 @@
 /**
  * Constants for use within the Scene Packer module.
- * @type {Readonly<{CF_SEPARATOR: string, FLAGS_SOURCE_MODULE: string, MODULE_NAME: string, SETTING_SHOW_WELCOME_PROMPTS: string, FLAGS_PACKED_VERSION: string, SETTING_PROMPTED: string, CF_TEMP_ENTITY_NAME: string, PACK_IMPORT_ORDER: string[], FLAGS_JOURNALS: string, FLAGS_TOKENS: string, FLAGS_SCENE_JOURNAL: string, SETTING_ENABLE_CONTEXT_MENU: string, FLAGS_SCENE_POSITION: string, FLAGS_DEFAULT_PERMISSION: string, FLAGS_MACROS: string, MINIMUM_SUPPORTED_PACKER_VERSION: string, SETTING_IMPORTED_VERSION: string, FLAGS_PLAYLIST: string, TYPE_HUMANISE: {Item: string, Playlist: string, Macro: string, RollTable: string, Actor: string, Scene: string, JournalEntry: string}}>}
+ * @type {Readonly<{CF_SEPARATOR: string, FLAGS_SOURCE_MODULE: string, MODULE_NAME: string, SETTING_SHOW_WELCOME_PROMPTS: string, FLAGS_PACKED_VERSION: string, SETTING_PROMPTED: string, CF_TEMP_ENTITY_NAME: string, PACK_IMPORT_ORDER: string[], FLAGS_JOURNALS: string, FLAGS_TILES: string, FLAGS_TOKENS: string, FLAGS_SCENE_JOURNAL: string, SETTING_ENABLE_CONTEXT_MENU: string, FLAGS_SCENE_POSITION: string, FLAGS_DEFAULT_PERMISSION: string, FLAGS_MACROS: string, MINIMUM_SUPPORTED_PACKER_VERSION: string, SETTING_IMPORTED_VERSION: string, FLAGS_PLAYLIST: string, TYPE_HUMANISE: {Item: string, Playlist: string, Macro: string, RollTable: string, Actor: string, Scene: string, JournalEntry: string}}>}
  */
 export const CONSTANTS = Object.freeze({
   /**
@@ -52,6 +52,11 @@ export const CONSTANTS = Object.freeze({
    * The flag used to store which module owns the packed data.
    */
   FLAGS_SOURCE_MODULE: 'source-module',
+
+  /**
+   * The flag used to store tile data.
+   */
+  FLAGS_TILES: 'tiles',
 
   /**
    * The flag used to store token data.
