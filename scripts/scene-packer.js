@@ -725,6 +725,7 @@ export default class ScenePacker {
     tokenFlag = CONSTANTS.FLAGS_TOKENS,
     journalFlag = CONSTANTS.FLAGS_JOURNALS,
     macroFlag = CONSTANTS.FLAGS_MACROS,
+    tilesFlag = CONSTANTS.FLAGS_TILES,
     playlistFlag = CONSTANTS.FLAGS_PLAYLIST,
   ) {
     if (!game.user.isGM) {
@@ -747,6 +748,13 @@ export default class ScenePacker {
     }
     try {
       if (scene.getFlag(moduleName, macroFlag)) {
+        return true;
+      }
+    } catch (e) {
+      // Happens if the scene has no flag registered
+    }
+    try {
+      if (scene.getFlag(moduleName, tilesFlag)) {
         return true;
       }
     } catch (e) {
@@ -1354,6 +1362,57 @@ export default class ScenePacker {
     }
 
     /**
+     * tileInfo is the data that gets passed to findMissingTiles
+     */
+    const tileInfoResults = await Promise.allSettled(
+      scene.data.tiles
+        .filter(
+          (tile) =>
+            tile
+              .getFlag('monks-active-tiles', 'actions')
+              ?.filter((a) => a?.action === 'runmacro').length
+        )
+        .map(async (tile) => {
+          return {
+            tileID: tile.id,
+            actions: await Promise.all(
+              tile
+                .getFlag('monks-active-tiles', 'actions')
+                .filter((a) => a?.action === 'runmacro')
+                .map(async (d) => {
+                  const macro = game.macros.get(d.data.macroid);
+                  const compendiumMacro = await this.FindMacroInCompendiums(
+                    macro,
+                    this.packs.macros
+                  );
+                  return {
+                    actionID: d.id,
+                    originalMacroId: d.data.macroid,
+                    name: macro?.name || compendiumMacro?.name,
+                    sourceId: macro?.uuid,
+                    compendiumSourceId: compendiumMacro?.uuid,
+                  };
+                })
+            ),
+          };
+        })
+    );
+    const tileInfo = tileInfoResults.filter(result => result.status === 'fulfilled').map(result => result.value);
+
+    if (tileInfo.length > 0) {
+      ui.notifications.info(
+        game.i18n.format(
+          'SCENE-PACKER.notifications.pack-scene.writing-tile-macros',
+          {
+            number: tileInfo.length,
+            name: scene.name,
+          },
+        ),
+      );
+      await scene.setFlag(this.moduleName, CONSTANTS.FLAGS_TILES, tileInfo);
+    }
+
+    /**
      * tokenInfo is the data that gets passed to findMissingTokens
      */
     const tokenInfoResults = await Promise.allSettled(scene.data.tokens.filter(a => a?.actorId || a?.data?.actorId)
@@ -1869,6 +1928,130 @@ export default class ScenePacker {
   }
 
   /**
+   * Find a macro in the listed search packs compendiums.
+   * @param {Object} macro The entry to find.
+   * @param {String[]} searchPacks The compendium pack names to search within
+   * @returns {Object|null} The macro in the compendium.
+   */
+  async FindMacroInCompendiums(macro, searchPacks) {
+    if (!macro) {
+      return null;
+    }
+
+    let compendiumMacro = null;
+    let possibleMatches = [];
+
+    for (let packName of searchPacks) {
+      const pack = game.packs.get(packName);
+      if (!pack) {
+        ui.notifications.error(
+          game.i18n.format(
+            'SCENE-PACKER.notifications.find-macro-compendium.missing-pack',
+            {
+              packName: packName,
+            },
+          ),
+        );
+        this.logError(
+          true,
+          game.i18n.format(
+            'SCENE-PACKER.notifications.find-macro-compendium.missing-pack-details',
+            {
+              packName: packName,
+            },
+          ),
+        );
+        continue;
+      }
+
+      const matchingIndexes = pack.index.filter(p => p.name === macro.name);
+      for (let i = 0; i < matchingIndexes.length; i++) {
+        let id = matchingIndexes[i]?._id;
+        let entity;
+        if (!isNewerVersion('0.8.0', game.data.version)) {
+          entity = await pack.getDocument(id);
+        } else {
+          entity = await pack.getEntity(id);
+        }
+        if (entity) {
+          if (entity.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === `Macro.${macro.id}`) {
+            // Exact match
+            return entity;
+          }
+          possibleMatches.push(entity);
+        }
+      }
+    }
+
+    if (!possibleMatches.length) {
+      ui.notifications.warn(
+        game.i18n.format(
+          'SCENE-PACKER.notifications.find-macro-compendium.no-match',
+          {
+            macro: macro.name,
+          },
+        ),
+      );
+      this.logWarn(
+        true,
+        game.i18n.format(
+          'SCENE-PACKER.notifications.find-playlmacroist-compendium.no-match',
+          {
+            macro: macro.name,
+          },
+        ),
+      );
+
+      return compendiumMacro;
+    }
+
+    if (possibleMatches.length === 1) {
+      // Only one Macro matches
+      return possibleMatches.pop();
+    }
+
+    if (possibleMatches.length) {
+      // See if there is a single entry in a compendium that belongs to this module
+      let filteredOptions = possibleMatches.filter(a => a.uuid.startsWith(`Compendium.${this.moduleName}.`));
+
+      if (filteredOptions.length === 1) {
+        // Only one Macro matches in a compendium belonging to this module
+        return filteredOptions.pop();
+      }
+    }
+
+    const compendiumSourceId = macro.getFlag('core', 'sourceId');
+    if (compendiumSourceId && searchPacks.some(p => compendiumSourceId.startsWith(`Compendium.${p}.`))) {
+      const match = fromUuid(compendiumSourceId);
+      if (match) {
+        return match;
+      }
+    }
+
+    if (!compendiumMacro) {
+      ui.notifications.warn(
+        game.i18n.format(
+          'SCENE-PACKER.notifications.find-macro-compendium.no-match',
+          {
+            macro: macro.name,
+          },
+        ),
+      );
+      this.logWarn(
+        true,
+        game.i18n.format(
+          'SCENE-PACKER.notifications.find-macro-compendium.no-match',
+          {
+            macro: macro.name,
+          },
+        ),
+      );
+    }
+
+    return compendiumMacro;
+  }
+
+  /**
    * Import entities by their Uuid, falling back to name based import
    * @param {String[]} searchPacks The compendium pack names to search within
    * @param {Object[]} entities The entities to import
@@ -2342,9 +2525,9 @@ export default class ScenePacker {
       }
       let matches = [];
       if (!isNewerVersion('0.8.0', game.data.version)) {
-        matches = game.macros.contents.filter(a => a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === macro.sourceId && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated'));
+        matches = game.macros.contents.filter(a => (a.uuid === macro.sourceId || a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === macro.sourceId) && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated'));
       } else {
-        matches = game.macros.entities.filter(a => a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === macro.sourceId && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated'));
+        matches = game.macros.entities.filter(a => (a.uuid === macro.sourceId || a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === macro.sourceId) && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated'));
       }
       if (matches.length) {
         exact_matches.push(macro);
@@ -2794,6 +2977,7 @@ export default class ScenePacker {
   ) {
     const tokenInfo = scene.getFlag(this.moduleName, CONSTANTS.FLAGS_TOKENS);
     const journalInfo = scene.getFlag(this.moduleName, CONSTANTS.FLAGS_JOURNALS);
+    const tilesInfo = scene.getFlag(this.moduleName, CONSTANTS.FLAGS_TILES);
     const sceneJournalInfo = scene.getFlag(this.moduleName, CONSTANTS.FLAGS_SCENE_JOURNAL);
     const sceneInitialPosition = scene.getFlag(this.moduleName, CONSTANTS.FLAGS_SCENE_POSITION);
     const scenePlaylist = scene.getFlag(this.moduleName, CONSTANTS.FLAGS_PLAYLIST);
@@ -2834,6 +3018,19 @@ export default class ScenePacker {
       if (journals?.length) {
         await this.unpackQuickEncounters(scene, journals, this.moduleName);
       }
+    }
+
+    if (tilesInfo?.length) {
+      if (!contentPreImported) {
+        const macroInfo = [];
+        tilesInfo.forEach(m => macroInfo.push(...m.actions))
+        await this.ImportEntities(
+          this.packs.macros,
+          this.findMissingMacros(macroInfo),
+          'macros',
+        );
+      }
+      await this.unpackActiveTiles(scene, tilesInfo);
     }
 
     if (this.welcomeJournal && !contentPreImported) {
@@ -2901,6 +3098,69 @@ export default class ScenePacker {
     ui.sidebar.activateTab('scenes');
 
     return Promise.resolve();
+  }
+
+  /**
+   * Unpacks the macros associated with Monk's Active Tiles
+   * @param {Object} scene - The scene being unpacked
+   * @param {Object[]} tilesInfo - The tiles which contain Monk's Active Tiles data
+   */
+  async unpackActiveTiles(scene, tilesInfo) {
+    const tiles = scene.data.tiles.filter(tile => tile.getFlag('monks-active-tiles', 'actions')?.filter(a => a?.action === 'runmacro').length);
+    for (const tile of tiles) {
+      const tileInfo = tilesInfo.find(t => t.tileID === tile.id);
+      if (!tileInfo) {
+        continue;
+      }
+      let changed = false;
+      const actions = tile.getFlag('monks-active-tiles', 'actions');
+      for (const action of actions.filter(a => a?.action === 'runmacro')) {
+        if (game.macros.get(action.data.macroid)) {
+          // Macro already exists in the world
+          continue;
+        }
+        const tileInfoAction = tileInfo.actions.find(a => a.actionID === action.id);
+        if (!tileInfoAction) {
+          // Could not find this action in the packed data
+          continue;
+        }
+        let macro;
+        if (!isNewerVersion('0.8.0', game.data.version)) {
+          macro = game.macros.contents.find(a => (a.uuid === tileInfoAction.sourceId || a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === tileInfoAction.sourceId) && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated'));
+        } else {
+          macro = game.macros.entities.find(a => (a.uuid === tileInfoAction.sourceId || a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === tileInfoAction.sourceId) && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated'));
+        }
+        if (!macro) {
+          // Try looking up by name
+          if (!isNewerVersion('0.8.0', game.data.version)) {
+            macro = game.macros.contents.find(a => a.name === tileInfoAction.name && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated'));
+          } else {
+            macro = game.macros.entities.find(a => a.name === tileInfoAction.name && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated'));
+          }
+          if (!macro) {
+            // No macro found to relink.
+            ScenePacker.logType(
+              moduleName,
+              'error',
+              true,
+              game.i18n.format(
+                'SCENE-PACKER.notifications.import-entities.active-tiles-macro-missing',
+                {
+                  tile: tile.name,
+                  macro: tileInfoAction.name,
+                },
+              ),
+            );
+            continue;
+          }
+        }
+        action.data.macroid = macro.id;
+        changed = true;
+      }
+      if (changed) {
+        await tile.setFlag('monks-active-tiles', 'actions', actions);
+      }
+    }
   }
 
   /**
@@ -3097,6 +3357,7 @@ export default class ScenePacker {
 
     await scene.unsetFlag(this.moduleName, CONSTANTS.FLAGS_TOKENS);
     await scene.unsetFlag(this.moduleName, CONSTANTS.FLAGS_JOURNALS);
+    await scene.unsetFlag(this.moduleName, CONSTANTS.FLAGS_TILES);
     await scene.unsetFlag(this.moduleName, CONSTANTS.FLAGS_SCENE_JOURNAL);
     await scene.unsetFlag(this.moduleName, CONSTANTS.FLAGS_SCENE_POSITION);
     await scene.unsetFlag(this.moduleName, CONSTANTS.FLAGS_PLAYLIST);
