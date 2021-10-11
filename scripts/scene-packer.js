@@ -741,6 +741,14 @@ export default class ScenePacker {
       }
     }
 
+    if (!packs.size) {
+      // No packs have explicitly been set, default to those belonging to this module
+      const filteredPacks = game.packs.filter(p => p.metadata.package === this.moduleName);
+      for (const pack of filteredPacks) {
+        packs.add(pack.collection);
+      }
+    }
+
     return [...packs];
   }
 
