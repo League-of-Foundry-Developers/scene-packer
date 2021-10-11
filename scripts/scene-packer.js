@@ -710,6 +710,41 @@ export default class ScenePacker {
   }
 
   /**
+   * Gets the compendium search packs for the requested type.
+   * @param {String} type - The type to search for. One of CONST.COMPENDIUM_ENTITY_TYPES (['Actor', 'Item', 'Scene', 'JournalEntry', 'Macro', 'RollTable', 'Playlist'])
+   */
+  getSearchPacksForType(type) {
+    const packs = new Set();
+    switch (type) {
+      case 'Actor':
+        this.packs.creatures.forEach(a => packs.add(a));
+        break;
+      case 'JournalEntry':
+        this.packs.journals.forEach(a => packs.add(a));
+        break;
+      case 'Macro':
+        this.packs.macros.forEach(a => packs.add(a));
+        break;
+      case 'Playlist':
+        this.packs.playlists.forEach(a => packs.add(a));
+        break;
+    }
+    if (this.packs.modules.length) {
+      const filteredPacks = game.packs.filter((p) => {
+        const isCorrectType = (p.documentName || p.entity) === type;
+        const isCorrectModule = this.packs.modules.includes(p.metadata.package);
+        const isCorrectSystem = typeof p.metadata.system === 'Undefined' || p.metadata.system === game.system.id;
+        return isCorrectType && isCorrectModule && isCorrectSystem;
+      });
+      for (const pack of filteredPacks) {
+        packs.add(pack.collection);
+      }
+    }
+
+    return [...packs];
+  }
+
+  /**
    * Returns whether the scene has and Packed Data.
    * @param {Object} scene The scene to check.
    * @param {String} moduleName The name of the module that Packed the data.
@@ -1303,7 +1338,7 @@ export default class ScenePacker {
     if (scene.journal) {
       sceneJournalInfo.journalName = scene.journal.name;
       sceneJournalInfo.sourceId = scene.journal.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') || scene.journal.getFlag('core', 'sourceId') || scene.journal.uuid;
-      const compendiumJournal = await this.FindJournalInCompendiums(scene.journal, this.packs.journals);
+      const compendiumJournal = await this.FindJournalInCompendiums(scene.journal, this.getSearchPacksForType('JournalEntry'));
       if (compendiumJournal?.uuid) {
         sceneJournalInfo.compendiumSourceId = compendiumJournal.uuid;
       }
@@ -1311,7 +1346,7 @@ export default class ScenePacker {
     await scene.setFlag(this.moduleName, CONSTANTS.FLAGS_SCENE_JOURNAL, sceneJournalInfo);
     await scene.setFlag(this.moduleName, CONSTANTS.FLAGS_SCENE_POSITION, scene.data?.initial);
     if (scene.playlist) {
-      const compendiumPlaylist = await this.FindPlaylistInCompendiums(scene.playlist, this.packs.playlists);
+      const compendiumPlaylist = await this.FindPlaylistInCompendiums(scene.playlist, this.getSearchPacksForType('Playlist'));
       if (compendiumPlaylist) {
         await scene.setFlag(this.moduleName, CONSTANTS.FLAGS_PLAYLIST, compendiumPlaylist?.uuid);
       }
@@ -1326,7 +1361,7 @@ export default class ScenePacker {
         note = note.data.toObject();
       }
       const journalData = game.journal.get(note.entryId);
-      const compendiumJournal = await this.FindJournalInCompendiums(journalData, this.packs.journals);
+      const compendiumJournal = await this.FindJournalInCompendiums(journalData, this.getSearchPacksForType('JournalEntry'));
 
       // Take a copy of the original note adding in the sourceId, journal name and folder name it belongs to
       return mergeObject(
@@ -1383,7 +1418,7 @@ export default class ScenePacker {
                   const macro = game.macros.get(d.data.macroid);
                   const compendiumMacro = await this.FindMacroInCompendiums(
                     macro,
-                    this.packs.macros
+                    this.getSearchPacksForType('Macro')
                   );
                   return {
                     actionID: d.id,
@@ -1437,7 +1472,7 @@ export default class ScenePacker {
             compendiumSourceId = actor.getFlag('core', 'sourceId');
             if (!compendiumSourceId || !compendiumSourceId.startsWith(`Compendium.${this.moduleName}.`)) {
               // The actor source isn't the module's compendium, see if we have a direct match in a different compendium
-              const compendiumActor = await this.FindActorInCompendiums(actor, this.packs.creatures);
+              const compendiumActor = await this.FindActorInCompendiums(actor, this.getSearchPacksForType('Actor'));
               if (compendiumActor?.uuid) {
                 compendiumSourceId = compendiumActor.uuid;
               }
@@ -2482,7 +2517,7 @@ export default class ScenePacker {
     if (missing_name_matches.size) {
       // Support multiple folder names by compendium names
       const folderNames = [this.adventureName];
-      this.packs.journals.forEach(j => {
+      this.getSearchPacksForType('JournalEntry').forEach(j => {
         const pack = game.packs.get(j);
         if (pack?.metadata?.label) {
           folderNames.push(pack.metadata.label);
@@ -2546,7 +2581,7 @@ export default class ScenePacker {
     if (missing_name_matches.size) {
       // Support multiple folder names by compendium names
       const folderNames = [this.adventureName];
-      this.packs.macros.forEach(j => {
+      this.getSearchPacksForType('Macro').forEach(j => {
         const pack = game.packs.get(j);
         if (pack?.metadata?.label) {
           folderNames.push(pack.metadata.label);
@@ -2995,7 +3030,7 @@ export default class ScenePacker {
     if (tokenInfo?.length && !contentPreImported) {
       // Import tokens that don't yet exist in the world
       await this.ImportEntities(
-        this.packs.creatures,
+        this.getSearchPacksForType('Actor'),
         this.findMissingActors(tokenInfo),
         'actors',
       );
@@ -3006,13 +3041,13 @@ export default class ScenePacker {
       if (!contentPreImported) {
         // Import Journal Pins
         journals = await this.ImportEntities(
-          this.packs.journals,
+          this.getSearchPacksForType('JournalEntry'),
           this.findMissingJournals(journalInfo),
           'journals',
         );
       } else {
         // List all of the journals belonging to this module's packs
-        journals = game.journal.filter(j => this.packs.journals.some(p => j.getFlag('core', 'sourceId')
+        journals = game.journal.filter(j => this.getSearchPacksForType('JournalEntry').some(p => j.getFlag('core', 'sourceId')
           ?.startsWith(`Compendium.${p}.`)));
       }
       if (journals?.length) {
@@ -3025,7 +3060,7 @@ export default class ScenePacker {
         const macroInfo = [];
         tilesInfo.forEach(m => macroInfo.push(...m.actions))
         await this.ImportEntities(
-          this.packs.macros,
+          this.getSearchPacksForType('Macro'),
           this.findMissingMacros(macroInfo),
           'macros',
         );
@@ -3036,7 +3071,7 @@ export default class ScenePacker {
     if (this.welcomeJournal && !contentPreImported) {
       // Import the "Welcome Journal"
       await this.ImportEntities(
-        this.packs.journals,
+        this.getSearchPacksForType('JournalEntry'),
         this.findMissingJournals([this.welcomeJournal].map(d => {
           return {journalName: d};
         })),
@@ -3046,7 +3081,7 @@ export default class ScenePacker {
     if (this.additionalJournals.length > 0 && !contentPreImported) {
       // Import any additional Journals
       await this.ImportEntities(
-        this.packs.journals,
+        this.getSearchPacksForType('JournalEntry'),
         this.findMissingJournals(this.additionalJournals.map(d => {
           return {journalName: d};
         })),
@@ -3056,7 +3091,7 @@ export default class ScenePacker {
     if (this.additionalMacros.length > 0 && !contentPreImported) {
       // Import any additional Macros
       await this.ImportEntities(
-        this.packs.macros,
+        this.getSearchPacksForType('Macro'),
         this.findMissingMacros(this.additionalMacros.map(d => {
           return {name: d};
         })),
@@ -3068,7 +3103,7 @@ export default class ScenePacker {
       if (!contentPreImported) {
         // Ensure the scene journal is imported
         await this.ImportEntities(
-          this.packs.journals,
+          this.getSearchPacksForType('JournalEntry'),
           this.findMissingJournals([sceneJournalInfo]),
           'journals',
         );
@@ -4017,7 +4052,7 @@ export default class ScenePacker {
         const actor = quickEncounter.extractedActors[i];
         const worldActor = game.actors.get(actor.actorID);
         if (worldActor) {
-          const compendiumActor = await instance.FindActorInCompendiums(worldActor, instance.packs.creatures);
+          const compendiumActor = await instance.FindActorInCompendiums(worldActor, instance.getSearchPacksForType('Actor'));
           if (compendiumActor?.uuid) {
             quickEncounter.extractedActors[i].actorID = compendiumActor.uuid;
             updates.push({

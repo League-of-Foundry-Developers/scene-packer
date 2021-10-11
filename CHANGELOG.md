@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.15
+
+- Corrected the use of `additionalModulePacks` to be used across all of Scene Packer, rather than just within `Relink compendium entries`.
+
 ## v2.3.14
 
 - Added support for packing and unpacking Macros embedded within [Monk's Active Tile Triggers](https://foundryvtt.com/packages/monks-active-tiles).
