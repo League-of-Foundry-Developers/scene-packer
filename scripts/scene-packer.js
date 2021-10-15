@@ -1405,12 +1405,21 @@ export default class ScenePacker {
     }
 
     /**
-     * tileInfo is the data that gets passed to findMissingTiles
+     * tileInfo is the data that gets passed to findMissingTiles,
+     * currently only worth checking if Monk's Active Tile Triggers module is in scope.
      */
+    let scopes;
+    if (!isNewerVersion('0.8.0', game.data.version)) {
+      scopes = game.getPackageScopes();
+    } else {
+      scopes = SetupConfiguration.getPackageScopes();
+    }
+    const hasMonksActiveTilesSupport = (scopes.length && scopes.includes('monks-active-tiles'));
     const tileInfoResults = await Promise.allSettled(
       scene.data.tiles
         .filter(
           (tile) =>
+            hasMonksActiveTilesSupport &&
             tile
               .getFlag('monks-active-tiles', 'actions')
               ?.filter((a) => a?.action === 'runmacro').length
