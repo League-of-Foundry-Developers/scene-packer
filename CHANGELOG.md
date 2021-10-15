@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.3.16
+
+- Fixed issue when packing a scene if `Monk's Active Tile Triggers` isn't installed on the instance.
+- Added macro `Bulk Lock/Unlock compendiums`.
+  - This macro allows you to bulk lock or unlock compendiums belonging to the selected module.
+
 ## v2.3.15
 
 - Corrected the use of `additionalModulePacks` to be used across all of Scene Packer, rather than just within `Relink compendium entries`.
