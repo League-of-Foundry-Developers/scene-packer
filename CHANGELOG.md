@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.17
+
+- Updated the `Relink compendium entries` macro to support relinking RollTable entries.
+
 ## v2.3.16
 
 - Fixed issue when packing a scene if `Monk's Active Tile Triggers` isn't installed on the instance.

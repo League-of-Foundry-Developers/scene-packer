@@ -3563,6 +3563,7 @@ export default class ScenePacker {
 
     await instance.RelinkEntries(moduleName, 'JournalEntryPacks', {dryRun, packs});
     await instance.RelinkEntries(moduleName, 'ItemPacks', {dryRun, packs});
+    await instance.RelinkEntries(moduleName, 'RollTablePacks', {dryRun, packs});
 
     // Lock the module compendiums again
     if (!dryRun) {
@@ -3586,7 +3587,7 @@ export default class ScenePacker {
    *   Macros
    *   Playlists
    * @param {String} moduleName - The name of the module that owns the compendiums to be updated
-   * @param {String} type - The type of entries to search though. Currently "JournalEntryPacks" and "ItemPacks"
+   * @param {String} type - The type of entries to search though. Currently "JournalEntryPacks", "ItemPacks" and "RollTablePacks"
    * @param {Boolean} dryRun - Whether to do a dry-run (no changes committed, just calculations and logs)
    * @param {{ActorPacks: *[], ItemPacks: *[], ScenePacks: *[], JournalEntryPacks: *[], MacroPacks: *[], RollTablePacks: *[], PlaylistPacks: *[]}} packs - The packs to search within
    * @param {RegExp} rex - The regular expression to search for. Default matches things like: @Actor[obe2mDyYDXYmxHJb]{Something or other}
@@ -3606,6 +3607,9 @@ export default class ScenePacker {
         break;
       case 'ItemPacks':
         typeName = 'item';
+        break;
+      case 'RollTablePacks':
+        typeName = 'table';
         break;
     }
     for (const pack of entryPacks.filter(p => p.metadata.package === moduleName)) {
@@ -3639,6 +3643,49 @@ export default class ScenePacker {
             break;
           case 'ItemPacks':
             content = document?.data?.data?.description?.value;
+            break;
+          case 'RollTablePacks':
+            // Rolltables don't have content like normal but instead have references to other results
+            for (const result of document?.data?.results) {
+              if (!result?.data?.resultId || !result?.data?.collection) {
+                // This result is not a reference to another entity
+                continue;
+              }
+              if ((result.data.collection || '').includes('.')) {
+                // This result is already a reference to a compendium
+                continue;
+              }
+              const existingEntry = game.collections.get(result.data.collection)?.get(result.data.resultId);
+              let newRef = await this.findNewReferences(result.data.collection, existingEntry.id, existingEntry.name, existingEntry, document.name, moduleName, packs);
+              if (newRef.length !== 1) {
+                // Skip any reference update that isn't a one to one replacement
+                continue;
+              }
+              ScenePacker.logType(
+                moduleName,
+                'info',
+                true,
+                game.i18n.format(
+                  'SCENE-PACKER.world-conversion.compendiums.updating-reference-console',
+                  {
+                    pack: pack.collection,
+                    journalEntryId: entry._id,
+                    type: result.data.collection,
+                    oldRef: result.data.resultId,
+                    newRefPack: newRef[0].pack,
+                    newRef: newRef[0].ref,
+                  },
+                ),
+              );
+    
+              if (!dryRun) {
+                await result.update({
+                  collection: newRef[0].pack,
+                  resultId: newRef[0].ref,
+                  type: CONST.TABLE_RESULT_TYPES.COMPENDIUM || 2,
+                })
+              }
+            }
             break;
         }
         if (!content) {
