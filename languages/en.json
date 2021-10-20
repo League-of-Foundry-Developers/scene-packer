@@ -72,7 +72,7 @@
         "no-journal-pins": "No journal pins detected on the scene.",
         "writing-tokens": "Writing {number} tokens to scene: {name}",
         "no-tokens": "No tokens detected on the scene.",
-        "writing-tile-macros": "Writing {number} macros to scene tiles: {name}",
+        "writing-tile-actions": "Writing {countActions} actions to {countTiles} tiles on scene: {name}",
         "already-shown-welcome": "The welcome journal \"{journal}\" has already been shown for this version \"{version}\"."
       },
       "import-entities": {
@@ -87,7 +87,9 @@
           "missing-pack": "Invalid pack configuration. Cannot find compendium {packName}. Check console (F12) for more details.",
           "missing-pack-details": "ImportEntities was called to search for pack \"{packName}\" which is not found. Check for typos in your module setup."
         },
+        "invalid-collection": "Could not find a game collection of type \"{type}\".",
         "active-tiles-macro-missing": "Tile \"{tile}\" | Monk's Active Tile Triggers | Could not find a Macro named \"{macro}\" within your world. This active tile will remain unlinked and you will need to link the macro again manually.",
+        "active-tiles-entity-reference-missing": "Tile \"{tile}\" | Monk's Active Tile Triggers | Could not find a replacement entity for \"{ref}\" within your world. This active tile will remain unlinked and you will need to link the entity again manually.",
         "cf-clean-up-title": "Clean up {name} entities?",
         "cf-clean-up": "<p>You just imported {count} entites with the name <code style=\"display:inline-block;\">{name}</code> that belong to the <a href=\"https://foundryvtt.com/packages/compendium-folders\" target=\"_blank\">Compendium Folders</a> module which you do not have enabled.</p><p>Do you want to run the <a class=\"entity-link\" draggable=\"true\" data-pack=\"scene-packer.macros\" data-id=\"D0GsPqV3zglJ9w7V\"><i class=\"fas fa-terminal\"></i> Clean up {name} entries</a> macro?</p>"
       },
@@ -120,6 +122,12 @@
         "invalid-index": "Error loading macro content from compendium. Check debug logs for details.",
         "missing-pack": "Invalid pack configuration. Cannot find compendium {packName}. Check console (F12) for more details.",
         "missing-pack-details": "FindMacroInCompendiums was called to search for pack \"{packName}\" which is not found. Check for typos in your module setup."
+      },
+      "find-entity-compendium": {
+        "no-match": "Could not find a {type} entry named \"{name}\" in the compendiums.",
+        "invalid-index": "Error loading {type} content from compendium. Check debug logs for details.",
+        "missing-pack": "Invalid pack configuration. Cannot find compendium {packName}. Check console (F12) for more details.",
+        "missing-pack-details": "findCompendiumEntity was called to search for pack \"{packName}\" which is not found. Check for typos in your module setup."
       },
       "find-actor": {
         "missing-name": "Cannot find a token that has no name. Check debug logs for details.",

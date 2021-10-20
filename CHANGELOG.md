@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.3.18
+
+- Added support for packing and unpacking remaining embedded references within [Monk's Active Tile Triggers](https://foundryvtt.com/packages/monks-active-tiles).
+  - Triggers should all now correctly unpack and update their references appropriately.
+
 ## v2.3.17
 
 - Updated the `Relink compendium entries` macro to support relinking RollTable entries.
