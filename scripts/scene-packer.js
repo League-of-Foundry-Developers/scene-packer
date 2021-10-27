@@ -1426,7 +1426,8 @@ export default class ScenePacker {
               (a) => a?.data?.macroid ||
                 a?.data?.entity?.id ||
                 a?.data?.item?.id ||
-                a?.data?.location?.sceneId
+                a?.data?.location?.sceneId ||
+                a?.data?.rolltableid
             )
             .map(async (d) => {
               const response = {
@@ -1442,6 +1443,8 @@ export default class ScenePacker {
                 ref = `Macro.${d.data.macroid}`;
               } else if (d.data?.location?.sceneId) {
                 ref = `Scene.${d.data.location.sceneId}`;
+              } else if (d.data?.rolltableid) {
+                ref = `RollTable.${d.data.rolltableid}`;
               } else if (d.data?.entity?.id) {
                 ref = d.data.entity.id;
               } else if (d.data?.item?.id) {
@@ -3463,7 +3466,8 @@ export default class ScenePacker {
               a?.data?.macroid ||
               a?.data?.entity?.id ||
               a?.data?.item?.id ||
-              a?.data?.location?.sceneId
+              a?.data?.location?.sceneId ||
+              a?.data?.rolltableid
           ).length
     );
   }
@@ -3474,6 +3478,8 @@ export default class ScenePacker {
    * @param {Object[]} tilesInfo - The tiles which contain Monk's Active Tiles data
    */
   async unpackActiveTiles(scene, tilesInfo) {
+    let tilesCount = 0;
+    let actionsCount = 0;
     const tiles = ScenePacker.getActiveTilesData(scene);
     for (const tile of tiles) {
       const tileInfo = tilesInfo?.find(t => t.tileID === tile.id);
@@ -3498,6 +3504,9 @@ export default class ScenePacker {
         } else if (action.data?.macroid) {
           value = `Macro.${action.data.macroid}`;
           actionType = 'Macro';
+        } else if (action.data?.rolltableid) {
+          value = `RollTable.${action.data.rolltableid}`;
+          actionType = 'RollTable';
         }
 
         if (!value) {
@@ -3508,7 +3517,16 @@ export default class ScenePacker {
           // Missing definition of the entity type and entity id, unable to match.
           continue;
         }
-        const newEntity = this.findEntity(value);
+        let newEntity;
+        newEntity = this.findEntity(value);
+        if (!newEntity) {
+          // Try to find the entity by compendium reference
+          const compendiumSourceId = tileInfo.actions?.find(a => a.actionID === action.id)?.compendiumSourceId;
+          if (compendiumSourceId) {
+            newEntity = await fromUuid(compendiumSourceId);
+          }
+        }
+
         if (!newEntity) {
           this.logError(
             true,
@@ -3529,41 +3547,84 @@ export default class ScenePacker {
           continue;
         }
         const entityId = entityParts[1];
+        let newValue;
 
         switch (actionType) {
           case 'EntityId':
-            action.data.entity.id = action.data.entity.id.replace(
+            newValue = action.data.entity.id.replace(
               entityId,
               newEntity.id
             );
-            changed = true;
+            if (newValue !== action.data.entity.id) {
+              action.data.entity.id = newValue;
+              changed = true;
+              actionsCount++;
+            }
           break;
           case 'ItemId':
-            action.data.item.id = action.data.item.id.replace(
+            newValue = action.data.item.id.replace(
               entityId,
               newEntity.id
             );
-            changed = true;
+            if (newValue !== action.data.item.id) {
+              action.data.item.id = newValue;
+              changed = true;
+              actionsCount++;
+            }
           break;
           case 'SceneLocation':
-            action.data.location.sceneId = action.data.location.sceneId.replace(
+            newValue = action.data.location.sceneId.replace(
               entityId,
               newEntity.id
             );
-            changed = true;
+            if (newValue !== action.data.location.sceneId) {
+              action.data.location.sceneId = newValue;
+              changed = true;
+              actionsCount++;
+            }
           break;
           case 'Macro':
-            action.data.macroid = action.data.macroid.replace(
+            newValue = action.data.macroid.replace(
               entityId,
               newEntity.id
             );
-            changed = true;
+            if (newValue !== action.data.macroid) {
+              action.data.macroid = newValue;
+              changed = true;
+              actionsCount++;
+            }
+          break;
+          case 'RollTable':
+            newValue = action.data.rolltableid.replace(
+              entityId,
+              newEntity.id
+            );
+            if (newValue !== action.data.rolltableid) {
+              action.data.rolltableid = newValue;
+              changed = true;
+              actionsCount++;
+            }
           break;
         }
       }
       if (changed) {
+        tilesCount++;
         await tile.setFlag('monks-active-tiles', 'actions', actions);
       }
+    }
+
+    if (tilesCount && actionsCount) {
+      this.log(
+        true,
+        game.i18n.format(
+          'SCENE-PACKER.notifications.import-entities.active-tiles-unpacked',
+          {
+            scene: scene.name,
+            tiles: tilesCount,
+            actions: actionsCount,
+          }
+        )
+      );
     }
   }
 

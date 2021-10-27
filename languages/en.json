@@ -90,6 +90,7 @@
         "invalid-collection": "Could not find a game collection of type \"{type}\".",
         "active-tiles-macro-missing": "Tile \"{tile}\" | Monk's Active Tile Triggers | Could not find a Macro named \"{macro}\" within your world. This active tile will remain unlinked and you will need to link the macro again manually.",
         "active-tiles-entity-reference-missing": "Tile \"{tile}\" | Monk's Active Tile Triggers | Could not find a replacement entity for \"{ref}\" within your world. This active tile will remain unlinked and you will need to link the entity again manually.",
+        "active-tiles-unpacked": "Unpacked {tiles} tiles and {actions} actions on scene \"{scene}.\"",
         "cf-clean-up-title": "Clean up {name} entities?",
         "cf-clean-up": "<p>You just imported {count} entites with the name <code style=\"display:inline-block;\">{name}</code> that belong to the <a href=\"https://foundryvtt.com/packages/compendium-folders\" target=\"_blank\">Compendium Folders</a> module which you do not have enabled.</p><p>Do you want to run the <a class=\"entity-link\" draggable=\"true\" data-pack=\"scene-packer.macros\" data-id=\"D0GsPqV3zglJ9w7V\"><i class=\"fas fa-terminal\"></i> Clean up {name} entries</a> macro?</p>"
       },
