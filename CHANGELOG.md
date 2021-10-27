@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.19
+
+- Added missing support for RollTable packing and unpacking within [Monk's Active Tile Triggers](https://foundryvtt.com/packages/monks-active-tiles).
+
 ## v2.3.18
 
 - Added support for packing and unpacking remaining embedded references within [Monk's Active Tile Triggers](https://foundryvtt.com/packages/monks-active-tiles).
