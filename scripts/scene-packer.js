@@ -759,6 +759,7 @@ export default class ScenePacker {
    * @param {String} tokenFlag The flag that stores token data.
    * @param {String} journalFlag The flag that stores journal pin data.
    * @param {String} macroFlag The flag that stores linked Macro data.
+   * @param {String} tilesFlag The flag that stores active tile data.
    * @param {String} playlistFlag The flag that stores linked Playlist data.
    * @returns {Boolean}
    */
@@ -1269,33 +1270,38 @@ export default class ScenePacker {
     }
 
     const sceneInfo = new Map();
-    const scenes = [];
-    if (!isNewerVersion('0.8.0', game.data.version)) {
-      scenes.push(...game.scenes.contents);
-    } else {
-      scenes.push(...game.scenes.entities);
-    }
+    const scenes = game.scenes.entities || game.scenes.contents;
 
     for (let i = 0; i < scenes.length; i++) {
       const scene = scenes[i];
       const sceneData = {
         id: scene.id,
         name: scene.name,
+        sources: [],
       };
 
-      if (scene.journal || scene.playlist) {
-        sceneInfo.set(scene.id, sceneData);
-        continue;
+      if (scene.journal) {
+        sceneData.sources.push('journal');
       }
 
-      if (!isNewerVersion('0.8.0', game.data.version)) {
-        if (scene.data?.notes?.size || scene.data?.tokens?.size) {
-          sceneInfo.set(scene.id, sceneData);
-        }
-      } else {
-        if (scene.data?.notes?.length || scene.data?.tokens?.length) {
-          sceneInfo.set(scene.id, sceneData);
-        }
+      if (scene.playlist) {
+        sceneData.sources.push('playlist');
+      }
+
+      if (scene.data?.notes?.size || scene.data?.notes?.length) {
+        sceneData.sources.push('notes');
+      }
+
+      if (scene.data?.tokens?.size || scene.data?.tokens?.length) {
+        sceneData.sources.push('tokens');
+      }
+
+      if (ScenePacker.getActiveTilesData(scene)) {
+        sceneData.sources.push('monks-active-tiles');
+      }
+
+      if (sceneData.sources.length) {
+        sceneInfo.set(scene.id, sceneData);
       }
     }
 
@@ -1306,19 +1312,156 @@ export default class ScenePacker {
     if (sceneInfo.size) {
       content += '<ul>';
       for (const scene of sceneInfo.values()) {
-        content += `<li>${scene.name}</li>`;
+        content += `<li>${scene.name} (${scene.sources.join(', ')})</li>`;
       }
       content += '</ul>';
     } else {
       content = `<p>${game.i18n.localize('SCENE-PACKER.worth-packing.none')}</p>`;
     }
-    Dialog.prompt({
+    let activeModules = Object.keys(globalScenePacker.instances);
+
+    const displaySummary = (moduleName, missing) => {
+      let content = `<p>${game.i18n.format('SCENE-PACKER.worth-packing.verify-missing', {
+        module: moduleName,
+        count: new Intl.NumberFormat().format(missing.size),
+        total: new Intl.NumberFormat().format(sceneInfo.size),
+      })}</p>`;
+      if (missing.size) {
+        content += '<ul>';
+        for (const scene of missing.values()) {
+          content += `<li>${scene.name} (${scene.reason})</li>`;
+        }
+        content += '</ul>';
+      } else {
+        content = `<p>${game.i18n.format('SCENE-PACKER.worth-packing.verify-ok', {module: moduleName})}</p>`;
+      }
+      Dialog.prompt({
+        title: game.i18n.localize('SCENE-PACKER.worth-packing.verify'),
+        content,
+        label: game.i18n.localize('Close'),
+        callback: () => {
+        },
+      });
+    };
+
+    new Dialog({
       title: game.i18n.localize('SCENE-PACKER.worth-packing.title'),
       content: content,
-      label: game.i18n.localize('Close'),
-      callback: () => {
+      buttons: {
+        verify: {
+          icon: '<i class="fas fa-check"></i>',
+          label: game.i18n.localize('Verify'),
+          condition: () => activeModules.length && sceneInfo.size,
+          callback: () => {
+            let internalContent = game.i18n.localize('SCENE-PACKER.worth-packing.verify-intro');
+            internalContent += `<p>${game.i18n.localize('SCENE-PACKER.worth-packing.verify-select')}</p>`;
+            internalContent += '<select id="module-name">';
+            activeModules.forEach(m => {
+              internalContent += `<option value="${m}">${m}</option>`;
+            });
+            internalContent += '</select>';
+            internalContent += `<p>${game.i18n.localize('SCENE-PACKER.worth-packing.verify-slow')}</p>`;
+            internalContent += '<p><hr></p>';
+            new Dialog({
+              title: game.i18n.localize('SCENE-PACKER.worth-packing.verify'),
+              content: internalContent,
+              buttons: {
+                verify: {
+                  icon: '<i class="fas fa-check"></i>',
+                  label: game.i18n.localize('Verify'),
+                  callback: async (html) => {
+                    let moduleName = html.find('#module-name')[0].value;
+                    let missing = new Map(sceneInfo);
+                    if (!moduleName) {
+                      return displaySummary('undefined', missing);
+                    }
+                    const instance = globalScenePacker.instances[moduleName];
+                    if (!instance) {
+                      return displaySummary(moduleName, missing);
+                    }
+                    const packs = game.packs.filter(p => p.metadata.package === moduleName && (p.documentName || p.entity) === 'Scene');
+                    if (!packs.length) {
+                      return displaySummary(moduleName, missing);
+                    }
+
+                    const di = new Dialog({
+                      title: game.i18n.localize('Verify'),
+                      content: `<p>${game.i18n.localize('SCENE-PACKER.worth-packing.verify-wait')}</p>`,
+                      buttons: {
+                        close: {
+                          icon: '<i class="fas fa-check"></i>',
+                          label: game.i18n.localize('Close'),
+                          callback: () => {
+                          },
+                        },
+                      },
+                      default: 'close',
+                    });
+                    di.render(true);
+
+                    for (const pack of packs) {
+                      let packData;
+                      if (!isNewerVersion('0.8.0', game.data.version)) {
+                        packData = await pack.getDocuments();
+                      } else {
+                        packData = await pack.getContent();
+                      }
+                      for (const scene of packData) {
+                        const sourceId = scene.getFlag(CONSTANTS.MODULE_NAME, 'sourceId');
+                        if (!sourceId) {
+                          continue;
+                        }
+                        const localScene = instance.findEntity(sourceId);
+                        if (!localScene?.id) {
+                          continue;
+                        }
+                        const missingData = missing.get(localScene.id)
+                        if (!missingData) {
+                          continue;
+                        }
+                        if (ScenePacker.HasPackedData(scene, moduleName)) {
+                          missing.delete(localScene.id);
+                          continue;
+                        }
+
+                        missingData.reason = game.i18n.localize('SCENE-PACKER.worth-packing.verify-not-packed');
+                        missing.set(localScene.id, missingData);
+                      }
+                    }
+
+                    missing.forEach((value, key) => {
+                      if (!value.reason) {
+                        value.reason = game.i18n.localize('SCENE-PACKER.worth-packing.verify-not-found');
+                        missing.set(key, value);
+                      }
+                    });
+
+                    if (di && typeof di.close === 'function') {
+                      // Wrap in a setTimeout to make sure the application has finished rendering it, otherwise it won't close.
+                      setTimeout(() => {
+                        di.close({force: true});
+                      }, 0)
+                    }
+
+                    return displaySummary(moduleName, missing);
+                  },
+                },
+                cancel: {
+                  icon: '<i class="fas fa-times"></i>',
+                  label: game.i18n.localize('Cancel'),
+                },
+              },
+            }).render(true);
+          },
+        },
+        close: {
+          icon: '<i class="fas fa-times"></i>',
+          label: game.i18n.localize('Close'),
+          callback: () => {
+          },
+        },
       },
-    });
+    }).render(true);
   }
 
   /**
@@ -2812,6 +2955,10 @@ export default class ScenePacker {
    * @returns {Object}
    */
   findEntity(entityReference) {
+    if (!entityReference) {
+      return undefined;
+    }
+
     const entityParts = entityReference.split('.');
     if (entityParts.length < 2 || !entityParts[0] || !entityParts[1]) {
       // Missing definition of the entity type and entity id, unable to match.
@@ -4090,7 +4237,7 @@ export default class ScenePacker {
                   },
                 ),
               );
-    
+
               if (!dryRun) {
                 await result.update({
                   collection: newRef[0].pack,

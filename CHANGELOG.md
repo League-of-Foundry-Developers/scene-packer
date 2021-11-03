@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.3.20
+
+- Updated the `Show Scenes Worth Packing` macro display why a Scene should be packed and also added basic "verification" support to compare the compendium packs against the local scene data.
+  - The verify step does not compare the packed data, it only checks for the presence of packed data. 
+
 ## v2.3.19
 
 - Added missing support for RollTable packing and unpacking within [Monk's Active Tile Triggers](https://foundryvtt.com/packages/monks-active-tiles).

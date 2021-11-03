@@ -2,11 +2,11 @@
   "name": "scene-packer",
   "title": "Library: Scene Packer",
   "description": "A module to assist with Scene and Adventure packing and unpacking.",
-  "version": "2.3.19",
+  "version": "2.3.20",
   "library": "true",
   "manifestPlusVersion": "1.1.0",
   "minimumCoreVersion": "0.7.9",
-  "compatibleCoreVersion": "0.8.8",
+  "compatibleCoreVersion": "0.8.9",
   "author": "Blair McMillan",
   "authors": [
     {
