@@ -30,7 +30,16 @@
     },
     "worth-packing": {
       "title": "Scenes worth packing",
-      "intro": "The following {count} of {total} Scene/s are worth packing:",
+      "intro": "The following {count} of {total} Scene/s are worth packing if you haven't already:",
+      "verify": "Verify compendium packs",
+      "verify-intro": "<p>Verify that the scenes present in your world are also present in your module compendiums and contain packed data.</p><p><strong>Please note:</strong> this process will not verify that the packed data is the same, it merely ensures that packed data is present in the compendiums.</p>",
+      "verify-select": "Select the module containing the compendium packs you wish to verify:",
+      "verify-slow": "<strong>Please note:</strong> This process may take a while depending on how many scenes you have.",
+      "verify-wait": "Please wait...",
+      "verify-missing": "The following {count} of {total} Scene/s in the compendiums belonging to \"{module}\" may have issues:",
+      "verify-ok": "All scenes were found in the compendiums belonging to \"{module}\".",
+      "verify-not-found": "missing",
+      "verify-not-packed": "no packed data",
       "none": "There are no Scenes that contain data worth packing."
     },
     "asset-report": {
