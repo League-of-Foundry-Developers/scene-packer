@@ -2304,7 +2304,7 @@ export default class ScenePacker {
    * @param {String[]} searchPacks The compendium pack names to search within
    * @param {Object[]} entities The entities to import
    * @param {String} type The type of entity being imported. Used for notification purposes only.
-   * @returns {Object[]} The entities created. May be fewer than requested if some already exist.
+   * @returns {Promise<Object[]>} The entities created. May be fewer than requested if some already exist.
    */
   async ImportEntities(searchPacks, entities, type) {
     if (!game.user.isGM) {
@@ -3469,7 +3469,7 @@ export default class ScenePacker {
       }
     }
 
-    if (tokenInfo?.length && !contentPreImported) {
+    if (tokenInfo?.length) {
       // Import tokens that don't yet exist in the world
       await this.ImportEntities(
         this.getSearchPacksForType('Actor'),
@@ -3498,27 +3498,25 @@ export default class ScenePacker {
     }
 
     if (tilesInfo?.length) {
-      if (!contentPreImported) {
-        // Ensure that tiles that require entities have been imported
-        const entities = {};
-        tilesInfo.forEach(m => {
-          for (const action of m.actions) {
-            if (!action.entityType || !action.sourceId) {
-              continue;
-            }
-            if (typeof entities[action.entityType] === 'undefined') {
-              entities[action.entityType] = [];
-            }
-            entities[action.entityType].push(action);
+      // Ensure that tiles that require entities have been imported
+      const entities = {};
+      tilesInfo.forEach(m => {
+        for (const action of m.actions) {
+          if (!action.entityType || !action.sourceId) {
+            continue;
           }
-        });
-        for (const [entityType, actions] of Object.entries(entities)) {
-          await this.ImportEntities(
-            this.getSearchPacksForType(entityType),
-            this.findMissingEntities(actions),
-            CONSTANTS.TYPE_HUMANISE[entityType],
-          )
+          if (typeof entities[action.entityType] === 'undefined') {
+            entities[action.entityType] = [];
+          }
+          entities[action.entityType].push(action);
         }
+      });
+      for (const [entityType, actions] of Object.entries(entities)) {
+        await this.ImportEntities(
+          this.getSearchPacksForType(entityType),
+          this.findMissingEntities(actions),
+          CONSTANTS.TYPE_HUMANISE[entityType],
+        )
       }
       await this.unpackActiveTiles(scene, tilesInfo);
     }
@@ -3565,7 +3563,7 @@ export default class ScenePacker {
       }
       if (!scene.journal) {
         // Relink the journal to the correct entry
-        const newSceneJournal = game.journal.find(j => j.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === sceneJournalInfo.sourceId);
+        const newSceneJournal = game.journal.find(j => j.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === sceneJournalInfo.sourceId || j.getFlag('core', 'sourceId') === sceneJournalInfo.compendiumSourceId);
         if (newSceneJournal?.id) {
           await scene.update({journal: newSceneJournal.id});
         }
