@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.3.21
+
+- Updated unpacking of [Monk's Active Tile Triggers](https://foundryvtt.com/packages/monks-active-tiles) to handle multiple references within a single action.
+- Added alternate matching method when unpacking scenes.
+- "Import all" will no longer show individual UI notifications. This will greatly cut down on the number of notifications that are shown.
+
 ## v2.3.20
 
 - Allow journal unpacking to find by compendium reference as well.
