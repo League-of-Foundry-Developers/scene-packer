@@ -54,15 +54,12 @@ export default class AssetReport extends FormApplication {
             label: game.i18n.localize('World'),
             callback: () => {
               this.runReport();
-              this.close();
             },
           },
           module: {
             icon: '<i class="fas fa-atlas"></i>',
             label: game.i18n.localize('Module'),
             callback: () => {
-              this.close();
-
               let modules = game.data.modules.filter(m => m.packs?.length && m.active);
               let content = `<p>${game.i18n.localize('SCENE-PACKER.asset-report.module-select.mini')}</p>`;
               if (!modules.length) {
@@ -83,8 +80,6 @@ export default class AssetReport extends FormApplication {
                     icon: '<i class="fas fa-check"></i>',
                     label: game.i18n.localize('Next'),
                     callback: (html) => {
-                      this.close();
-
                       let moduleName = html.find('#module-name')[0]?.value;
                       if (moduleName) {
                         this.runReport({moduleName});
@@ -95,7 +90,6 @@ export default class AssetReport extends FormApplication {
                     icon: '<i class="fas fa-times"></i>',
                     label: game.i18n.localize('Cancel'),
                     callback: () => {
-                      this.close();
                     },
                   },
                 },
@@ -195,21 +189,20 @@ export default class AssetReport extends FormApplication {
       const assetRequests = [];
       /**
        * Keep track of the asset responses in the same order as the asset requests.
-       * @type {Promise<Response>[]}
+       * @type {Response[]}
        */
       const assetResponses = [];
 
       // Resolve all of the assets to see if they exist on the server.
       const totalToResolve = this.assetResolver.size;
       if (!totalToResolve) {
-        Dialog.prompt({
+        return Dialog.prompt({
           title: game.i18n.localize('SCENE-PACKER.asset-report.no-assets'),
           content: `<p>${game.i18n.localize('SCENE-PACKER.asset-report.no-assets-details')}</p>`,
           label: game.i18n.localize('Close'),
           callback: () => {
           },
         });
-        return;
       }
       const d = new Dialog({
         title: game.i18n.localize('SCENE-PACKER.asset-report.processing-assets'),
@@ -408,7 +401,7 @@ export default class AssetReport extends FormApplication {
   _onToggleDependenciesList(event) {
     event.preventDefault();
     const $tag = $(event.currentTarget);
-    const $icon = $tag.find('i.fas').toggleClass('fa-angle-double-down fa-angle-double-up');
+    $tag.find('i.fas').toggleClass('fa-angle-double-down fa-angle-double-up');
     $tag.siblings('ul').toggle();
   }
 
@@ -468,8 +461,12 @@ export default class AssetReport extends FormApplication {
    * Locations that assets can be.
    */
   static Locations = {
+    Unknown: 'unknown',
     ActorImage: 'actor-image',
     ActorTokenImage: 'actor-token-image',
+    ActorTokenAttacherTile: 'actor-token-attacher-tile',
+    ActorTokenAttacherToken: 'actor-token-attacher-token',
+    ActorTokenAttacherDrawingTexture: 'actor-token-attacher-drawing-texture',
     ActorItemImage: 'actor-item-image',
     ActorEffectImage: 'actor-effect-image',
     ItemImage: 'item-image',
@@ -624,9 +621,9 @@ export default class AssetReport extends FormApplication {
   }
 
   /**
-   * Gets the contents of `type` for the packs beloging to {@link moduleToCheck}
+   * Gets the contents of `type` for the packs belonging to {@link moduleToCheck}
    * @param {String} type
-   * @return {String[]}
+   * @return {Promise<String[]>}
    */
   async getPackContents(type) {
     const entities = [];
@@ -637,7 +634,7 @@ export default class AssetReport extends FormApplication {
       if (!pack) {
         continue;
       }
-      if (!isNewerVersion('0.8.0', game.data.version)) {
+      if (CONSTANTS.IsV8orNewer()) {
         const contents = await pack.getDocuments();
         entities.push(...contents.filter(s => s.name !== CONSTANTS.CF_TEMP_ENTITY_NAME));
       } else {
@@ -653,7 +650,7 @@ export default class AssetReport extends FormApplication {
    * Parses world Scenes for all of their assets.
    * Sets the {@link EntityData} for the world Scenes, keyed by scene.id
    * @param {Object} scene The scene to parse. Will parse all Scenes if none are provided.
-   * @return {Number} The number of Scenes checked.
+   * @return {Promise<Number>} The number of Scenes checked.
    */
   async ParseSceneAssets(scene) {
     const entities = [];
@@ -662,7 +659,7 @@ export default class AssetReport extends FormApplication {
     } else if (this.moduleToCheck) {
       const contents = await this.getPackContents('Scene');
       entities.push(...contents);
-    } else if (!isNewerVersion('0.8.0', game.data.version)) {
+    } else if (CONSTANTS.IsV8orNewer()) {
       entities.push(...game[AssetReport.Sources.Scene].contents);
     } else {
       entities.push(...game[AssetReport.Sources.Scene].entities);
@@ -697,7 +694,7 @@ export default class AssetReport extends FormApplication {
       const tokens = [];
       const sounds = [];
 
-      if (!isNewerVersion('0.8.0', game.data.version)) {
+      if (CONSTANTS.IsV8orNewer()) {
         if (scene.data.notes?.size) {
           notes.push(...Array.from(scene.data.notes.values()));
         }
@@ -757,11 +754,15 @@ export default class AssetReport extends FormApplication {
         if (img) {
           this.CheckAsset(scene.id, AssetReport.Sources.Scene, img, AssetReport.Locations.SceneTokenImage);
         }
-        const effects = token?.data?.actorData?.effects || token?.actorData?.effects || [];
+        let effects = token?.data?.actorData?.effects || token?.actorData?.effects || [];
+        if (token?.actor?.effects?.size) {
+          effects.push([...token.actor.effects.values()]);
+        }
         for (let j = 0; j < effects.length; j++) {
           const effect = effects[j];
-          if (effect?.icon) {
-            this.CheckAsset(scene.id, AssetReport.Sources.Scene, effect.icon, AssetReport.Locations.SceneTokenEffectIcon);
+          const icon = effect?.data?.icon || effect?.icon;
+          if (icon) {
+            this.CheckAsset(scene.id, AssetReport.Sources.Scene, icon, AssetReport.Locations.SceneTokenEffectIcon);
           }
         }
       });
@@ -787,14 +788,14 @@ export default class AssetReport extends FormApplication {
   /**
    * Parses world Actors for all of their assets.
    * Sets the {@link EntityData} for the world Actors, keyed by actor.id
-   * @return {Number} The number of Actors checked.
+   * @return {Promise<Number>} The number of Actors checked.
    */
   async ParseActorAssets() {
     const entities = [];
     if (this.moduleToCheck) {
       const contents = await this.getPackContents('Actor');
       entities.push(...contents);
-    } else if (!isNewerVersion('0.8.0', game.data.version)) {
+    } else if (CONSTANTS.IsV8orNewer()) {
       entities.push(...game[AssetReport.Sources.Actor].contents);
     } else {
       entities.push(...game[AssetReport.Sources.Actor].entities);
@@ -827,7 +828,7 @@ export default class AssetReport extends FormApplication {
       const items = [];
       const effects = [];
 
-      if (!isNewerVersion('0.8.0', game.data.version)) {
+      if (CONSTANTS.IsV8orNewer()) {
         if (actor.data.items?.size) {
           items.push(...Array.from(actor.data.items.values()));
         }
@@ -866,14 +867,14 @@ export default class AssetReport extends FormApplication {
   /**
    * Parses world Journals for all of their assets.
    * Sets the {@link EntityData} for the world Journals, keyed by journal.id
-   * @return {Number} The number of Journals checked.
+   * @return {Promise<Number>} The number of Journals checked.
    */
   async ParseJournalAssets() {
     const entities = [];
     if (this.moduleToCheck) {
       const contents = await this.getPackContents('JournalEntry');
       entities.push(...contents);
-    } else if (!isNewerVersion('0.8.0', game.data.version)) {
+    } else if (CONSTANTS.IsV8orNewer()) {
       entities.push(...game[AssetReport.Sources.JournalEntry].contents);
     } else {
       entities.push(...game[AssetReport.Sources.JournalEntry].entities);
@@ -917,14 +918,14 @@ export default class AssetReport extends FormApplication {
   /**
    * Parses world Items for all of their assets.
    * Sets the {@link EntityData} for the world Items, keyed by item.id
-   * @return {Number} The number of Items checked.
+   * @return {Promise<Number>} The number of Items checked.
    */
   async ParseItemAssets() {
     const entities = [];
     if (this.moduleToCheck) {
       const contents = await this.getPackContents('Item');
       entities.push(...contents);
-    } else if (!isNewerVersion('0.8.0', game.data.version)) {
+    } else if (CONSTANTS.IsV8orNewer()) {
       entities.push(...game[AssetReport.Sources.Item].contents);
     } else {
       entities.push(...game[AssetReport.Sources.Item].entities);
@@ -950,7 +951,7 @@ export default class AssetReport extends FormApplication {
       }
 
       const effects = [];
-      if (!isNewerVersion('0.8.0', game.data.version)) {
+      if (CONSTANTS.IsV8orNewer()) {
         if (item.data.effects?.size) {
           effects.push(...Array.from(item.data.effects.values()));
         }
@@ -987,14 +988,14 @@ export default class AssetReport extends FormApplication {
   /**
    * Parses world Playlists for all of their assets.
    * Sets the {@link EntityData} for the world Playlists, keyed by playlist.id
-   * @return {Number} The number of Playlists checked.
+   * @return {Promise<Number>} The number of Playlists checked.
    */
   async ParsePlaylistAssets() {
     const entities = [];
     if (this.moduleToCheck) {
       const contents = await this.getPackContents('Playlist');
       entities.push(...contents);
-    } else if (!isNewerVersion('0.8.0', game.data.version)) {
+    } else if (CONSTANTS.IsV8orNewer()) {
       entities.push(...game[AssetReport.Sources.Playlist].contents);
     } else {
       entities.push(...game[AssetReport.Sources.Playlist].entities);
@@ -1017,7 +1018,7 @@ export default class AssetReport extends FormApplication {
 
       const sounds = [];
 
-      if (!isNewerVersion('0.8.0', game.data.version)) {
+      if (CONSTANTS.IsV8orNewer()) {
         if (playlist.data.sounds?.size) {
           sounds.push(...Array.from(playlist.data.sounds.values()));
         }
@@ -1048,14 +1049,14 @@ export default class AssetReport extends FormApplication {
   /**
    * Parses world Macros for all of their assets.
    * Sets the {@link EntityData} for the world Macros, keyed by macro.id
-   * @return {Number} The number of Macros checked.
+   * @return {Promise<Number>} The number of Macros checked.
    */
   async ParseMacroAssets() {
     const entities = [];
     if (this.moduleToCheck) {
       const contents = await this.getPackContents('Macro');
       entities.push(...contents);
-    } else if (!isNewerVersion('0.8.0', game.data.version)) {
+    } else if (CONSTANTS.IsV8orNewer()) {
       entities.push(...game[AssetReport.Sources.Macro].contents);
     } else {
       entities.push(...game[AssetReport.Sources.Macro].entities);
@@ -1089,14 +1090,14 @@ export default class AssetReport extends FormApplication {
   /**
    * Parses world RollTables for all of their assets.
    * Sets the {@link EntityData} for the world RollTables, keyed by table.id
-   * @return {Number} The number of RollTables checked.
+   * @return {Promise<Number>} The number of RollTables checked.
    */
   async ParseRollTableAssets() {
     const entities = [];
     if (this.moduleToCheck) {
       const contents = await this.getPackContents('RollTable');
       entities.push(...contents);
-    } else if (!isNewerVersion('0.8.0', game.data.version)) {
+    } else if (CONSTANTS.IsV8orNewer()) {
       entities.push(...game[AssetReport.Sources.RollTable].contents);
     } else {
       entities.push(...game[AssetReport.Sources.RollTable].entities);
@@ -1123,7 +1124,7 @@ export default class AssetReport extends FormApplication {
 
       const results = [];
 
-      if (!isNewerVersion('0.8.0', game.data.version)) {
+      if (CONSTANTS.IsV8orNewer()) {
         if (table.data.results?.size) {
           results.push(...Array.from(table.data.results.values()));
         }

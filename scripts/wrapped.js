@@ -6,16 +6,16 @@ import Hash from './hash.js';
  * Utilise libWrapper to ensure we get a sourceId for each of our compendium imports
  */
 Hooks.once('setup', function () {
-    if (isNewerVersion('0.8.0', game.data.version)) {
+    if (CONSTANTS.IsV7()) {
       // Wrap things < 0.8.0
       libWrapper.register(
         'scene-packer',
         'Entity.prototype.toCompendium',
         function (wrapped, ...args) {
           const newFlags = {};
-          newFlags[ScenePacker.MODULE_NAME] = {sourceId: this.uuid};
+          newFlags[CONSTANTS.MODULE_NAME] = {sourceId: this.uuid};
           if (this.data?.permission?.default) {
-            newFlags[ScenePacker.MODULE_NAME][ScenePacker.FLAGS_DEFAULT_PERMISSION] = this.data.permission.default;
+            newFlags[CONSTANTS.MODULE_NAME][ScenePacker.FLAGS_DEFAULT_PERMISSION] = this.data.permission.default;
           }
           if (!this.data.flags) {
             this.data.flags = {};
@@ -89,10 +89,10 @@ Hooks.once('setup', function () {
             data.flags = {};
           }
           // Set the source hash for update functionality
-          if (!data.flags[ScenePacker.MODULE_NAME]) {
-            data.flags[ScenePacker.MODULE_NAME] = {};
+          if (!data.flags[CONSTANTS.MODULE_NAME]) {
+            data.flags[CONSTANTS.MODULE_NAME] = {};
           }
-          data.flags[ScenePacker.MODULE_NAME].hash = Hash.SHA1(data);
+          data.flags[CONSTANTS.MODULE_NAME].hash = Hash.SHA1(data);
 
           // Patch "Sight angle must be between 1 and 360 degrees." error
           if (data.token?.sightAngle === 0) {
@@ -150,10 +150,10 @@ Hooks.once('setup', function () {
               e.data.flags = {};
             }
             mergeObject(e.data.flags, newFlags);
-            if (!e.data.flags[ScenePacker.MODULE_NAME]) {
-              e.data.flags[ScenePacker.MODULE_NAME] = {};
+            if (!e.data.flags[CONSTANTS.MODULE_NAME]) {
+              e.data.flags[CONSTANTS.MODULE_NAME] = {};
             }
-            e.data.flags[ScenePacker.MODULE_NAME].hash = Hash.SHA1(e.data);
+            e.data.flags[CONSTANTS.MODULE_NAME].hash = Hash.SHA1(e.data);
 
             return e.data;
           }));
@@ -179,9 +179,9 @@ Hooks.once('setup', function () {
             let data = wrapped.bind(this)(...args);
 
             const newFlags = {};
-            newFlags[ScenePacker.MODULE_NAME] = {sourceId: this.uuid};
-            if (data?.permission?.default) {
-              newFlags[ScenePacker.MODULE_NAME][ScenePacker.FLAGS_DEFAULT_PERMISSION] = data.permission.default;
+            newFlags[CONSTANTS.MODULE_NAME] = {sourceId: this.uuid};
+            if (this?.data?.permission?.default) {
+              newFlags[CONSTANTS.MODULE_NAME][ScenePacker.FLAGS_DEFAULT_PERMISSION] = this.data.permission.default;
             }
             if (!data.flags) {
               data.flags = {};
@@ -195,25 +195,13 @@ Hooks.once('setup', function () {
       });
 
       // Add hashes to entities imported from compendiums to support upgrade diffs.
-      libWrapper.register(
-        'scene-packer',
-        'WorldCollection.prototype.fromCompendium',
-        function (wrapped, ...args) {
-          const data = wrapped.bind(this)(...args);
-
-          if (!data.flags) {
-            data.flags = {};
-          }
-          // Set the source hash for update functionality
-          if (!data.flags[ScenePacker.MODULE_NAME]) {
-            data.flags[ScenePacker.MODULE_NAME] = {};
-          }
-          data.flags[ScenePacker.MODULE_NAME].hash = Hash.SHA1(data);
-
-          return data;
-        },
-        'WRAPPER',
-      );
+      for (const type of ['Folder', 'Playlist', 'Macro', 'Item', 'Actor', 'RollTable', 'JournalEntry', 'Scene']) {
+        Hooks.on(`preCreate${type}`, (entity, createData) => {
+          const newFlags = {};
+          newFlags[CONSTANTS.MODULE_NAME] = {hash: Hash.SHA1(entity)};
+          entity.data.update({flags: newFlags});
+        });
+      }
 
       // Clean up temporary compendium folder entities when importing all from a compendium.
       libWrapper.register(
@@ -248,5 +236,7 @@ Hooks.once('setup', function () {
         'WRAPPER',
       );
     }
-  },
-);
+  }
+  ,
+)
+;

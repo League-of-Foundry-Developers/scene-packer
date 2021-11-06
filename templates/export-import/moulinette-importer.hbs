@@ -1,0 +1,284 @@
+{{#*inline "folderPartial"}}
+  <li class="directory-item folder flexcol {{#unless folder.expanded}}collapsed{{/unless}}"
+      data-folder-id="{{folder.id}}" data-folder-depth="{{folder.depth}}">
+    <header class="folder-header flexrow" style="background-color: {{folder.data.color}}">
+      <h3>
+        <input type="checkbox" data-type="Folder" data-folder-type="{{folder.type}}" value="{{folder.id}}" checked>
+        <i class="fas fa-folder-open fa-fw"></i>{{folder.name}}
+      </h3>
+    </header>
+
+    <ol class="subdirectory">
+      {{~#each folder.children as |child i|}}
+        {{> folderPartial folder=child user=../user}}
+      {{/each}}
+      {{#each folder.content}}
+        {{> entityPartial}}
+      {{/each~}}
+    </ol>
+  </li>
+{{/inline}}
+
+{{#*inline "entityPartial"}}
+  <li class="directory-item entity" data-entity-id="{{this.id}}">
+    <label class="flexrow">
+      <input type="checkbox" data-type="{{this.documentName}}" name="entity.{{this.documentName}}.{{this.id}}" value="{{this.id}}" checked>
+      {{#if this.img}}<img class="profile actor-profile" title="{{this.name}}" data-src="{{this.img}}"/>{{/if}}
+      <h4 class="entity-name"><a class="entity-link" data-entity="{{this.documentName}}" data-id="{{this.id}}">{{this.name}}</a></h4>
+    </label>
+  </li>
+{{/inline}}
+
+<form autocomplete="off">
+  <nav class="sheet-tabs tabs" data-group="sections">
+    <a class="item" data-tab="scenes"><i class="fas fa-map"></i> {{localize 'SCENE-PACKER.exporter.tabs.scenes'}}</a>
+    <a class="item" data-tab="actors"><i class="fas fa-users"></i> {{localize 'SCENE-PACKER.exporter.tabs.actors'}}</a>
+    <a class="item" data-tab="items"><i class="fas fa-suitcase"></i> {{localize 'SCENE-PACKER.exporter.tabs.items'}}</a>
+    <a class="item" data-tab="journals"><i class="fas fa-book-open"></i> {{localize 'SCENE-PACKER.exporter.tabs.journals'}}</a>
+    <a class="item" data-tab="tables"><i class="fas fa-th-list"></i> {{localize 'SCENE-PACKER.exporter.tabs.tables'}}</a>
+    <a class="item" data-tab="playlists"><i class="fas fa-music"></i> {{localize 'SCENE-PACKER.exporter.tabs.playlists'}}</a>
+    <a class="item" data-tab="macros"><i class="fas fa-plug"></i> {{localize 'SCENE-PACKER.exporter.tabs.macros'}}</a>
+    <a class="item" data-tab="options"><i class="fas fa-cogs"></i> {{localize 'SCENE-PACKER.exporter.tabs.options'}}</a>
+  </nav>
+
+  <section class="content directory">
+
+    <div class="tab" data-tab="scenes" data-group="sections">
+      <header class="directory-header">
+        <div class="header-search flexrow">
+          <i class="fas fa-search"></i>
+          <input type="text" name="search" value="" placeholder="{{localize 'SIDEBAR.SceneSearch'}}" autocomplete="off"/>
+          <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="1"><i class="fas fa-check-square"></i></a>
+          <a class="header-control collapse-all" title="{{localize 'FOLDER.Collapse'}}"><i class="fas fa-sort-amount-up"></i></a>
+        </div>
+      </header>
+
+      <ol class="directory-list" data-entity="Scene">
+        {{~#each scenes.tree.children as |f fi|}}
+          {{> folderPartial folder=f user=../user}}
+        {{/each}}
+        {{#each scenes.tree.content}}
+          {{> entityPartial}}
+        {{/each~}}
+      </ol>
+    </div>
+
+    <div class="tab" data-tab="actors" data-group="sections">
+      <header class="directory-header">
+        <div class="header-search flexrow">
+          <i class="fas fa-search"></i>
+          <input type="text" name="search" value="" placeholder="{{localize 'ACTOR.Search'}}" autocomplete="off"/>
+          <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="1"><i class="fas fa-check-square"></i></a>
+          <a class="header-control collapse-all" title="{{localize 'FOLDER.Collapse'}}"><i class="fas fa-sort-amount-up"></i></a>
+        </div>
+      </header>
+
+      <ol class="directory-list" data-entity="Actor">
+        {{~#each actors.tree.children as |f fi|}}
+          {{> folderPartial folder=f user=../user}}
+        {{/each}}
+        {{#each actors.tree.content}}
+          {{> entityPartial}}
+        {{/each~}}
+      </ol>
+    </div>
+
+    <div class="tab" data-tab="items" data-group="sections">
+      <header class="directory-header">
+        <div class="header-search flexrow">
+          <i class="fas fa-search"></i>
+          <input type="text" name="search" value="" placeholder="{{localize 'ITEM.Search'}}" autocomplete="off"/>
+          <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="1"><i class="fas fa-check-square"></i></a>
+          <a class="header-control collapse-all" title="{{localize 'FOLDER.Collapse'}}"><i class="fas fa-sort-amount-up"></i></a>
+        </div>
+      </header>
+
+      <ol class="directory-list" data-entity="Item">
+        {{~#each items.tree.children as |f fi|}}
+          {{> folderPartial folder=f user=../user}}
+        {{/each}}
+        {{#each items.tree.content}}
+          {{> entityPartial}}
+        {{/each~}}
+      </ol>
+    </div>
+
+    <div class="tab" data-tab="journals" data-group="sections">
+      <header class="directory-header">
+        <div class="header-search flexrow">
+          <i class="fas fa-search"></i>
+          <input type="text" name="search" value="" placeholder="{{localize 'JOURNAL.Search'}}" autocomplete="off"/>
+          <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="1"><i class="fas fa-check-square"></i></a>
+          <a class="header-control collapse-all" title="{{localize 'FOLDER.Collapse'}}"><i class="fas fa-sort-amount-up"></i></a>
+        </div>
+      </header>
+
+      <ol class="directory-list" data-entity="JournalEntry">
+        {{~#each journals.tree.children as |f fi|}}
+          {{> folderPartial folder=f user=../user}}
+        {{/each}}
+        {{#each journals.tree.content}}
+          {{> entityPartial}}
+        {{/each~}}
+      </ol>
+    </div>
+
+    <div class="tab" data-tab="tables" data-group="sections">
+      <header class="directory-header">
+        <div class="header-search flexrow">
+          <i class="fas fa-search"></i>
+          <input type="text" name="search" value="" placeholder="{{localize 'TABLE.Search'}}" autocomplete="off"/>
+          <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="1"><i class="fas fa-check-square"></i></a>
+          <a class="header-control collapse-all" title="{{localize 'FOLDER.Collapse'}}"><i class="fas fa-sort-amount-up"></i></a>
+        </div>
+      </header>
+
+      <ol class="directory-list" data-entity="RollTable">
+        {{~#each tables.tree.children as |f fi|}}
+          {{> folderPartial folder=f user=../user}}
+        {{/each}}
+        {{#each tables.tree.content}}
+          {{> entityPartial}}
+        {{/each~}}
+      </ol>
+    </div>
+
+    <div class="tab" data-tab="playlists" data-group="sections">
+      <header class="directory-header">
+        <div class="header-search flexrow">
+          <i class="fas fa-search"></i>
+          <input type="text" name="search" value="" placeholder="{{localize 'PLAYLIST.Search'}}" autocomplete="off"/>
+          <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="1"><i class="fas fa-check-square"></i></a>
+          <a class="header-control collapse-all" title="{{localize 'FOLDER.Collapse'}}"><i class="fas fa-sort-amount-up"></i></a>
+        </div>
+      </header>
+
+      <ol class="directory-list" data-entity="Playlist">
+        {{~#each playlists.tree.children as |f fi|}}
+          {{> folderPartial folder=f user=../user}}
+        {{/each}}
+        {{#each playlists.tree.content}}
+          {{> entityPartial}}
+        {{/each~}}
+      </ol>
+    </div>
+
+    <div class="tab" data-tab="macros" data-group="sections">
+      <header class="directory-header">
+        <div class="header-search flexrow">
+          <i class="fas fa-search"></i>
+          <input type="text" name="search" value="" placeholder="{{localize 'MACRO.Search'}}" autocomplete="off"/>
+          <a class="header-control collapse-all" title="{{localize 'FOLDER.Collapse'}}"><i class="fas fa-sort-amount-up fa-fw"></i></a>
+        </div>
+      </header>
+
+      <ol class="directory-list" data-entity="Macro">
+        {{~#each macros.tree.children as |f fi|}}
+          {{> folderPartial folder=f user=../user}}
+        {{/each}}
+        {{#each macros.tree.content}}
+          {{> entityPartial}}
+        {{/each~}}
+      </ol>
+    </div>
+
+    <div class="tab" data-tab="options" data-group="sections">
+      <p>{{{localize 'SCENE-PACKER.exporter.options.intro'}}}</p>
+
+      <div class="form-group">
+        <label for="SP-export-packageName">
+          <b>{{localize 'SCENE-PACKER.exporter.options.package-name'}}</b>
+          <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.package-name-help'}}"></i>
+        </label>
+        <input type="text" id="SP-export-packageName" name="packageName" value="" maxlength="50" required>
+      </div>
+      <div class="form-group">
+        <label for="SP-export-version">
+          <b>{{localize 'SCENE-PACKER.exporter.options.version'}}</b>
+          <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.version-help'}}"></i>
+        </label>
+        <input type="text" id="SP-export-version" name="version" value="1.0.0" required>
+      </div>
+      <div class="form-group">
+        <label for="SP-export-author">
+          <b>{{localize 'SCENE-PACKER.exporter.options.author'}}</b>
+          <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.author-help'}}"></i>
+        </label>
+        <input type="text" id="SP-export-author" name="author" value="" required>
+      </div>
+      <div class="form-group">
+        <label for="SP-export-packageDescription">
+          <b>{{localize 'SCENE-PACKER.exporter.options.package-description'}}</b>
+          <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.package-description-help'}}"></i>
+        </label>
+        <textarea id="SP-export-packageDescription" name="packageDescription" spellcheck="true" rows="6"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="SP-export-packageCover">
+          <b>{{localize 'SCENE-PACKER.exporter.options.package-cover'}}</b>
+          <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.package-cover-help'}}"></i>
+        </label>
+        <input type="text" id="SP-export-packageCover" name="packageCover" value="" placeholder="https://example.com/adventure.png">
+      </div>
+      <div class="form-group">
+        <label for="SP-export-email">
+          <b>{{localize 'SCENE-PACKER.exporter.options.email'}}</b>
+          <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.email-help'}}"></i>
+        </label>
+        <input type="text" id="SP-export-email" name="email" value="">
+      </div>
+      <div class="form-group">
+        <label for="SP-export-discordId">
+          <b>{{localize 'SCENE-PACKER.exporter.options.discord-id'}}</b>
+          <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.discord-id-help'}}"></i>
+        </label>
+        <input type="text" id="SP-export-discordId" name="discordId" value="">
+      </div>
+      <div class="form-group">
+        <label for="SP-export-externalLink">
+          <b>{{localize 'SCENE-PACKER.exporter.options.external-link'}}</b>
+          <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.external-link-help'}}"></i>
+        </label>
+        <input type="text" id="SP-export-externalLink" name="externalLink" value="" placeholder="https://patreon.com">
+      </div>
+      <div class="form-group">
+        <label for="SP-export-welcomeJournal">
+          <b>{{localize 'SCENE-PACKER.exporter.options.welcome-journal'}}</b>
+          <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.welcome-journal-help'}}"></i>
+        </label>
+        <input type="text" id="SP-export-welcomeJournal" name="welcomeJournal" value="" placeholder="{{localize 'SCENE-PACKER.exporter.options.welcome-journal-drop-text'}}">
+      </div>
+      <div class="form-group">
+        <b>{{localize 'SCENE-PACKER.exporter.options.allow-complete-import'}}</b>
+        <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.allow-complete-import-help'}}"></i>
+        <label for="SP-export-allow-import-yes">
+          <input type="radio" id="SP-export-allow-import-yes" name="allowCompleteImport" value="yes" checked>
+          <b>{{localize 'Yes'}}</b>
+        </label>
+        <label for="SP-export-allow-import-no">
+          <input type="radio" id="SP-export-allow-import-no" name="allowCompleteImport" value="no">
+          <b>{{localize 'No'}}</b>
+        </label>
+      </div>
+
+      <hr>
+      <p>{{localize 'SCENE-PACKER.exporter.options.next'}}</p>
+      <hr>
+      <p class="options-help"></p>
+    </div>
+  </section>
+
+  <footer class="sheet-footer">
+    <hr>
+    <p class="summary">{{ summary }}</p>
+  </footer>
+
+  <footer class="sheet-footer flexrow">
+    <button type="submit" name="submit" value="1">
+      <i class="fas fa-check"></i> {{localize 'Next'}}
+    </button>
+    <button type="button" name="close">
+      <i class="fas fa-times"></i> {{localize 'Close'}}
+    </button>
+  </footer>
+</form>

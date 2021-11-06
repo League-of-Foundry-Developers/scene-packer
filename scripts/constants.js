@@ -85,6 +85,11 @@ export const CONSTANTS = Object.freeze({
   SETTING_ENABLE_CONTEXT_MENU: 'enableContextMenu',
 
   /**
+   * The setting key for triggering the Exporter class.
+   */
+  SETTING_EXPORT_TO_MOULINETTE: 'exportToMoulinette',
+
+  /**
    * The setting key for what version has been imported already. Used for tracking which dialogs to display.
    */
   SETTING_IMPORTED_VERSION: 'imported',
@@ -111,6 +116,69 @@ export const CONSTANTS = Object.freeze({
     RollTable: 'roll tables',
     JournalEntry: 'journal entries',
     Scene: 'scenes',
+  },
+
+  /**
+   * Returns the version of the game instance.
+   * Handles the storage structure that changed over time.
+   * @return {string}
+   */
+  Version() {
+    return game.version || game.data.version;
+  },
+
+  /**
+   * Returns whether the version is at least V7
+   * @param {string} version - The version to test. Defaults to the current game instance version.
+   * @return {boolean}
+   */
+  IsV7orNewer(version = this.Version()) {
+    return version === '0.7.0' || isNewerVersion(version, '0.7.0')
+  },
+
+  /**
+   * Returns whether the version is V7
+   * @param {string} version - The version to test. Defaults to the current game instance version.
+   * @return {boolean}
+   */
+  IsV7(version = this.Version()) {
+    return this.IsV7orNewer(version) && isNewerVersion('0.8.0', version);
+  },
+
+  /**
+   * Returns whether the version is at least V8
+   * @param {string} version - The version to test. Defaults to the current game instance version.
+   * @return {boolean}
+   */
+  IsV8orNewer(version = this.Version()) {
+    return version === '0.8.0' || isNewerVersion(version, '0.8.0')
+  },
+
+  /**
+   * Returns whether the version is V8
+   * @param {string} version - The version to test. Defaults to the current game instance version.
+   * @return {boolean}
+   */
+  IsV8(version = this.Version()) {
+    return this.IsV8orNewer(version) && isNewerVersion('9', version);
+  },
+
+  /**
+   * Returns whether the version is at least V9
+   * @param {string} version - The version to test. Defaults to the current game instance version.
+   * @return {boolean}
+   */
+  IsV9orNewer(version = this.Version()) {
+    return version === '9.0' || isNewerVersion(version, '9')
+  },
+
+  /**
+   * Returns whether the version is V9
+   * @param {string} version - The version to test. Defaults to the current game instance version.
+   * @return {boolean}
+   */
+  IsV9(version = this.Version()) {
+    return this.IsV9orNewer(version) && isNewerVersion('10', version);
   },
 });
 

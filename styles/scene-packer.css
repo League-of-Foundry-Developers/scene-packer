@@ -73,3 +73,46 @@
 .dialog.welcome-prompt .dialog-buttons button.dialog-button.close {
   flex-basis: 75px;
 }
+#scene-packer-exporter nav {
+  border-bottom: 1px solid #000000;
+  padding-bottom: 5px;
+}
+#scene-packer-exporter section.directory {
+  height: 570px;
+  overflow-y: auto;
+}
+#scene-packer-exporter li.folder.collapsed > .folder-header {
+  background: inherit;
+}
+#scene-packer-exporter li.folder > .folder-header h3 {
+  color: inherit;
+}
+#scene-packer-exporter .entity label {
+  align-items: center;
+}
+#scene-packer-exporter .form-group {
+  align-items: baseline;
+}
+#scene-packer-exporter .form-group.file-picker input {
+  margin-left: -3px;
+}
+#scene-packer-exporter .form-group textarea {
+  padding: 3px;
+  border: 1px solid #7a7971;
+}
+#scene-packer-exporter-progress .app-footer {
+  flex: 0;
+  margin-top: auto;
+}
+#scene-packer-exporter-progress .app-footer progress {
+  flex-basis: 70%;
+  flex-shrink: 10;
+}
+#scene-packer-exporter-progress .app-footer .speed,
+#scene-packer-exporter-progress .app-footer .size {
+  text-align: right;
+}
+#scene-packer-exporter-progress .app-footer .info {
+  white-space: nowrap;
+  margin-left: 5px;
+}
