@@ -537,7 +537,7 @@ export default class ScenePacker {
                       await scene.update({thumb: t.thumb});
                     }
                   }
-                  await this.ProcessScene(scene, {showLinkedJournal: false, contentPreImported: true});
+                  await this.ProcessScene(scene, {showLinkedJournal: false, contentPreImported: true, showUI: false});
                 }
                 break;
               case 'JournalEntry':
@@ -822,6 +822,7 @@ export default class ScenePacker {
    * @param {Object} scene The scene to initialise. Defaults to the currently viewed scene.
    * @param {Boolean} showLinkedJournal Whether to show any Journals linked to the Scene.
    * @param {Boolean} contentPreImported Whether the content for this scene has already been imported.
+   * @param {Boolean|null} showUI Whether to show the UI notifications. If null, will default to the opposite of contentPreImported.
    * @returns Promise<ScenePacker> for chaining
    */
   async ProcessScene(
@@ -829,10 +830,15 @@ export default class ScenePacker {
     {
       showLinkedJournal: showLinkedJournal = this.allowImportPrompts,
       contentPreImported: contentPreImported = false,
+      showUI: showUI = null,
     } = {},
   ) {
     if (!game.user.isGM) {
       return;
+    }
+
+    if (showUI === null) {
+      showUI = !contentPreImported;
     }
 
     const packedVersion = await scene.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_PACKED_VERSION);
@@ -858,14 +864,14 @@ export default class ScenePacker {
       return this;
     }
 
-    if (!contentPreImported) {
+    if (showUI) {
       ui.notifications.info(
         game.i18n.localize('SCENE-PACKER.notifications.first-launch'),
       );
     }
-    await this.UnpackScene(scene, {showLinkedJournal, contentPreImported});
-    await this.ClearPackedData(scene, !contentPreImported);
-    if (!contentPreImported) {
+    await this.UnpackScene(scene, {showLinkedJournal, contentPreImported, showUI});
+    await this.ClearPackedData(scene, showUI);
+    if (showUI) {
       ui.notifications.info(
         game.i18n.localize('SCENE-PACKER.notifications.done'),
       );
@@ -876,7 +882,7 @@ export default class ScenePacker {
     if (this.welcomeJournal && isNewerVersion(moduleVersion, importedVersion)) {
       // Display the welcome journal once per new module version
       const j = game.journal.find(j => j.name === this.welcomeJournal && j.getFlag('core', 'sourceId')
-        .startsWith(`Compendium.${this.moduleName}.`));
+        ?.startsWith(`Compendium.${this.moduleName}.`));
       if (j) {
         j.sheet.render(true, {sheetMode: 'text'});
       }
@@ -1812,7 +1818,11 @@ export default class ScenePacker {
             return entity;
           }
 
-          if (coreSourceId && entity.getFlag('core', 'sourceId') === sourceId) {
+          if (sourceId && entity.getFlag('core', 'sourceId') === sourceId) {
+            return entity;
+          }
+
+          if (coreSourceId && entity.getFlag('core', 'sourceId') === coreSourceId) {
             return entity;
           }
         }
@@ -3468,10 +3478,11 @@ export default class ScenePacker {
    * @param {Object} scene The scene to unpack. Defaults to the currently viewed scene.
    * @param {Boolean} showLinkedJournal Whether to show any Journals linked to the Scene.
    * @param {Boolean} contentPreImported Whether the content for this scene has already been imported.
+   * @param {Boolean} showUI Whether to show the UI notifications.
    */
   async UnpackScene(
     scene = game.scenes.get(game.user.viewedScene),
-    {showLinkedJournal = true, contentPreImported = false} = {},
+    {showLinkedJournal = true, contentPreImported = false, showUI = true} = {},
   ) {
     const tokenInfo = scene.getFlag(this.moduleName, CONSTANTS.FLAGS_TOKENS);
     const journalInfo = scene.getFlag(this.moduleName, CONSTANTS.FLAGS_JOURNALS);
@@ -3496,7 +3507,7 @@ export default class ScenePacker {
         this.getSearchPacksForType('Actor'),
         this.findMissingActors(tokenInfo),
         'actors',
-        !contentPreImported,
+        showUI,
       );
     }
 
@@ -3508,7 +3519,7 @@ export default class ScenePacker {
           this.getSearchPacksForType('JournalEntry'),
           this.findMissingJournals(journalInfo),
           'journals',
-          !contentPreImported,
+          showUI,
         );
       } else {
         // List all of the journals belonging to this module's packs
@@ -3539,7 +3550,7 @@ export default class ScenePacker {
           this.getSearchPacksForType(entityType),
           this.findMissingEntities(actions),
           CONSTANTS.TYPE_HUMANISE[entityType],
-          !contentPreImported,
+          showUI,
         )
       }
       await this.unpackActiveTiles(scene, tilesInfo);
@@ -3553,7 +3564,7 @@ export default class ScenePacker {
           return {journalName: d};
         })),
         'journals',
-        !contentPreImported,
+        showUI,
       );
     }
     if (this.additionalJournals.length > 0 && !contentPreImported) {
@@ -3564,7 +3575,7 @@ export default class ScenePacker {
           return {journalName: d};
         })),
         'journals',
-        !contentPreImported,
+        showUI,
       );
     }
     if (this.additionalMacros.length > 0 && !contentPreImported) {
@@ -3575,7 +3586,7 @@ export default class ScenePacker {
           return {name: d};
         })),
         'macros',
-        !contentPreImported,
+        showUI,
       );
     }
 
@@ -3586,7 +3597,7 @@ export default class ScenePacker {
           this.getSearchPacksForType('JournalEntry'),
           this.findMissingJournals([sceneJournalInfo]),
           'journals',
-          !contentPreImported,
+          showUI,
         );
       }
       if (!scene.journal) {
@@ -3605,10 +3616,10 @@ export default class ScenePacker {
 
     // Relink the tokens and spawn the pins
     if (tokenInfo?.length) {
-      await this.relinkTokens(scene, tokenInfo, !contentPreImported);
+      await this.relinkTokens(scene, tokenInfo, showUI);
     }
     if (journalInfo?.length) {
-      await this.spawnNotes(scene, journalInfo, !contentPreImported);
+      await this.spawnNotes(scene, journalInfo, showUI);
     }
 
     // Display the Scene's journal note if it has one
@@ -3616,7 +3627,7 @@ export default class ScenePacker {
       scene.journal.show();
     }
 
-    if (!contentPreImported) {
+    if (showUI) {
       ui.sidebar.activateTab('scenes');
     }
 
@@ -4561,7 +4572,7 @@ export default class ScenePacker {
       }
     }
     let name = entity.name;
-    let sourceId = entity.getFlag(CONSTANTS.MODULE_NAME, 'sourceId');
+    let sourceId = entity.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') || entity.uuid;
     let matches = [];
 
     for (let l = 0; l < packs[`${type}Packs`].length; l++) {
