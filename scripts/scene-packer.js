@@ -542,7 +542,7 @@ export default class ScenePacker {
                       await scene.update({thumb: t.thumb});
                     }
                   }
-                  await this.ProcessScene(scene, {showLinkedJournal: false, contentPreImported: true});
+                  await this.ProcessScene(scene, {showLinkedJournal: false, contentPreImported: true, showUI: false});
                 }
                 break;
               case 'JournalEntry':
@@ -4577,7 +4577,7 @@ export default class ScenePacker {
       }
     }
     let name = entity.name;
-    let sourceId = entity.getFlag(CONSTANTS.MODULE_NAME, 'sourceId');
+    let sourceId = entity.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') || entity.uuid;
     let matches = [];
 
     for (let l = 0; l < packs[`${type}Packs`].length; l++) {

@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.3.22
+
+- Fixed an edge case where relinking entities wouldn't match correctly if they originated from a DDB Import.
+- Added macro `Bulk Unpack Scenes`
+  - This macro will unpack any scene in your world that has not yet been unpacked. Useful if you have imported a bunch of Scenes all at once, but didn't use the "Import All" option.
+- Reduce the number of notifications that show when unpacking a lot of scenes at once.
+
 ## v2.3.21
 
 - Updated unpacking of [Monk's Active Tile Triggers](https://foundryvtt.com/packages/monks-active-tiles) to handle multiple references within a single action.
