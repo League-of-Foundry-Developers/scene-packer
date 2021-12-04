@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.23
+
+- Adjust folder creation to work around changes in [Compendium Folders](https://foundryvtt.com/packages/compendium-folders) internal API.
+
 ## v2.3.22
 
 - Fixed an edge case where relinking entities wouldn't match correctly if they originated from a DDB Import.
