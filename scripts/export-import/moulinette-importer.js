@@ -9,11 +9,9 @@ import { ExporterData } from './exporter.js';
 
 export default class MoulinetteImporter extends FormApplication {
   /**
-   * @param {string} url - The URL containing the ExporterData payload
-   * @param {string} sceneID - Optional. The specific SceneID to import, ignoring other entities unless required for that Scene
-   * @param {string} actorID - Optional. The specific ActorID to import, ignoring other entities unless required for that Actor
+   * @param {object} packInfo - The ExporterData payload
    */
-  constructor({ url = '', sceneID = '', actorID = '' } = {}) {
+  constructor({ packInfo = {} } = {}) {
     super();
 
     if (CONSTANTS.IsV7()) {
@@ -22,14 +20,13 @@ export default class MoulinetteImporter extends FormApplication {
         content: game.i18n.localize('SCENE-PACKER.importer.unsupported'),
         callback: () => {},
       });
-      return;
+      return null;
     }
 
-    if (!url) {
-      // TODO Better error checking/handling
-      return;
-    }
-    this.process(url, {sceneID, actorID});
+    /**
+     * @type {object} packInfo - The ExporterData payload
+     */
+    this.packInfo = packInfo;
   }
 
   /** @inheritdoc */
@@ -74,59 +71,27 @@ export default class MoulinetteImporter extends FormApplication {
 
   /**
    * Process the requested URL.
-   * @param {URL|string} url - The URL to process and import.
    * @param {ProcessOptions} options - Additional options for processing
    */
-  async process(url, options) {
-    if (!url) {
-      return;
-    }
-
-    if (typeof url === 'string') {
-      this.url = new URL(url, this.url || undefined);
-    }
-
+  async process(options) {
     options = Object.assign({ sceneID: '', actorID: '' }, options);
     const { sceneID, actorID } = options;
-    if (!url) {
-      throw game.i18n.localize('SCENE-PACKER.importer.invalid-url-empty');
-    }
-    try {
-      url = new URL(url);
-    } catch (e) {
-      throw game.i18n.format('SCENE-PACKER.importer.invalid-url', {
-        url,
-        err: e,
-      });
-    }
-    const response = await Compressor.FetchWithTimeout(url, { timeout: 60000 });
-    if (!response.ok) {
-      throw game.i18n.format('SCENE-PACKER.importer.invalid-url', {
-        url,
-        err: response.statusText,
-      });
-    }
-    const data = ExporterData.FromJSON(await response.json());
     // TODO remove debugging
-    console.log('url', url);
     console.log('options', options);
     console.log('sceneID', sceneID);
     console.log('actorID', actorID);
-    console.log('data', data);
+    console.log('packInfo', this.packInfo);
 
     const restrictFolderIDS = [];
 
-    const assetData = await this.fetchAssetData(
-      new URL('data/assets.json', url)
-    );
+    const assetData = await this.fetchAssetData(this.packInfo['data/assets.json']);
     /**
      * Track which assets have been imported
      * @type {Map<string, boolean>}
      */
     const assetMap = new Map();
 
-    const sceneData = await this.fetchData(
-      new URL('data/Scene.json', url),
+    const sceneData = await this.fetchData(this.packInfo['data/Scene.json'],
       game.scenes,
       sceneID ? [sceneID] : []
     );
@@ -140,7 +105,7 @@ export default class MoulinetteImporter extends FormApplication {
       }
     }
     const actorData = await this.fetchData(
-      new URL('data/Actor.json', url),
+      this.packInfo['data/Actor.json'],
       game.actors,
       actorID ? [actorID] : []
     );
@@ -152,7 +117,7 @@ export default class MoulinetteImporter extends FormApplication {
     }
 
     await this.importFolders(
-      new URL('data/folders.json', url),
+      this.packInfo['data/folders.json'],
       restrictFolderIDS
     );
 
@@ -168,7 +133,7 @@ export default class MoulinetteImporter extends FormApplication {
     }
 
     const journalData = await this.fetchData(
-      new URL('data/JournalEntry.json', url),
+      this.packInfo['data/JournalEntry.json'],
       game.journal
     );
     if (journalData.length) {
@@ -179,7 +144,7 @@ export default class MoulinetteImporter extends FormApplication {
     }
 
     const itemData = await this.fetchData(
-      new URL('data/Item.json', url),
+      this.packInfo['data/Item.json'],
       game.items
     );
     if (itemData.length) {
@@ -190,7 +155,7 @@ export default class MoulinetteImporter extends FormApplication {
     }
 
     const macroData = await this.fetchData(
-      new URL('data/Macro.json', url),
+      this.packInfo['data/Macro.json'],
       game.macros
     );
     if (macroData.length) {
@@ -200,7 +165,7 @@ export default class MoulinetteImporter extends FormApplication {
     }
 
     const playlistData = await this.fetchData(
-      new URL('data/Playlist.json', url),
+      this.packInfo['data/Playlist.json'],
       game.playlists
     );
     if (playlistData.length) {
@@ -210,7 +175,7 @@ export default class MoulinetteImporter extends FormApplication {
     }
 
     const rollTableData = await this.fetchData(
-      new URL('data/RollTable.json', url),
+      this.packInfo['data/RollTable.json'],
       game.tables
     );
     if (rollTableData.length) {
@@ -226,7 +191,7 @@ export default class MoulinetteImporter extends FormApplication {
    * Ensure that all of the assets for the provided entities exist in the appropriate place.
    * @param {Object} entities - The entities to ensure assets for
    * @param {Map<string, boolean>} assetMap - A map of assets that have already been processed or exist
-   * @param {Object[]} assetData - The asset data
+   * @param {Object} assetData - The asset data
    */
   async ensureAssets(entities, assetMap, assetData) {
     if (!entities.length) {

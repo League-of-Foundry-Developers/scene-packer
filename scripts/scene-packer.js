@@ -4224,7 +4224,7 @@ export default class ScenePacker {
   async RelinkEntries(
     moduleName,
     type,
-    {dryRun = false, packs = {}, rex = /@(\w+)\[(\w+)]{([^}]+)}/g, domParser = new DOMParser()} = {},
+    {dryRun = false, packs = {}, rex = /@(\w+)\[([.\w]+)]{([^}]+)}/g, domParser = new DOMParser()} = {},
   ) {
     // Check each of the compendium packs in the requested module
     const entryPacks = packs[type];

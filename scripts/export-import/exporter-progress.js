@@ -1,13 +1,19 @@
-import { AssetMap } from '../assets/data.js';
-import { Compressor } from './compressor.js';
-import { CONSTANTS } from '../constants.js';
-import { Downloader } from './downloader.js';
-import { ExtractActorAssets } from '../assets/actor.js';
-import { ExtractItemAssets } from '../assets/item.js';
-import { ExtractMacroAssets } from '../assets/macro.js';
-import { ExtractPlaylistAssets } from '../assets/playlist.js';
-import { ExtractSceneAssets } from '../assets/scene.js';
-import { ExtractRollTableAssets } from '../assets/rolltable.js';
+import {AssetMap} from '../assets/data.js';
+import {Compressor} from './compressor.js';
+import {CONSTANTS} from '../constants.js';
+import {Downloader} from './downloader.js';
+import {ExtractActorAssets} from '../assets/actor.js';
+import {ExtractItemAssets} from '../assets/item.js';
+import {ExtractJournalEntryAssets} from '../assets/journal.js';
+import {ExtractMacroAssets} from '../assets/macro.js';
+import {ExtractPlaylistAssets} from '../assets/playlist.js';
+import {ExtractRelatedActorData} from './related/actor.js';
+import {ExtractRelatedItemData} from './related/item.js';
+import {ExtractRelatedJournalData} from './related/journals.js';
+import {ExtractRelatedSceneData} from './related/scene.js';
+import {ExtractRollTableAssets} from '../assets/rolltable.js';
+import {ExtractSceneAssets} from '../assets/scene.js';
+import {RelatedData} from './related/related-data.js';
 
 export default class ExporterProgress extends FormApplication {
   constructor({
@@ -35,6 +41,7 @@ export default class ExporterProgress extends FormApplication {
     this.percent = 0;
     this.domParser = new DOMParser();
     this.assetsMap = new AssetMap();
+    this.relatedData = new RelatedData();
     this.totalSize = 0;
     this.speed = 0;
   }
@@ -47,12 +54,12 @@ export default class ExporterProgress extends FormApplication {
         ScenePacker.logType(CONSTANTS.MODULE_NAME, 'info', true, `Exporter | Processing ${this.selected.length} selections.`);
         this._updateStatus({
           message: `<p>${game.i18n.localize(
-            'SCENE-PACKER.exporter.progress.extract-data'
+            'SCENE-PACKER.exporter.progress.extract-data',
           )}</p>`,
         });
         const folderMap = new Map();
 
-        let filename = this.packageName.slugify({ strict: true }) || 'export';
+        let filename = this.packageName.slugify({strict: true}) || 'export';
         dataZip = new Compressor('data.zip');
         // Add an empty info file for Moulinette to detect that this is a Scene Packer module
         dataZip.AddStringToZip('', 'scene-packer.info');
@@ -62,10 +69,10 @@ export default class ExporterProgress extends FormApplication {
             await dataZip.AddFileURLToZip(
               this.exporterData.cover_image,
               `data/cover/cover.${new URL(
-                this.exporterData.cover_image
+                this.exporterData.cover_image,
               ).pathname
                 .split('.')
-                .pop()}`
+                .pop()}`,
             );
           }
         }
@@ -156,7 +163,7 @@ export default class ExporterProgress extends FormApplication {
             .map((d) => d.value);
           ScenePacker.logType(CONSTANTS.MODULE_NAME, 'info', true, `Exporter | Processing ${ids.length} ${CONSTANTS.TYPE_HUMANISE[type]}.`);
           const documents = CONFIG[type].collection.instance.filter((s) =>
-            ids.includes(s.id)
+            ids.includes(s.id),
           );
           const out = documents.map((d) => (d.toJSON ? d.toJSON() : d)) || [];
           dataZip.AddToZip(out, `data/${type}.json`);
@@ -166,7 +173,7 @@ export default class ExporterProgress extends FormApplication {
               {
                 count: out.length,
                 type: CONSTANTS.TYPE_HUMANISE[type],
-              }
+              },
             )}</p>`,
           });
           if (!ids.length) {
@@ -183,10 +190,12 @@ export default class ExporterProgress extends FormApplication {
               case 'Actor':
                 assetData = await ExtractActorAssets(document);
                 this.assetsMap.AddAssets(assetData.assets);
+                this.relatedData.AddRelatedData(ExtractRelatedActorData(document));
                 break;
               case 'Item':
                 assetData = await ExtractItemAssets(document);
                 this.assetsMap.AddAssets(assetData.assets);
+                this.relatedData.AddRelatedData(ExtractRelatedItemData(document));
                 break;
               case 'Macro':
                 assetData = await ExtractMacroAssets(document);
@@ -196,9 +205,15 @@ export default class ExporterProgress extends FormApplication {
                 assetData = await ExtractPlaylistAssets(document);
                 this.assetsMap.AddAssets(assetData.assets);
                 break;
+              case 'JournalEntry':
+                assetData = await ExtractJournalEntryAssets(document);
+                this.assetsMap.AddAssets(assetData.assets);
+                this.relatedData.AddRelatedData(ExtractRelatedJournalData(document));
+                break;
               case 'Scene':
                 assetData = await ExtractSceneAssets(document);
                 this.assetsMap.AddAssets(assetData.assets);
+                this.relatedData.AddRelatedData(ExtractRelatedSceneData(document));
 
                 // Add thumbnails to dataZip
                 if (document.data.thumb?.startsWith('data:')) {
@@ -210,16 +225,16 @@ export default class ExporterProgress extends FormApplication {
                   });
                   await dataZip.AddBlobToZip(
                     blob,
-                    `data/scenes/thumbs/${document.id}.png`
+                    `data/scenes/thumbs/${document.id}.png`,
                   );
                 } else if (document.data.thumb) {
                   const url = new URL(
                     document.data.thumb,
-                    window.location.href
+                    window.location.href,
                   );
                   await dataZip.AddFileURLToZip(
                     url,
-                    `data/scenes/thumbs/${document.id}.png`
+                    `data/scenes/thumbs/${document.id}.png`,
                   );
                 }
                 break;
@@ -234,6 +249,7 @@ export default class ExporterProgress extends FormApplication {
             const sceneInfo = documents.map((s) => {
               return {
                 id: s.id,
+                name: s.name,
                 hasDrawings: !!s.drawings?.size,
                 hasLights: !!s.lights?.size,
                 hasNotes: !!s.notes?.size,
@@ -250,10 +266,11 @@ export default class ExporterProgress extends FormApplication {
 
         dataZip.AddToZip(
           Object.fromEntries(folderMap.entries()),
-          'data/folders.json'
+          'data/folders.json',
         );
 
         dataZip.AddToZip(this.assetsMap, 'data/assets.json');
+        dataZip.AddToZip(this.relatedData, 'data/related-data.json');
         updateTotalSize();
 
         // TODO prompt for which modules images should be extracted from
@@ -263,7 +280,7 @@ export default class ExporterProgress extends FormApplication {
         this._updateStatus({
           message: `<p>${game.i18n.format(
             'SCENE-PACKER.exporter.progress.compressing-assets',
-            { count: downloader.urls.length }
+            {count: downloader.urls.length},
           )}</p>`,
         });
         const startTime = new Date().getTime();
@@ -280,12 +297,12 @@ export default class ExporterProgress extends FormApplication {
           percent: 100,
           speed: bps,
           message: `<h2>${game.i18n.localize(
-            'SCENE-PACKER.exporter.progress.complete'
+            'SCENE-PACKER.exporter.progress.complete',
           )}</h2>`,
         });
         this._updateStatus({
           message: `<p>${game.i18n.localize(
-            'SCENE-PACKER.exporter.progress.downloading'
+            'SCENE-PACKER.exporter.progress.downloading',
           )}</p>`,
         });
         this._updateStatus({
@@ -293,11 +310,11 @@ export default class ExporterProgress extends FormApplication {
             'SCENE-PACKER.exporter.progress.next-step',
             {
               files: [dataZip.filename].join('</li><li>'),
-            }
+            },
           )}</p>`,
         });
 
-        resolve({ dataZip });
+        resolve({dataZip});
       } catch (e) {
         // Clean up the zip memory
         dataZip?.Cancel();
@@ -335,7 +352,8 @@ export default class ExporterProgress extends FormApplication {
   }
 
   /** @inheritdoc */
-  async _updateObject(event, formData) {}
+  async _updateObject(event, formData) {
+  }
 
   /** @inheritdoc */
   activateListeners(html) {

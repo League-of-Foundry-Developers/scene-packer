@@ -63,11 +63,12 @@ export class AssetMap {
 
   toJSON() {
     // Convert the mapping set into an array so that it can be JSON encoded.
+    const response = new Map();
     for (const [key, val] of this.mapping) {
-      this.mapping.set(key, [...val]);
+      response.set(key, [...val]);
     }
     return {
-      mapping: Object.fromEntries(this.mapping.entries()),
+      mapping: Object.fromEntries(response.entries()),
       data: Object.fromEntries(this.data.entries()),
     };
   }
