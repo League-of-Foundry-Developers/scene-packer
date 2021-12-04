@@ -664,14 +664,6 @@ export default class ScenePacker {
         continue;
       }
 
-      // Utilise the Compendium Folders functionality if it exists to build the full folder path
-      if (typeof game.CF?.FICManager?.createFolderPath === 'function') {
-        // Utilise a Fake Entity so that Compendium Folders doesn't throw errors when trying to update its folder information.
-        // Compendium Folders normally operates on entities that have already been imported into the system,
-        // whereas Scene Packer imports the folders first.
-        await game.CF.FICManager.createFolderPath(cfPath, cfColor, entity.documentName ?? entity.entity, FakeEntity);
-      }
-
       const pathParts = cfPath.split(CONSTANTS.CF_SEPARATOR);
       for (let j = 0; j < pathParts.length; j++) {
         const pathPart = pathParts[j];
