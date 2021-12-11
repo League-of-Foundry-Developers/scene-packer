@@ -4266,7 +4266,7 @@ export default class ScenePacker {
             break;
           case 'RollTablePacks':
             // Rolltables don't have content like normal but instead have references to other results
-            for (const result of document?.data?.results) {
+            for (const result of document?.data?.results || []) {
               if (!result?.data?.resultId || !result?.data?.collection) {
                 // This result is not a reference to another entity
                 continue;
