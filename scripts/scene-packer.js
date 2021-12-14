@@ -4211,7 +4211,7 @@ export default class ScenePacker {
   async RelinkEntries(
     moduleName,
     type,
-    {dryRun = false, packs = {}, rex = /@(\w+)\[(\w+)]{([^}]+)}/g, domParser = new DOMParser()} = {},
+    {dryRun = false, packs = {}, rex = /@(\w+)\[(\w+)(#[^\]]+)?]{([^}]+)}/g, domParser = new DOMParser()} = {},
   ) {
     // Check each of the compendium packs in the requested module
     const entryPacks = packs[type];
@@ -4368,7 +4368,8 @@ export default class ScenePacker {
           const link = links[k];
           const type = link[1];
           const oldRef = link[2];
-          const oldName = link[3];
+          const anchor = link[3];
+          const oldName = link[4];
 
           // Build the links to the new references that exist within the compendium/s
           let newRef = await this.findNewReferences(type, oldRef, oldName, entry, document.name, moduleName, packs);
@@ -4383,6 +4384,7 @@ export default class ScenePacker {
             newRef: newRef,
             pack: pack.collection,
             journalEntryId: entry._id,
+            journalAnchorLink: anchor ? anchor : '',
           });
         }
 
@@ -4422,19 +4424,19 @@ export default class ScenePacker {
                   pack: change.pack,
                   journalEntryId: change.journalEntryId,
                   type: change.type,
-                  oldRef: change.oldRef,
+                  oldRef: change.oldRef + change.journalAnchorLink,
                   newRefPack: change.newRef[0].pack,
                   newRef: change.newRef[0].ref,
                 },
               ),
             );
             let regex = new RegExp(
-              `@${change.type}\\[${change.oldRef}\\]\\{`,
+              `@${change.type}\\[${change.oldRef}${change.journalAnchorLink}\\]\\{`,
               'g',
             );
             newContent = newContent.replace(
               regex,
-              `@Compendium[${change.newRef[0].pack}.${change.newRef[0].ref}]{`,
+              `@Compendium[${change.newRef[0].pack}.${change.newRef[0].ref}${change.journalAnchorLink}]{`,
             );
           }
           ui.notifications.info(
