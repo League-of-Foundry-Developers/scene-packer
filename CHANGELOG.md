@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.24
+
+- Relinking entities will now ask you if you want to lock the compendiums, rather than doing it by default.
+
 ## v2.3.23
 
 - Adjust folder creation to work around changes in [Compendium Folders](https://foundryvtt.com/packages/compendium-folders) internal API.

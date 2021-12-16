@@ -4182,7 +4182,14 @@ export default class ScenePacker {
 
     // Lock the module compendiums again
     if (!dryRun) {
-      await ScenePacker.SetModuleCompendiumLockState(true, moduleName);
+      Dialog.confirm({
+        title: game.i18n.localize('SCENE-PACKER.world-conversion.compendiums.lock-prompt-title'),
+        content: game.i18n.format('SCENE-PACKER.world-conversion.compendiums.lock-prompt', {moduleName}),
+        label: game.i18n.localize('SCENE-PACKER.world-conversion.compendiums.lock-prompt-button'),
+        yes: async () => {
+          await ScenePacker.SetModuleCompendiumLockState(true, moduleName);
+        }
+      });
     }
 
     ui.notifications.info(
