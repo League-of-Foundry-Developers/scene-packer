@@ -3,6 +3,7 @@
 ## v2.3.24
 
 - Relinking entities will now ask you if you want to lock the compendiums, rather than doing it by default.
+- Updated macro `Bulk Lock/Unlock compendiums` to support World compendiums.
 
 ## v2.3.23
 
