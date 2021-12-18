@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.3.24
+
+- Specifically mark Scene Packer as compatible with Foundry Core V9.
+  - Scene Packer remains backwards compatible to v0.7.9
+  - Deprecation warnings will be removed in v2.4.0
+- Added support for [Journal Anchor Links](https://foundryvtt.com/packages/jal).
+  - Big thank you to Mgiepz for the community submission.
+- Relinking entities will now ask you if you want to lock the compendiums, rather than doing it by default.
+- Updated macro `Bulk Lock/Unlock compendiums` to support World compendiums.
+
 ## v2.3.23
 
 - Adjust folder creation to work around changes in [Compendium Folders](https://foundryvtt.com/packages/compendium-folders) internal API.

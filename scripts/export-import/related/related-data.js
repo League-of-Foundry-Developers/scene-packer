@@ -100,7 +100,7 @@ export function ExtractUUIDsFromContent(content) {
   }
 
   const domParser = new DOMParser();
-  const rex = /@(\w+)\[([.\w]+)]{([^}]+)}/g;
+  const rex = /@(\w+)\[([.\w]+)(#[^\]]+)?]{([^}]+)}/g;
 
   const links = [...content.matchAll(rex)];
   for (const link of links) {
