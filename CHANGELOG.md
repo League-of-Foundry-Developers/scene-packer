@@ -2,6 +2,9 @@
 
 ## v2.3.24
 
+- Specifically mark Scene Packer as compatible with Foundry Core V9
+  - Scene Packer remains backwards compatible to v0.7.9
+  - Deprecation warnings will be removed in v2.4.0
 - Relinking entities will now ask you if you want to lock the compendiums, rather than doing it by default.
 - Updated macro `Bulk Lock/Unlock compendiums` to support World compendiums.
 
