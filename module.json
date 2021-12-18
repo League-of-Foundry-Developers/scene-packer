@@ -6,7 +6,7 @@
   "library": "true",
   "manifestPlusVersion": "1.1.0",
   "minimumCoreVersion": "0.7.9",
-  "compatibleCoreVersion": "0.8.9",
+  "compatibleCoreVersion": "9",
   "author": "Blair McMillan",
   "authors": [
     {
@@ -32,6 +32,7 @@
       "label": "Library: Scene Packer",
       "path": "/packs/journals.db",
       "entity": "JournalEntry",
+      "type": "JournalEntry",
       "module": "scene-packer",
       "private": false
     },
@@ -40,6 +41,7 @@
       "label": "Library: Scene Packer",
       "path": "/packs/macros.db",
       "entity": "Macro",
+      "type": "Macro",
       "module": "scene-packer",
       "private": false
     }
