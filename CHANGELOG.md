@@ -2,6 +2,13 @@
 
 ## v2.4.0
 
+- New feature: Distributing packed scenes and adventures via [Moulinette](https://www.moulinette.cloud/)
+  - This feature allows content creators to distribute their creations to the community without needing to create modules for every release, reducing the number of modules an end-user needs to have installed.
+  - End-users can import just the scene/s they need and all the associated assets and entities for those scenes will be automatically downloaded.
+  - End-users can also import an entire adventure if the creator has enabled the option (some creators generate so much content that importing everything will slow the Foundry VTT instance down significantly).
+  - Standard Moulinette features such as locking down access via Patreon tiers work.
+  - See *placeholder link* for an example of how to use the new feature.
+  - This feature is still in beta, so please report any issues you find.
 - Updated wording to make it clearer when there are no modules correctly registered with Scene Packer.
   - Useful for new creators. This usually happens when you haven't quite initialised your module correctly.
   - A reminder that the [module generator](https://sneat.github.io/scene-packer-module-generator/) is a good starting point for generating modules that are compatible with Scene Packer.
