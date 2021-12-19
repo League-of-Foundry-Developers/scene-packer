@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.4.0
+
+- Updated wording to make it clearer when there are no modules correctly registered with Scene Packer.
+  - Useful for new creators. This usually happens when you haven't quite initialised your module correctly.
+  - A reminder that the [module generator](https://sneat.github.io/scene-packer-module-generator/) is a good starting point for generating modules that are compatible with Scene Packer.
+
 ## v2.3.24
 
 - Specifically mark Scene Packer as compatible with Foundry Core V9.

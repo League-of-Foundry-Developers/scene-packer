@@ -262,7 +262,7 @@
     "instance-prompt": {
       "title": "Select instance",
       "intro": "Select the module that you want to use:",
-      "none-found": "There are no modules installed that have registered with Scene Packer. See the Journal entries in the compendium for how to register your module with Scene Packer.",
+      "none-found": "There are no modules installed that are registered with Scene Packer. See the Journal entries in the compendium for how to register your module with Scene Packer.",
       "select": "Select",
       "cancel": "Cancel"
     },
@@ -273,7 +273,7 @@
       "make-changes-info": "Leaving this unchecked will operate in a \"dry run\" mode, where changes are only output to the console.",
       "relink": "Relink",
       "cancel": "Cancel",
-      "none": "There are no modules initialised with Scene Packer in this world."
+      "none": "There are no modules installed that are registered with Scene Packer. See the Journal entries in the compendium for how to register your module with Scene Packer."
     },
     "performance-report": {
       "title": "Performance Report",
