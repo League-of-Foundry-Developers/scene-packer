@@ -13,6 +13,11 @@
   - Useful for new creators. This usually happens when you haven't quite initialised your module correctly.
   - A reminder that the [module generator](https://sneat.github.io/scene-packer-module-generator/) is a good starting point for generating modules that are compatible with Scene Packer.
 
+## v2.3.25
+
+- Fixed issue where packing/unpacking a scene would only pack or unpack the currently active scene rather than the one selected.
+  - Thanks to Virto Nex for reporting this issue.
+
 ## v2.3.24
 
 - Specifically mark Scene Packer as compatible with Foundry Core V9.
