@@ -4953,7 +4953,8 @@ Hooks.once('setup', () => {
           name: game.i18n.localize('SCENE-PACKER.scene-context.pack.title'),
           icon: '<i class="fas fa-scroll"></i>',
           condition: (li) => {
-            let scene = game.scenes.get(li.data('entityId'));
+            let documentId = li.data('documentId') || li.data('entityId');
+            let scene = game.scenes.get(documentId);
             let instance = ScenePacker.GetInstanceForScene(scene);
             if (instance) {
               return !ScenePacker.HasPackedData(scene, instance.GetModuleName()) &&
@@ -4963,7 +4964,8 @@ Hooks.once('setup', () => {
             return game.user.isGM && game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_ENABLE_CONTEXT_MENU);
           },
           callback: (li) => {
-            let scene = game.scenes.get(li.data('entityId'));
+            let documentId = li.data('documentId') || li.data('entityId');
+            let scene = game.scenes.get(documentId);
             let instance = ScenePacker.GetInstanceForScene(scene);
             if (instance) {
               return instance.PackScene(scene);
@@ -4982,7 +4984,8 @@ Hooks.once('setup', () => {
           name: game.i18n.localize('SCENE-PACKER.scene-context.unpack.title'),
           icon: '<i class="fas fa-scroll"></i>',
           condition: (li) => {
-            let scene = game.scenes.get(li.data('entityId'));
+            let documentId = li.data('documentId') || li.data('entityId');
+            let scene = game.scenes.get(documentId);
             let instance = ScenePacker.GetInstanceForScene(scene);
             return instance &&
               ScenePacker.HasPackedData(scene, instance.GetModuleName()) &&
@@ -4990,7 +4993,8 @@ Hooks.once('setup', () => {
               game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_ENABLE_CONTEXT_MENU);
           },
           callback: (li) => {
-            let scene = game.scenes.get(li.data('entityId'));
+            let documentId = li.data('documentId') || li.data('entityId');
+            let scene = game.scenes.get(documentId);
             let instance = ScenePacker.GetInstanceForScene(scene);
             if (instance) {
               instance.ProcessScene(scene);
@@ -5003,7 +5007,8 @@ Hooks.once('setup', () => {
           ),
           icon: '<i class="fas fa-scroll"></i>',
           condition: (li) => {
-            let scene = game.scenes.get(li.data('entityId'));
+            let documentId = li.data('documentId') || li.data('entityId');
+            let scene = game.scenes.get(documentId);
             let instance = ScenePacker.GetInstanceForScene(scene);
             return instance &&
               ScenePacker.HasPackedData(scene, instance.GetModuleName()) &&
@@ -5011,7 +5016,8 @@ Hooks.once('setup', () => {
               game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_ENABLE_CONTEXT_MENU);
           },
           callback: (li) => {
-            let scene = game.scenes.get(li.data('entityId'));
+            let documentId = li.data('documentId') || li.data('entityId');
+            let scene = game.scenes.get(documentId);
             let instance = ScenePacker.GetInstanceForScene(scene);
             if (instance) {
               instance.ClearPackedData(scene);
@@ -5030,7 +5036,8 @@ Hooks.once('setup', () => {
               game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_ENABLE_CONTEXT_MENU);
           },
           callback: (li) => {
-            let scene = game.scenes.get(li.data('entityId'));
+            let documentId = li.data('documentId') || li.data('entityId');
+            let scene = game.scenes.get(documentId);
             new globalScenePacker.AssetReport({scene});
           },
         },

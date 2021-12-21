@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.3.25
+
+- Fixed issue where packing/unpacking a scene would only pack or unpack the currently active scene rather than the one selected.
+  - Thanks to Virto Nex for reporting this issue.
+
 ## v2.3.24
 
 - Specifically mark Scene Packer as compatible with Foundry Core V9.
