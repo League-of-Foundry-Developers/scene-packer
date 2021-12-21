@@ -5,7 +5,6 @@ import {
   FileExists,
   UploadFile,
 } from '../assets/file.js';
-import { ExporterData } from './exporter.js';
 
 export default class MoulinetteImporter extends FormApplication {
   /**
@@ -84,6 +83,7 @@ export default class MoulinetteImporter extends FormApplication {
 
     const restrictFolderIDS = [];
 
+    const relatedData = await this.fetchAssetData(this.packInfo['data/related-data.json']);
     const assetData = await this.fetchAssetData(this.packInfo['data/assets.json']);
     /**
      * Track which assets have been imported
@@ -231,7 +231,7 @@ export default class MoulinetteImporter extends FormApplication {
         );
         const filename = decodeURIComponent(asset.split('/').pop());
         // TODO Verify URL validity
-        const srcURL = new URL('data/assets/' + asset, this.url);
+        const srcURL = new URL(this.packInfo['data/assets/' + asset]);
 
         await CreateFolderRecursive(folder);
         // TODO Concurrent download/upload
