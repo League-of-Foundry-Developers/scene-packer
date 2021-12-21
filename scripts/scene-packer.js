@@ -4532,6 +4532,11 @@ export default class ScenePacker {
    * @return {Promise<[{ref, pack}]>}
    */
   async findNewReferences(type, oldRef, oldName, entry, containerName, moduleName, packs) {
+    if (type === 'Compendium') {
+      // Compendium references are already "correct" and don't need a new reference found.
+      return [];
+    }
+
     // Need to look up the in world reference to find the new compendium reference by name
     const collection = game.collections.get(type);
     if (!collection) {
