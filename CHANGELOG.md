@@ -12,6 +12,8 @@
 - Updated wording to make it clearer when there are no modules correctly registered with Scene Packer.
   - Useful for new creators. This usually happens when you haven't quite initialised your module correctly.
   - A reminder that the [module generator](https://sneat.github.io/scene-packer-module-generator/) is a good starting point for generating modules that are compatible with Scene Packer.
+- Updated macro `Clean up #[CF_tempEntity] entries` to support deleting the CF entities from compendiums.
+  - You must manually unlock the compendium first.
 
 ## v2.3.25
 
