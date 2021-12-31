@@ -287,7 +287,8 @@
       "name": "Scene Packer: Importer",
       "unsupported": "Scene Packer: Importer is only supported in versions >= 0.8.0",
       "invalid-url": "An invalid URL value was passed to the Scene Packer importer. Received: \"{url}\". {err}",
-      "invalid-url-empty": "An empty URL value was passed to the Scene Packer importer."
+      "invalid-url-empty": "An empty URL value was passed to the Scene Packer importer.",
+      "creating-documents": "Creating {count} {type}..."
     },
     "exporter": {
       "name": "Export to Moulinette",

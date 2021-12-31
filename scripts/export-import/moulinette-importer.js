@@ -26,6 +26,12 @@ export default class MoulinetteImporter extends FormApplication {
      * @type {object} packInfo - The ExporterData payload
      */
     this.packInfo = packInfo;
+
+    /**
+     * Summary data for the package.
+     * @type {ExporterData|Object|null}
+     */
+    this.scenePackerInfo = null;
   }
 
   /** @inheritdoc */
@@ -83,15 +89,18 @@ export default class MoulinetteImporter extends FormApplication {
 
     const restrictFolderIDS = [];
 
-    const relatedData = await this.fetchAssetData(this.packInfo['data/related-data.json']);
-    const assetData = await this.fetchAssetData(this.packInfo['data/assets.json']);
+    this.scenePackerInfo = await this.fetchData(this.packInfo['mtte.json']);
+    console.log('scenePackerInfo', this.scenePackerInfo);
+    // TODO Utilise relatedData to ensure related entities are imported
+    const relatedData = await this.fetchData(this.packInfo['data/related-data.json']);
+    const assetData = await this.fetchData(this.packInfo['data/assets.json']);
     /**
      * Track which assets have been imported
      * @type {Map<string, boolean>}
      */
     const assetMap = new Map();
 
-    const sceneData = await this.fetchData(this.packInfo['data/Scene.json'],
+    const sceneData = await this.fetchDataIfMissing(this.packInfo['data/Scene.json'],
       game.scenes,
       sceneID ? [sceneID] : []
     );
@@ -104,7 +113,7 @@ export default class MoulinetteImporter extends FormApplication {
         restrictFolderIDS.push(scene.data.folder);
       }
     }
-    const actorData = await this.fetchData(
+    const actorData = await this.fetchDataIfMissing(
       this.packInfo['data/Actor.json'],
       game.actors,
       actorID ? [actorID] : []
@@ -122,91 +131,96 @@ export default class MoulinetteImporter extends FormApplication {
     );
 
     if (sceneData.length) {
-      console.log(`Creating ${sceneData.length} scenes`);
-      await Scene.createDocuments(sceneData, { keepId: true });
-      await this.ensureAssets(sceneData, assetMap, assetData);
+      ScenePacker.logType(this.scenePackerInfo.name, 'info', true, game.i18n.format('SCENE-PACKER.importer.name', {count: sceneData.length, type: 'scenes'}));
+      await Scene.createDocuments(await this.ensureAssets(sceneData, assetMap, assetData), { keepId: true });
     }
     if (actorData.length) {
       console.log(`Creating ${actorData.length} actors`);
-      await Actor.createDocuments(actorData, { keepId: true });
-      await this.ensureAssets(actorData, assetMap, assetData);
+      await Actor.createDocuments(this.ensureAssets(actorData, assetMap, assetData), { keepId: true });
     }
 
-    const journalData = await this.fetchData(
+    const journalData = await this.fetchDataIfMissing(
       this.packInfo['data/JournalEntry.json'],
       game.journal
     );
     if (journalData.length) {
       console.log(`Creating ${journalData.length} journals`);
-      await JournalEntry.createDocuments(journalData, { keepId: true });
-      await this.ensureAssets(journalData, assetMap, assetData);
+      await JournalEntry.createDocuments(this.ensureAssets(journalData, assetMap, assetData), { keepId: true });
       // TODO Replace links in Journal data
     }
 
-    const itemData = await this.fetchData(
+    const itemData = await this.fetchDataIfMissing(
       this.packInfo['data/Item.json'],
       game.items
     );
     if (itemData.length) {
       console.log(`Creating ${itemData.length} items`);
-      await Item.createDocuments(itemData, { keepId: true });
-      await this.ensureAssets(itemData, assetMap, assetData);
+      await Item.createDocuments(this.ensureAssets(itemData, assetMap, assetData), { keepId: true });
       // TODO Replace links in Item data
     }
 
-    const macroData = await this.fetchData(
+    const macroData = await this.fetchDataIfMissing(
       this.packInfo['data/Macro.json'],
       game.macros
     );
     if (macroData.length) {
       console.log(`Creating ${macroData.length} macros`);
-      await Macro.createDocuments(macroData, { keepId: true });
-      await this.ensureAssets(macroData, assetMap, assetData);
+      await Macro.createDocuments(this.ensureAssets(macroData, assetMap, assetData), { keepId: true });
     }
 
-    const playlistData = await this.fetchData(
+    const playlistData = await this.fetchDataIfMissing(
       this.packInfo['data/Playlist.json'],
       game.playlists
     );
     if (playlistData.length) {
       console.log(`Creating ${playlistData.length} playlists`);
-      await Playlist.createDocuments(playlistData, { keepId: true });
-      await this.ensureAssets(playlistData, assetMap, assetData);
+      await Playlist.createDocuments(this.ensureAssets(playlistData, assetMap, assetData), { keepId: true });
     }
 
-    const rollTableData = await this.fetchData(
+    const rollTableData = await this.fetchDataIfMissing(
       this.packInfo['data/RollTable.json'],
       game.tables
     );
     if (rollTableData.length) {
       console.log(`Creating ${rollTableData.length} rolltables`);
-      await RollTable.createDocuments(rollTableData, { keepId: true });
-      await this.ensureAssets(rollTableData, assetMap, assetData);
+      await RollTable.createDocuments(this.ensureAssets(rollTableData, assetMap, assetData), { keepId: true });
     }
 
     console.log('Done');
   }
 
   /**
-   * Ensure that all of the assets for the provided entities exist in the appropriate place.
-   * @param {Object} entities - The entities to ensure assets for
+   * Ensure that all the assets for the provided entities exist in the appropriate place.
+   * @param {Object[]} entities - The entities to ensure assets for
    * @param {Map<string, boolean>} assetMap - A map of assets that have already been processed or exist
    * @param {Object} assetData - The asset data
+   * @return {Promise<Object[]>} The entity data with its assets updated
    */
   async ensureAssets(entities, assetMap, assetData) {
     if (!entities.length) {
-      return;
+      return entities;
     }
 
+    const returnEntities = [];
     console.groupCollapsed(
-      `Ensuring assets exists for ${entities.length} entities.`
+      `Ensuring assets exist for ${entities.length} entities.`
     );
+    let total = 0;
     for (const entity of entities) {
+      let assets = assetData.mapping[entity._id];
+      total += assets?.length || 0;
+    }
+    let idx = 0;
+    for (const entity of entities) {
+      let stringRepresentation = JSON.stringify(entity);
       const assets = assetData.mapping[entity._id];
       if (!assets?.length) {
         continue;
       }
-      for (const asset of assets) {
+      for (const originalAsset of assets) {
+        const asset = decodeURIComponent(originalAsset);
+        const localAsset = `${CONSTANTS.MOULINETTE_PATH}/${asset}`;
+
         if (assetMap.has(asset)) {
           console.log(`⏩ ${asset}`);
           continue;
@@ -219,18 +233,15 @@ export default class MoulinetteImporter extends FormApplication {
           continue;
         }
 
-        const exists = await FileExists(asset);
+        const exists = await FileExists(localAsset);
         if (exists) {
           console.log(`✅ ${asset}`);
           assetMap.set(asset, true);
           continue;
         }
 
-        const folder = decodeURIComponent(
-          asset.substring(0, asset.lastIndexOf('/'))
-        );
-        const filename = decodeURIComponent(asset.split('/').pop());
-        // TODO Verify URL validity
+        const folder = localAsset.substring(0, localAsset.lastIndexOf('/'));
+        const filename = asset.split('/').pop();
         const srcURL = new URL(this.packInfo['data/assets/' + asset]);
 
         await CreateFolderRecursive(folder);
@@ -257,28 +268,36 @@ export default class MoulinetteImporter extends FormApplication {
 
         const blob = await res.blob();
         ScenePacker.logType(CONSTANTS.MODULE_NAME, 'info', true, `Importer | ⬆️️ ${asset}`);
-        const response = await UploadFile(
+        await UploadFile(
           new File([blob], filename, {
             type: blob.type,
             lastModified: new Date(),
           }),
           folder,
         );
-        // TODO handle errors and cleanup this code
-        console.log(asset, response);
+        stringRepresentation = stringRepresentation.replaceAll(`"${originalAsset}"`, `"${folder}/${encodeURIComponent(filename)}"`);
         ScenePacker.logType(CONSTANTS.MODULE_NAME, 'info', true, `Importer | ✅️️ ${asset}`);
         assetMap.set(asset, true);
+        idx++;
+        this.displayProgressBar(`Ensuring assets exist for ${total} entities.`, idx, total);
       }
+
+      // Convert the string representation that includes the updated assets back to an object
+      returnEntities.push(JSON.parse(stringRepresentation));
     }
+    // Ensure that the progress bar is hidden.
+    this.displayProgressBar(`Ensuring assets exist for ${total} entities.`, 1, 1);
     console.groupEnd();
+
+    return returnEntities;
   }
 
   /**
-   * Fetch the asset data.
-   * @param {URL} url - The URL to the scene JSON.
-   * @return {Promise<Object[]>}
+   * Fetch data.
+   * @param {URL} url - The URL to the JSON.
+   * @return {Promise<Object>}
    */
-  async fetchAssetData(url) {
+  async fetchData(url) {
     const response = await Compressor.FetchWithTimeout(url, { timeout: 60000 });
     if (!response.ok) {
       throw game.i18n.format('SCENE-PACKER.importer.invalid-url', {
@@ -290,13 +309,13 @@ export default class MoulinetteImporter extends FormApplication {
   }
 
   /**
-   * Fetch data.
-   * @param {URL} url - The URL to the journal JSON
+   * Fetch data if it is missing from the given collection.
+   * @param {URL} url - The URL to the JSON
    * @param {Object} collection - The collection that this data belongs to
    * @param {string[]} onlyIDs - Only import the data for the given IDs
    * @return {Promise<Object[]>}
    */
-  async fetchData(url, collection, onlyIDs = []) {
+  async fetchDataIfMissing(url, collection, onlyIDs = []) {
     const response = await Compressor.FetchWithTimeout(url, { timeout: 60000 });
     if (!response.ok) {
       throw game.i18n.format('SCENE-PACKER.importer.invalid-url', {
@@ -392,5 +411,17 @@ export default class MoulinetteImporter extends FormApplication {
     if (createData.length) {
       await Folder.createDocuments(createData, { keepId: true });
     }
+  }
+
+  /**
+   * Display a progress bar for the given name.
+   * @param {string} name - The name of the bar.
+   * @param {number} total - The total number of items.
+   * @param {number} current - The current number of items progressed.
+   */
+  displayProgressBar(name, total, current) {
+    const bar = SceneNavigation.displayProgressBar || SceneNavigation._onLoadProgress;
+    const progress = Math.round((current / total) * 100);
+    bar(name, progress);
   }
 }

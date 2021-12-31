@@ -74,6 +74,11 @@ export const CONSTANTS = Object.freeze({
   MODULE_NAME: 'scene-packer',
 
   /**
+   * The location to store assets downloaded from Moulinette during imports by Scene Packer.
+   */
+  MOULINETTE_PATH: 'moulinette/adventures',
+
+  /**
    * The order of types to import when importing all content from compendiums.
    * @type {string[]}
    */
