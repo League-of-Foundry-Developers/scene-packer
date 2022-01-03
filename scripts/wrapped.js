@@ -67,7 +67,12 @@ Hooks.once('setup', function () {
           }
           // Set the source uuid of the entity if it isn't already set in updateData
           if (!args[2].flags?.core?.sourceId) {
-            const source = await pack.getEntity(args[1]);
+            let source;
+            if (CONSTANTS.IsV8orNewer()) {
+              source = await pack.getDocument(args[1]);
+            } else {
+              source = await pack.getEntity(args[1]);
+            }
             if (!args[2].flags.core) {
               args[2].flags.core = {};
             }
@@ -125,7 +130,12 @@ Hooks.once('setup', function () {
           }
 
           // Step 2 - load all content
-          const entities = await this.getContent();
+          let entities;
+          if (CONSTANTS.IsV8orNewer()) {
+            entities = await this.getDocuments();
+          } else {
+            entities = await this.getContent();
+          }
           ui.notifications.info(game.i18n.format('COMPENDIUM.ImportAllStart', {
             number: entities.length,
             type: this.entity,
@@ -225,9 +235,16 @@ Hooks.once('setup', function () {
                 count: tempEntities.length,
               }),
               yes: () => {
-                game.packs.get('scene-packer.macros')
-                  .getContent()
-                  .then(m => m.find(e => e.name === 'Clean up #[CF_tempEntity] entries')?.execute());
+                const callback = m => m.find(e => e.name === 'Clean up #[CF_tempEntity] entries')?.execute();
+                if (CONSTANTS.IsV8orNewer()) {
+                  game.packs.get('scene-packer.macros')
+                    .getDocuments()
+                    .then(callback);
+                } else {
+                  game.packs.get('scene-packer.macros')
+                    .getContent()
+                    .then(callback);
+                }
               },
             });
           }
