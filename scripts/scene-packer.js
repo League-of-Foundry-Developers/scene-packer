@@ -561,6 +561,31 @@ export default class ScenePacker {
                   }
                 }
                 break;
+              case 'Actor':
+                // Check if the actors had embedded Automated Evocations data
+                // @see https://github.com/theripper93/automated-evocations#store-companions-on-actor
+                for (let createdEntity of createdEntities) {
+                  let documentFlags = createdEntity.data.flags || {};
+                  let automatedEvocationsCompanions = documentFlags['automated-evocations']?.companions || [];
+                  let needsUpdate = false;
+                  for (let companionData of automatedEvocationsCompanions) {
+                    // Look for the new entity and update the reference
+                    const newCompanion = this.findEntity(`Actor.${companionData.id}`);
+                    if (newCompanion?.id) {
+                      companionData.id = newCompanion.id;
+                      needsUpdate = true;
+                    } else {
+                      this.logWarn(true, `Could not find Automated Evocation companion ${companionData.id} for ${createdEntity.name}. Unable to update reference.`);
+                    }
+                  }
+                  if (needsUpdate) {
+                    this.log(true, `Updating ${createdEntity.name}'s Automated Evocations companion references.`);
+                    await createdEntity.update({
+                      'flags.automated-evocations.isLocal': true,
+                      'flags.automated-evocations.companions': automatedEvocationsCompanions,
+                    });
+                  }
+                }
             }
           }
         } catch (e) {

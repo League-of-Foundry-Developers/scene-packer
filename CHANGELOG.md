@@ -12,6 +12,9 @@
 - Updated wording to make it clearer when there are no modules correctly registered with Scene Packer.
   - Useful for new creators. This usually happens when you haven't quite initialised your module correctly.
   - A reminder that the [module generator](https://sneat.github.io/scene-packer-module-generator/) is a good starting point for generating modules that are compatible with Scene Packer.
+- Added initial support for unpacking [Automated Evocations](https://github.com/theripper93/automated-evocations#store-companions-on-actor) companions.
+  - Companion data must be stored on the actor prior to exporting to your compendium. See the [Automated Evocations module readme](https://github.com/theripper93/automated-evocations#store-companions-on-actor) for details.
+  - Unpacking will only work if the end-user utilises the "Import All" functionality. It *will not* work for individually imported actors.
 - Updated macro `Clean up #[CF_tempEntity] entries` to support deleting the CF entities from compendiums.
   - You must manually unlock the compendium first.
 
