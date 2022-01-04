@@ -1,10 +1,5 @@
 import { Compressor } from './compressor.js';
 import { CONSTANTS } from '../constants.js';
-import {
-  CreateFolderRecursive,
-  FileExists,
-  UploadFile,
-} from '../assets/file.js';
 
 export default class MoulinetteImporter extends FormApplication {
   /**
@@ -79,6 +74,8 @@ export default class MoulinetteImporter extends FormApplication {
    * @param {ProcessOptions} options - Additional options for processing
    */
   async process(options) {
+    // TODO Show process bar / dialog
+
     options = Object.assign({ sceneID: '', actorID: '' }, options);
     const { sceneID, actorID } = options;
     // TODO remove debugging
@@ -93,6 +90,7 @@ export default class MoulinetteImporter extends FormApplication {
     console.log('scenePackerInfo', this.scenePackerInfo);
     // TODO Utilise relatedData to ensure related entities are imported
     const relatedData = await this.fetchData(this.packInfo['data/related-data.json']);
+    console.log('relatedData', relatedData);
     const assetData = await this.fetchData(this.packInfo['data/assets.json']);
     /**
      * Track which assets have been imported
@@ -104,21 +102,53 @@ export default class MoulinetteImporter extends FormApplication {
       game.scenes,
       sceneID ? [sceneID] : []
     );
-    if (sceneID) {
-      // TODO ensure journals and tokens are imported
-      // scene.data.notes
-      // scene.data.tokens
-      const scene = sceneData.find((s) => s._id === sceneID);
-      if (scene?.data?.folder) {
-        restrictFolderIDS.push(scene.data.folder);
-      }
-    }
     const actorData = await this.fetchDataIfMissing(
       this.packInfo['data/Actor.json'],
       game.actors,
       actorID ? [actorID] : []
     );
+    const journalData = await this.fetchDataIfMissing(
+      this.packInfo['data/JournalEntry.json'],
+      game.journal
+    );
+    const itemData = await this.fetchDataIfMissing(
+      this.packInfo['data/Item.json'],
+      game.items
+    );
+    const macroData = await this.fetchDataIfMissing(
+      this.packInfo['data/Macro.json'],
+      game.macros
+    );
+    const playlistData = await this.fetchDataIfMissing(
+      this.packInfo['data/Playlist.json'],
+      game.playlists
+    );
+    const rollTableData = await this.fetchDataIfMissing(
+      this.packInfo['data/RollTable.json'],
+      game.tables
+    );
+
+    // TODO Determine if anything like this is needed to import/update references
+    // const compendiumRelatedData = this.getRelatedDataToImport('Compendium', null, relatedData);
+    // for (const compendiumRelatedDatum of compendiumRelatedData) {
+    //   const document = fromUuid(compendiumRelatedDatum);
+    //   if (!document || document.collection.has(document.id)) {
+    //     // Invalid reference or already imported
+    //     continue;
+    //   }
+    //   await document.collection.importFromCompendium(document.pack, document.id, {}, {keepId: true});
+    // }
+
+    let sourceReference;
+    if (sceneID) {
+      sourceReference = `Scene.${sceneID}`;
+      const scene = sceneData.find((s) => s._id === sceneID);
+      if (scene?.data?.folder) {
+        restrictFolderIDS.push(scene.data.folder);
+      }
+    }
     if (actorID) {
+      sourceReference = `Actor.${actorID}`;
       const actor = actorData.find((a) => a._id === actorID);
       if (actor?.data?.folder) {
         restrictFolderIDS.push(actor.data.folder);
@@ -132,58 +162,59 @@ export default class MoulinetteImporter extends FormApplication {
 
     if (sceneData.length) {
       ScenePacker.logType(this.scenePackerInfo.name, 'info', true, game.i18n.format('SCENE-PACKER.importer.name', {count: sceneData.length, type: 'scenes'}));
-      await Scene.createDocuments(await this.ensureAssets(sceneData, assetMap, assetData), { keepId: true });
+      const filteredData = this.filterData(sceneData, relatedData, 'Scene', sourceReference);
+      if (filteredData.length) {
+        await Scene.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
+      }
     }
     if (actorData.length) {
       console.log(`Creating ${actorData.length} actors`);
-      await Actor.createDocuments(this.ensureAssets(actorData, assetMap, assetData), { keepId: true });
+      const filteredData = this.filterData(actorData, relatedData, 'Actor', sourceReference);
+      if (filteredData.length) {
+        await Actor.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
+      }
     }
 
-    const journalData = await this.fetchDataIfMissing(
-      this.packInfo['data/JournalEntry.json'],
-      game.journal
-    );
     if (journalData.length) {
       console.log(`Creating ${journalData.length} journals`);
-      await JournalEntry.createDocuments(this.ensureAssets(journalData, assetMap, assetData), { keepId: true });
-      // TODO Replace links in Journal data
+      const filteredData = this.filterData(journalData, relatedData, 'JournalEntry', sourceReference);
+      if (filteredData.length) {
+        await JournalEntry.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
+      }
+      // TODO Replace links in Journal data (they might reference compendiums)
     }
 
-    const itemData = await this.fetchDataIfMissing(
-      this.packInfo['data/Item.json'],
-      game.items
-    );
     if (itemData.length) {
       console.log(`Creating ${itemData.length} items`);
-      await Item.createDocuments(this.ensureAssets(itemData, assetMap, assetData), { keepId: true });
-      // TODO Replace links in Item data
+      const filteredData = this.filterData(itemData, relatedData, 'Item', sourceReference);
+      if (filteredData.length) {
+        await Item.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
+      }
+      // TODO Replace links in Item data (they might reference compendiums)
     }
 
-    const macroData = await this.fetchDataIfMissing(
-      this.packInfo['data/Macro.json'],
-      game.macros
-    );
     if (macroData.length) {
       console.log(`Creating ${macroData.length} macros`);
-      await Macro.createDocuments(this.ensureAssets(macroData, assetMap, assetData), { keepId: true });
+      const filteredData = this.filterData(macroData, relatedData, 'Macro', sourceReference);
+      if (filteredData.length) {
+        await Macro.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
+      }
     }
 
-    const playlistData = await this.fetchDataIfMissing(
-      this.packInfo['data/Playlist.json'],
-      game.playlists
-    );
     if (playlistData.length) {
       console.log(`Creating ${playlistData.length} playlists`);
-      await Playlist.createDocuments(this.ensureAssets(playlistData, assetMap, assetData), { keepId: true });
+      const filteredData = this.filterData(playlistData, relatedData, 'Playlist', sourceReference);
+      if (filteredData.length) {
+        await Playlist.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
+      }
     }
 
-    const rollTableData = await this.fetchDataIfMissing(
-      this.packInfo['data/RollTable.json'],
-      game.tables
-    );
     if (rollTableData.length) {
       console.log(`Creating ${rollTableData.length} rolltables`);
-      await RollTable.createDocuments(this.ensureAssets(rollTableData, assetMap, assetData), { keepId: true });
+      const filteredData = this.filterData(rollTableData, relatedData, 'RollTable', sourceReference);
+      if (filteredData.length) {
+        await RollTable.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
+      }
     }
 
     console.log('Done');
@@ -215,6 +246,8 @@ export default class MoulinetteImporter extends FormApplication {
       let stringRepresentation = JSON.stringify(entity);
       const assets = assetData.mapping[entity._id];
       if (!assets?.length) {
+        // No assets to process, leave the original data as is.
+        returnEntities.push(entity);
         continue;
       }
       for (const originalAsset of assets) {
@@ -233,53 +266,24 @@ export default class MoulinetteImporter extends FormApplication {
           continue;
         }
 
-        const exists = await FileExists(localAsset);
-        if (exists) {
-          console.log(`✅ ${asset}`);
-          assetMap.set(asset, true);
-          continue;
-        }
-
         const folder = localAsset.substring(0, localAsset.lastIndexOf('/'));
         const filename = asset.split('/').pop();
         const srcURL = new URL(this.packInfo['data/assets/' + asset]);
 
-        await CreateFolderRecursive(folder);
-        // TODO Concurrent download/upload
-        // TODO Better logging
-
-        ScenePacker.logType(CONSTANTS.MODULE_NAME, 'info', true, `Importer | ⬇️ ${asset}`);
-        let res = await fetch(srcURL).catch(function (e) {
+        if (!await game.moulinette.applications.MoulinetteFileUtil.downloadFile(srcURL, folder, filename)) {
           ScenePacker.logType(CONSTANTS.MODULE_NAME, 'error', true,
             game.i18n.format('SCENE-PACKER.exporter.progress.download-error', {
               error: asset,
             }),
-            e
-          );
-        });
-        if (!res?.ok) {
-          ui.notifications.error(
-            game.i18n.format('SCENE-PACKER.exporter.progress.download-error', {
-              error: asset,
-            })
           );
           continue;
         }
 
-        const blob = await res.blob();
-        ScenePacker.logType(CONSTANTS.MODULE_NAME, 'info', true, `Importer | ⬆️️ ${asset}`);
-        await UploadFile(
-          new File([blob], filename, {
-            type: blob.type,
-            lastModified: new Date(),
-          }),
-          folder,
-        );
         stringRepresentation = stringRepresentation.replaceAll(`"${originalAsset}"`, `"${folder}/${encodeURIComponent(filename)}"`);
-        ScenePacker.logType(CONSTANTS.MODULE_NAME, 'info', true, `Importer | ✅️️ ${asset}`);
+        ScenePacker.logType(CONSTANTS.MODULE_NAME, 'info', true, `Importer | ✅️️ ${localAsset}`);
         assetMap.set(asset, true);
         idx++;
-        this.displayProgressBar(`Ensuring assets exist for ${total} entities.`, idx, total);
+        this.displayProgressBar(`Ensuring assets exist for ${total} entities.`, total, idx);
       }
 
       // Convert the string representation that includes the updated assets back to an object
@@ -306,6 +310,58 @@ export default class MoulinetteImporter extends FormApplication {
       });
     }
     return await response.json();
+  }
+
+  /**
+   * Filters the provided data to only include the entities that are relevant to the sourceReference.
+   *
+   * @param {object[]} data - The data to process.
+   * @param {Object.<string, string[]>} allRelatedData - All of the references to related data that are owned by the sourceReference.
+   * @param {string} type - The type of related data to import.
+   * @param {string|null} sourceReference - The reference to the source that owns the related data or null to include all.
+   * @return {object[]} - The filtered data.
+   */
+  filterData(data, allRelatedData, type, sourceReference) {
+    if (!sourceReference) {
+      return data;
+    }
+
+    if (!data.length) {
+      return [];
+    }
+
+    const relatedData = this.getRelatedDataToImport(allRelatedData, type, sourceReference);
+
+    return data.filter(d => sourceReference === `${type}.${d._id}` || relatedData.has(`${type}.${d._id}`));
+  }
+
+  /**
+   * Gets the related data to only those that are relevant to the provided type.
+   *
+   * @param {Object.<string, string[]>} allRelatedData - All of the references to related data that are owned by the sourceReference.
+   * @param {string} type - The type of related data to import.
+   * @param {string|null} sourceReference - The reference to the source that owns the related data or null to include all.
+   * @return {Set<string>} The list of related data references to import for the given type.
+   */
+  getRelatedDataToImport(allRelatedData, type, sourceReference) {
+    const relatedData = new Set();
+    if (sourceReference) {
+      for (const relatedDataReference of allRelatedData[sourceReference]) {
+        if (relatedDataReference.startsWith(type)) {
+          relatedData.add(relatedDataReference);
+        }
+      }
+    } else {
+      for (const [, relatedDataReferences] of Object.entries(allRelatedData)) {
+        for (const relatedDataReference of relatedDataReferences) {
+          if (relatedDataReference.startsWith(type)) {
+            relatedData.add(relatedDataReference);
+          }
+        }
+      }
+    }
+
+    return relatedData;
   }
 
   /**

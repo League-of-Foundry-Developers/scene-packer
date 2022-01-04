@@ -345,7 +345,7 @@
         "extract-data": "Extracting JSON data...",
         "compressing-data": "Compressing {count} {type}...",
         "compressing-assets": "Mapping {count} assets...",
-        "download-error": "Error downloading assets: {error}"
+        "download-error": "Error downloading asset: {error}"
       },
       "invalid": {
         "title": "Invalid form data",
