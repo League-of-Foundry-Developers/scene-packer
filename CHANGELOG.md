@@ -18,6 +18,10 @@
 - Updated macro `Clean up #[CF_tempEntity] entries` to support deleting the CF entities from compendiums.
   - You must manually unlock the compendium first.
 
+## v2.3.26
+
+- Try an alternate search pack name when unable to find a pack. There are some cases where creators utilise world compendiums for Actor packs to get around the system specific limitations of Actor compendiums.
+
 ## v2.3.25
 
 - Fixed issue where packing/unpacking a scene would only pack or unpack the currently active scene rather than the one selected.

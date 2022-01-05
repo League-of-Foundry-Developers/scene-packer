@@ -93,7 +93,7 @@
           "error": "Invalid pack configuration. Cannot import {type}. Check console (F12) for more details.",
           "short": "ImportEntities was called with no searchPacks defined.",
           "details": "ImportEntities was called with no valid searchPacks defined. Double check for typos between your manifest.json and module initialisation files. Received the following call details:",
-          "reference": "ImportEntities was called with a reference that is not registered with Foundry. Double check for typos between your manifest.json and module initialisation files. Received the following call details:",
+          "reference": "ImportEntities was called with a reference that is not registered with Foundry. Double check for typos between your manifest.json and module initialisation files. If you are *not* the creator of this module, then the issue is likely that a compendium pack from a different game system is being referenced. You can ignore this warning if so. Received the following call details:",
           "missing-pack": "Invalid pack configuration. Cannot find compendium {packName}. Check console (F12) for more details.",
           "missing-pack-details": "ImportEntities was called to search for pack \"{packName}\" which is not found. Check for typos in your module setup."
         },
