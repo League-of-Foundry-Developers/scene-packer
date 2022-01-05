@@ -2360,10 +2360,25 @@ export default class ScenePacker {
         },
       );
     }
-    searchPacks.forEach(searchPack => {
-      const pack = game.packs.get(searchPack);
+
+    const packRemap = new Map();
+    for (let i = 0; i < searchPacks.length; i++) {
+      const searchPack = searchPacks[i];
+      let pack = game.packs.get(searchPack);
       if (!pack) {
-        ui.notifications.error(
+        // Try a world prefixed pack. Some content creators utilise [Token Attacher](https://github.com/KayelGee/token-attacher)
+        // functionality (importFromJSON) to convert Actor compendiums between systems.
+        // Any fullstops in the existing pack name will be replaced with dashes.
+        let remappedPackName = `world.${searchPack.slugify({strict: true})}`;
+        pack = game.packs.get(remappedPackName);
+        if (pack) {
+          // Replace the searchPack with the world prefixed pack
+          searchPacks[i] = remappedPackName;
+          packRemap.set(searchPack, remappedPackName);
+          continue;
+        }
+
+        ui.notifications.warn(
           game.i18n.format(
             'SCENE-PACKER.notifications.import-entities.invalid-packs.error',
             {
@@ -2371,26 +2386,31 @@ export default class ScenePacker {
             },
           ),
         );
-        this.logError(
+        this.logWarn(
           true,
           game.i18n.localize(
             'SCENE-PACKER.notifications.import-entities.invalid-packs.reference',
           ),
           {searchPack, entityNames, entities, type},
         );
-        throw game.i18n.format(
-          'SCENE-PACKER.notifications.import-entities.invalid-packs.error',
-          {
-            type: type,
-          },
-        );
       }
-    });
+    }
 
     for (let i = 0; i < entities.length; i++) {
       try {
         const entity = entities[i];
         if (entity.compendiumSourceId) {
+          // Check to see if this compendium source was remapped
+          if (entity.compendiumSourceId.startsWith('Compendium.')) {
+            let compendiumSourceIdParts = entity.compendiumSourceId.split('.');
+            if (compendiumSourceIdParts.length >= 3) {
+              let remappedPack = packRemap.get(`${compendiumSourceIdParts[1]}.${compendiumSourceIdParts[2]}`);
+              if (remappedPack) {
+                compendiumSourceIdParts.splice(1, 2, remappedPack);
+                entity.compendiumSourceId = compendiumSourceIdParts.join('.');
+              }
+            }
+          }
           const createdEntity = await this.ImportByUuid(entity.compendiumSourceId);
           if (createdEntity) {
             createdEntities.push(createdEntity);
@@ -2433,7 +2453,7 @@ export default class ScenePacker {
 
     let exampleEntity;
     if (!isNewerVersion('0.8.0', game.data.version)) {
-      exampleEntity = game.packs.get(searchPacks[0])?.documentClass?.documentName;
+      exampleEntity = game.packs.get(searchPacks[0])?.documentName;
     } else {
       exampleEntity = game.packs.get(searchPacks[0])?.entity;
     }
@@ -2522,7 +2542,7 @@ export default class ScenePacker {
       let packContent;
       let collection;
       if (!isNewerVersion('0.8.0', game.data.version)) {
-        entityType = pack.documentClass.documentName;
+        entityType = pack.documentName;
         packContent = await pack.getDocuments();
         collection = game[entityClass.collectionName];
       } else {
@@ -4124,7 +4144,7 @@ export default class ScenePacker {
       const type = CONST.COMPENDIUM_ENTITY_TYPES[i];
       const uniquePacks = new Set(allPacks.filter((p) => {
         if (!isNewerVersion('0.8.0', game.data.version)) {
-          return p.documentClass.documentName === type;
+          return p.documentName === type;
         }
         return p.entity === type;
       }));
