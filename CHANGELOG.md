@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.3.27
+
+- Updated macro `Clean up #[CF_tempEntity] entries` to support deleting the CF entities from compendiums.
+- Updated macro `Show Scenes Worth Packing` to correctly identify [Monk's Active Tile Triggers](https://foundryvtt.com/packages/monks-active-tiles).
+
 ## v2.3.26
 
 - Try an alternate search pack name when unable to find a pack. There are some cases where creators utilise world compendiums for Actor packs to get around the system specific limitations of Actor compendiums.

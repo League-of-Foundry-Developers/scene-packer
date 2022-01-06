@@ -1301,7 +1301,7 @@ export default class ScenePacker {
         sceneData.sources.push('tokens');
       }
 
-      if (ScenePacker.getActiveTilesData(scene)) {
+      if (ScenePacker.getActiveTilesData(scene).length) {
         sceneData.sources.push('monks-active-tiles');
       }
 
