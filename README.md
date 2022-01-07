@@ -29,6 +29,10 @@ Scene Packer is system agnostic, it doesn't matter whether you're packaging up a
 
 I have put together a site to help build your first module (with or without Scene Packer integration). It takes all of the guess work out of creating your first module, and in a lot of cases means that you don't have to do anything in a text-editor. Simply fill in the form and download your ready-to-go module zip file. https://sneat.github.io/scene-packer-module-generator/
 
+There is also a how to tutorial video which you can follow along with:
+
+[![Asset Report](http://img.youtube.com/vi/cG6qtoZPczI/0.jpg)](https://www.youtube.com/watch?v=cG6qtoZPczI "Scene Packer - How to convert a World to a Module (The Sky Isles)")
+
 ### Asset Report
 
 Additionally, `Scene Packer` contains an `Asset Report` (accessible via the bundled Macro or by right clicking on a Scene in the sidebar) which details which assets will have broken references when imported into someone else's world.
