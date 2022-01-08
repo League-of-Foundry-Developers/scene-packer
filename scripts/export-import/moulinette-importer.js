@@ -2,11 +2,22 @@ import { Compressor } from './compressor.js';
 import { CONSTANTS } from '../constants.js';
 
 export default class MoulinetteImporter extends FormApplication {
+
   /**
-   * @param {object} packInfo - The ExporterData payload
+   * @typedef ImportOptions
+   * @property {Object.<string, string>} packInfo - The map of filenames to URLs from Moulinette.
+   * @property {string} sceneID - Optional. The specific SceneID to import, ignoring other entities unless required for that Scene.
+   * @property {string} actorID - Optional. The specific ActorID to import, ignoring other entities unless required for that Actor.
    */
-  constructor({ packInfo = {} } = {}) {
+
+  /**
+   * @param {ImportOptions} options - Additional options for processing
+   */
+  constructor(options) {
     super();
+
+    options = Object.assign({ sceneID: '', actorID: '', packInfo: {} }, options);
+    const { sceneID, actorID, packInfo } = options;
 
     if (CONSTANTS.IsV7()) {
       Dialog.prompt({
@@ -17,16 +28,33 @@ export default class MoulinetteImporter extends FormApplication {
       return null;
     }
 
-    /**
-     * @type {object} packInfo - The ExporterData payload
-     */
     this.packInfo = packInfo;
+    this.sceneID = sceneID;
+    this.actorID = actorID;
 
     /**
      * Summary data for the package.
      * @type {ExporterData|Object|null}
      */
     this.scenePackerInfo = null;
+
+    this.processing = false;
+    this.processingMessage = '';
+    this.loading = true;
+
+    this.fetchData(this.packInfo['mtte.json']).then(data => {
+      this.scenePackerInfo = data;
+      console.log('scenePackerInfo', this.scenePackerInfo);
+      this.loading = false;
+
+      if (!this.scenePackerInfo.allow_complete_import) {
+        this.process();
+        this.close();
+
+        return;
+      }
+      this.render();
+    });
   }
 
   /** @inheritdoc */
@@ -39,53 +67,74 @@ export default class MoulinetteImporter extends FormApplication {
       width: 700,
       height: 720,
       classes: ['scene-packer'],
-      scrollY: ['ol.directory-list'],
-      filters: [
-        {
-          inputSelector: 'input[name="search"]',
-          contentSelector: '.directory-list',
-        },
-      ],
-      tabs: [
-        {
-          navSelector: '.tabs',
-          contentSelector: '.content',
-          initial: 'scenes',
-        },
-      ],
+      closeOnSubmit: false,
     });
   }
 
   /** @inheritdoc */
   getData() {
-    return {};
+    return {
+      loading: this.loading,
+      pack: this.scenePackerInfo,
+      processing: this.processing,
+      processingMessage: this.processingMessage,
+    };
   }
 
   async _updateObject(event, formData) {}
 
-  /**
-   * @typedef ProcessOptions
-   * @property {string} [sceneID] - Optional. The specific SceneID to import, ignoring other entities unless required for that Scene.
-   * @property {string} [actorID] - Optional. The specific ActorID to import, ignoring other entities unless required for that Actor.
-   */
+  /** @inheritdoc */
+  activateListeners(html) {
+    super.activateListeners(html);
+    html.find('button[name="import-all"]').click(() => {
+      this.sceneID = '';
+      this.actorID = '';
+      this.process().then(() => {
+        Dialog.prompt({
+          title: game.i18n.localize('SCENE-PACKER.importer.name'),
+          content: `<p>${game.i18n.localize('SCENE-PACKER.importer.complete')}</p>`,
+          label: game.i18n.localize('Close'),
+          callback: () => {
+            this.close();
+          },
+        });
+      });
+    });
+    html.find('button[name="import-one"]').click(() => {
+      this.process().then(() => {
+        Dialog.prompt({
+          title: game.i18n.localize('SCENE-PACKER.importer.name'),
+          content: `<p>${game.i18n.localize('SCENE-PACKER.importer.complete')}</p>`,
+          label: game.i18n.localize('Close'),
+          callback: () => {
+            this.close();
+          },
+        });
+      });
+    });
+    html.find('button[name="close"]').click(this.close.bind(this));
+  }
 
   /**
-   * Process the requested URL.
-   * @param {ProcessOptions} options - Additional options for processing
+   * Process the import.
    */
-  async process(options) {
+  async process() {
     // TODO Show process bar / dialog
+    await this.updateProcessStatus({
+      message: `<p>${game.i18n.localize('SCENE-PACKER.importer.processing')}</p>`,
+      processing: true,
+    });
 
-    options = Object.assign({ sceneID: '', actorID: '' }, options);
-    const { sceneID, actorID } = options;
     // TODO remove debugging
-    console.log('options', options);
-    console.log('sceneID', sceneID);
-    console.log('actorID', actorID);
+    console.log('sceneID', this.sceneID);
+    console.log('actorID', this.actorID);
     console.log('packInfo', this.packInfo);
 
     const restrictFolderIDS = [];
 
+    await this.updateProcessStatus({
+      message: `<p>${game.i18n.localize('SCENE-PACKER.importer.process-fetch-data')}</p>`,
+    });
     this.scenePackerInfo = await this.fetchData(this.packInfo['mtte.json']);
     console.log('scenePackerInfo', this.scenePackerInfo);
     // TODO Utilise relatedData to ensure related entities are imported
@@ -98,14 +147,15 @@ export default class MoulinetteImporter extends FormApplication {
      */
     const assetMap = new Map();
 
+    // TODO Handle entities that already exist but are a different version
     const sceneData = await this.fetchDataIfMissing(this.packInfo['data/Scene.json'],
       game.scenes,
-      sceneID ? [sceneID] : []
+      this.sceneID ? [this.sceneID] : []
     );
     const actorData = await this.fetchDataIfMissing(
       this.packInfo['data/Actor.json'],
       game.actors,
-      actorID ? [actorID] : []
+      this.actorID ? [this.actorID] : []
     );
     const journalData = await this.fetchDataIfMissing(
       this.packInfo['data/JournalEntry.json'],
@@ -140,16 +190,16 @@ export default class MoulinetteImporter extends FormApplication {
     // }
 
     let sourceReference;
-    if (sceneID) {
-      sourceReference = `Scene.${sceneID}`;
-      const scene = sceneData.find((s) => s._id === sceneID);
+    if (this.sceneID) {
+      sourceReference = `Scene.${this.sceneID}`;
+      const scene = sceneData.find((s) => s._id === this.sceneID);
       if (scene?.data?.folder) {
         restrictFolderIDS.push(scene.data.folder);
       }
     }
-    if (actorID) {
-      sourceReference = `Actor.${actorID}`;
-      const actor = actorData.find((a) => a._id === actorID);
+    if (this.actorID) {
+      sourceReference = `Actor.${this.actorID}`;
+      const actor = actorData.find((a) => a._id === this.actorID);
       if (actor?.data?.folder) {
         restrictFolderIDS.push(actor.data.folder);
       }
@@ -164,6 +214,9 @@ export default class MoulinetteImporter extends FormApplication {
       ScenePacker.logType(this.scenePackerInfo.name, 'info', true, game.i18n.format('SCENE-PACKER.importer.name', {count: sceneData.length, type: 'scenes'}));
       const filteredData = this.filterData(sceneData, relatedData, 'Scene', sourceReference);
       if (filteredData.length) {
+        await this.updateProcessStatus({
+          message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {type: Scene.collectionName, count: filteredData.length})}</p>`,
+        });
         await Scene.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
       }
     }
@@ -171,6 +224,9 @@ export default class MoulinetteImporter extends FormApplication {
       console.log(`Creating ${actorData.length} actors`);
       const filteredData = this.filterData(actorData, relatedData, 'Actor', sourceReference);
       if (filteredData.length) {
+        await this.updateProcessStatus({
+          message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {type: Actor.collectionName, count: filteredData.length})}</p>`,
+        });
         await Actor.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
       }
     }
@@ -179,6 +235,9 @@ export default class MoulinetteImporter extends FormApplication {
       console.log(`Creating ${journalData.length} journals`);
       const filteredData = this.filterData(journalData, relatedData, 'JournalEntry', sourceReference);
       if (filteredData.length) {
+        await this.updateProcessStatus({
+          message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {type: JournalEntry.collectionName, count: filteredData.length})}</p>`,
+        });
         await JournalEntry.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
       }
       // TODO Replace links in Journal data (they might reference compendiums)
@@ -188,6 +247,9 @@ export default class MoulinetteImporter extends FormApplication {
       console.log(`Creating ${itemData.length} items`);
       const filteredData = this.filterData(itemData, relatedData, 'Item', sourceReference);
       if (filteredData.length) {
+        await this.updateProcessStatus({
+          message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {type: Item.collectionName, count: filteredData.length})}</p>`,
+        });
         await Item.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
       }
       // TODO Replace links in Item data (they might reference compendiums)
@@ -197,6 +259,9 @@ export default class MoulinetteImporter extends FormApplication {
       console.log(`Creating ${macroData.length} macros`);
       const filteredData = this.filterData(macroData, relatedData, 'Macro', sourceReference);
       if (filteredData.length) {
+        await this.updateProcessStatus({
+          message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {type: Macro.collectionName, count: filteredData.length})}</p>`,
+        });
         await Macro.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
       }
     }
@@ -205,6 +270,9 @@ export default class MoulinetteImporter extends FormApplication {
       console.log(`Creating ${playlistData.length} playlists`);
       const filteredData = this.filterData(playlistData, relatedData, 'Playlist', sourceReference);
       if (filteredData.length) {
+        await this.updateProcessStatus({
+          message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {type: Playlist.collectionName, count: filteredData.length})}</p>`,
+        });
         await Playlist.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
       }
     }
@@ -213,11 +281,36 @@ export default class MoulinetteImporter extends FormApplication {
       console.log(`Creating ${rollTableData.length} rolltables`);
       const filteredData = this.filterData(rollTableData, relatedData, 'RollTable', sourceReference);
       if (filteredData.length) {
+        await this.updateProcessStatus({
+          message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {type: RollTable.collectionName, count: filteredData.length})}</p>`,
+        });
         await RollTable.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
       }
     }
 
-    console.log('Done');
+    await this.updateProcessStatus({
+      message: `<p>${game.i18n.localize('SCENE-PACKER.importer.complete')}</p>`,
+    });
+  }
+
+  /**
+   * @typedef ProcessState
+   * @property {boolean} processing - Whether the pack is currently being processed
+   * @property {string} message - The message to display to the user
+   */
+
+  /**
+   * Update the processing state of the importer.
+   * @param {ProcessState} processState
+   */
+  async updateProcessStatus(processState) {
+    if (typeof processState.processing !== 'undefined') {
+      this.processing = processState.processing;
+    }
+    if (processState.message) {
+      this.processingMessage += processState.message;
+    }
+    return this._render();
   }
 
   /**

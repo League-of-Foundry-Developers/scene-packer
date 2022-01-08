@@ -285,10 +285,22 @@
     },
     "importer": {
       "name": "Scene Packer: Importer",
+      "loading": "Loading data...",
       "unsupported": "Scene Packer: Importer is only supported in versions >= 0.8.0",
       "invalid-url": "An invalid URL value was passed to the Scene Packer importer. Received: \"{url}\". {err}",
       "invalid-url-empty": "An empty URL value was passed to the Scene Packer importer.",
-      "creating-documents": "Creating {count} {type}..."
+      "creating-documents": "Creating {count} {type}...",
+      "processing": "Processing...",
+      "process-fetch-data": "Fetching data...",
+      "process-creating-data": "Creating {count} {type} and assets...",
+      "complete": "Complete!",
+      "import-all": "Import all",
+      "import-one": "Import selected",
+      "author": "Author:",
+      "discord": "Discord:",
+      "email": "Email:",
+      "version": "Version:",
+      "more-info": "More info:"
     },
     "exporter": {
       "name": "Export to Moulinette",
