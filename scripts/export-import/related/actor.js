@@ -1,4 +1,5 @@
 import {ExtractUUIDsFromContent, RelatedData, ResolvePath} from './related-data.js';
+import ScenePacker from '../../scene-packer.js';
 
 /**
  * ActorDataLocations - the list of locations where HTML content is stored.
@@ -64,6 +65,51 @@ export function ExtractRelatedActorData(actor) {
     if (relations.length) {
       relatedData.AddRelations(actor.uuid, relations);
     }
+  }
+
+  // Include Token Attacher related data
+  relatedData.AddRelatedData(ExtractRelatedTokenAttacherData(actor));
+
+  return relatedData;
+}
+
+/**
+ * ExtractRelatedTokenAttacherData - extracts the entity UUIDS that are related to the token attacher data.
+ * @see https://github.com/KayelGee/token-attacher
+ * @param {object} actor - the actor to extract the related data from.
+ * @return {RelatedData}
+ */
+export function ExtractRelatedTokenAttacherData(actor) {
+  const relatedData = new RelatedData();
+  if (!actor?.data) {
+    return relatedData;
+  }
+
+  let tokenAttacherData = getProperty(actor.data, 'token.flags.token-attacher.prototypeAttached');
+  if (tokenAttacherData?.Tile?.length) {
+    // Extract Monk's Active Tile related actions
+    ScenePacker.GetActiveTilesData(tokenAttacherData.Tile).forEach(tile => {
+      (getProperty(tile.data, 'flags.monks-active-tiles.actions') || [])
+        .filter(
+          (a) => a?.data?.macroid ||
+            a?.data?.entity?.id ||
+            a?.data?.item?.id ||
+            a?.data?.location?.sceneId ||
+            a?.data?.rolltableid
+        ).forEach(action => {
+        if (action.data?.macroid) {
+          relatedData.AddRelation(actor.uuid, `Macro.${action.data.macroid}`);
+        } else if (action.data?.location?.sceneId) {
+          relatedData.AddRelation(actor.uuid, `Scene.${action.data.location.sceneId}`);
+        } else if (action.data?.rolltableid) {
+          relatedData.AddRelation(actor.uuid, `RollTable.${action.data.rolltableid}`);
+        } else if (action.data?.entity?.id) {
+          relatedData.AddRelation(actor.uuid, action.data.entity.id);
+        } else if (action.data?.item?.id) {
+          relatedData.AddRelation(actor.uuid, action.data.item.id);
+        }
+      })
+    });
   }
 
   return relatedData;

@@ -1331,7 +1331,7 @@ export default class ScenePacker {
         sceneData.sources.push('tokens');
       }
 
-      if (ScenePacker.getActiveTilesData(scene).length) {
+      if (ScenePacker.GetActiveTilesData(scene.data?.tiles).length) {
         sceneData.sources.push('monks-active-tiles');
       }
 
@@ -1595,70 +1595,7 @@ export default class ScenePacker {
     /**
      * tileInfo is the data referenced by Monk's Active Tile Triggers that needs packing.
      */
-    const tileInfoResults = await Promise.allSettled(
-      ScenePacker.getActiveTilesData(scene).map(async (tile) => {
-        const actions = await Promise.allSettled(
-          tile
-            .getFlag('monks-active-tiles', 'actions')
-            .filter(
-              (a) => a?.data?.macroid ||
-                a?.data?.entity?.id ||
-                a?.data?.item?.id ||
-                a?.data?.location?.sceneId ||
-                a?.data?.rolltableid
-            )
-            .map(async (d) => {
-              const response = {
-                action: d,
-                actionID: d.id,
-                name: undefined,
-                sourceId: undefined,
-                compendiumSourceId: undefined,
-                entityType: undefined,
-              };
-              let ref;
-              if (d.data?.macroid) {
-                ref = `Macro.${d.data.macroid}`;
-              } else if (d.data?.location?.sceneId) {
-                ref = `Scene.${d.data.location.sceneId}`;
-              } else if (d.data?.rolltableid) {
-                ref = `RollTable.${d.data.rolltableid}`;
-              } else if (d.data?.entity?.id) {
-                ref = d.data.entity.id;
-              } else if (d.data?.item?.id) {
-                ref = d.data.item.id;
-              }
-              const entityParts = ref.split('.');
-              if (entityParts.length < 2 ||
-                !entityParts[0] ||
-                !entityParts[1]) {
-                // Missing definition of the entity type and entity id, unable to match.
-                return response;
-              }
-              const entityType = entityParts[0];
-              const entity = this.findEntity(ref);
-              const compendiumEntity = await this.findCompendiumEntity(
-                ref,
-                entity?.name,
-                entityType,
-                this.getSearchPacksForType(entityType)
-              );
-
-              response.name = entity?.name;
-              response.sourceId = entity?.uuid;
-              response.compendiumSourceId = compendiumEntity?.uuid;
-              response.entityType = entityType;
-
-              return response;
-            })
-        );
-        return {
-          tileID: tile.id,
-          actions: actions.filter(result => result.status === 'fulfilled').map(result => result.value),
-        };
-      })
-    );
-    const tileInfo = tileInfoResults.filter(result => result.status === 'fulfilled').map(result => result.value);
+    const tileInfo = await this.packActiveTiles(scene.data?.tiles);
 
     if (tileInfo.length > 0) {
       ui.notifications.info(
@@ -3202,27 +3139,25 @@ export default class ScenePacker {
       }
     }
 
-    if (!compendiumEntity) {
-      ui.notifications.warn(
-        game.i18n.format(
-          'SCENE-PACKER.notifications.find-entity-compendium.no-match',
-          {
-            name: entityName,
-            type: entityType,
-          },
-        ),
-      );
-      this.logWarn(
-        true,
-        game.i18n.format(
-          'SCENE-PACKER.notifications.find-entity-compendium.no-match',
-          {
-            name: entityName,
-            type: entityType,
-          },
-        ),
-      );
-    }
+    ui.notifications.warn(
+      game.i18n.format(
+        'SCENE-PACKER.notifications.find-entity-compendium.no-match',
+        {
+          name: entityName,
+          type: entityType,
+        },
+      ),
+    );
+    this.logWarn(
+      true,
+      game.i18n.format(
+        'SCENE-PACKER.notifications.find-entity-compendium.no-match',
+        {
+          name: entityName,
+          type: entityType,
+        },
+      ),
+    );
 
     return compendiumEntity;
   }
@@ -3677,23 +3612,36 @@ export default class ScenePacker {
   }
 
   /**
-   * Gets the tiles that have actions that need processing
-   * @param {Object} scene - The scene being unpacked
+   * Returns whether the provided actor contains Monk's Active Tiles that could be packed.
+   * @param {Object} actor - The Actor which might have Monk's Active Tiles data inside Token Attacher data
+   * @return {boolean}
    */
-  static getActiveTilesData(scene) {
-    let scopes;
-    if (CONSTANTS.IsV8orNewer()) {
-      scopes = game.getPackageScopes();
-    } else {
-      scopes = SetupConfiguration.getPackageScopes();
+  static ActorHasActiveTilesData(actor) {
+    if (!actor?.data) {
+      return false;
     }
-    if (scopes.length && !scopes.includes('monks-active-tiles')) {
+
+    let tokenAttacherData = getProperty(actor.data, 'token.flags.token-attacher.prototypeAttached');
+    if (!tokenAttacherData?.Tile?.length) {
+      return false;
+    }
+
+    return ScenePacker.GetActiveTilesData(tokenAttacherData.Tile).length > 0;
+  }
+
+  /**
+   * Gets the tiles that have actions that need processing
+   * @param {Object[]} tiles - The tiles which might contain Monk's Active Tiles actions
+   * @return {Object[]} - The tiles that have actions that need processing
+   */
+  static GetActiveTilesData(tiles) {
+    if (!tiles?.length) {
       return [];
     }
-    return scene.data.tiles.filter(
+
+    return tiles.filter(
       (tile) =>
-        tile
-          .getFlag('monks-active-tiles', 'actions')
+        (getProperty(tile.data, 'flags.monks-active-tiles.actions') || [])
           ?.filter(
             (a) =>
               a?.data?.macroid ||
@@ -3706,6 +3654,82 @@ export default class ScenePacker {
   }
 
   /**
+   * Returns packed active tile data for the provided tiles
+   * @param {Object[]} tiles - The tiles which might contain Monk's Active Tile Trigger data
+   * @return {Promise<Object[]>}
+   */
+  async packActiveTiles(tiles) {
+    if (!tiles?.length) {
+      return [];
+    }
+
+    const tileInfoResults = await Promise.allSettled(
+      ScenePacker.GetActiveTilesData(tiles).map(async (tile) => {
+        const actions = await Promise.allSettled(
+          (getProperty(tile.data, 'flags.monks-active-tiles.actions') || [])
+            .filter(
+              (a) => a?.data?.macroid ||
+                a?.data?.entity?.id ||
+                a?.data?.item?.id ||
+                a?.data?.location?.sceneId ||
+                a?.data?.rolltableid
+            )
+            .map(async (d) => {
+              const response = {
+                action: d,
+                actionID: d.id,
+                name: undefined,
+                sourceId: undefined,
+                compendiumSourceId: undefined,
+                entityType: undefined,
+              };
+              let ref;
+              if (d.data?.macroid) {
+                ref = `Macro.${d.data.macroid}`;
+              } else if (d.data?.location?.sceneId) {
+                ref = `Scene.${d.data.location.sceneId}`;
+              } else if (d.data?.rolltableid) {
+                ref = `RollTable.${d.data.rolltableid}`;
+              } else if (d.data?.entity?.id) {
+                ref = d.data.entity.id;
+              } else if (d.data?.item?.id) {
+                ref = d.data.item.id;
+              }
+              const entityParts = ref.split('.');
+              if (entityParts.length < 2 ||
+                !entityParts[0] ||
+                !entityParts[1]) {
+                // Missing definition of the entity type and entity id, unable to match.
+                return response;
+              }
+              const entityType = entityParts[0];
+              const entity = this.findEntity(ref);
+              const compendiumEntity = await this.findCompendiumEntity(
+                ref,
+                entity?.name,
+                entityType,
+                this.getSearchPacksForType(entityType)
+              );
+
+              response.name = entity?.name;
+              response.sourceId = entity?.uuid;
+              response.compendiumSourceId = compendiumEntity?.uuid;
+              response.entityType = entityType;
+
+              return response;
+            })
+        );
+        return {
+          tileID: tile.id,
+          actions: actions.filter(result => result.status === 'fulfilled').map(result => result.value),
+        };
+      })
+    );
+
+    return tileInfoResults.filter(result => result.status === 'fulfilled').map(result => result.value);
+  }
+
+  /**
    * Unpacks the macros associated with Monk's Active Tiles
    * @param {Object} scene - The scene being unpacked
    * @param {Object[]} tilesInfo - The tiles which contain Monk's Active Tiles data
@@ -3713,7 +3737,7 @@ export default class ScenePacker {
   async unpackActiveTiles(scene, tilesInfo) {
     let tilesCount = 0;
     let actionsCount = 0;
-    const tiles = ScenePacker.getActiveTilesData(scene);
+    const tiles = ScenePacker.GetActiveTilesData(scene.data.tiles);
 
     const extractEntityID = (value) => {
       const entityParts = value.split('.');
@@ -3762,7 +3786,7 @@ export default class ScenePacker {
         continue;
       }
       let changed = false;
-      const actions = tile.getFlag('monks-active-tiles', 'actions');
+      const actions = (getProperty(tile.data, 'flags.monks-active-tiles.actions') || []);
       // Unpack entity references
       for (const action of actions) {
         const compendiumSourceId = tileInfo.actions?.find(a => a.actionID === action.id)?.compendiumSourceId;
@@ -3858,7 +3882,9 @@ export default class ScenePacker {
 
       if (changed) {
         tilesCount++;
-        await tile.setFlag('monks-active-tiles', 'actions', actions);
+        let newActions = {};
+        setProperty(newActions, 'flags.monks-active-tiles.actions', actions)
+        await tile.data.update(newActions)
       }
     }
 
@@ -3896,55 +3922,43 @@ export default class ScenePacker {
       return;
     }
 
-    // Check if the quick encounters module exists at all and bail if it isn't.
-    let scopes;
-    if (CONSTANTS.IsV8orNewer()) {
-      scopes = game.getPackageScopes();
-    } else {
-      scopes = SetupConfiguration.getPackageScopes();
-    }
-    if (!scopes.length || !scopes.includes('quick-encounters')) {
-      return;
-    }
-
     const journalInfo = scene.getFlag(this.moduleName, CONSTANTS.FLAGS_JOURNALS);
 
     for (let i = 0; i < journals.length; i++) {
       const journal = journals[i];
       let quickEncounter = {};
-      const quickEncounterData = journal.getFlag('quick-encounters', 'quickEncounter');
-      if (quickEncounterData) {
-        try {
-          if (typeof quickEncounterData === 'string') {
-            quickEncounter = JSON.parse(quickEncounterData);
-          } else if (typeof quickEncounterData === 'object') {
-            quickEncounter = quickEncounterData;
-          }
-          if (!quickEncounter) {
-            continue;
-          }
-          if (!quickEncounter.journalEntryId || !quickEncounter.journalEntryId.startsWith('Compendium.')) {
-            // Only support unpacking compendium references
-            continue;
-          }
-        } catch (e) {
-          ScenePacker.logType(
-            moduleName,
-            'info',
-            false,
-            game.i18n.format(
-              'SCENE-PACKER.world-conversion.compendiums.quick-encounters.could-not-parse',
-              {
-                journal: journal.name,
-                error: e,
-              },
-            ),
-          );
-
-          return;
-        }
-      } else {
+      const quickEncounterData = getProperty(journal.data, 'quick-encounters.quickEncounter');
+      if (!quickEncounterData) {
         continue;
+      }
+      try {
+        if (typeof quickEncounterData === 'string') {
+          quickEncounter = JSON.parse(quickEncounterData);
+        } else if (typeof quickEncounterData === 'object') {
+          quickEncounter = quickEncounterData;
+        }
+        if (!quickEncounter) {
+          continue;
+        }
+        if (!quickEncounter.journalEntryId || !quickEncounter.journalEntryId.startsWith('Compendium.')) {
+          // Only support unpacking compendium references
+          continue;
+        }
+      } catch (e) {
+        ScenePacker.logType(
+          moduleName,
+          'info',
+          false,
+          game.i18n.format(
+            'SCENE-PACKER.world-conversion.compendiums.quick-encounters.could-not-parse',
+            {
+              journal: journal.name,
+              error: e,
+            },
+          ),
+        );
+
+        return;
       }
 
       const originalData = duplicate(quickEncounter);
@@ -4054,7 +4068,9 @@ export default class ScenePacker {
           );
         });
 
-        await journal.setFlag('quick-encounters', 'quickEncounter', JSON.stringify(quickEncounter));
+        let newFlags = {};
+        setProperty(newFlags, 'flags.quick-encounters.quickEncounter', JSON.stringify(quickEncounter));
+        await journal.data.update(newFlags);
       }
     }
   }
@@ -4719,19 +4735,8 @@ export default class ScenePacker {
       return;
     }
 
-    // Check if the quick encounters module exists at all and bail if it isn't.
-    let scopes;
-    if (CONSTANTS.IsV8orNewer()) {
-      scopes = game.getPackageScopes();
-    } else {
-      scopes = SetupConfiguration.getPackageScopes();
-    }
-    if (!scopes.length || !scopes.includes('quick-encounters')) {
-      return;
-    }
-
     let quickEncounter = {};
-    const quickEncounterData = journal.getFlag('quick-encounters', 'quickEncounter');
+    const quickEncounterData = getProperty(journal.data, 'quick-encounters.quickEncounter');
     if (quickEncounterData) {
       try {
         quickEncounter = JSON.parse(quickEncounterData);
@@ -4832,7 +4837,9 @@ export default class ScenePacker {
       });
 
       if (!dryRun) {
-        await journal.setFlag('quick-encounters', 'quickEncounter', JSON.stringify(quickEncounter));
+        let newFlags = {};
+        setProperty(newFlags, 'flags.quick-encounters.quickEncounter', JSON.stringify(quickEncounter));
+        await journal.data.update(newFlags);
       }
     }
   }
@@ -4949,14 +4956,23 @@ export default class ScenePacker {
    * @returns {null|ScenePacker}
    */
   static GetInstanceForScene(scene) {
+    return ScenePacker.GetInstanceForDocument(scene);
+  }
+
+  /**
+   * Gets the instance of Scene Packer that packed the given document
+   * @param {Object} doc The document that was packed.
+   * @returns {null|ScenePacker}
+   */
+  static GetInstanceForDocument(doc) {
     if (!game.user.isGM) {
       return null;
     }
 
-    if (!scene) {
+    if (!doc) {
       return null;
     }
-    const moduleName = scene.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_SOURCE_MODULE);
+    const moduleName = doc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_SOURCE_MODULE);
     if (!moduleName) {
       // No packed data defined.
       return null;

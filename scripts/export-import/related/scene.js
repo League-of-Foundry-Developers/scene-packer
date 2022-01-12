@@ -31,7 +31,7 @@ export function ExtractRelatedSceneData(scene) {
   }
 
   // Monk's Active Tile Triggers support.
-  const activeTiles = ScenePacker.getActiveTilesData(scene);
+  const activeTiles = ScenePacker.GetActiveTilesData(scene.data?.tiles);
   if (activeTiles.length) {
     const extractActiveTileReference = (value) => {
       if (!value) {
