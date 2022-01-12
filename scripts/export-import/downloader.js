@@ -43,7 +43,7 @@ export class Downloader {
 
   /**
    * Add an array of URLs
-   * @param {string[]} urls - The URLs to add
+   * @param {IterableIterator<string>|string[]} urls - The URLs to add
    * @constructor
    */
   AddURLs(urls) {
@@ -51,7 +51,7 @@ export class Downloader {
   }
 
   /**
-   * Process the pending urls. Be sure to add all of the URLs prior to calling Process.
+   * Process the pending urls. Be sure to add all the URLs prior to calling Process.
    * @return {Promise<void>}
    */
   async Process() {
@@ -65,7 +65,7 @@ export class Downloader {
       }
 
       const resolveAsset = async (iterator) => {
-        for (let [index, url] of iterator) {
+        for (let [, url] of iterator) {
           const blob = await this._download(url);
           if (blob) {
             this.onDownloaded({
@@ -123,7 +123,7 @@ export class Downloader {
           complete: false,
         });
       });
-      oReq.addEventListener('load', (e) => {
+      oReq.addEventListener('load', () => {
         this.onProgress({
           url,
           percentComplete: 100,

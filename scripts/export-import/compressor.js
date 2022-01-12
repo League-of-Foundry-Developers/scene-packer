@@ -71,7 +71,7 @@ export class Compressor {
 
   /**
    * Add a file URL to download and then add to the zip.
-   * @param {string} url - The URL to download and add to the Zip
+   * @param {URL|string} url - The URL to download and add to the Zip
    * @param {string} filename - The filename to use. Use forward slashes for subdirectories.
    * @return {Promise<void>}
    */

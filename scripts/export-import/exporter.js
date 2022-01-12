@@ -5,6 +5,8 @@ export default class Exporter extends FormApplication {
   constructor() {
     super();
 
+    // TODO Support updating an "existing" export in a nice way
+
     if (CONSTANTS.IsV7()) {
       Dialog.prompt({
         title: game.i18n.localize('Unsupported'),
@@ -62,8 +64,10 @@ export default class Exporter extends FormApplication {
     });
   }
 
-  /** @inheritdoc */
-  getData() {
+  /**
+   * @return {Object|Promise}
+   */
+  getData(options = {}) {
     return {
       scenes: this.Scene,
       actors: this.Actor,
@@ -86,43 +90,11 @@ export default class Exporter extends FormApplication {
     };
   }
 
-  _isValid({ showDialog = false, throwError = false } = {}) {
-    // TODO Implement validation properly
-    const invalid = [];
-    for (const field of ['packageName', 'version', 'author']) {
-      if (!formData[field]) {
-        invalid.push(field);
-      }
-    }
-    if (!formData.discordId && !formData.email) {
-      invalid.push('email or discordId');
-    }
-    if (invalid.length) {
-      if (showDialog) {
-        Dialog.prompt({
-          title: game.i18n.localize('SCENE-PACKER.exporter.invalid.title'),
-          content: game.i18n.format('SCENE-PACKER.exporter.invalid.fields', {
-            fields: `<li>${invalid.join('</li><li>')}</li>`,
-          }),
-          callback: () => {},
-        });
-      }
-      if (throwError) {
-        throw new Error(
-          `You must specify values for the following fields: ${invalid.join(
-            ', '
-          )}`
-        );
-      }
-    }
-
-    return !invalid.length;
-  }
-
   /** @inheritdoc */
   async _updateObject(event, formData) {
     this._updateCounts();
 
+    // TODO Implement validation properly
     const invalid = [];
     for (const field of ['packageName', 'packageDescription']) {
       if (!formData[field]) {
@@ -167,13 +139,13 @@ export default class Exporter extends FormApplication {
         version: formData.version,
       }),
     }).render(true);
-    setTimeout(() => {
+    setTimeout((exporter) => {
       exporter.Process().then(({ dataZip } = response) => {
         dataZip.Download();
         this.complete = true;
         this.render();
       });
-    }, 500);
+    }, 500, exporter);
   }
 
   /** @inheritdoc */
@@ -257,10 +229,11 @@ export default class Exporter extends FormApplication {
    * Updates the count of entities selected
    */
   _updateCounts() {
-    this.selected = $('#scene-packer-exporter')
+    let scenePackerExporter = $('#scene-packer-exporter');
+    this.selected = scenePackerExporter
       .find('input[type="checkbox"]:checked')
       .filter((i, e) => e.dataset.type !== 'Folder');
-    $('#scene-packer-exporter')
+    scenePackerExporter
       .find('footer p.summary')
       .text(
         game.i18n.format('SCENE-PACKER.exporter.selected-count', {
@@ -304,7 +277,7 @@ export default class Exporter extends FormApplication {
     } // Collapse
     else {
       folder.addClass('collapsed');
-      const subs = folder.find('.folder').addClass('collapsed');
+      folder.find('.folder').addClass('collapsed');
     }
   }
 
@@ -429,9 +402,9 @@ export class ExporterData {
    * Triggers a download of the exporter data as JSON.
    */
   DownloadJSON() {
-    var content = JSON.stringify(this, null, 2);
-    let filename = this.name.slugify({ strict: true }) || 'export';
-    var blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const content = JSON.stringify(this, null, 2);
+    const filename = this.name.slugify({ strict: true }) || 'export';
+    const blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
     if (typeof window.navigator.msSaveBlob !== 'undefined') {
       // IE doesn't allow using a blob object directly as link href.
       // Workaround for "HTML7007: One or more blob URLs were

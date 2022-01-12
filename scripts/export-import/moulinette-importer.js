@@ -1,5 +1,5 @@
-import { Compressor } from './compressor.js';
-import { CONSTANTS } from '../constants.js';
+import {Compressor} from './compressor.js';
+import {CONSTANTS} from '../constants.js';
 
 export default class MoulinetteImporter extends FormApplication {
 
@@ -16,8 +16,8 @@ export default class MoulinetteImporter extends FormApplication {
   constructor(options) {
     super();
 
-    options = Object.assign({ sceneID: '', actorID: '', packInfo: {} }, options);
-    const { sceneID, actorID, packInfo } = options;
+    options = Object.assign({sceneID: '', actorID: '', packInfo: {}}, options);
+    const {sceneID, actorID, packInfo} = options;
 
     if (CONSTANTS.IsV7()) {
       Dialog.prompt({
@@ -57,7 +57,7 @@ export default class MoulinetteImporter extends FormApplication {
         this.process();
         this.close();
 
-        return;
+        return null;
       }
       this.render();
     });
@@ -77,8 +77,10 @@ export default class MoulinetteImporter extends FormApplication {
     });
   }
 
-  /** @inheritdoc */
-  getData() {
+  /**
+   * @return {Object|Promise}
+   */
+  getData(options = {}) {
     return {
       loading: this.loading,
       pack: this.scenePackerInfo,
@@ -126,7 +128,6 @@ export default class MoulinetteImporter extends FormApplication {
    * Process the import.
    */
   async process() {
-    // TODO Show process bar / dialog
     await this.updateProcessStatus({
       message: `<p>${game.i18n.localize('SCENE-PACKER.importer.processing')}</p>`,
       processing: true,
@@ -144,7 +145,6 @@ export default class MoulinetteImporter extends FormApplication {
     });
     this.scenePackerInfo = await this.fetchData(this.packInfo['mtte.json']);
     console.log('scenePackerInfo', this.scenePackerInfo);
-    // TODO Utilise relatedData to ensure related entities are imported
     const relatedData = await this.fetchData(this.packInfo['data/related-data.json']);
     console.log('relatedData', relatedData);
     const assetData = await this.fetchData(this.packInfo['data/assets.json']);
@@ -157,32 +157,32 @@ export default class MoulinetteImporter extends FormApplication {
     // TODO Handle entities that already exist but are a different version
     const sceneData = await this.fetchDataIfMissing(this.packInfo['data/Scene.json'],
       game.scenes,
-      this.sceneID ? [this.sceneID] : []
+      this.sceneID ? [this.sceneID] : [],
     );
     const actorData = await this.fetchDataIfMissing(
       this.packInfo['data/Actor.json'],
       game.actors,
-      this.actorID ? [this.actorID] : []
+      this.actorID ? [this.actorID] : [],
     );
     const journalData = await this.fetchDataIfMissing(
       this.packInfo['data/JournalEntry.json'],
-      game.journal
+      game.journal,
     );
     const itemData = await this.fetchDataIfMissing(
       this.packInfo['data/Item.json'],
-      game.items
+      game.items,
     );
     const macroData = await this.fetchDataIfMissing(
       this.packInfo['data/Macro.json'],
-      game.macros
+      game.macros,
     );
     const playlistData = await this.fetchDataIfMissing(
       this.packInfo['data/Playlist.json'],
-      game.playlists
+      game.playlists,
     );
     const rollTableData = await this.fetchDataIfMissing(
       this.packInfo['data/RollTable.json'],
-      game.tables
+      game.tables,
     );
 
     // TODO Determine if anything like this is needed to import/update references
@@ -214,15 +214,26 @@ export default class MoulinetteImporter extends FormApplication {
 
     await this.importFolders(
       this.packInfo['data/folders.json'],
-      restrictFolderIDS
+      restrictFolderIDS,
     );
 
     if (sceneData.length) {
-      ScenePacker.logType(this.scenePackerInfo.name, 'info', true, game.i18n.format('SCENE-PACKER.importer.name', {count: sceneData.length, type: 'scenes'}));
+      ScenePacker.logType(
+        this.scenePackerInfo.name,
+        'info',
+        true,
+        game.i18n.format('SCENE-PACKER.importer.name', {
+          count: sceneData.length,
+          type: game.i18n.localize('scenes'),
+        }),
+      );
       const filteredData = this.filterData(sceneData, relatedData, 'Scene', sourceReference);
       if (filteredData.length) {
         await this.updateProcessStatus({
-          message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {type: Scene.collectionName, count: filteredData.length})}</p>`,
+          message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {
+            type: Scene.collectionName,
+            count: filteredData.length,
+          })}</p>`,
         });
         await Scene.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
         for (const id of filteredData.map(s => s._id)) {
@@ -233,22 +244,44 @@ export default class MoulinetteImporter extends FormApplication {
       }
     }
     if (actorData.length) {
-      console.log(`Creating ${actorData.length} actors`);
+      ScenePacker.logType(
+        this.scenePackerInfo.name,
+        'info',
+        true,
+        game.i18n.format('SCENE-PACKER.importer.name', {
+          count: actorData.length,
+          type: game.i18n.localize('actors'),
+        }),
+      );
       const filteredData = this.filterData(actorData, relatedData, 'Actor', sourceReference);
       if (filteredData.length) {
         await this.updateProcessStatus({
-          message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {type: Actor.collectionName, count: filteredData.length})}</p>`,
+          message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {
+            type: Actor.collectionName,
+            count: filteredData.length,
+          })}</p>`,
         });
         await Actor.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
       }
     }
 
     if (journalData.length) {
-      console.log(`Creating ${journalData.length} journals`);
+      ScenePacker.logType(
+        this.scenePackerInfo.name,
+        'info',
+        true,
+        game.i18n.format('SCENE-PACKER.importer.name', {
+          count: journalData.length,
+          type: game.i18n.localize('journals'),
+        }),
+      );
       const filteredData = this.filterData(journalData, relatedData, 'JournalEntry', sourceReference);
       if (filteredData.length) {
         await this.updateProcessStatus({
-          message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {type: JournalEntry.collectionName, count: filteredData.length})}</p>`,
+          message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {
+            type: JournalEntry.collectionName,
+            count: filteredData.length,
+          })}</p>`,
         });
         await JournalEntry.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
       }
@@ -256,11 +289,22 @@ export default class MoulinetteImporter extends FormApplication {
     }
 
     if (itemData.length) {
-      console.log(`Creating ${itemData.length} items`);
+      ScenePacker.logType(
+        this.scenePackerInfo.name,
+        'info',
+        true,
+        game.i18n.format('SCENE-PACKER.importer.name', {
+          count: itemData.length,
+          type: game.i18n.localize('items'),
+        }),
+      );
       const filteredData = this.filterData(itemData, relatedData, 'Item', sourceReference);
       if (filteredData.length) {
         await this.updateProcessStatus({
-          message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {type: Item.collectionName, count: filteredData.length})}</p>`,
+          message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {
+            type: Item.collectionName,
+            count: filteredData.length,
+          })}</p>`,
         });
         await Item.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
       }
@@ -268,33 +312,66 @@ export default class MoulinetteImporter extends FormApplication {
     }
 
     if (macroData.length) {
-      console.log(`Creating ${macroData.length} macros`);
+      ScenePacker.logType(
+        this.scenePackerInfo.name,
+        'info',
+        true,
+        game.i18n.format('SCENE-PACKER.importer.name', {
+          count: macroData.length,
+          type: game.i18n.localize('macros'),
+        }),
+      );
       const filteredData = this.filterData(macroData, relatedData, 'Macro', sourceReference);
       if (filteredData.length) {
         await this.updateProcessStatus({
-          message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {type: Macro.collectionName, count: filteredData.length})}</p>`,
+          message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {
+            type: Macro.collectionName,
+            count: filteredData.length,
+          })}</p>`,
         });
         await Macro.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
       }
     }
 
     if (playlistData.length) {
-      console.log(`Creating ${playlistData.length} playlists`);
+      ScenePacker.logType(
+        this.scenePackerInfo.name,
+        'info',
+        true,
+        game.i18n.format('SCENE-PACKER.importer.name', {
+          count: playlistData.length,
+          type: game.i18n.localize('playlists'),
+        }),
+      );
       const filteredData = this.filterData(playlistData, relatedData, 'Playlist', sourceReference);
       if (filteredData.length) {
         await this.updateProcessStatus({
-          message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {type: Playlist.collectionName, count: filteredData.length})}</p>`,
+          message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {
+            type: Playlist.collectionName,
+            count: filteredData.length,
+          })}</p>`,
         });
         await Playlist.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
       }
     }
 
     if (rollTableData.length) {
-      console.log(`Creating ${rollTableData.length} rolltables`);
+      ScenePacker.logType(
+        this.scenePackerInfo.name,
+        'info',
+        true,
+        game.i18n.format('SCENE-PACKER.importer.name', {
+          count: rollTableData.length,
+          type: game.i18n.localize('rollable tables'),
+        }),
+      );
       const filteredData = this.filterData(rollTableData, relatedData, 'RollTable', sourceReference);
       if (filteredData.length) {
         await this.updateProcessStatus({
-          message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {type: RollTable.collectionName, count: filteredData.length})}</p>`,
+          message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {
+            type: RollTable.collectionName,
+            count: filteredData.length,
+          })}</p>`,
         });
         await RollTable.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
       }
@@ -322,7 +399,7 @@ export default class MoulinetteImporter extends FormApplication {
     if (processState.message) {
       this.processingMessage += processState.message;
     }
-    return this._render();
+    return this._render(false, {});
   }
 
   /**
@@ -339,7 +416,11 @@ export default class MoulinetteImporter extends FormApplication {
 
     const returnEntities = [];
     console.groupCollapsed(
-      `Ensuring assets exist for ${entities.length} entities.`
+      this.scenePackerInfo.name,
+      '|',
+      game.i18n.format('SCENE-PACKER.importer.ensure-assets', {
+        count: entities.length,
+      }),
     );
     let total = 0;
     for (const entity of entities) {
@@ -376,7 +457,7 @@ export default class MoulinetteImporter extends FormApplication {
         const srcURL = new URL(this.packInfo['data/assets/' + asset]);
 
         if (!await game.moulinette.applications.MoulinetteFileUtil.downloadFile(srcURL, folder, filename)) {
-          ScenePacker.logType(CONSTANTS.MODULE_NAME, 'error', true,
+          ScenePacker.logType(this.scenePackerInfo.name, 'error', true,
             game.i18n.format('SCENE-PACKER.exporter.progress.download-error', {
               error: asset,
             }),
@@ -385,17 +466,21 @@ export default class MoulinetteImporter extends FormApplication {
         }
 
         stringRepresentation = stringRepresentation.replaceAll(`"${originalAsset}"`, `"${folder}/${encodeURIComponent(filename)}"`);
-        ScenePacker.logType(CONSTANTS.MODULE_NAME, 'info', true, `Importer | ✅️️ ${localAsset}`);
+        ScenePacker.logType(this.scenePackerInfo.name, 'info', true, `Importer | ✅️️ ${localAsset}`);
         assetMap.set(asset, true);
         idx++;
-        this.displayProgressBar(`Ensuring assets exist for ${total} entities.`, total, idx);
+        this.displayProgressBar(game.i18n.format('SCENE-PACKER.importer.ensure-assets', {
+          count: total,
+        }), total, idx);
       }
 
       // Convert the string representation that includes the updated assets back to an object
       returnEntities.push(JSON.parse(stringRepresentation));
     }
     // Ensure that the progress bar is hidden.
-    this.displayProgressBar(`Ensuring assets exist for ${total} entities.`, 1, 1);
+    this.displayProgressBar(game.i18n.format('SCENE-PACKER.importer.ensure-assets', {
+      count: total,
+    }), 1, 1);
     console.groupEnd();
 
     return returnEntities;
@@ -403,11 +488,11 @@ export default class MoulinetteImporter extends FormApplication {
 
   /**
    * Fetch data.
-   * @param {URL} url - The URL to the JSON.
+   * @param {URL|string} url - The URL to the JSON.
    * @return {Promise<Object>}
    */
   async fetchData(url) {
-    const response = await Compressor.FetchWithTimeout(url, { timeout: 60000 });
+    const response = await Compressor.FetchWithTimeout(url, {timeout: 60000});
     if (!response.ok) {
       throw game.i18n.format('SCENE-PACKER.importer.invalid-url', {
         url,
@@ -471,13 +556,14 @@ export default class MoulinetteImporter extends FormApplication {
 
   /**
    * Fetch data if it is missing from the given collection.
-   * @param {URL} url - The URL to the JSON
+   * @param {URL|string} url - The URL to the JSON
    * @param {Object} collection - The collection that this data belongs to
    * @param {string[]} onlyIDs - Only import the data for the given IDs
    * @return {Promise<Object[]>}
    */
   async fetchDataIfMissing(url, collection, onlyIDs = []) {
-    const response = await Compressor.FetchWithTimeout(url, { timeout: 60000 });
+    // TODO Look into a nice way to handle updating existing data.
+    const response = await Compressor.FetchWithTimeout(url, {timeout: 60000});
     if (!response.ok) {
       throw game.i18n.format('SCENE-PACKER.importer.invalid-url', {
         url,
@@ -494,11 +580,11 @@ export default class MoulinetteImporter extends FormApplication {
 
   /**
    * Downloads the JSON data for the given URL and creates the folders within the world.
-   * @param {URL} url - The URL to the folder JSON.
+   * @param {URL|string} url - The URL to the folder JSON.
    * @param {string[]} limitToParentsOfIDs - Optional. Only import folders that are parents of the given IDs.
    */
   async importFolders(url, limitToParentsOfIDs = []) {
-    const response = await Compressor.FetchWithTimeout(url, { timeout: 60000 });
+    const response = await Compressor.FetchWithTimeout(url, {timeout: 60000});
     if (!response.ok) {
       throw game.i18n.format('SCENE-PACKER.importer.invalid-url', {
         url,
@@ -552,7 +638,6 @@ export default class MoulinetteImporter extends FormApplication {
     for (const entry of Object.values(toImport)) {
       if (game.folders.has(entry._id)) {
         // Folder has already been imported
-        // TODO consider updating data
         continue;
       }
       if (!entry.parent || createData.some((e) => e._id === entry.parent)) {
@@ -570,7 +655,7 @@ export default class MoulinetteImporter extends FormApplication {
     }
 
     if (createData.length) {
-      await Folder.createDocuments(createData, { keepId: true });
+      await Folder.createDocuments(createData, {keepId: true});
     }
   }
 

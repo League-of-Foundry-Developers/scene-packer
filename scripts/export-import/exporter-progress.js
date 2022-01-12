@@ -46,6 +46,10 @@ export default class ExporterProgress extends FormApplication {
     this.speed = 0;
   }
 
+  /**
+   * Process the exporter data and return the final compressed data zip.
+   * @return {Promise<{dataZip: Compressor}>}
+   */
   async Process() {
     return new Promise(async (resolve, reject) => {
       let dataZip;
@@ -339,8 +343,10 @@ export default class ExporterProgress extends FormApplication {
     });
   }
 
-  /** @inheritdoc */
-  getData() {
+  /**
+   * @return {Object|Promise}
+   */
+  getData(options = {}) {
     return {
       packageName: this.packageName,
       selected: this.selected,
