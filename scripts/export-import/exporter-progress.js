@@ -70,6 +70,7 @@ export default class ExporterProgress extends FormApplication {
               this.exporterData.cover_image,
               `data/cover/cover.${new URL(
                 this.exporterData.cover_image,
+                window.location.href,
               ).pathname
                 .split('.')
                 .pop()}`,

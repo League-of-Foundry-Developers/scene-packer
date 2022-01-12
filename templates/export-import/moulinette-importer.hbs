@@ -66,7 +66,7 @@
       <i class="fas fa-check-double"></i> {{localize 'SCENE-PACKER.importer.import-all'}}
     </button>
     <button type="submit" name="import-one" value="1" {{#if loading}}disabled{{/if}}>
-      <i class="fas fa-check"></i> {{localize 'SCENE-PACKER.importer.import-one'}}
+      <i class="fas fa-check"></i> {{localize 'SCENE-PACKER.importer.import-one'}} {{importType}}
     </button>
     <button type="button" name="close">
       <i class="fas fa-times"></i> {{localize 'Cancel'}}

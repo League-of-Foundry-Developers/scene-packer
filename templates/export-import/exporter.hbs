@@ -23,7 +23,7 @@
   <li class="directory-item entity" data-entity-id="{{this.id}}">
     <label class="flexrow">
       <input type="checkbox" data-type="{{this.documentName}}" name="entity.{{this.documentName}}.{{this.id}}" value="{{this.id}}" checked>
-      {{#if this.img}}<img class="profile actor-profile" title="{{this.name}}" data-src="{{this.img}}"/>{{/if}}
+      {{#if this.img}}<img class="profile actor-profile" title="{{this.name}}" alt="{{this.name}}" data-src="{{this.img}}" style="margin-right: 5px;">{{/if}}
       <h4 class="entity-name"><a class="entity-link" data-entity="{{this.documentName}}" data-id="{{this.id}}">{{this.name}}</a></h4>
     </label>
   </li>
@@ -47,7 +47,7 @@
       <header class="directory-header">
         <div class="header-search flexrow">
           <i class="fas fa-search"></i>
-          <input type="text" name="search" value="" placeholder="{{localize 'SIDEBAR.SceneSearch'}}" autocomplete="off"/>
+          <input type="text" name="search" value="" placeholder="{{localize 'SCENE-PACKER.exporter.search.scenes'}}" autocomplete="off"/>
           <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="1"><i class="fas fa-check-square"></i></a>
           <a class="header-control collapse-all" title="{{localize 'FOLDER.Collapse'}}"><i class="fas fa-sort-amount-up"></i></a>
         </div>
@@ -67,7 +67,7 @@
       <header class="directory-header">
         <div class="header-search flexrow">
           <i class="fas fa-search"></i>
-          <input type="text" name="search" value="" placeholder="{{localize 'ACTOR.Search'}}" autocomplete="off"/>
+          <input type="text" name="search" value="" placeholder="{{localize 'SCENE-PACKER.exporter.search.actors'}}" autocomplete="off"/>
           <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="1"><i class="fas fa-check-square"></i></a>
           <a class="header-control collapse-all" title="{{localize 'FOLDER.Collapse'}}"><i class="fas fa-sort-amount-up"></i></a>
         </div>
@@ -87,7 +87,7 @@
       <header class="directory-header">
         <div class="header-search flexrow">
           <i class="fas fa-search"></i>
-          <input type="text" name="search" value="" placeholder="{{localize 'ITEM.Search'}}" autocomplete="off"/>
+          <input type="text" name="search" value="" placeholder="{{localize 'SCENE-PACKER.exporter.search.items'}}" autocomplete="off"/>
           <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="1"><i class="fas fa-check-square"></i></a>
           <a class="header-control collapse-all" title="{{localize 'FOLDER.Collapse'}}"><i class="fas fa-sort-amount-up"></i></a>
         </div>
@@ -107,7 +107,7 @@
       <header class="directory-header">
         <div class="header-search flexrow">
           <i class="fas fa-search"></i>
-          <input type="text" name="search" value="" placeholder="{{localize 'JOURNAL.Search'}}" autocomplete="off"/>
+          <input type="text" name="search" value="" placeholder="{{localize 'SCENE-PACKER.exporter.search.journals'}}" autocomplete="off"/>
           <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="1"><i class="fas fa-check-square"></i></a>
           <a class="header-control collapse-all" title="{{localize 'FOLDER.Collapse'}}"><i class="fas fa-sort-amount-up"></i></a>
         </div>
@@ -127,7 +127,7 @@
       <header class="directory-header">
         <div class="header-search flexrow">
           <i class="fas fa-search"></i>
-          <input type="text" name="search" value="" placeholder="{{localize 'TABLE.Search'}}" autocomplete="off"/>
+          <input type="text" name="search" value="" placeholder="{{localize 'SCENE-PACKER.exporter.search.tables'}}" autocomplete="off"/>
           <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="1"><i class="fas fa-check-square"></i></a>
           <a class="header-control collapse-all" title="{{localize 'FOLDER.Collapse'}}"><i class="fas fa-sort-amount-up"></i></a>
         </div>
@@ -147,7 +147,7 @@
       <header class="directory-header">
         <div class="header-search flexrow">
           <i class="fas fa-search"></i>
-          <input type="text" name="search" value="" placeholder="{{localize 'PLAYLIST.Search'}}" autocomplete="off"/>
+          <input type="text" name="search" value="" placeholder="{{localize 'SCENE-PACKER.exporter.search.playlists'}}" autocomplete="off"/>
           <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="1"><i class="fas fa-check-square"></i></a>
           <a class="header-control collapse-all" title="{{localize 'FOLDER.Collapse'}}"><i class="fas fa-sort-amount-up"></i></a>
         </div>
@@ -167,7 +167,7 @@
       <header class="directory-header">
         <div class="header-search flexrow">
           <i class="fas fa-search"></i>
-          <input type="text" name="search" value="" placeholder="{{localize 'MACRO.Search'}}" autocomplete="off"/>
+          <input type="text" name="search" value="" placeholder="{{localize 'SCENE-PACKER.exporter.search.macros'}}" autocomplete="off"/>
           <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="1"><i class="fas fa-check-square"></i></a>
           <a class="header-control collapse-all" title="{{localize 'FOLDER.Collapse'}}"><i class="fas fa-sort-amount-up fa-fw"></i></a>
         </div>
@@ -219,7 +219,10 @@
           <b>{{localize 'SCENE-PACKER.exporter.options.package-cover'}}</b>
           <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.package-cover-help'}}"></i>
         </label>
-        <input type="text" id="SP-export-packageCover" name="packageCover" value="" placeholder="https://example.com/adventure.png">
+        <div class="form-fields">
+          <input type="text" id="SP-export-packageCover" name="packageCover" value="" placeholder="https://example.com/adventure.png">
+          {{filePicker target="packageCover" type="image"}}
+        </div>
       </div>
       <div class="form-group">
         <label for="SP-export-email">
@@ -263,7 +266,8 @@
       </div>
 
       <hr>
-      <p>{{localize 'SCENE-PACKER.exporter.options.next'}}</p>
+      <p>{{{localize 'SCENE-PACKER.exporter.options.next'}}}</p>
+      <p>{{{localize 'SCENE-PACKER.exporter.options.help'}}}</p>
       <hr>
       <p class="options-help"></p>
     </div>

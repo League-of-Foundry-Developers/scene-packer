@@ -31,6 +31,12 @@ export default class MoulinetteImporter extends FormApplication {
     this.packInfo = packInfo;
     this.sceneID = sceneID;
     this.actorID = actorID;
+    this.importType = '';
+    if (sceneID) {
+      this.importType = game.i18n.localize('scene');
+    } else if (actorID) {
+      this.importType = game.i18n.localize('actor');
+    }
 
     /**
      * Summary data for the package.
@@ -78,6 +84,7 @@ export default class MoulinetteImporter extends FormApplication {
       pack: this.scenePackerInfo,
       processing: this.processing,
       processingMessage: this.processingMessage,
+      importType: this.importType,
     };
   }
 
@@ -218,6 +225,11 @@ export default class MoulinetteImporter extends FormApplication {
           message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {type: Scene.collectionName, count: filteredData.length})}</p>`,
         });
         await Scene.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
+        for (const id of filteredData.map(s => s._id)) {
+          const scene = game.scenes.get(id);
+          const thumbData = await scene.createThumbnail();
+          await scene.update({thumb: thumbData.thumb}, {diff: false});
+        }
       }
     }
     if (actorData.length) {

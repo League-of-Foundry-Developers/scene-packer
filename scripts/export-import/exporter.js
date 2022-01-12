@@ -55,7 +55,7 @@ export default class Exporter extends FormApplication {
         {
           navSelector: '.tabs',
           contentSelector: '.content',
-          initial: 'scenes',
+          initial: 'options',
         },
       ],
       dragDrop: [{ dropSelector: '#SP-export-welcomeJournal' }],
@@ -87,6 +87,7 @@ export default class Exporter extends FormApplication {
   }
 
   _isValid({ showDialog = false, throwError = false } = {}) {
+    // TODO Implement validation properly
     const invalid = [];
     for (const field of ['packageName', 'version', 'author']) {
       if (!formData[field]) {

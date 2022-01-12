@@ -304,8 +304,8 @@
     },
     "exporter": {
       "name": "Export to Moulinette",
-      "label": "Open Exporter",
-      "hint": "Open the exporter wizard.",
+      "label": "Open Exporter wizard",
+      "hint": "The exporter wizard will allow you to package up an adventure for distribution via Moulinette Cloud.",
       "unsupported": "Export to Moulinette is only supported in versions >= 0.8.0",
       "selected-count": "{count} entities selected for export.",
       "toggle-checkboxes": "Toggle All Checkboxes",
@@ -319,6 +319,15 @@
         "scenes": "Scenes",
         "tables": "Roll Tables"
       },
+      "search": {
+        "actors": "Search Actors",
+        "items": "Search Items",
+        "journals": "Search Journals",
+        "macros": "Search Macros",
+        "playlists": "Search Playlists",
+        "scenes": "Search Scenes",
+        "tables": "Search Rollable Tables"
+      },
       "options": {
         "intro": "You are about to build an adventure package to be shared via Moulinette. You must be a <a href=\"https://www.patreon.com/moulinette\" target=\"_blank\">Patreon of Moulinette</a> to be able to upload and share your adventure.",
         "package-name": "Adventure Package Name",
@@ -330,19 +339,19 @@
         "package-description": "Adventure Package Description",
         "package-description-help": "Describe the type of adventure this is, what levels it is designed for, what's included etc.",
         "package-cover": "Adventure Package Cover Image",
-        "package-cover-help": "The image to show the end-user when they are viewing details of the adventure. Must be a publicly accessible URL.",
+        "package-cover-help": "The image to show the end-user when they are viewing details of the adventure.",
         "discord-id": "Your Discord identifier",
         "discord-id-help": "In case you need to be contacted for additional information. Will not be shown to the public.",
         "email": "Your email address",
         "email-help": "In case you need to be contacted for additional information. Will not be shown to the public.",
         "external-link": "URL for additional information",
-        "external-link-help": "URL where an end user can find out more information about the adventure package.",
+        "external-link-help": "An absolute URL where an end user can find out more information about the adventure package.",
         "welcome-journal": "Journal to show after importing",
         "welcome-journal-help": "Automatically show the selected Journal entry when the end user imports the adventure package. Leave blank if you do not want to automatically show a Journal entry.",
         "welcome-journal-drop-text": "Drag and drop your Journal here",
         "allow-complete-import": "Allow importing all entities?",
         "allow-complete-import-help": "Choose \"no\" if you do not want the end user to be able to import the entire adventure package at once. You should choose \"no\" if you have a lot of entities in your package to prevent lag.",
-        "next": "When you click Next, Scene Packer will link all of your entities together, verify them and then create a <code>data.zip</code> file containing your whole adventure including assets. This file should then be uploaded to the Moulinette website in the standard assets section.",
+        "next": "When you click Next, Scene Packer will link all of your entities together, verify them and then create a <code>data.zip</code> file containing your whole adventure including assets. This file should then be uploaded to the Moulinette website in the standard assets section. Once it has been processed and you have published it, end users will be able to import it into their game from the Scenes section of Moulinette.",
         "help": "If you require any assistance with packing your adventure, please stop by the <img src=\"https://github.com/League-of-Foundry-Developers/scene-packer/raw/main/assets/icons/hand-truck.png\" alt=\"icon\" height=\"24\" valign=\"middle\" style=\"max-width:100%;border:0;\"> <a href=\"https://discord.com/invite/HY3xhBEf2A\" target=\"_blank\">Scene Packer Discord server</a> and speak with <code>blair#9056</code>."
       },
       "progress": {

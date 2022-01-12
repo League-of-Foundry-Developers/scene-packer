@@ -90,6 +90,10 @@
 #scene-packer-exporter .entity label {
   align-items: center;
 }
+#scene-packer-exporter .entity h4 {
+  line-height: 1.5em;
+  margin: 0;
+}
 #scene-packer-exporter .form-group {
   align-items: baseline;
 }
