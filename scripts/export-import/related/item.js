@@ -5,12 +5,23 @@ import {ExtractUUIDsFromContent, RelatedData, ResolvePath} from './related-data.
  * @type {string[]}
  */
 export const ItemDataLocations = [
-  'data.data.description.value', // dnd5e, pf2e, harn, alienrpg etc
-  'data.data.identification.identified.data.description.value', // pf2e
-  'data.data.identification.unidentified.data.description.value', // pf2e
-  'data.data.notes', // harn
+  // dnd5e, pf2e, harn, alienrpg etc
+  'data.description.value',
+  'data.data.description.value',
 
-  'data.flags.gm-notes.notes', // gm-notes module (https://github.com/syl3r86/gm-notes)
+  // pf2e
+  'data.identification.identified.data.description.value',
+  'data.data.identification.identified.data.description.value',
+  'data.identification.unidentified.data.description.value',
+  'data.data.identification.unidentified.data.description.value',
+
+  // harn
+  'data.notes',
+  'data.data.notes',
+
+  // gm-notes module (https://github.com/syl3r86/gm-notes)
+  'flags.gm-notes.notes',
+  'data.flags.gm-notes.notes',
 ];
 
 /**
@@ -24,15 +35,18 @@ export function ExtractRelatedItemData(item) {
     return relatedData;
   }
 
+  const id = item.id || item._id;
+  const uuid = item.uuid || `${Item.documentName}.${id}`;
+
   for (const path of ItemDataLocations) {
     const content = ResolvePath(path, item);
     if (typeof content !== 'string') {
       continue;
     }
 
-    const relations = ExtractUUIDsFromContent(content);
+    const relations = ExtractUUIDsFromContent(content, path);
     if (relations.length) {
-      relatedData.AddRelations(item.uuid, relations);
+      relatedData.AddRelations(uuid, relations);
     }
   }
 

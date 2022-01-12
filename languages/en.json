@@ -294,6 +294,7 @@
       "process-fetch-data": "Fetching data...",
       "process-creating-data": "Creating {count} {type} and assets...",
       "ensure-assets": "Ensuring assets exist for {count} entities.",
+      "converting-reference": "Converting reference {oldRef} -> {newRef}",
       "complete": "Complete!",
       "import-all": "Import all",
       "import-one": "Import selected",

@@ -6,7 +6,7 @@ export class RelatedData {
   /**
    * Data references, keyed by source UUID.
    * Value is a set of related UUIDs that is referenced by the source UUID.
-   * @type {Map<string, Set<string>>}
+   * @type {Map<string, Set<Relation>>}
    */
   data = new Map();
 
@@ -41,7 +41,7 @@ export class RelatedData {
   /**
    * Add references for the given source and relations.
    * @param {string} source - Source UUID.
-   * @param {string[]} relations - Related UUIDs.
+   * @param {Relation[]} relations - Related UUIDs.
    */
   AddRelations(source, relations) {
     if (!source || !relations.length) {
@@ -63,7 +63,7 @@ export class RelatedData {
   /**
    * Add references for the given source and relation.
    * @param {string} source - Source UUID.
-   * @param {string} relation - Related UUID.
+   * @param {Relation} relation - Related UUID.
    */
   AddRelation(source, relation) {
     if (!source || !relation) {
@@ -89,23 +89,36 @@ export class RelatedData {
 }
 
 /**
+ * @typedef {Object} Relation
+ * @property {string} uuid - The related UUID.
+ * @property {string} path - The path to the UUID within the parent.
+ */
+
+/**
+ * @typedef {Object} ContentWithPath
+ * @property {string} content - The content.
+ * @property {string} path - The path to the content within the parent.
+ */
+
+/**
  * Extracts all UUID references from the given HTML content.
  * @param {string} content - HTML content.
- * @return {string[]} - UUIDs referred to within the content.
+ * @param {string} path - The path that this content exists at.
+ * @return {Relation[]} - UUIDs referred to within the content.
  */
-export function ExtractUUIDsFromContent(content) {
+export function ExtractUUIDsFromContent(content, path) {
   const references = [];
   if (!content) {
     return references;
   }
 
   const domParser = new DOMParser();
-  const rex = /@(\w+)\[([.\w]+)(#[^\]]+)?]{([^}]+)}/g;
+  const rex = /@(\w+)\[([-.\w]+)(#[^\]]+)?]{([^}]+)}/g;
 
   const links = [...content.matchAll(rex)];
-  for (const link of links) {
-    const [, type, id] = link;
-    references.push(`${type}.${id}`);
+  for (let link of links) {
+    let [, type, id] = link;
+    references.push({path, uuid: `${type}.${id}`});
   }
 
   const doc = domParser.parseFromString(content, 'text/html');
@@ -113,7 +126,7 @@ export function ExtractUUIDsFromContent(content) {
     if (!link.dataset?.entity || !link.dataset?.id) {
       continue;
     }
-    references.push(`${link.dataset.entity}.${link.dataset.id}`);
+    references.push({path, uuid: `${link.dataset.entity}.${link.dataset.id}`});
   }
 
   return references;

@@ -6,9 +6,11 @@ import {ExtractUUIDsFromContent, RelatedData, ResolvePath} from './related-data.
  */
 export const JournalDataLocations = [
   // dnd5e, pf2e, aliengrpg etc
+  'content',
   'data.content',
 
   // gm-notes module (https://github.com/syl3r86/gm-notes)
+  'flags.gm-notes.notes',
   'data.flags.gm-notes.notes',
 ];
 
@@ -23,15 +25,18 @@ export function ExtractRelatedJournalData(journal) {
     return relatedData;
   }
 
+  const id = journal.id || journal._id;
+  const uuid = journal.uuid || `${JournalEntry.documentName}.${id}`;
+
   for (const path of JournalDataLocations) {
     const content = ResolvePath(path, journal);
     if (typeof content !== 'string') {
       continue;
     }
 
-    const relations = ExtractUUIDsFromContent(content);
+    const relations = ExtractUUIDsFromContent(content, path);
     if (relations.length) {
-      relatedData.AddRelations(journal.uuid, relations);
+      relatedData.AddRelations(uuid, relations);
     }
   }
 

@@ -1,5 +1,6 @@
 import {Compressor} from './compressor.js';
 import {CONSTANTS} from '../constants.js';
+import {ExtractRelatedJournalData} from './related/journals.js';
 
 export default class MoulinetteImporter extends FormApplication {
 
@@ -23,7 +24,8 @@ export default class MoulinetteImporter extends FormApplication {
       Dialog.prompt({
         title: game.i18n.localize('Unsupported'),
         content: game.i18n.localize('SCENE-PACKER.importer.unsupported'),
-        callback: () => {},
+        callback: () => {
+        },
       });
       return null;
     }
@@ -90,7 +92,8 @@ export default class MoulinetteImporter extends FormApplication {
     };
   }
 
-  async _updateObject(event, formData) {}
+  async _updateObject(event, formData) {
+  }
 
   /** @inheritdoc */
   activateListeners(html) {
@@ -284,8 +287,97 @@ export default class MoulinetteImporter extends FormApplication {
           })}</p>`,
         });
         await JournalEntry.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
+
+        // Check for compendium references within the journals and update them to local world references
+        for (const datum of filteredData) {
+          const relatedData = ExtractRelatedJournalData(datum);
+          if (!relatedData.data.size) {
+            continue;
+          }
+
+          // TODO Extract this method out into a separate function
+          console.log('relatedData', relatedData);
+          for (const relations of relatedData.data.values()) {
+            for (const relation of relations) {
+              if (!relation.uuid.startsWith('Compendium.')) {
+                // Only try to replace compendium references
+                continue;
+              }
+              let sources = [
+                Actor.collectionName,
+                JournalEntry.collectionName,
+                Scene.collectionName,
+                Item.collectionName,
+                Macro.collectionName,
+                Playlist.collectionName,
+                RollTable.collectionName,
+              ];
+              if (typeof Cards !== 'undefined') {
+                sources.push(Cards.collectionName);
+              }
+
+              let relationParts = relation.uuid.split('.');
+              relationParts.pop(); // Remove the id
+              const type = relationParts.pop();
+              switch (type) {
+                case 'actors':
+                  sources = [Actor.collectionName];
+                  break;
+                case 'journals':
+                  sources = [JournalEntry.collectionName];
+                  break;
+                case 'maps':
+                  sources = [Scene.collectionName];
+                  break;
+                case 'items':
+                  sources = [Item.collectionName];
+                  break;
+                case 'macros':
+                  sources = [Macro.collectionName];
+                  break;
+                case 'playlists':
+                  sources = [Playlist.collectionName];
+                  break;
+                case 'rolltables':
+                  sources = [RollTable.collectionName];
+                  break;
+                case 'cards':
+                  sources = [Cards.collectionName];
+                  break;
+              }
+
+              let foundEntity;
+              for (const source of sources) {
+                foundEntity = game[source].find(e => e.getFlag('core', 'sourceId') === relation.uuid);
+                if (foundEntity) {
+                  break;
+                }
+              }
+              if (!foundEntity) {
+                continue;
+              }
+
+              ScenePacker.logType(
+                this.scenePackerInfo.name,
+                'info',
+                true,
+                game.i18n.format(
+                  'SCENE-PACKER.importer.converting-reference',
+                  {
+                    oldRef: relation.uuid,
+                    newRef: foundEntity.uuid,
+                  },
+                ),
+              );
+
+              console.log('Replacing at location', relation.path);
+            }
+          }
+
+          // TODO Replace links in Journal data (they might reference compendiums)
+          // TODO Extract this method out into a separate function
+        }
       }
-      // TODO Replace links in Journal data (they might reference compendiums)
     }
 
     if (itemData.length) {
@@ -478,9 +570,11 @@ export default class MoulinetteImporter extends FormApplication {
       returnEntities.push(JSON.parse(stringRepresentation));
     }
     // Ensure that the progress bar is hidden.
-    this.displayProgressBar(game.i18n.format('SCENE-PACKER.importer.ensure-assets', {
-      count: total,
-    }), 1, 1);
+    if (total) {
+      this.displayProgressBar(game.i18n.format('SCENE-PACKER.importer.ensure-assets', {
+        count: total,
+      }), 1, 1);
+    }
     console.groupEnd();
 
     return returnEntities;
@@ -666,8 +760,11 @@ export default class MoulinetteImporter extends FormApplication {
    * @param {number} current - The current number of items progressed.
    */
   displayProgressBar(name, total, current) {
-    const bar = SceneNavigation.displayProgressBar || SceneNavigation._onLoadProgress;
-    const progress = Math.round((current / total) * 100);
-    bar(name, progress);
+    const progress = total > 0 ? Math.round((current / total) * 100) : 100;
+    if (typeof SceneNavigation.displayProgressBar === 'function') {
+      SceneNavigation.displayProgressBar({label: name, pct: progress});
+    } else if (typeof SceneNavigation._onLoadProgress === 'function') {
+      SceneNavigation._onLoadProgress(name, progress);
+    }
   }
 }
