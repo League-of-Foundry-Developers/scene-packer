@@ -83,12 +83,19 @@ export default class MoulinetteImporter extends FormApplication {
    * @return {Object|Promise}
    */
   getData(options = {}) {
+    let coverImage = '';
+    if (this.scenePackerInfo?.cover_image) {
+      const coverImageExtension = this.scenePackerInfo.cover_image.split('.').pop();
+      coverImage = this.packInfo[`data/cover/cover.${coverImageExtension}`];
+    }
+
     return {
       loading: this.loading,
       pack: this.scenePackerInfo,
       processing: this.processing,
       processingMessage: this.processingMessage,
       importType: this.importType,
+      coverImage: coverImage,
     };
   }
 
@@ -582,7 +589,7 @@ export default class MoulinetteImporter extends FormApplication {
 
   /**
    * Fetch data.
-   * @param {URL|string} url - The URL to the JSON.
+   * @param {RequestInfo} url - The URL to the JSON.
    * @return {Promise<Object>}
    */
   async fetchData(url) {
@@ -600,7 +607,7 @@ export default class MoulinetteImporter extends FormApplication {
    * Filters the provided data to only include the entities that are relevant to the sourceReference.
    *
    * @param {object[]} data - The data to process.
-   * @param {Object.<string, string[]>} allRelatedData - All of the references to related data that are owned by the sourceReference.
+   * @param {Object.<string, Relation[]>} allRelatedData - All of the references to related data that are owned by the sourceReference.
    * @param {string} type - The type of related data to import.
    * @param {string|null} sourceReference - The reference to the source that owns the related data or null to include all.
    * @return {object[]} - The filtered data.
@@ -622,7 +629,7 @@ export default class MoulinetteImporter extends FormApplication {
   /**
    * Gets the related data to only those that are relevant to the provided type.
    *
-   * @param {Object.<string, string[]>} allRelatedData - All of the references to related data that are owned by the sourceReference.
+   * @param {Object.<string, Relation[]>} allRelatedData - All of the references to related data that are owned by the sourceReference.
    * @param {string} type - The type of related data to import.
    * @param {string|null} sourceReference - The reference to the source that owns the related data or null to include all.
    * @return {Set<string>} The list of related data references to import for the given type.
@@ -631,14 +638,18 @@ export default class MoulinetteImporter extends FormApplication {
     const relatedData = new Set();
     if (sourceReference) {
       for (const relatedDataReference of allRelatedData[sourceReference]) {
-        if (relatedDataReference.startsWith(type)) {
+        // TODO Convert to just using the relation format once the old format is removed.
+        // if (relatedDataReference.uuid.startsWith(type)) {
+        if ((relatedDataReference.uuid || relatedDataReference).startsWith(type)) {
           relatedData.add(relatedDataReference);
         }
       }
     } else {
       for (const [, relatedDataReferences] of Object.entries(allRelatedData)) {
         for (const relatedDataReference of relatedDataReferences) {
-          if (relatedDataReference.startsWith(type)) {
+          // TODO Convert to just using the relation format once the old format is removed.
+          // if (relatedDataReference.uuid.startsWith(type)) {
+          if ((relatedDataReference.uuid || relatedDataReference).startsWith(type)) {
             relatedData.add(relatedDataReference);
           }
         }
@@ -650,7 +661,7 @@ export default class MoulinetteImporter extends FormApplication {
 
   /**
    * Fetch data if it is missing from the given collection.
-   * @param {URL|string} url - The URL to the JSON
+   * @param {RequestInfo} url - The URL to the JSON
    * @param {Object} collection - The collection that this data belongs to
    * @param {string[]} onlyIDs - Only import the data for the given IDs
    * @return {Promise<Object[]>}
@@ -674,7 +685,7 @@ export default class MoulinetteImporter extends FormApplication {
 
   /**
    * Downloads the JSON data for the given URL and creates the folders within the world.
-   * @param {URL|string} url - The URL to the folder JSON.
+   * @param {RequestInfo} url - The URL to the folder JSON.
    * @param {string[]} limitToParentsOfIDs - Optional. Only import folders that are parents of the given IDs.
    */
   async importFolders(url, limitToParentsOfIDs = []) {

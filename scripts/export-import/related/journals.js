@@ -40,6 +40,7 @@ export function ExtractRelatedJournalData(journal) {
     }
   }
 
+  // TODO Extract Quick Encounter data
 
   return relatedData;
 }

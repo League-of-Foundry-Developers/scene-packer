@@ -71,7 +71,7 @@ export class Compressor {
 
   /**
    * Add a file URL to download and then add to the zip.
-   * @param {URL|string} url - The URL to download and add to the Zip
+   * @param {RequestInfo} url - The URL to download and add to the Zip
    * @param {string} filename - The filename to use. Use forward slashes for subdirectories.
    * @return {Promise<void>}
    */
@@ -291,7 +291,7 @@ export class Compressor {
    * Wrapper around {@link fetch} to include a timeout.
    * Defaults to 15sec.
    * @param {RequestInfo} resource
-   * @param {RequestInit} options
+   * @param {RequestInit|{timeout: number}} options
    * @return {Response}
    */
   static async FetchWithTimeout(resource, options) {
