@@ -17,6 +17,11 @@
   - Unpacking will only work if the end-user utilises the "Import All" functionality. It *will not* work for individually imported actors.
 - Updated macro `Clean up #[CF_tempEntity] entries` to support deleting the CF entities from compendiums.
   - You must manually unlock the compendium first.
+- Added new `Hooks`:
+  - `ScenePacker.importAllComplete` - Called after all entities in a pack have been imported.
+    - `Hooks.on("ScenePacker.importAllComplete", (data) => { const {moduleName, adventureName, instance} = data; })`
+  - `ScenePacker.sceneUnpacked` - Called after a scene has been unpacked.
+    - `Hooks.on("ScenePacker.sceneUnpacked", (data) => { const {scene, moduleName, adventureName, instance} = data; })` 
 
 ## v2.3.27
 

@@ -182,6 +182,33 @@ There are several Macros included in the `Library: Scene Packer` compendium entr
 
 Support for packing Scenes with embedded [Quick Encounters](https://foundryvtt.com/packages/quick-encounters) data was added in v2.2.0 of Scene Packer. There is a Journal Entry bundled in the Scene Packer compendium which describes how to pack these scenes.
 
+## Hooks
+
+There are several [Hooks](https://foundryvtt.com/api/Hooks.html) exposed by Scene Packer.
+
+`scenePackerReady`
+- This hook is called when the Scene Packer class is available to be called.
+- Called with a single argument of type `ScenePacker`.
+  - See [Module Code Requirements](https://github.com/League-of-Foundry-Developers/scene-packer#module-code-requirements) for how to initialise your module with Scene Packer.
+
+`ScenePacker.importAllComplete`
+- Called after all entities in a pack have been imported.
+- Called with a single argument of type `ImportedAllEntities`.
+```js
+Hooks.on("ScenePacker.importAllComplete", (data) => {
+ const {moduleName, adventureName, instance} = data;
+});
+```
+
+`ScenePacker.sceneUnpacked`
+- Called after a scene has been unpacked.
+- Called with a single argument of type `UnpackedScene`.
+```js
+Hooks.on("ScenePacker.sceneUnpacked", (data) => {
+  const {scene, moduleName, adventureName, instance} = data;
+});
+```
+
 ## Example module use
 
 You can view an example module that showcases Scene Packer's features at https://github.com/sneat/example-scene-packer

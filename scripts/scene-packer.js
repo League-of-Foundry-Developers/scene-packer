@@ -598,6 +598,12 @@ export default class ScenePacker {
         name: this.adventureName,
       }),
     );
+
+    /**
+     * Trigger any hooks for importing all packs in the module. Receives argument: {@link ImportedAllEntities}
+     */
+    Hooks.callAll(CONSTANTS.HOOKS_IMPORT_ALL_COMPLETE, {moduleName: this.moduleName, adventureName: this.adventureName, instance: this});
+
     if (di && typeof di.close === 'function') {
       // Wrap in a setTimeout to make sure the application has finished rendering it, otherwise it won't close.
       setTimeout(() => {
@@ -3608,6 +3614,11 @@ export default class ScenePacker {
       ui.sidebar.activateTab('scenes');
     }
 
+    /**
+     * Trigger any hooks for unpacking a scene. Receives argument: {@link UnpackedScene}
+     */
+    Hooks.callAll(CONSTANTS.HOOKS_SCENE_UNPACKED, {scene: scene, moduleName: this.moduleName, adventureName: this.adventureName, instance: this});
+
     return Promise.resolve();
   }
 
@@ -5222,7 +5233,7 @@ Hooks.on('ready', () => {
     return;
   }
 
-  Hooks.callAll('scenePackerReady', globalThis.ScenePacker);
+  Hooks.callAll(CONSTANTS.HOOKS_SCENE_PACKER_READY, globalThis.ScenePacker);
 });
 
 /**

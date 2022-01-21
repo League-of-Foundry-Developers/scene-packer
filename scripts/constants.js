@@ -64,6 +64,24 @@ export const CONSTANTS = Object.freeze({
   FLAGS_TOKENS: 'tokens',
 
   /**
+   * The hook to call when importing all entities in the pack is complete.
+   * Called with a single argument of type {@link ImportedAllEntities}.
+   */
+  HOOKS_IMPORT_ALL_COMPLETE: 'ScenePacker.importAllComplete',
+
+  /**
+   * The hook to call when the Scene Packer class is available to being called.
+   * Called with a single argument of type {@link ScenePacker}.
+   */
+  HOOKS_SCENE_PACKER_READY: 'scenePackerReady',
+
+  /**
+   * The hook to call when a scene is unpacked.
+   * Called with a single argument of type {@link UnpackedScene}.
+   */
+  HOOKS_SCENE_UNPACKED: 'ScenePacker.sceneUnpacked',
+
+  /**
    * The minimum version of packed scenes supported by this version.
    */
   MINIMUM_SUPPORTED_PACKER_VERSION: '2.0.0',
@@ -188,10 +206,25 @@ export const CONSTANTS = Object.freeze({
 });
 
 /**
- * Fake Entity is used in place of a real entity, for times where operating against a real entity would throw errors.
+ * Fake Entity is used in place of a real entity, for times when operating against a real entity would throw errors.
  * @type {{update: FakeEntity.update}}
  */
 export const FakeEntity = {
   update: () => {
   },
 };
+
+/**
+ * @typedef ImportedAllEntities
+ * @property {string} moduleName - The module name.
+ * @property {string} adventureName - The name of the adventure.
+ * @property {ScenePacker} instance - The instance of Scene Packer that was used to pack the scene.
+ */
+
+/**
+ * @typedef UnpackedScene
+ * @property {Object} scene - The scene that was unpacked.
+ * @property {string} moduleName - The module name.
+ * @property {string} adventureName - The name of the adventure.
+ * @property {ScenePacker} instance - The instance of Scene Packer that was used to pack the scene.
+ */
