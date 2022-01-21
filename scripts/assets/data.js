@@ -131,8 +131,13 @@ export class AssetData {
     location = AssetReport.Locations.Unknown,
   } = {}) {
     const assets = await ExpandWildcard(asset);
-    for (const asset of assets) {
-      const url = new URL(asset, window.location.href);
+    const searchValue = new RegExp(`^${window.location.origin}/`);
+    for (const rawAsset of assets) {
+      const url = new URL(rawAsset, window.location.href);
+      let asset = rawAsset;
+      if (rawAsset.startsWith(`${window.location.origin}/`)) {
+        asset = rawAsset.replace(searchValue, '')
+      }
       this.assets.push(
         new AssetDetails({
           id,

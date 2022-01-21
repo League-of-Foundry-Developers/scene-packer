@@ -200,6 +200,15 @@ Hooks.on("ScenePacker.importAllComplete", (data) => {
 });
 ```
 
+`ScenePacker.importMoulinetteComplete`
+- Called after entities in a pack have been imported from Moulinette.
+- Called with a single argument of type `ImportedMoulinetteEntities`.
+```js
+Hooks.on("ScenePacker.importMoulinetteComplete", (data) => {
+ const {sceneID, actorID, info} = data;
+});
+```
+
 `ScenePacker.sceneUnpacked`
 - Called after a scene has been unpacked.
 - Called with a single argument of type `UnpackedScene`.

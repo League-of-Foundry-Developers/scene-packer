@@ -20,6 +20,8 @@
 - Added new `Hooks`:
   - `ScenePacker.importAllComplete` - Called after all entities in a pack have been imported.
     - `Hooks.on("ScenePacker.importAllComplete", (data) => { const {moduleName, adventureName, instance} = data; })`
+  - `ScenePacker.importMoulinetteComplete` - Called after entities in a pack from Moulinette have been imported.
+    - `Hooks.on("ScenePacker.importMoulinetteComplete", (data) => { const {sceneID, actorID, info} = data; })`
   - `ScenePacker.sceneUnpacked` - Called after a scene has been unpacked.
     - `Hooks.on("ScenePacker.sceneUnpacked", (data) => { const {scene, moduleName, adventureName, instance} = data; })` 
 

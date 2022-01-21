@@ -285,6 +285,7 @@
     },
     "importer": {
       "name": "Scene Packer: Importer",
+      "invalid-pack-data": "Invalid pack data. Please try again and if the error persists, ask for assistance on the Scene Packer or Moulinette Discord server.",
       "loading": "Loading data...",
       "unsupported": "Scene Packer: Importer is only supported in versions >= 0.8.0",
       "invalid-url": "An invalid URL value was passed to the Scene Packer importer. Received: \"{url}\". {err}",

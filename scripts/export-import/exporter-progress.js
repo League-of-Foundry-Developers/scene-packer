@@ -266,6 +266,17 @@ export default class ExporterProgress extends FormApplication {
             });
             dataZip.AddToZip(sceneInfo, `data/scenes/info.json`);
             updateTotalSize();
+          } else if (type === 'Actor') {
+            const actorInfo = documents.map((a) => {
+              return {
+                id: a.id,
+                name: a.name,
+                img: a.img,
+                hasTokenAttacherData: !!getProperty(a.data, 'token.flags.token-attacher.prototypeAttached'),
+              };
+            });
+            dataZip.AddToZip(actorInfo, `data/actors/info.json`);
+            updateTotalSize();
           }
         }
 

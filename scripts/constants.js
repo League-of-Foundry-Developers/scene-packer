@@ -70,6 +70,12 @@ export const CONSTANTS = Object.freeze({
   HOOKS_IMPORT_ALL_COMPLETE: 'ScenePacker.importAllComplete',
 
   /**
+   * The hook to call when importing entities in a pack from Moulinette is complete.
+   * Called with a single argument of type {@link ImportedMoulinetteEntities}.
+   */
+  HOOKS_IMPORTED_MOULINETTE_COMPLETE: 'ScenePacker.importMoulinetteComplete',
+
+  /**
    * The hook to call when the Scene Packer class is available to being called.
    * Called with a single argument of type {@link ScenePacker}.
    */
@@ -219,6 +225,13 @@ export const FakeEntity = {
  * @property {string} moduleName - The module name.
  * @property {string} adventureName - The name of the adventure.
  * @property {ScenePacker} instance - The instance of Scene Packer that was used to pack the scene.
+ */
+
+/**
+ * @typedef ImportedMoulinetteEntities
+ * @property {string} sceneID - Optional. The specific SceneID that was imported, along with any related data.
+ * @property {string} actorID - Optional. The specific ActorID that was imported, along with any related data.
+ * @property {ExporterData} info - Information about the pack that was imported.
  */
 
 /**
