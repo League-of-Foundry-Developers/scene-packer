@@ -49,8 +49,32 @@ export default class Exporter extends FormApplication {
       scrollY: ['ol.directory-list'],
       filters: [
         {
-          inputSelector: 'input[name="search"]',
-          contentSelector: '.directory-list',
+          inputSelector: '#scene-packer-exporter-tab-scenes input[name="search"]',
+          contentSelector: '#scene-packer-exporter-tab-scenes .directory-list',
+        },
+        {
+          inputSelector: '#scene-packer-exporter-tab-actors input[name="search"]',
+          contentSelector: '#scene-packer-exporter-tab-actors .directory-list',
+        },
+        {
+          inputSelector: '#scene-packer-exporter-tab-items input[name="search"]',
+          contentSelector: '#scene-packer-exporter-tab-items .directory-list',
+        },
+        {
+          inputSelector: '#scene-packer-exporter-tab-journals input[name="search"]',
+          contentSelector: '#scene-packer-exporter-tab-journals .directory-list',
+        },
+        {
+          inputSelector: '#scene-packer-exporter-tab-tables input[name="search"]',
+          contentSelector: '#scene-packer-exporter-tab-tables .directory-list',
+        },
+        {
+          inputSelector: '#scene-packer-exporter-tab-playlists input[name="search"]',
+          contentSelector: '#scene-packer-exporter-tab-playlists .directory-list',
+        },
+        {
+          inputSelector: '#scene-packer-exporter-tab-macros input[name="search"]',
+          contentSelector: '#scene-packer-exporter-tab-macros .directory-list',
         },
       ],
       tabs: [
