@@ -196,7 +196,7 @@ There are several [Hooks](https://foundryvtt.com/api/Hooks.html) exposed by Scen
 - Called with a single argument of type `ImportedAllEntities`.
 ```js
 Hooks.on("ScenePacker.importAllComplete", (data) => {
- const {moduleName, adventureName, instance} = data;
+ const [moduleName, adventureName, instance] = data;
 });
 ```
 
@@ -205,7 +205,7 @@ Hooks.on("ScenePacker.importAllComplete", (data) => {
 - Called with a single argument of type `ImportedMoulinetteEntities`.
 ```js
 Hooks.on("ScenePacker.importMoulinetteComplete", (data) => {
- const {sceneID, actorID, info} = data;
+ const [sceneID, actorID, info] = data;
 });
 ```
 
@@ -214,7 +214,7 @@ Hooks.on("ScenePacker.importMoulinetteComplete", (data) => {
 - Called with a single argument of type `UnpackedScene`.
 ```js
 Hooks.on("ScenePacker.sceneUnpacked", (data) => {
-  const {scene, moduleName, adventureName, instance} = data;
+  const [scene, moduleName, adventureName, instance] = data;
 });
 ```
 
