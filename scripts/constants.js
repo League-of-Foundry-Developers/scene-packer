@@ -14,6 +14,12 @@ export const CONSTANTS = Object.freeze({
   CF_SEPARATOR: '#/CF_SEP/',
 
   /**
+   * DOM Parser provides the ability to parse HTML into a DOM Document.
+   * @link https://developer.mozilla.org/en-US/docs/Web/API/DOMParser
+   */
+  DOM_PARSER: new DOMParser(),
+
+  /**
    * The flag used to store default permissions values.
    */
   FLAGS_DEFAULT_PERMISSION: 'defaultPermission',
@@ -86,6 +92,16 @@ export const CONSTANTS = Object.freeze({
    * Called with a single argument of type {@link UnpackedScene}.
    */
   HOOKS_SCENE_UNPACKED: 'ScenePacker.sceneUnpacked',
+
+  /**
+   * Regular expression to match document links within journal entries.
+   * Matches references like:
+   *   @Actor[obe2mDyYDXYmxHJb]{Something or other}
+   *   @Actor[obe2mDyYDXYmxHJb#sub-link]{Something or other}
+   *   @Compendium[scene-packer.journals.LSbUJA9hw0vmYeSZ]{Something or other}
+   *   @Compendium[scene-packer.journals.LSbUJA9hw0vmYeSZ#sub-link]{Something or other}
+   */
+  LINK_REGEX: /@(\w+)\[([-.\w]+)(#[^\]]+)?]{([^}]+)}/g,
 
   /**
    * The minimum version of packed scenes supported by this version.
@@ -162,7 +178,7 @@ export const CONSTANTS = Object.freeze({
    * @return {boolean}
    */
   IsV7orNewer(version = this.Version()) {
-    return version === '0.7.0' || isNewerVersion(version, '0.7.0')
+    return version === '0.7.0' || isNewerVersion(version, '0.7.0');
   },
 
   /**
@@ -180,7 +196,7 @@ export const CONSTANTS = Object.freeze({
    * @return {boolean}
    */
   IsV8orNewer(version = this.Version()) {
-    return version === '0.8.0' || isNewerVersion(version, '0.8.0')
+    return version === '0.8.0' || isNewerVersion(version, '0.8.0');
   },
 
   /**
@@ -198,7 +214,7 @@ export const CONSTANTS = Object.freeze({
    * @return {boolean}
    */
   IsV9orNewer(version = this.Version()) {
-    return version === '9.0' || isNewerVersion(version, '9')
+    return version === '9.0' || isNewerVersion(version, '9');
   },
 
   /**

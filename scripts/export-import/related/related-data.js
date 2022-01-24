@@ -1,3 +1,5 @@
+import {CONSTANTS} from '../../constants.js';
+
 /**
  * RelatedData holds a map of all document entity references
  * to ensure that all required data is imported.
@@ -113,9 +115,8 @@ export function ExtractUUIDsFromContent(content, path) {
   }
 
   const domParser = new DOMParser();
-  const rex = /@(\w+)\[([-.\w]+)(#[^\]]+)?]{([^}]+)}/g;
 
-  const links = [...content.matchAll(rex)];
+  const links = [...content.matchAll(CONSTANTS.LINK_REGEX)];
   for (let link of links) {
     let [, type, id] = link;
     references.push({path, uuid: `${type}.${id}`});
@@ -126,7 +127,11 @@ export function ExtractUUIDsFromContent(content, path) {
     if (!link.dataset?.entity || !link.dataset?.id) {
       continue;
     }
-    references.push({path, uuid: `${link.dataset.entity}.${link.dataset.id}`});
+    let uuid = `${link.dataset.entity}.${link.dataset.id}`;
+    if (link.dataset.pack) {
+      uuid = `Compendium.${link.dataset.pack}.${link.dataset.id}`;
+    }
+    references.push({path, uuid: uuid});
   }
 
   return references;
@@ -140,7 +145,7 @@ export function ExtractUUIDsFromContent(content, path) {
  * @param {string} separator - The separator to use when splitting the path.
  * @return {*}
  */
-export function ResolvePath(path, obj= self, separator='.') {
+export function ResolvePath(path, obj = self, separator = '.') {
   const properties = Array.isArray(path) ? path : path.split(separator);
-  return properties.reduce((prev, curr) => prev && prev[curr], obj)
+  return properties.reduce((prev, curr) => prev && prev[curr], obj);
 }
