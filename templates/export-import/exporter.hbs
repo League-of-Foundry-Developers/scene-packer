@@ -29,7 +29,7 @@
   </li>
 {{/inline}}
 
-<form autocomplete="off">
+<form>
   <nav class="sheet-tabs tabs" data-group="sections">
     <a class="item" data-tab="scenes"><i class="fas fa-map"></i> {{localize 'SCENE-PACKER.exporter.tabs.scenes'}}</a>
     <a class="item" data-tab="actors"><i class="fas fa-users"></i> {{localize 'SCENE-PACKER.exporter.tabs.actors'}}</a>
@@ -250,7 +250,7 @@
           <b>{{localize 'SCENE-PACKER.exporter.options.welcome-journal'}}</b>
           <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.welcome-journal-help'}}"></i>
         </label>
-        <input type="text" id="SP-export-welcomeJournal" name="welcomeJournal" value="" placeholder="{{localize 'SCENE-PACKER.exporter.options.welcome-journal-drop-text'}}">
+        <input type="text" id="SP-export-welcomeJournal" name="welcomeJournal" value="" placeholder="{{localize 'SCENE-PACKER.exporter.options.welcome-journal-drop-text'}}" autocomplete="off">
       </div>
       <div class="form-group">
         <b>{{localize 'SCENE-PACKER.exporter.options.allow-complete-import'}}</b>
