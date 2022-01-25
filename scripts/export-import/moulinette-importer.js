@@ -243,17 +243,17 @@ export default class MoulinetteImporter extends FormApplication {
     );
 
     if (sceneData.length) {
-      ScenePacker.logType(
-        this.scenePackerInfo.name,
-        'info',
-        true,
-        game.i18n.format('SCENE-PACKER.importer.creating-documents', {
-          count: sceneData.length,
-          type: Scene.collectionName,
-        }),
-      );
       const filteredData = this.filterData(sceneData, relatedData, 'Scene', sourceReference);
       if (filteredData.length) {
+        ScenePacker.logType(
+          this.scenePackerInfo.name,
+          'info',
+          true,
+          game.i18n.format('SCENE-PACKER.importer.creating-documents', {
+            count: sceneData.length,
+            type: Scene.collectionName,
+          }),
+        );
         await this.updateProcessStatus({
           message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {
             type: Scene.collectionName,
@@ -271,17 +271,17 @@ export default class MoulinetteImporter extends FormApplication {
       }
     }
     if (actorData.length) {
-      ScenePacker.logType(
-        this.scenePackerInfo.name,
-        'info',
-        true,
-        game.i18n.format('SCENE-PACKER.importer.creating-documents', {
-          count: actorData.length,
-          type: Actor.collectionName,
-        }),
-      );
       const filteredData = this.filterData(actorData, relatedData, 'Actor', sourceReference);
       if (filteredData.length) {
+        ScenePacker.logType(
+          this.scenePackerInfo.name,
+          'info',
+          true,
+          game.i18n.format('SCENE-PACKER.importer.creating-documents', {
+            count: filteredData.length,
+            type: Actor.collectionName,
+          }),
+        );
         await this.updateProcessStatus({
           message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {
             type: Actor.collectionName,
@@ -292,18 +292,25 @@ export default class MoulinetteImporter extends FormApplication {
       }
     }
 
+    // Track whether this import created the welcome journal.
+    let didCreateWelcomeJournal = false;
+
     if (journalData.length) {
-      ScenePacker.logType(
-        this.scenePackerInfo.name,
-        'info',
-        true,
-        game.i18n.format('SCENE-PACKER.importer.creating-documents', {
-          count: journalData.length,
-          type: JournalEntry.collectionName,
-        }),
-      );
       const filteredData = this.filterData(journalData, relatedData, 'JournalEntry', sourceReference);
+      if (this.scenePackerInfo?.welcome_journal && !filteredData.some(j => j._id === this.scenePackerInfo.welcome_journal) && !game.journal.get(this.scenePackerInfo.welcome_journal)) {
+        // Ensure that the welcome journal exists in the world.
+        filteredData.push(journalData.find(j => j._id === this.scenePackerInfo.welcome_journal));
+      }
       if (filteredData.length) {
+        ScenePacker.logType(
+          this.scenePackerInfo.name,
+          'info',
+          true,
+          game.i18n.format('SCENE-PACKER.importer.creating-documents', {
+            count: filteredData.length,
+            type: JournalEntry.collectionName,
+          }),
+        );
         await this.updateProcessStatus({
           message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {
             type: JournalEntry.collectionName,
@@ -311,6 +318,11 @@ export default class MoulinetteImporter extends FormApplication {
           })}</p>`,
         });
         const created = await JournalEntry.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
+        if (this.scenePackerInfo?.welcome_journal) {
+          if (created.find(j => j.id === this.scenePackerInfo.welcome_journal)) {
+            didCreateWelcomeJournal = true;
+          }
+        }
 
         // TODO Extract this method out into a separate function and call for each data type
         // Check for compendium references within the journals and update them to local world references
@@ -470,7 +482,7 @@ export default class MoulinetteImporter extends FormApplication {
                       path: relation.path,
                     },
                   ),
-                  datum
+                  datum,
                 );
                 continue;
               }
@@ -536,17 +548,17 @@ export default class MoulinetteImporter extends FormApplication {
     }
 
     if (itemData.length) {
-      ScenePacker.logType(
-        this.scenePackerInfo.name,
-        'info',
-        true,
-        game.i18n.format('SCENE-PACKER.importer.creating-documents', {
-          count: itemData.length,
-          type: Item.collectionName,
-        }),
-      );
       const filteredData = this.filterData(itemData, relatedData, 'Item', sourceReference);
       if (filteredData.length) {
+        ScenePacker.logType(
+          this.scenePackerInfo.name,
+          'info',
+          true,
+          game.i18n.format('SCENE-PACKER.importer.creating-documents', {
+            count: filteredData.length,
+            type: Item.collectionName,
+          }),
+        );
         await this.updateProcessStatus({
           message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {
             type: Item.collectionName,
@@ -559,17 +571,17 @@ export default class MoulinetteImporter extends FormApplication {
     }
 
     if (macroData.length) {
-      ScenePacker.logType(
-        this.scenePackerInfo.name,
-        'info',
-        true,
-        game.i18n.format('SCENE-PACKER.importer.creating-documents', {
-          count: macroData.length,
-          type: Macro.collectionName,
-        }),
-      );
       const filteredData = this.filterData(macroData, relatedData, 'Macro', sourceReference);
       if (filteredData.length) {
+        ScenePacker.logType(
+          this.scenePackerInfo.name,
+          'info',
+          true,
+          game.i18n.format('SCENE-PACKER.importer.creating-documents', {
+            count: filteredData.length,
+            type: Macro.collectionName,
+          }),
+        );
         await this.updateProcessStatus({
           message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {
             type: Macro.collectionName,
@@ -581,17 +593,17 @@ export default class MoulinetteImporter extends FormApplication {
     }
 
     if (playlistData.length) {
-      ScenePacker.logType(
-        this.scenePackerInfo.name,
-        'info',
-        true,
-        game.i18n.format('SCENE-PACKER.importer.creating-documents', {
-          count: playlistData.length,
-          type: Playlist.collectionName,
-        }),
-      );
       const filteredData = this.filterData(playlistData, relatedData, 'Playlist', sourceReference);
       if (filteredData.length) {
+        ScenePacker.logType(
+          this.scenePackerInfo.name,
+          'info',
+          true,
+          game.i18n.format('SCENE-PACKER.importer.creating-documents', {
+            count: filteredData.length,
+            type: Playlist.collectionName,
+          }),
+        );
         await this.updateProcessStatus({
           message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {
             type: Playlist.collectionName,
@@ -603,17 +615,17 @@ export default class MoulinetteImporter extends FormApplication {
     }
 
     if (rollTableData.length) {
-      ScenePacker.logType(
-        this.scenePackerInfo.name,
-        'info',
-        true,
-        game.i18n.format('SCENE-PACKER.importer.creating-documents', {
-          count: rollTableData.length,
-          type: RollTable.collectionName,
-        }),
-      );
       const filteredData = this.filterData(rollTableData, relatedData, 'RollTable', sourceReference);
       if (filteredData.length) {
+        ScenePacker.logType(
+          this.scenePackerInfo.name,
+          'info',
+          true,
+          game.i18n.format('SCENE-PACKER.importer.creating-documents', {
+            count: filteredData.length,
+            type: RollTable.collectionName,
+          }),
+        );
         await this.updateProcessStatus({
           message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {
             type: RollTable.collectionName,
@@ -624,10 +636,13 @@ export default class MoulinetteImporter extends FormApplication {
       }
     }
 
-    if (!this.sceneID && this.scenePackerInfo?.welcome_journal) {
-      const welcomeJournal = await game.journal.get(this.scenePackerInfo.welcome_journal);
-      if (welcomeJournal?.sheet) {
-        welcomeJournal.sheet.render(true, {});
+    if (this.scenePackerInfo?.welcome_journal) {
+      // Render the welcome journal for an "Import All", or if this is the first import for the pack.
+      if (!this.sceneID || didCreateWelcomeJournal) {
+        const welcomeJournal = await game.journal.get(this.scenePackerInfo.welcome_journal);
+        if (welcomeJournal?.sheet) {
+          welcomeJournal.sheet.render(true, {});
+        }
       }
     }
 
