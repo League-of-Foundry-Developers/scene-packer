@@ -265,8 +265,6 @@ export default class MoulinetteImporter extends FormApplication {
           const scene = game.scenes.get(id);
           const thumbData = await scene.createThumbnail();
           await scene.update({thumb: thumbData.thumb}, {diff: false});
-
-          // TODO Parse Active Tile Triggers data
         }
       }
     }
