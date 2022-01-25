@@ -64,7 +64,7 @@ export default class ExporterProgress extends FormApplication {
         const folderMap = new Map();
 
         let filename = this.packageName.slugify({strict: true}) || 'export';
-        dataZip = new Compressor('data.zip');
+        dataZip = new Compressor(`${filename}-data.zip`);
         // Add an empty info file for Moulinette to detect that this is a Scene Packer module
         dataZip.AddStringToZip('', 'scene-packer.info');
         if (this.exporterData) {
