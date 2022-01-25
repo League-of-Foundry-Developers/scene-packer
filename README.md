@@ -192,7 +192,7 @@ There are several [Hooks](https://foundryvtt.com/api/Hooks.html) exposed by Scen
   - See [Module Code Requirements](https://github.com/League-of-Foundry-Developers/scene-packer#module-code-requirements) for how to initialise your module with Scene Packer.
 
 `ScenePacker.importAllComplete`
-- Called after all entities in a pack have been imported.
+- Called after all documents in a pack have been imported.
 - Called with a single argument of type `ImportedAllEntities`.
 ```js
 Hooks.on("ScenePacker.importAllComplete", (data) => {
@@ -201,7 +201,7 @@ Hooks.on("ScenePacker.importAllComplete", (data) => {
 ```
 
 `ScenePacker.importMoulinetteComplete`
-- Called after entities in a pack have been imported from Moulinette.
+- Called after documents in a pack have been imported from Moulinette.
 - Called with a single argument of type `ImportedMoulinetteEntities`.
 ```js
 Hooks.on("ScenePacker.importMoulinetteComplete", (data) => {
