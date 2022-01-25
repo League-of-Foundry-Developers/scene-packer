@@ -3642,11 +3642,11 @@ export default class ScenePacker {
 
   /**
    * Gets the tiles that have actions that need processing
-   * @param {Object[]} tiles - The tiles which might contain Monk's Active Tiles actions
+   * @param {Object[]|EmbeddedCollection} tiles - The tiles which might contain Monk's Active Tiles actions
    * @return {Object[]} - The tiles that have actions that need processing
    */
   static GetActiveTilesData(tiles) {
-    if (!tiles?.length) {
+    if (!tiles?.length && !tiles?.size) {
       return [];
     }
 
