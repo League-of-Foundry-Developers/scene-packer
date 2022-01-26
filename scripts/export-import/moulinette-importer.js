@@ -695,6 +695,7 @@ export default class MoulinetteImporter extends FormApplication {
       return entities;
     }
 
+    const adventureFolder = `${this.scenePackerInfo.author}-${this.scenePackerInfo.name}`.slugify({strict: true}) || 'scene-packer-fallback';
     const returnEntities = [];
     console.groupCollapsed(
       this.scenePackerInfo.name,
@@ -718,35 +719,46 @@ export default class MoulinetteImporter extends FormApplication {
         continue;
       }
       for (const originalAsset of assets) {
-        const asset = decodeURIComponent(originalAsset);
-        const localAsset = `${CONSTANTS.MOULINETTE_PATH}/${asset}`;
+        let needsDownloading = true;
+        let needsRename = true;
 
-        if (assetMap.has(asset)) {
-          console.log(`⏩ ${asset}`);
-          continue;
+        const asset = decodeURIComponent(originalAsset);
+        let localAsset = `${CONSTANTS.MOULINETTE_PATH}/${adventureFolder}/${asset}`;
+
+        if (asset.startsWith('moulinette/')) {
+          needsRename = false;
+          localAsset = asset;
         }
 
         // Treat external URLs as always existing
         if (asset.startsWith('http://') || asset.startsWith('https://')) {
-          console.log(`⏩ ${asset}`);
-          assetMap.set(asset, true);
-          continue;
+          needsDownloading = false;
+          needsRename = false;
+        }
+
+        if (assetMap.has(asset)) {
+          needsDownloading = false;
         }
 
         const folder = localAsset.substring(0, localAsset.lastIndexOf('/'));
         const filename = asset.split('/').pop();
+        const newAssetLocation = `${folder}/${encodeURIComponent(filename)}`;
         const srcURL = new URL(this.packInfo['data/assets/' + asset]);
 
-        if (!await game.moulinette.applications.MoulinetteFileUtil.downloadFile(srcURL, folder, filename)) {
-          ScenePacker.logType(this.scenePackerInfo.name, 'error', true,
-            game.i18n.format('SCENE-PACKER.exporter.progress.download-error', {
-              error: asset,
-            }),
-          );
-          continue;
+        if (needsDownloading) {
+          if (!await game.moulinette.applications.MoulinetteFileUtil.downloadFile(srcURL, folder, filename)) {
+            ScenePacker.logType(this.scenePackerInfo.name, 'error', true,
+              game.i18n.format('SCENE-PACKER.exporter.progress.download-error', {
+                error: asset,
+              }),
+            );
+            continue;
+          }
         }
 
-        stringRepresentation = stringRepresentation.replaceAll(`"${originalAsset}"`, `"${folder}/${encodeURIComponent(filename)}"`);
+        if (needsRename) {
+          stringRepresentation = stringRepresentation.replaceAll(`${originalAsset}`, newAssetLocation);
+        }
         ScenePacker.logType(this.scenePackerInfo.name, 'info', true, `Importer | ✅️️ ${localAsset}`);
         assetMap.set(asset, true);
         idx++;
