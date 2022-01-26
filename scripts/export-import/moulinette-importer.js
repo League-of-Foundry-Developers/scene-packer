@@ -297,7 +297,10 @@ export default class MoulinetteImporter extends FormApplication {
       const filteredData = this.filterData(journalData, relatedData, 'JournalEntry', sourceReference);
       if (this.scenePackerInfo?.welcome_journal && !filteredData.some(j => j._id === this.scenePackerInfo.welcome_journal) && !game.journal.get(this.scenePackerInfo.welcome_journal)) {
         // Ensure that the welcome journal exists in the world.
-        filteredData.push(journalData.find(j => j._id === this.scenePackerInfo.welcome_journal));
+        let welcomeJournal = journalData.find(j => j._id === this.scenePackerInfo.welcome_journal);
+        if (welcomeJournal) {
+          filteredData.push(welcomeJournal);
+        }
       }
       if (filteredData.length) {
         ScenePacker.logType(
