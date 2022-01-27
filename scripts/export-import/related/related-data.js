@@ -94,6 +94,8 @@ export class RelatedData {
  * @typedef {Object} Relation
  * @property {string} uuid - The related UUID.
  * @property {string} path - The path to the UUID within the parent.
+ * @property {string?} embeddedId - The ID of the embedded related entity.
+ * @property {string?} embeddedPath - The path to the embedded related entity.
  */
 
 /**

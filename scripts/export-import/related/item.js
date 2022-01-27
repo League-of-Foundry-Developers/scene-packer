@@ -26,7 +26,7 @@ export const ItemDataLocations = [
 
 /**
  * ExtractRelatedItemData - extracts the entity UUIDs that are related to the given item.
- * @param {object} item - the item to extract the related data from.
+ * @param {Item|ClientDocumentMixin} item - the item to extract the related data from.
  * @return {RelatedData}
  */
 export function ExtractRelatedItemData(item) {

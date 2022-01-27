@@ -1,3 +1,4 @@
+import {ExtractRelatedItemData} from './item.js';
 import {ExtractUUIDsFromContent, RelatedData, ResolvePath} from './related-data.js';
 import ScenePacker from '../../scene-packer.js';
 
@@ -64,7 +65,7 @@ export const ActorDataLocations = [
 
 /**
  * ExtractRelatedActorData - extracts the entity UUIDs that are related to the given actor.
- * @param {object} actor - the actor to extract the related data from.
+ * @param {Actor|ClientDocumentMixin} actor - the actor to extract the related data from.
  * @return {RelatedData}
  */
 export function ExtractRelatedActorData(actor) {
@@ -72,14 +73,13 @@ export function ExtractRelatedActorData(actor) {
   if (!actor) {
     return relatedData;
   }
+  const id = actor.id || actor._id;
+  const uuid = actor.uuid || `${Actor.documentName}.${id}`;
 
   for (const contentWithPath of ExtractActorContent(actor)) {
     if (typeof contentWithPath?.content !== 'string') {
       continue;
     }
-
-    const id = actor.id || actor._id;
-    const uuid = actor.uuid || `${Actor.documentName}.${id}`;
 
     const relations = ExtractUUIDsFromContent(contentWithPath.content, contentWithPath.path);
     if (relations.length) {
@@ -89,6 +89,18 @@ export function ExtractRelatedActorData(actor) {
 
   // Include Token Attacher related data
   relatedData.AddRelatedData(ExtractRelatedTokenAttacherData(actor));
+
+  // Include related Items belonging to the actor
+  if (actor.items) {
+    for (const item of actor.items) {
+      const relatedItems = ExtractRelatedItemData(item);
+      for (const relations of relatedItems.data.values()) {
+        for (const relation of relations) {
+          relatedData.AddRelation(uuid, {path: 'items', uuid: relation.uuid, embeddedId: item.id, embeddedPath: relation.path});
+        }
+      }
+    }
+  }
 
   return relatedData;
 }

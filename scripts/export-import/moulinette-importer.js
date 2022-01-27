@@ -1,6 +1,6 @@
 import {Compressor} from './compressor.js';
 import {CONSTANTS} from '../constants.js';
-import {ExtractRelatedJournalData} from './related/journals.js';
+import {ReplaceCompendiumReferences} from './converter.js';
 
 export default class MoulinetteImporter extends FormApplication {
 
@@ -209,17 +209,16 @@ export default class MoulinetteImporter extends FormApplication {
       this.packInfo['data/RollTable.json'],
       game.tables,
     );
-
-    // TODO Determine if anything like this is needed to import/update references
-    // const compendiumRelatedData = this.getRelatedDataToImport('Compendium', null, relatedData);
-    // for (const compendiumRelatedDatum of compendiumRelatedData) {
-    //   const document = fromUuid(compendiumRelatedDatum);
-    //   if (!document || document.collection.has(document.id)) {
-    //     // Invalid reference or already imported
-    //     continue;
-    //   }
-    //   await document.collection.importFromCompendium(document.pack, document.id, {}, {keepId: true});
-    // }
+    const availableDocuments = {
+      actors: actorData,
+      journals: journalData,
+      scenes: sceneData,
+      items: itemData,
+      macros: macroData,
+      playlists: playlistData,
+      rollTables: rollTableData,
+      cards: [], // TODO Add cards
+    };
 
     let sourceReference;
     if (this.sceneID) {
@@ -260,12 +259,26 @@ export default class MoulinetteImporter extends FormApplication {
             count: filteredData.length,
           })}</p>`,
         });
-        await Scene.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
-        for (const id of filteredData.map(s => s._id)) {
+        const created = await Scene.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
+        for (const id of created.map(s => s.id)) {
           const scene = game.scenes.get(id);
+          if (!scene) {
+            continue;
+          }
           const thumbData = await scene.createThumbnail();
           await scene.update({thumb: thumbData.thumb}, {diff: false});
         }
+
+        // Check for compendium references within the scenes and update them to local world references
+        console.groupCollapsed(game.i18n.format('SCENE-PACKER.importer.converting-references', {
+          count: created.length,
+          type: Scene.collectionName,
+        }));
+        const sceneUpdates = ReplaceCompendiumReferences(Scene, created, availableDocuments, this.scenePackerInfo.name);
+        if (sceneUpdates.length) {
+          await Scene.updateDocuments(sceneUpdates);
+        }
+        console.groupEnd();
       }
     }
     if (actorData.length) {
@@ -286,7 +299,35 @@ export default class MoulinetteImporter extends FormApplication {
             count: filteredData.length,
           })}</p>`,
         });
-        await Actor.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
+        const created = await Actor.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
+
+        // Check for compendium references within the actors and update them to local world references
+        console.groupCollapsed(game.i18n.format('SCENE-PACKER.importer.converting-references', {
+          count: created.length,
+          type: Actor.collectionName,
+        }));
+        const actorUpdates = ReplaceCompendiumReferences(Actor, created, availableDocuments, this.scenePackerInfo.name);
+        if (actorUpdates.length) {
+          const basicUpdates = actorUpdates.filter(d => !d.embeddedId);
+          const embeddedUpdates = actorUpdates.filter(d => d.embeddedId);
+          if (basicUpdates.length) {
+            await Actor.updateDocuments(actorUpdates);
+          }
+          for (const embeddedUpdate of embeddedUpdates) {
+            const actor = game.actors.get(embeddedUpdate._id);
+            if (!actor) {
+              continue;
+            }
+
+            if (embeddedUpdate.items) {
+              await actor.updateEmbeddedDocuments('Item', {
+                _id: embeddedUpdate.embeddedId,
+                [embeddedUpdate.embeddedPath]: embeddedUpdate.items,
+              });
+            }
+          }
+        }
+        console.groupEnd();
       }
     }
 
@@ -325,226 +366,16 @@ export default class MoulinetteImporter extends FormApplication {
           }
         }
 
-        // TODO Extract this method out into a separate function and call for each data type
         // Check for compendium references within the journals and update them to local world references
         console.groupCollapsed(game.i18n.format('SCENE-PACKER.importer.converting-references', {
           count: created.length,
           type: JournalEntry.collectionName,
         }));
-        for (const datum of created) {
-          const relatedData = ExtractRelatedJournalData(datum);
-          if (!relatedData.data.size) {
-            continue;
-          }
-
-          console.log('relatedData for datum', datum, relatedData); // TODO Delete this line
-          for (const relations of relatedData.data.values()) {
-            for (const relation of relations) {
-              if (!relation.uuid.startsWith('Compendium.')) {
-                // Only try to replace compendium references
-                continue;
-              }
-
-              const ActorSources = {
-                type: Actor,
-                data: [
-                  game[Actor.collectionName],
-                  actorData,
-                ],
-              };
-              const JournalSources = {
-                type: JournalEntry,
-                data: [
-                  game[JournalEntry.collectionName],
-                  journalData,
-                ],
-              };
-              const SceneSources = {
-                type: Scene,
-                data: [
-                  game[Scene.collectionName],
-                  sceneData,
-                ],
-              };
-              const ItemSources = {
-                type: Item,
-                data: [
-                  game[Item.collectionName],
-                  itemData,
-                ],
-              };
-              const MacroSources = {
-                type: Macro,
-                data: [
-                  game[Macro.collectionName],
-                  macroData,
-                ],
-              };
-              const PlaylistSources = {
-                type: Playlist,
-                data: [
-                  game[Playlist.collectionName],
-                  playlistData,
-                ],
-              };
-              const RollTableSources = {
-                type: RollTable,
-                data: [
-                  game[RollTable.collectionName],
-                  rollTableData,
-                ],
-              };
-              const CardSources = (typeof Cards !== 'undefined') ? {
-                type: Card,
-                data: [
-                  game[Card.collectionName],
-                  // cardData, // TODO Add card data
-                ],
-              } : undefined;
-
-              let sources = [
-                ActorSources,
-                JournalSources,
-                SceneSources,
-                ItemSources,
-                MacroSources,
-                PlaylistSources,
-                RollTableSources,
-              ];
-              if (CardSources) {
-                sources.push(CardSources);
-              }
-
-              let relationParts = relation.uuid.split('.');
-              relationParts.pop(); // Remove the id
-              const type = relationParts.pop();
-              switch (type) {
-                case 'actors':
-                case 'monsters':
-                  sources = [ActorSources];
-                  break;
-                case 'journals':
-                case 'journal':
-                case 'handouts':
-                case 'notes':
-                  sources = [JournalSources];
-                  break;
-                case 'maps':
-                case 'scenes':
-                  sources = [SceneSources];
-                  break;
-                case 'items':
-                  sources = [ItemSources];
-                  break;
-                case 'macros':
-                  sources = [MacroSources];
-                  break;
-                case 'playlists':
-                  sources = [PlaylistSources];
-                  break;
-                case 'rolltables':
-                case 'tables':
-                  sources = [RollTableSources];
-                  break;
-                case 'cards':
-                  if (CardSources) {
-                    sources = [CardSources];
-                  }
-                  break;
-              }
-
-              let foundEntity;
-              for (const sourceType of sources) {
-                for (const source of sourceType.data) {
-                  foundEntity = source.find(e => (getProperty(e, 'data.flags.core.sourceId') || getProperty(e, 'flags.core.sourceId')) === relation.uuid);
-                  if (foundEntity) {
-                    if (!foundEntity.uuid || !foundEntity.documentName || !foundEntity.id) {
-                      foundEntity.documentName = sourceType.type.documentName;
-                      foundEntity.id = foundEntity._id;
-                      foundEntity.uuid = `${foundEntity.documentName}.${foundEntity.id}`;
-                    }
-                    break;
-                  }
-                }
-              }
-              if (!foundEntity) {
-                continue;
-              }
-
-              const oldValue = getProperty(datum, relation.path);
-              if (!oldValue) {
-                ScenePacker.logType(
-                  this.scenePackerInfo.name,
-                  'error',
-                  true,
-                  game.i18n.format(
-                    'SCENE-PACKER.importer.no-existing-value',
-                    {
-                      path: relation.path,
-                    },
-                  ),
-                  datum,
-                );
-                continue;
-              }
-              if (typeof oldValue !== 'string') {
-                // Only strings can be updated
-                continue;
-              }
-              const [, moduleName, pack, id] = relation.uuid.split('.');
-              const oldReference = `@Compendium[${moduleName}.${pack}.${id}]`;
-              const newReference = `@${foundEntity.documentName}[${foundEntity.id}]`;
-
-              let newValue = oldValue.replace(oldReference, newReference);
-              let hyperlinksChanged = 0;
-              const doc = CONSTANTS.DOM_PARSER.parseFromString(newValue, 'text/html');
-              for (const link of doc.getElementsByTagName('a')) {
-                if (!link.classList.contains('entity-link') || link.dataset.pack !== `${moduleName}.${pack}` || link.dataset.id !== id) {
-                  continue;
-                }
-
-                link.removeAttribute('data-pack');
-                link.setAttribute('data-entity', foundEntity.documentName);
-                link.setAttribute('data-id', foundEntity.id);
-                hyperlinksChanged++;
-              }
-
-              if (hyperlinksChanged) {
-                newValue = doc.body.innerHTML;
-              }
-
-              if (newValue === oldValue) {
-                continue;
-              }
-
-              let path = relation.path;
-              if (path.startsWith('data.')) {
-                path = path.substring(5);
-              }
-
-              ScenePacker.logType(
-                this.scenePackerInfo.name,
-                'info',
-                true,
-                game.i18n.format(
-                  'SCENE-PACKER.importer.converting-reference',
-                  {
-                    type: foundEntity.documentName,
-                    name: foundEntity.name,
-                    oldRef: relation.uuid,
-                    newRef: foundEntity.uuid,
-                    path: path,
-                  },
-                ),
-              );
-
-              await datum.update({[path]: newValue});
-            }
-          }
-
+        const journalUpdates = ReplaceCompendiumReferences(JournalEntry, created, availableDocuments, this.scenePackerInfo.name);
+        if (journalUpdates.length) {
+          await JournalEntry.updateDocuments(journalUpdates);
         }
         console.groupEnd();
-        // TODO Extract this method out into a separate function
       }
     }
 
@@ -566,9 +397,19 @@ export default class MoulinetteImporter extends FormApplication {
             count: filteredData.length,
           })}</p>`,
         });
-        await Item.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
+        const created = await Item.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
+
+        // Check for compendium references within the items and update them to local world references
+        console.groupCollapsed(game.i18n.format('SCENE-PACKER.importer.converting-references', {
+          count: created.length,
+          type: Item.collectionName,
+        }));
+        const itemUpdates = ReplaceCompendiumReferences(Item, created, availableDocuments, this.scenePackerInfo.name);
+        if (itemUpdates.length) {
+          await Item.updateDocuments(itemUpdates);
+        }
+        console.groupEnd();
       }
-      // TODO Replace links in Item data (they might reference compendiums)
     }
 
     if (macroData.length) {
@@ -633,7 +474,29 @@ export default class MoulinetteImporter extends FormApplication {
             count: filteredData.length,
           })}</p>`,
         });
-        await RollTable.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
+        const created = await RollTable.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
+
+        // Check for compendium references within the roll tables and update them to local world references
+        console.groupCollapsed(game.i18n.format('SCENE-PACKER.importer.converting-references', {
+          count: created.length,
+          type: RollTable.collectionName,
+        }));
+        const tableUpdates = ReplaceCompendiumReferences(RollTable, created, availableDocuments, this.scenePackerInfo.name);
+        if (tableUpdates.length) {
+          for (const tableUpdate of tableUpdates) {
+            const table = game.tables.get(tableUpdate._id);
+            if (!table) {
+              continue;
+            }
+
+            await table.updateEmbeddedDocuments('TableResult', {
+              _id: tableUpdate.embeddedId,
+              collection: tableUpdate.collection,
+              resultId: tableUpdate.resultId,
+            });
+          }
+        }
+        console.groupEnd();
       }
     }
 
@@ -648,6 +511,8 @@ export default class MoulinetteImporter extends FormApplication {
     }
 
     // TODO Support running macros at the end of the import process
+
+    // TODO Potentially prompt for importing documents that are not related to scenes. These cannot be imported unless the Import All option is used.
 
     await this.updateProcessStatus({
       message: `<p>${game.i18n.localize('SCENE-PACKER.importer.complete')}</p>`,

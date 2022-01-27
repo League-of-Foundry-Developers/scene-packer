@@ -16,7 +16,7 @@ export const JournalDataLocations = [
 
 /**
  * ExtractRelatedJournalData - extracts the entity UUIDs that are related to the journal entry.
- * @param {object} journal - the journal to extract the related data from.
+ * @param {JournalEntry|ClientDocumentMixin} journal - the journal to extract the related data from.
  * @return {RelatedData}
  */
 export function ExtractRelatedJournalData(journal) {

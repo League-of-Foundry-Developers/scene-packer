@@ -2,7 +2,7 @@ import {RelatedData} from './related-data.js';
 
 /**
  * ExtractRelatedSceneData - extracts the entity UUIDs that are related to the given scene.
- * @param {object} scene - the scene to extract the related data from.
+ * @param {Scene|ClientDocumentMixin} scene - the scene to extract the related data from.
  * @return {RelatedData}
  */
 export function ExtractRelatedSceneData(scene) {

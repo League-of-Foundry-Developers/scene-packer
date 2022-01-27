@@ -122,7 +122,7 @@ export const CONSTANTS = Object.freeze({
    * The order of types to import when importing all content from compendiums.
    * @type {string[]}
    */
-  PACK_IMPORT_ORDER: ['Playlist', 'Macro', 'Item', 'Actor', 'RollTable', 'JournalEntry', 'Scene'],
+  PACK_IMPORT_ORDER: ['Playlist', 'Macro', 'Item', 'Actor', 'Card', 'RollTable', 'JournalEntry', 'Scene'],
 
   /**
    * The setting key for whether to display the context menu on the Scene sidebar.
