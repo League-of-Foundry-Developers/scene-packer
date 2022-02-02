@@ -4,9 +4,8 @@ import { CONSTANTS } from '../constants.js';
 
 /**
  * Extract assets from the given item
- * @param {object} item - The item to extract assets from.
+ * @param {Item|ClientDocumentMixin} item - The item to extract assets from.
  * @return {AssetData}
- * @constructor
  */
 export async function ExtractItemAssets(item) {
   const data = new AssetData({

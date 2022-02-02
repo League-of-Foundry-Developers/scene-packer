@@ -3,9 +3,8 @@ import AssetReport from '../asset-report.js';
 
 /**
  * Extract assets from the given macro
- * @param {object} macro - The macro to extract assets from.
+ * @param {Macro|ClientDocumentMixin} macro - The macro to extract assets from.
  * @return {AssetData}
- * @constructor
  */
 export async function ExtractMacroAssets(macro) {
   const data = new AssetData({

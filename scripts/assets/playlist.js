@@ -4,9 +4,8 @@ import { CONSTANTS } from '../constants.js';
 
 /**
  * Extract assets from the given playlist
- * @param {object} playlist - The playlist to extract assets from.
+ * @param {Playlist|ClientDocumentMixin} playlist - The playlist to extract assets from.
  * @return {AssetData}
- * @constructor
  */
 export async function ExtractPlaylistAssets(playlist) {
   const data = new AssetData({

@@ -4,9 +4,8 @@ import { CONSTANTS } from '../constants.js';
 
 /**
  * Extract assets from the given actor
- * @param {object} actor - The actor to extract assets from.
+ * @param {Actor|ClientDocumentMixin} actor - The actor to extract assets from.
  * @return {AssetData}
- * @constructor
  */
 export async function ExtractActorAssets(actor) {
   const data = new AssetData({

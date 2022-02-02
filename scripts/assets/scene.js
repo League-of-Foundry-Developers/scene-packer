@@ -4,9 +4,8 @@ import { CONSTANTS } from '../constants.js';
 
 /**
  * Extract assets from the given scene
- * @param {object} scene - The scene to extract assets from.
+ * @param {Scene||ClientDocumentMixin} scene - The scene to extract assets from.
  * @return {AssetData}
- * @constructor
  */
 export async function ExtractSceneAssets(scene) {
   const data = new AssetData({

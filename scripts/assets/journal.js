@@ -3,9 +3,8 @@ import AssetReport from '../asset-report.js';
 
 /**
  * Extract assets from the given journal
- * @param {object} journal - The journal to extract assets from.
+ * @param {JournalEntry|ClientDocumentMixin} journal - The journal to extract assets from.
  * @return {AssetData}
- * @constructor
  */
 export async function ExtractJournalEntryAssets(journal) {
   const data = new AssetData({

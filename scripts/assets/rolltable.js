@@ -4,9 +4,8 @@ import { CONSTANTS } from '../constants.js';
 
 /**
  * Extract assets from the given roll table
- * @param {object} table - The table to extract assets from.
+ * @param {RollTable|ClientDocumentMixin} table - The table to extract assets from.
  * @return {AssetData}
- * @constructor
  */
 export async function ExtractRollTableAssets(table) {
   const data = new AssetData({
