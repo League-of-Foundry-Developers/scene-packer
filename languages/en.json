@@ -321,6 +321,7 @@
         "macros": "Macros",
         "options": "Options",
         "playlists": "Playlists",
+        "cards": "Cards",
         "scenes": "Scenes",
         "tables": "Roll Tables"
       },
@@ -330,6 +331,7 @@
         "journals": "Search Journals",
         "macros": "Search Macros",
         "playlists": "Search Playlists",
+        "cards": "Search Cards",
         "scenes": "Search Scenes",
         "tables": "Search Rollable Tables"
       },

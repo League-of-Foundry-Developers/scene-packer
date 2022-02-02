@@ -122,7 +122,7 @@ export const CONSTANTS = Object.freeze({
    * The order of types to import when importing all content from compendiums.
    * @type {string[]}
    */
-  PACK_IMPORT_ORDER: ['Playlist', 'Macro', 'Item', 'Actor', 'Card', 'RollTable', 'JournalEntry', 'Scene'],
+  PACK_IMPORT_ORDER: ['Playlist', 'Macro', 'Item', 'Actor', 'Cards', 'RollTable', 'JournalEntry', 'Scene'],
 
   /**
    * The setting key for whether to display the context menu on the Scene sidebar.
@@ -151,15 +151,18 @@ export const CONSTANTS = Object.freeze({
 
   /**
    * Lookup entity types and get their common language strings.
-   * @type {{Item: string, Playlist: string, Macro: string, RollTable: string, Actor: string, Scene: string, JournalEntry: string}}
+   * @type {{Actor: string, Card: string, Cards: string, Item: string, JournalEntry: string, Macro: string, Playlist: string, RollTable: string, Scene: string}}
+   * @enum {string}
    */
   TYPE_HUMANISE: {
-    Playlist: 'playlists',
-    Macro: 'macros',
-    Item: 'items',
     Actor: 'actors',
-    RollTable: 'roll tables',
+    Card: 'card',
+    Cards: 'cards',
+    Item: 'items',
     JournalEntry: 'journal entries',
+    Macro: 'macros',
+    Playlist: 'playlists',
+    RollTable: 'roll tables',
     Scene: 'scenes',
   },
 

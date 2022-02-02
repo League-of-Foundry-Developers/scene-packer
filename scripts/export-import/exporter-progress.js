@@ -3,6 +3,7 @@ import {Compressor} from './compressor.js';
 import {CONSTANTS} from '../constants.js';
 import {Downloader} from './downloader.js';
 import {ExtractActorAssets} from '../assets/actor.js';
+import {ExtractCardAssets} from '../assets/cards.js';
 import {ExtractItemAssets} from '../assets/item.js';
 import {ExtractJournalEntryAssets} from '../assets/journal.js';
 import {ExtractMacroAssets} from '../assets/macro.js';
@@ -161,8 +162,12 @@ export default class ExporterProgress extends FormApplication {
           }
         };
 
-        // "Scene", "Actor", "Item", "JournalEntry", "RollTable", "Playlist", "Macro"]
+        // 'Playlist', 'Macro', 'Item', 'Actor', 'Cards', 'RollTable', 'JournalEntry', 'Scene'
         for (const type of CONSTANTS.PACK_IMPORT_ORDER) {
+          if (!CONFIG[type]) {
+            continue;
+          }
+
           const ids = this.selected
             .filter((d) => d.dataset.type === type)
             .map((d) => d.value);
@@ -201,6 +206,10 @@ export default class ExporterProgress extends FormApplication {
                 assetData = await ExtractItemAssets(document);
                 this.assetsMap.AddAssets(assetData.assets);
                 this.relatedData.AddRelatedData(ExtractRelatedItemData(document));
+                break;
+              case 'Cards':
+                assetData = await ExtractCardAssets(document);
+                this.assetsMap.AddAssets(assetData.assets);
                 break;
               case 'Macro':
                 assetData = await ExtractMacroAssets(document);

@@ -24,7 +24,7 @@
     <label class="flexrow">
       <input type="checkbox" data-type="{{this.documentName}}" name="entity.{{this.documentName}}.{{this.id}}" value="{{this.id}}" checked>
       {{#if this.img}}<img class="profile actor-profile" title="{{this.name}}" alt="{{this.name}}" data-src="{{this.img}}" style="margin-right: 5px;">{{/if}}
-      <h4 class="entity-name"><a class="entity-link" data-entity="{{this.documentName}}" data-id="{{this.id}}">{{this.name}}</a></h4>
+      <h4 class="entity-name"><a class="entity-link content-link" data-type="{{this.documentName}}" data-entity="{{this.documentName}}" data-id="{{this.id}}">{{this.name}}</a></h4>
     </label>
   </li>
 {{/inline}}
@@ -36,6 +36,7 @@
     <a class="item" data-tab="items"><i class="fas fa-suitcase"></i> {{localize 'SCENE-PACKER.exporter.tabs.items'}}</a>
     <a class="item" data-tab="journals"><i class="fas fa-book-open"></i> {{localize 'SCENE-PACKER.exporter.tabs.journals'}}</a>
     <a class="item" data-tab="tables"><i class="fas fa-th-list"></i> {{localize 'SCENE-PACKER.exporter.tabs.tables'}}</a>
+    {{#if supportsCards}}<a class="item" data-tab="cards"><i class="fas fa-id-badge"></i> {{localize 'SCENE-PACKER.exporter.tabs.cards'}}</a>{{/if}}
     <a class="item" data-tab="playlists"><i class="fas fa-music"></i> {{localize 'SCENE-PACKER.exporter.tabs.playlists'}}</a>
     <a class="item" data-tab="macros"><i class="fas fa-plug"></i> {{localize 'SCENE-PACKER.exporter.tabs.macros'}}</a>
     <a class="item" data-tab="options"><i class="fas fa-cogs"></i> {{localize 'SCENE-PACKER.exporter.tabs.options'}}</a>
@@ -158,6 +159,26 @@
           {{> folderPartial folder=f user=../user}}
         {{/each}}
         {{#each playlists.tree.content}}
+          {{> entityPartial}}
+        {{/each~}}
+      </ol>
+    </div>
+
+    <div id="scene-packer-exporter-tab-cards" class="tab" data-tab="cards" data-group="sections">
+      <header class="directory-header">
+        <div class="header-search flexrow">
+          <i class="fas fa-search"></i>
+          <input type="text" name="search" value="" placeholder="{{localize 'SCENE-PACKER.exporter.search.cards'}}" autocomplete="off"/>
+          <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="1"><i class="fas fa-check-square"></i></a>
+          <a class="header-control collapse-all" title="{{localize 'FOLDER.Collapse'}}"><i class="fas fa-sort-amount-up"></i></a>
+        </div>
+      </header>
+
+      <ol class="directory-list" data-entity="Cards">
+        {{~#each cards.tree.children as |f fi|}}
+          {{> folderPartial folder=f user=../user}}
+        {{/each}}
+        {{#each cards.tree.content}}
           {{> entityPartial}}
         {{/each~}}
       </ol>

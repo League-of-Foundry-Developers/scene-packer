@@ -209,6 +209,10 @@ export default class MoulinetteImporter extends FormApplication {
       this.packInfo['data/RollTable.json'],
       game.tables,
     );
+    const cardData = await this.fetchDataIfMissing(
+      this.packInfo['data/RollTable.json'],
+      game.tables,
+    ) || [];
     const availableDocuments = {
       actors: actorData,
       journals: journalData,
@@ -217,7 +221,7 @@ export default class MoulinetteImporter extends FormApplication {
       macros: macroData,
       playlists: playlistData,
       rollTables: rollTableData,
-      cards: [], // TODO Add cards
+      cards: cardData,
     };
 
     let sourceReference;
@@ -453,6 +457,28 @@ export default class MoulinetteImporter extends FormApplication {
           })}</p>`,
         });
         await Playlist.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
+      }
+    }
+
+    if (cardData.length) {
+      const filteredData = this.filterData(cardData, relatedData, 'Cards', sourceReference);
+      if (filteredData.length) {
+        ScenePacker.logType(
+          this.scenePackerInfo.name,
+          'info',
+          true,
+          game.i18n.format('SCENE-PACKER.importer.creating-documents', {
+            count: filteredData.length,
+            type: Cards.collectionName,
+          }),
+        );
+        await this.updateProcessStatus({
+          message: `<p>${game.i18n.format('SCENE-PACKER.importer.process-creating-data', {
+            type: Cards.collectionName,
+            count: filteredData.length,
+          })}</p>`,
+        });
+        await Cards.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
       }
     }
 

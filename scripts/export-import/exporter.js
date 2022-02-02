@@ -16,11 +16,14 @@ export default class Exporter extends FormApplication {
       return;
     }
 
+    this.supportsCards = !!CONFIG.Cards;
+
     this.Scene = this.initialize('Scene');
     this.Actor = this.initialize('Actor');
     this.Item = this.initialize('Item');
     this.JournalEntry = this.initialize('JournalEntry');
     this.RollTable = this.initialize('RollTable');
+    this.Cards = this.initialize('Cards');
     this.Playlist = this.initialize('Playlist');
     this.Macro = this.initialize('Macro');
     this.selected = [];
@@ -29,7 +32,7 @@ export default class Exporter extends FormApplication {
 
   initialize(type) {
     const folders = game.folders.filter((f) => f.type === type);
-    const documents = game.collections.get(type).filter((e) => e.visible);
+    const documents = game.collections.get(type)?.filter((e) => e.visible) || [];
     return {
       folders,
       documents,
@@ -39,6 +42,44 @@ export default class Exporter extends FormApplication {
 
   /** @inheritdoc */
   static get defaultOptions() {
+    const filters = [
+      {
+        inputSelector: '#scene-packer-exporter-tab-scenes input[name="search"]',
+        contentSelector: '#scene-packer-exporter-tab-scenes .directory-list',
+      },
+      {
+        inputSelector: '#scene-packer-exporter-tab-actors input[name="search"]',
+        contentSelector: '#scene-packer-exporter-tab-actors .directory-list',
+      },
+      {
+        inputSelector: '#scene-packer-exporter-tab-items input[name="search"]',
+        contentSelector: '#scene-packer-exporter-tab-items .directory-list',
+      },
+      {
+        inputSelector: '#scene-packer-exporter-tab-journals input[name="search"]',
+        contentSelector: '#scene-packer-exporter-tab-journals .directory-list',
+      },
+      {
+        inputSelector: '#scene-packer-exporter-tab-tables input[name="search"]',
+        contentSelector: '#scene-packer-exporter-tab-tables .directory-list',
+      },
+      {
+        inputSelector: '#scene-packer-exporter-tab-playlists input[name="search"]',
+        contentSelector: '#scene-packer-exporter-tab-playlists .directory-list',
+      },
+      {
+        inputSelector: '#scene-packer-exporter-tab-macros input[name="search"]',
+        contentSelector: '#scene-packer-exporter-tab-macros .directory-list',
+      },
+    ];
+
+    if (CONFIG.Cards) {
+      filters.push({
+        inputSelector: '#scene-packer-exporter-tab-cards input[name="search"]',
+        contentSelector: '#scene-packer-exporter-tab-cards .directory-list',
+      });
+    }
+
     return mergeObject(super.defaultOptions, {
       title: game.i18n.localize('SCENE-PACKER.exporter.name'),
       id: 'scene-packer-exporter',
@@ -47,36 +88,7 @@ export default class Exporter extends FormApplication {
       height: 720,
       classes: ['scene-packer'],
       scrollY: ['ol.directory-list'],
-      filters: [
-        {
-          inputSelector: '#scene-packer-exporter-tab-scenes input[name="search"]',
-          contentSelector: '#scene-packer-exporter-tab-scenes .directory-list',
-        },
-        {
-          inputSelector: '#scene-packer-exporter-tab-actors input[name="search"]',
-          contentSelector: '#scene-packer-exporter-tab-actors .directory-list',
-        },
-        {
-          inputSelector: '#scene-packer-exporter-tab-items input[name="search"]',
-          contentSelector: '#scene-packer-exporter-tab-items .directory-list',
-        },
-        {
-          inputSelector: '#scene-packer-exporter-tab-journals input[name="search"]',
-          contentSelector: '#scene-packer-exporter-tab-journals .directory-list',
-        },
-        {
-          inputSelector: '#scene-packer-exporter-tab-tables input[name="search"]',
-          contentSelector: '#scene-packer-exporter-tab-tables .directory-list',
-        },
-        {
-          inputSelector: '#scene-packer-exporter-tab-playlists input[name="search"]',
-          contentSelector: '#scene-packer-exporter-tab-playlists .directory-list',
-        },
-        {
-          inputSelector: '#scene-packer-exporter-tab-macros input[name="search"]',
-          contentSelector: '#scene-packer-exporter-tab-macros .directory-list',
-        },
-      ],
+      filters: filters,
       tabs: [
         {
           navSelector: '.tabs',
@@ -99,12 +111,15 @@ export default class Exporter extends FormApplication {
       journals: this.JournalEntry,
       tables: this.RollTable,
       playlists: this.Playlist,
+      supportsCards: this.supportsCards,
+      cards: this.Cards,
       macros: this.Macro,
       summary: game.i18n.format('SCENE-PACKER.exporter.selected-count', {
         count:
           this.Scene.documents.length +
           this.Actor.documents.length +
           this.Item.documents.length +
+          this.Cards.documents.length +
           this.JournalEntry.documents.length +
           this.RollTable.documents.length +
           this.Playlist.documents.length +

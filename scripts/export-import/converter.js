@@ -115,9 +115,9 @@ export function ReplaceCompendiumReferences(context, documents, availableDocumen
           ],
         };
         const CardSources = (typeof Cards !== 'undefined') ? {
-          type: Card,
+          type: Cards,
           data: [
-            game[Card.collectionName],
+            game[Cards.collectionName],
             availableDocuments.cards,
           ],
         } : undefined;
