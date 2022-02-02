@@ -2713,13 +2713,13 @@ export default class ScenePacker {
       if (CONSTANTS.IsV8orNewer()) {
         matches = game.journal.contents.filter(a => {
           return (
-            a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.compendiumSourceId
+            a.id === journal.entryId || a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.compendiumSourceId
           ) && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated');
         });
       } else {
         matches = game.journal.entities.filter(a => {
           return (
-            a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.compendiumSourceId
+            a.id === journal.entryId || a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.compendiumSourceId
           ) && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated');
         });
       }
@@ -3505,7 +3505,7 @@ export default class ScenePacker {
           showUI,
         );
       } else {
-        // List all of the journals belonging to this module's packs
+        // List all the journals belonging to this module's packs
         journals = game.journal.filter(j => this.getSearchPacksForType('JournalEntry').some(p => j.getFlag('core', 'sourceId')
           ?.startsWith(`Compendium.${p}.`)));
       }
