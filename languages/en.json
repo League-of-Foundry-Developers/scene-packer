@@ -305,7 +305,8 @@
       "discord": "Discord:",
       "email": "Email:",
       "version": "Version:",
-      "more-info": "More info:"
+      "more-info": "More info:",
+      "missing-asset": "Missing asset from package data: {asset}"
     },
     "exporter": {
       "name": "Export to Moulinette",

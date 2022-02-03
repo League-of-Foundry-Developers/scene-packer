@@ -634,9 +634,18 @@ export default class MoulinetteImporter extends FormApplication {
         const folder = localAsset.substring(0, localAsset.lastIndexOf('/'));
         const filename = asset.split('/').pop();
         const newAssetLocation = `${folder}/${encodeURIComponent(filename)}`;
-        const srcURL = new URL(this.packInfo['data/assets/' + asset]);
 
         if (needsDownloading) {
+          const assetURL = this.packInfo['data/assets/' + asset];
+          if (!assetURL) {
+            ScenePacker.logType(this.scenePackerInfo.name, 'warn', true,
+              game.i18n.format('SCENE-PACKER.importer.missing-asset', {
+                error: asset,
+              }),
+            );
+            continue;
+          }
+          const srcURL = new URL(assetURL);
           if (!await game.moulinette.applications.MoulinetteFileUtil.downloadFile(srcURL, folder, filename)) {
             ScenePacker.logType(this.scenePackerInfo.name, 'error', true,
               game.i18n.format('SCENE-PACKER.exporter.progress.download-error', {
