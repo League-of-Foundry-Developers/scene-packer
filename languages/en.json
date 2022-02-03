@@ -292,6 +292,7 @@
       "invalid-url-empty": "An empty URL value was passed to the Scene Packer importer.",
       "creating-documents": "Creating {count} {type}...",
       "processing": "Processing...",
+      "be-patient": "Please be patient while the pack is imported. This can take a while. If you feel it is taking too long, check the console (F12) for errors, noting that you may need to expand the log groups.",
       "process-fetch-data": "Fetching data...",
       "process-creating-data": "Creating {count} {type} and assets...",
       "ensure-assets": "Ensuring assets exist for {count} entities.",

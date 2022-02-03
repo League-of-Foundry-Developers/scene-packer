@@ -1,5 +1,6 @@
 import AssetReport from '../asset-report.js';
-import { ExpandWildcard, IsPublic } from './file.js';
+import {IsUsingTheForge} from '../constants.js';
+import {ExpandWildcard, IsPublic, IsSystem} from './file.js';
 
 export class AssetMap {
   /**
@@ -203,6 +204,19 @@ export class AssetDetails {
      * @type {string}
      */
     this.raw = raw;
+
+    this.storagePath = this.raw;
+    // Remove the forge prefix from the storagePath.
+    if (IsUsingTheForge() && this.storagePath.startsWith(ForgeVTT.ASSETS_LIBRARY_URL_PREFIX)) {
+      this.storagePath = this.storagePath.slice(ForgeVTT.ASSETS_LIBRARY_URL_PREFIX.length);
+    }
+
+    // Remove the protocol from the storagePath.
+    if (this.storagePath.startsWith('http://') || this.storagePath.startsWith('https://')) {
+      const url = new URL(this.storagePath);
+      this.storagePath = `${url.hostname}${url.pathname}`;
+    }
+
     /**
      * The location this asset is.
      * @type {Locations}
@@ -222,6 +236,13 @@ export class AssetDetails {
      * Whether this asset is part of a System within Foundry VTT.
      * @type {boolean}
      */
-    this.isSystem = this.raw.startsWith('systems/');
+    this.isSystem = IsSystem(raw);
+  }
+
+  toJSON() {
+    // Hide the absolute url from the returned JSON as it is not needed.
+    const { absolute, ...obj } = this;
+
+    return obj;
   }
 }

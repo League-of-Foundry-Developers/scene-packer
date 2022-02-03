@@ -231,6 +231,14 @@ export const CONSTANTS = Object.freeze({
 });
 
 /**
+ * Returns whether the instance is running on the forge
+ * @return {boolean}
+ */
+export const IsUsingTheForge = () => {
+  return typeof ForgeVTT !== 'undefined' && ForgeVTT.usingTheForge;
+};
+
+/**
  * Fake Entity is used in place of a real entity, for times when operating against a real entity would throw errors.
  * @type {{update: FakeEntity.update}}
  */

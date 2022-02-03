@@ -28,4 +28,6 @@ export function ExtractRelatedRollTableData(table) {
       relatedData.AddRelation(uuid, {path: 'results', uuid: `${collection}.${resultId}`, embeddedId: result.id});
     }
   }
+
+  return relatedData;
 }

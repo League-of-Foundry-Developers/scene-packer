@@ -158,6 +158,11 @@ export default class MoulinetteImporter extends FormApplication {
       processing: true,
     });
 
+    await this.updateProcessStatus({
+      message: `<p>${game.i18n.localize('SCENE-PACKER.importer.be-patient')}</p>`,
+      processing: true,
+    });
+
     // TODO remove debugging
     console.log('sceneID', this.sceneID);
     console.log('actorID', this.actorID);
@@ -610,11 +615,13 @@ export default class MoulinetteImporter extends FormApplication {
         continue;
       }
       for (const originalAsset of assets) {
+        const assetDetails = assetData.data[originalAsset];
+        const storagePath = assetDetails ? assetDetails[0].storagePath : originalAsset;
         let needsDownloading = true;
         let needsRename = true;
 
-        const asset = decodeURIComponent(originalAsset);
-        let localAsset = `${CONSTANTS.MOULINETTE_PATH}/${adventureFolder}/${asset}`;
+        const asset = decodeURIComponent(storagePath);
+        let localAsset = `${CONSTANTS.MOULINETTE_PATH}/${adventureFolder}/${storagePath}`;
 
         if (asset.startsWith('moulinette/')) {
           needsRename = false;

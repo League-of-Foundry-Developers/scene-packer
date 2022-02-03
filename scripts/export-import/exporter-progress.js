@@ -1,6 +1,6 @@
 import {AssetMap} from '../assets/data.js';
 import {Compressor} from './compressor.js';
-import {CONSTANTS} from '../constants.js';
+import {CONSTANTS, IsUsingTheForge} from '../constants.js';
 import {Downloader} from './downloader.js';
 import {ExtractActorAssets} from '../assets/actor.js';
 import {ExtractCardAssets} from '../assets/cards.js';
@@ -122,7 +122,7 @@ export default class ExporterProgress extends FormApplication {
             totalLoaded += data.blob.size || 0;
             const assetDetails = this.assetsMap.data.get(data.url);
             dataZip
-              .AddBlobToZip(data.blob, `data/assets/${decodeURIComponent(assetDetails[0].raw)}`)
+              .AddBlobToZip(data.blob, `data/assets/${decodeURIComponent(assetDetails[0].storagePath)}`)
               .then(() => {
                 processed++;
                 updateTotalSize({
@@ -314,7 +314,7 @@ export default class ExporterProgress extends FormApplication {
         if (duration <= 0) {
           duration = 0.01;
         }
-        const bps = totalLoaded / duration;
+        const bps = Math.floor(totalLoaded / duration * 100) / 100;
 
         dataZip.Complete();
 

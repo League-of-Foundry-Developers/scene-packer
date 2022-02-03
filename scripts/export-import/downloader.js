@@ -44,7 +44,6 @@ export class Downloader {
   /**
    * Add an array of URLs
    * @param {IterableIterator<string>|string[]} urls - The URLs to add
-   * @constructor
    */
   AddURLs(urls) {
     this.urls.push(...urls);

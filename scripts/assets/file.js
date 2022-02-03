@@ -1,10 +1,11 @@
-import {CONSTANTS} from '../constants.js';
+import {CONSTANTS, IsUsingTheForge} from '../constants.js';
 
 /**
  * List of directories belonging to Core data. See FilePicker._inferCurrentDirectory
  * @type {string[]}
  */
 export const PublicDirs = [
+  'cards',
   'css',
   'fonts',
   'icons',
@@ -20,7 +21,26 @@ export const PublicDirs = [
  * @return {boolean}
  */
 export function IsPublic(target) {
+  if (IsUsingTheForge()) {
+    if (target.startsWith(`${ForgeVTT.ASSETS_LIBRARY_URL_PREFIX}bazaar/core/`)) {
+      return true;
+    }
+  }
   return PublicDirs.some((d) => target.startsWith(d));
+}
+
+/**
+ * Returns whether the requested target path is part of a system within Foundry VTT.
+ * @param {string} target - The currently requested target path
+ * @return {boolean}
+ */
+export function IsSystem(target) {
+  if (IsUsingTheForge()) {
+    if (target.startsWith(`${ForgeVTT.ASSETS_LIBRARY_URL_PREFIX}bazaar/systems/`)) {
+      return true;
+    }
+  }
+  return target.startsWith('systems/');
 }
 
 /**
@@ -30,8 +50,7 @@ export function IsPublic(target) {
  */
 export function GetFilePickerSource(target) {
   if (
-    typeof ForgeVTT !== 'undefined' &&
-    ForgeVTT.usingTheForge &&
+    IsUsingTheForge() &&
     target.startsWith(ForgeVTT.ASSETS_LIBRARY_URL_PREFIX)
   ) {
     return 'forgevtt';
