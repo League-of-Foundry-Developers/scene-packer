@@ -1,6 +1,7 @@
 import {Compressor} from './compressor.js';
 import {CONSTANTS} from '../constants.js';
 import {ReplaceCompendiumReferences} from './converter.js';
+import {UnrelatedData} from './related/unrelated-data.js';
 
 export default class MoulinetteImporter extends FormApplication {
 
@@ -182,7 +183,7 @@ export default class MoulinetteImporter extends FormApplication {
     this.scenePackerInfo = await this.fetchData(this.packInfo['mtte.json']);
     console.log('scenePackerInfo', this.scenePackerInfo); // TODO Delete this line
     const relatedData = await this.fetchData(this.packInfo['data/related-data.json']);
-    console.log('relatedData', relatedData); // TODO Delete this line
+    const unrelatedData = await this.fetchData(this.packInfo['data/unrelated-data.json']);
     const assetData = await this.fetchData(this.packInfo['data/assets.json']);
     /**
      * Track which assets have been imported
@@ -534,6 +535,76 @@ export default class MoulinetteImporter extends FormApplication {
           }
         }
         console.groupEnd();
+      }
+    }
+
+    if (unrelatedData) {
+      const unrelatedDataSheet = new UnrelatedData(unrelatedData);
+
+      for (const [type, references] of Object.entries(unrelatedData)) {
+        const dataToImport = [];
+        for (let i = references.length - 1; i >= 0; i--) {
+          const reference = references[i];
+          const [type, id] = reference.uuid.split('.');
+          const collection = CONFIG[type]?.collection?.instance;
+          const entity = collection?.get(id);
+          if (entity) {
+            unrelatedDataSheet.RemoveDocument(entity);
+            continue;
+          }
+          switch (type) {
+            case 'Actor':
+              const actor = actorData.find(a => a._id === id);
+              if (actor) {
+                dataToImport.push(actor);
+              }
+              break;
+            case 'Cards':
+              const cards = cardData.find(c => c._id === id);
+              if (cards) {
+                dataToImport.push(cards);
+              }
+              break;
+            case 'Item':
+              const item = itemData.find(i => i._id === id);
+              if (item) {
+                dataToImport.push(item);
+              }
+              break;
+            case 'JournalEntry':
+              const journalEntry = journalData.find(j => j._id === id);
+              if (journalEntry) {
+                dataToImport.push(journalEntry);
+              }
+              break;
+            case 'Macro':
+              const macro = macroData.find(m => m._id === id);
+              if (macro) {
+                dataToImport.push(macro);
+              }
+              break;
+            case 'Playlist':
+              const playlist = playlistData.find(p => p._id === id);
+              if (playlist) {
+                dataToImport.push(playlist);
+              }
+              break;
+            case 'RollTable':
+              const rollTable = rollTableData.find(r => r._id === id);
+              if (rollTable) {
+                dataToImport.push(rollTable);
+              }
+              break;
+          }
+        }
+
+        if (dataToImport.length) {
+          await CONFIG[type].documentClass.createDocuments(dataToImport, {keepId: true});
+        }
+      }
+
+      if (unrelatedDataSheet.HasUnrelatedData()) {
+        unrelatedDataSheet.render(true, {});
       }
     }
 

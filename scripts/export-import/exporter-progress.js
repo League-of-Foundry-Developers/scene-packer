@@ -16,6 +16,7 @@ import {ExtractRollTableAssets} from '../assets/rolltable.js';
 import {ExtractSceneAssets} from '../assets/scene.js';
 import Hash from '../hash.js';
 import {RelatedData} from './related/related-data.js';
+import {UnrelatedData} from './related/unrelated-data.js';
 
 export default class ExporterProgress extends FormApplication {
   constructor({
@@ -44,6 +45,7 @@ export default class ExporterProgress extends FormApplication {
     this.domParser = new DOMParser();
     this.assetsMap = new AssetMap();
     this.relatedData = new RelatedData();
+    this.unrelatedData = new UnrelatedData();
     this.totalSize = 0;
     this.speed = 0;
   }
@@ -178,6 +180,11 @@ export default class ExporterProgress extends FormApplication {
             ids.includes(s.id),
           );
 
+          if (type !== 'Scene') {
+            // Add all documents by default as unrelated, later on remove those that have relations.
+            this.unrelatedData.AddDocuments(documents);
+          }
+
           exportedDocumentCount[type] = documents.length;
 
           const out = documents.map((d) => (d.toJSON ? d.toJSON() : d)) || [];
@@ -238,7 +245,11 @@ export default class ExporterProgress extends FormApplication {
               case 'Scene':
                 assetData = await ExtractSceneAssets(document);
                 this.assetsMap.AddAssets(assetData.assets);
-                this.relatedData.AddRelatedData(ExtractRelatedSceneData(document));
+                const relatedData = ExtractRelatedSceneData(document);
+                this.relatedData.AddRelatedData(relatedData);
+
+                // Stop tracking data that is related to the scene.
+                this.unrelatedData.RemoveRelations(relatedData.GetRelatedData());
 
                 // Add thumbnails to dataZip
                 if (document.data.thumb?.startsWith('data:')) {
@@ -307,6 +318,7 @@ export default class ExporterProgress extends FormApplication {
 
         dataZip.AddToZip(this.assetsMap, 'data/assets.json');
         dataZip.AddToZip(this.relatedData, 'data/related-data.json');
+        dataZip.AddToZip(this.unrelatedData, 'data/unrelated-data.json');
         this.exporterData = this.exporterData || {};
         this.exporterData.counts = exportedDocumentCount;
         dataZip.AddToZip(this.exporterData, `${filename}.json`);

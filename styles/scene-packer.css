@@ -171,8 +171,19 @@
   }
 }
 
-#scene-packer-importer footer {
+#scene-packer-importer footer,
+#scene-packer-importer-unrelated-data footer{
   margin-top: 5px;
   border-top: 1px solid #7a7971;
   padding-top: 5px;
+}
+
+#scene-packer-importer-unrelated-data .content {
+  height: 585px;
+  user-select: text;
+  overflow: hidden auto;
+}
+
+#scene-packer-importer-unrelated-data .content a.entity-link {
+  line-height: 1.6em;
 }

@@ -79,6 +79,31 @@ export class RelatedData {
     set.add(relation);
   }
 
+  /**
+   * Gets the related data for the given source.
+   * If no source is provided, all data related to any source is returned.
+   * @param {string?} source - Source UUID.
+   * @return {Relation[]}
+   */
+  GetRelatedData(source) {
+    if (!source) {
+      const relatedData = new Set();
+      for (const [, targets] of this.data) {
+        for (const target of targets) {
+          relatedData.add(target);
+        }
+      }
+
+      return Array.from(relatedData);
+    }
+
+    if (!this.data.has(source)) {
+      return [];
+    }
+
+    return Array.from(this.data.get(source));
+  }
+
   toJSON() {
     // Convert the mapping set into an array so that it can be JSON encoded.
     const response = new Map();

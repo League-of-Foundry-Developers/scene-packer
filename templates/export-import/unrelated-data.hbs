@@ -1,0 +1,29 @@
+{{#*inline "entityPartial"}}
+  <h2>{{type}}</h2>
+  <div>
+    {{#each entries}}
+      <a class="entity-link content-link" data-type="{{this.type}}" data-entity="{{this.type}}" data-id="{{this.id}}">{{this.name}}</a><br>
+    {{/each}}
+  </div>
+{{/inline}}
+
+<form autocomplete="off">
+  <section class="content">
+    <h1>{{localize "SCENE-PACKER.importer.unrelated-title"}}</h1>
+    <p>
+      {{localize "SCENE-PACKER.importer.unrelated-intro"}}
+    </p>
+    <hr>
+    {{#each data as |entries type|}}
+      {{#if entries}}
+        {{> entityPartial entries=entries type=type}}
+      {{/if}}
+    {{/each}}
+  </section>
+
+  <footer class="app-footer flexrow">
+    <button type="button" name="close">
+      <i class="fas fa-times"></i> {{localize 'Close'}}
+    </button>
+  </footer>
+</form>
