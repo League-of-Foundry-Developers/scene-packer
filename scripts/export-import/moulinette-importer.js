@@ -613,7 +613,7 @@ export default class MoulinetteImporter extends FormApplication {
         }
 
         if (dataToImport.length) {
-          await CONFIG[type].documentClass.createDocuments(dataToImport, {keepId: true});
+          await CONFIG[type].documentClass.createDocuments(await this.ensureAssets(dataToImport, assetMap, assetData), {keepId: true});
         }
       }
 
