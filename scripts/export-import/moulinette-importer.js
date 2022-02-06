@@ -100,14 +100,28 @@ export default class MoulinetteImporter extends FormApplication {
       coverImage = this.packInfo[`data/cover/cover.${coverImageExtension}`];
     }
 
+    let previewImage = '';
+    if (this.sceneID) {
+      previewImage = this.packInfo[`data/scenes/thumbs/${this.sceneID}.png`];
+    }
+
     let totalPackCount = '';
     if (this.scenePackerInfo?.counts) {
       totalPackCount = Object.values(this.scenePackerInfo.counts).reduce((a, b) => a + b, 0).toLocaleString();
     }
 
+    let selectedEntity = '';
+    if (this.sceneID && this.scenePackerInfo?.scenes) {
+      selectedEntity = this.scenePackerInfo.scenes.find(scene => scene.id === this.sceneID)?.name;
+    } else if (this.actorID && this.scenePackerInfo?.actors) {
+      selectedEntity = this.scenePackerInfo.actors.find(actor => actor.id === this.actorID)?.name;
+    }
+
     return {
       loading: this.loading,
       pack: this.scenePackerInfo,
+      selectedEntity: selectedEntity,
+      previewImage: previewImage,
       totalPackCount: totalPackCount,
       processing: this.processing,
       processingMessage: this.processingMessage,

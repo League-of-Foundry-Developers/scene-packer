@@ -31,11 +31,23 @@
         <img src="{{coverImage}}" alt="{{pack.name}}">
       </div>
     {{/if}}
-    <h3>{{pack.name}}</h3>
+    <h2>{{pack.name}}</h2>
     {{#if pack.description}}
       <div class="description">
         {{{pack.description}}}
       </div>
+    {{/if}}
+    <div><hr></div>
+    {{#if selectedEntity}}
+      <h3>{{localize "SCENE-PACKER.importer.selected-entity" type=importType}}</h3>
+    {{/if}}
+    {{#if previewImage}}
+      <div class="preview-image">
+        <img src="{{previewImage}}" alt="{{pack.name}}">
+      </div>
+    {{/if}}
+    {{#if selectedEntity}}
+      <h4>{{selectedEntity}}</h4>
     {{/if}}
     <p>
       {{localize "SCENE-PACKER.importer.version"}} {{pack.version}}
@@ -43,16 +55,6 @@
     <p>
       {{localize "SCENE-PACKER.importer.author"}} {{pack.author}}
     </p>
-    {{#if pack.email}}
-      <p>
-        {{localize "SCENE-PACKER.importer.email"}} <a href="mailto:{{pack.email}}">{{pack.email}}</a>
-      </p>
-    {{/if}}
-    {{#if pack.discordId}}
-      <p class="text-select">
-      {{localize "SCENE-PACKER.importer.discord"}} {{pack.discordId}}
-      </p>
-    {{/if}}
     {{#if pack.external_link}}
       <p>
         {{localize "SCENE-PACKER.importer.more-info"}} <a href="{{pack.external_link}}" target="_blank">{{pack.external_link}}</a>
@@ -68,7 +70,7 @@
     <button type="submit" name="import-one" value="1" {{#if loading}}disabled{{/if}}>
       <i class="fas fa-check"></i> {{localize 'SCENE-PACKER.importer.import-one'}} {{importType}}
     </button>
-    <button type="button" name="close">
+    <button type="button" name="close" style="flex:0.5">
       <i class="fas fa-times"></i> {{localize 'Cancel'}}
     </button>
   </footer>
