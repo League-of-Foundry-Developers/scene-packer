@@ -300,7 +300,7 @@
       "converting-reference": "Converting {type} reference in \"{name}\" {oldRef} -> {newRef} at location: {path}",
       "no-existing-value": "Could not find existing value at path \"{path}\". Skipping updating reference...",
       "complete": "Complete!",
-      "import-all": "Import all",
+      "import-all": "Import all {count} entities",
       "import-one": "Import selected",
       "author": "Author:",
       "discord": "Discord:",

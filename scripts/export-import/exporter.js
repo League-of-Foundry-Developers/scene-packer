@@ -435,6 +435,10 @@ export class ExporterData {
     this.discordId = discordId;
     this.allow_complete_import = allowCompleteImport;
     this.welcome_journal = welcomeJournal;
+    /**
+     * @type {Object<string, number>}
+     */
+    this.counts = {};
   }
 
   /**

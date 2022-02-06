@@ -68,20 +68,21 @@ export default class ExporterProgress extends FormApplication {
         dataZip = new Compressor(`${filename}-data.zip`);
         // Add an empty info file for Moulinette to detect that this is a Scene Packer module
         dataZip.AddStringToZip('', 'scene-packer.info');
-        if (this.exporterData) {
-          dataZip.AddToZip(this.exporterData, `${filename}.json`);
-          if (this.exporterData.cover_image) {
-            await dataZip.AddFileURLToZip(
-              this.exporterData.cover_image,
-              `data/cover/cover.${new URL(
-                this.exporterData.cover_image,
-                window.location.href,
-              ).pathname
-                .split('.')
-                .pop()}`,
-            );
-          }
-        }
+
+        /**
+         * The number of each document type that is exported. Used by the importer to display counts.
+         * @type {Object<string, number>}
+         */
+        const exportedDocumentCount = {
+          Actor: 0,
+          Cards: 0,
+          Item: 0,
+          JournalEntry: 0,
+          Macro: 0,
+          Playlist: 0,
+          RollTable: 0,
+          Scene: 0,
+        };
 
         const updateTotalSize = (status) => {
           this._updateStatus({
@@ -175,6 +176,7 @@ export default class ExporterProgress extends FormApplication {
           const documents = CONFIG[type].collection.instance.filter((s) =>
             ids.includes(s.id),
           );
+          exportedDocumentCount[type] = documents.length;
           const out = documents.map((d) => (d.toJSON ? d.toJSON() : d)) || [];
           dataZip.AddToZip(out, `data/${type}.json`);
           updateTotalSize({
@@ -296,6 +298,20 @@ export default class ExporterProgress extends FormApplication {
 
         dataZip.AddToZip(this.assetsMap, 'data/assets.json');
         dataZip.AddToZip(this.relatedData, 'data/related-data.json');
+        this.exporterData = this.exporterData || {};
+        this.exporterData.counts = exportedDocumentCount;
+        dataZip.AddToZip(this.exporterData, `${filename}.json`);
+        if (this.exporterData.cover_image) {
+          await dataZip.AddFileURLToZip(
+            this.exporterData.cover_image,
+            `data/cover/cover.${new URL(
+              this.exporterData.cover_image,
+              window.location.href,
+            ).pathname
+              .split('.')
+              .pop()}`,
+          );
+        }
         updateTotalSize();
 
         // TODO prompt for which modules images should be extracted from

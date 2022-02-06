@@ -99,9 +99,15 @@ export default class MoulinetteImporter extends FormApplication {
       coverImage = this.packInfo[`data/cover/cover.${coverImageExtension}`];
     }
 
+    let totalPackCount = '';
+    if (this.scenePackerInfo?.counts) {
+      totalPackCount = Object.values(this.scenePackerInfo.counts).reduce((a, b) => a + b, 0).toLocaleString();
+    }
+
     return {
       loading: this.loading,
       pack: this.scenePackerInfo,
+      totalPackCount: totalPackCount,
       processing: this.processing,
       processingMessage: this.processingMessage,
       importType: this.importType,

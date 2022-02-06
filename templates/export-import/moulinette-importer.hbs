@@ -63,7 +63,7 @@
 
   <footer class="app-footer flexrow">
     <button type="submit" name="import-all" value="1" {{#if loading}}disabled{{/if}}>
-      <i class="fas fa-check-double"></i> {{localize 'SCENE-PACKER.importer.import-all'}}
+      <i class="fas fa-check-double"></i> {{localize 'SCENE-PACKER.importer.import-all' count=totalPackCount}}
     </button>
     <button type="submit" name="import-one" value="1" {{#if loading}}disabled{{/if}}>
       <i class="fas fa-check"></i> {{localize 'SCENE-PACKER.importer.import-one'}} {{importType}}
