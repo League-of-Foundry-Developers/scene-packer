@@ -25,6 +25,11 @@ export default class Hash {
       delete data.flags['scene-packer'].hash;
     }
 
+    if (data._id) {
+      // Don't include an existing id in the hash
+      delete data._id;
+    }
+
     return SHA1.hex(stringify(data, {cycles: true}));
   }
 }

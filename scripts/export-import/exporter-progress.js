@@ -1,6 +1,6 @@
 import {AssetMap} from '../assets/data.js';
 import {Compressor} from './compressor.js';
-import {CONSTANTS, IsUsingTheForge} from '../constants.js';
+import {CONSTANTS} from '../constants.js';
 import {Downloader} from './downloader.js';
 import {ExtractActorAssets} from '../assets/actor.js';
 import {ExtractCardAssets} from '../assets/cards.js';
@@ -14,6 +14,7 @@ import {ExtractRelatedJournalData} from './related/journals.js';
 import {ExtractRelatedSceneData} from './related/scene.js';
 import {ExtractRollTableAssets} from '../assets/rolltable.js';
 import {ExtractSceneAssets} from '../assets/scene.js';
+import Hash from '../hash.js';
 import {RelatedData} from './related/related-data.js';
 
 export default class ExporterProgress extends FormApplication {
@@ -176,8 +177,16 @@ export default class ExporterProgress extends FormApplication {
           const documents = CONFIG[type].collection.instance.filter((s) =>
             ids.includes(s.id),
           );
+
           exportedDocumentCount[type] = documents.length;
+
           const out = documents.map((d) => (d.toJSON ? d.toJSON() : d)) || [];
+          for (const document of out) {
+            const hash = Hash.SHA1(document);
+            setProperty(document, 'flags.scene-packer.hash', hash);
+            setProperty(document, 'flags.scene-packer.moulinette-adventure-name', this.packageName);
+            setProperty(document, 'flags.scene-packer.moulinette-adventure-version', this.exporterData?.version || '1.0.0');
+          }
           dataZip.AddToZip(out, `data/${type}.json`);
           updateTotalSize({
             message: `<p>${game.i18n.format(
