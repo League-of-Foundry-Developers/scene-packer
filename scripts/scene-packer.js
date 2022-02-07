@@ -2663,13 +2663,13 @@ export default class ScenePacker {
       if (CONSTANTS.IsV8orNewer()) {
         matches = game.actors.contents.filter(a => {
           return (
-            a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === token.sourceId || a.getFlag('core', 'sourceId') === token.sourceId
+            a.uuid === token.sourceId || a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === token.sourceId || a.getFlag('core', 'sourceId') === token.sourceId
           ) && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated');
         });
       } else {
         matches = game.actors.entities.filter(a => {
           return (
-            a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === token.sourceId || a.getFlag('core', 'sourceId') === token.sourceId
+            a.uuid === token.sourceId || a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === token.sourceId || a.getFlag('core', 'sourceId') === token.sourceId
           ) && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated');
         });
       }
