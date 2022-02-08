@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.28
+
+- Fixed issue where an Actor, JournalEntry or Macro would incorrectly show as missing in the original source world due to data flags not existing on the source document.
+
 ## v2.3.27
 
 - Updated macro `Clean up #[CF_tempEntity] entries` to support deleting the CF entities from compendiums.
