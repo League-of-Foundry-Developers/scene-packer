@@ -78,7 +78,7 @@ export async function ExtractActorAssets(actor) {
   }
 
   for (const effect of effects) {
-    const img = effect?.data?.img || effect?.icon;
+    const img = effect?.data?.img;
     if (img) {
       await data.AddAsset({
         id: effect.id,
@@ -88,6 +88,18 @@ export async function ExtractActorAssets(actor) {
         documentType: effect.documentName || 'ActiveEffect',
         location: AssetReport.Locations.ActorEffectImage,
         asset: img,
+      });
+    }
+    const icon = effect?.data?.img || effect?.data?.icon;
+    if (icon) {
+      await data.AddAsset({
+        id: effect.id,
+        key: 'icon',
+        parentID: actor.id,
+        parentType: actor.documentName,
+        documentType: effect.documentName || 'ActiveEffect',
+        location: AssetReport.Locations.ActorEffectImage,
+        asset: icon,
       });
     }
   }
