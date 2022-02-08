@@ -805,6 +805,7 @@ export default class MoulinetteImporter extends FormApplication {
    * @return {object[]} - The filtered data.
    */
   filterData(data, allRelatedData, type, sourceReference) {
+    // TODO Handle the case where the document already exists in the world to support updating/replacing.
     if (!sourceReference || !allRelatedData[sourceReference]) {
       return data;
     }
