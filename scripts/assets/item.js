@@ -43,7 +43,7 @@ export async function ExtractItemAssets(item) {
   }
 
   for (const effect of effects) {
-    const img = effect?.data?.img || effect?.icon;
+    const img = effect?.data?.img;
     if (img) {
       await data.AddAsset({
         id: effect.id,
@@ -53,6 +53,18 @@ export async function ExtractItemAssets(item) {
         documentType: effect.documentName || 'ActiveEffect',
         location: AssetReport.Locations.ItemEffectImage,
         asset: img,
+      });
+    }
+    const icon = effect?.data?.icon;
+    if (icon) {
+      await data.AddAsset({
+        id: effect.id,
+        key: 'effect.icon',
+        parentID: item.id,
+        parentType: item.documentName,
+        documentType: effect.documentName || 'ActiveEffect',
+        location: AssetReport.Locations.ItemEffectImage,
+        asset: icon,
       });
     }
   }
