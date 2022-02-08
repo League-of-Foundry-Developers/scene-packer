@@ -2690,13 +2690,13 @@ export default class ScenePacker {
       if (!isNewerVersion('0.8.0', game.data.version)) {
         matches = game.actors.contents.filter(a => {
           return (
-            a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === token.sourceId || a.getFlag('core', 'sourceId') === token.sourceId
+            a.uuid === token.sourceId || a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === token.sourceId || a.getFlag('core', 'sourceId') === token.sourceId
           ) && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated');
         });
       } else {
         matches = game.actors.entities.filter(a => {
           return (
-            a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === token.sourceId || a.getFlag('core', 'sourceId') === token.sourceId
+            a.uuid === token.sourceId || a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === token.sourceId || a.getFlag('core', 'sourceId') === token.sourceId
           ) && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated');
         });
       }
@@ -2740,13 +2740,13 @@ export default class ScenePacker {
       if (!isNewerVersion('0.8.0', game.data.version)) {
         matches = game.journal.contents.filter(a => {
           return (
-            a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.compendiumSourceId
+            a.uuid === journal.sourceId || a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.compendiumSourceId
           ) && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated');
         });
       } else {
         matches = game.journal.entities.filter(a => {
           return (
-            a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.compendiumSourceId
+            a.uuid === journal.sourceId || a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.compendiumSourceId
           ) && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated');
         });
       }
