@@ -2713,13 +2713,13 @@ export default class ScenePacker {
       if (CONSTANTS.IsV8orNewer()) {
         matches = game.journal.contents.filter(a => {
           return (
-            a.id === journal.entryId || a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.compendiumSourceId
+            a.uuid === journal.sourceId || a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.compendiumSourceId
           ) && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated');
         });
       } else {
         matches = game.journal.entities.filter(a => {
           return (
-            a.id === journal.entryId || a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.compendiumSourceId
+            a.uuid === journal.sourceId || a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.sourceId || a.getFlag('core', 'sourceId') === journal.compendiumSourceId
           ) && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated');
         });
       }

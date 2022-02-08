@@ -23,7 +23,11 @@
   - `ScenePacker.importMoulinetteComplete` - Called after entities in a pack from Moulinette have been imported.
     - `Hooks.on("ScenePacker.importMoulinetteComplete", (data) => { const {sceneID, actorID, info} = data; })`
   - `ScenePacker.sceneUnpacked` - Called after a scene has been unpacked.
-    - `Hooks.on("ScenePacker.sceneUnpacked", (data) => { const {scene, moduleName, adventureName, instance} = data; })` 
+    - `Hooks.on("ScenePacker.sceneUnpacked", (data) => { const {scene, moduleName, adventureName, instance} = data; })`
+
+## v2.3.28
+
+- Fixed issue where an Actor, JournalEntry or Macro would incorrectly show as missing in the original source world due to data flags not existing on the source document.
 
 ## v2.3.27
 
