@@ -31,6 +31,7 @@ export default class MoulinetteImporter extends FormApplication {
       return;
     }
 
+    this.folderData = {};
     this.packInfo = packInfo;
     this.sceneID = sceneID;
     this.actorID = actorID;
@@ -189,8 +190,6 @@ export default class MoulinetteImporter extends FormApplication {
     console.log('actorID', this.actorID);
     console.log('packInfo', this.packInfo);
 
-    const restrictFolderIDS = [];
-
     await this.updateProcessStatus({
       message: `<p>${game.i18n.localize('SCENE-PACKER.importer.process-fetch-data')}</p>`,
     });
@@ -199,6 +198,7 @@ export default class MoulinetteImporter extends FormApplication {
     const relatedData = await this.fetchData(this.packInfo['data/related-data.json']);
     const unrelatedData = await this.fetchData(this.packInfo['data/unrelated-data.json']);
     const assetData = await this.fetchData(this.packInfo['data/assets.json']);
+    this.folderData = await this.fetchData(this.packInfo['data/folders.json']);
     /**
      * Track which assets have been imported
      * @type {Map<string, boolean>}
@@ -253,23 +253,10 @@ export default class MoulinetteImporter extends FormApplication {
     let sourceReference;
     if (this.sceneID) {
       sourceReference = `Scene.${this.sceneID}`;
-      const scene = sceneData.find((s) => s._id === this.sceneID);
-      if (scene?.data?.folder) {
-        restrictFolderIDS.push(scene.data.folder);
-      }
     }
     if (this.actorID) {
       sourceReference = `Actor.${this.actorID}`;
-      const actor = actorData.find((a) => a._id === this.actorID);
-      if (actor?.data?.folder) {
-        restrictFolderIDS.push(actor.data.folder);
-      }
     }
-
-    await this.importFolders(
-      this.packInfo['data/folders.json'],
-      restrictFolderIDS,
-    );
 
     if (sceneData.length) {
       const filteredData = this.filterData(sceneData, relatedData, 'Scene', sourceReference);
@@ -289,7 +276,12 @@ export default class MoulinetteImporter extends FormApplication {
             count: filteredData.length,
           })}</p>`,
         });
-        const created = await Scene.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
+        const documents = await this.ensureAssets(filteredData, assetMap, assetData);
+        const folderIDs = documents.map(d => d.folder);
+        if (folderIDs.length) {
+          await this.createFolders(folderIDs);
+        }
+        const created = await Scene.createDocuments(documents, {keepId: true});
         for (const id of created.map(s => s.id)) {
           const scene = game.scenes.get(id);
           if (!scene) {
@@ -329,7 +321,12 @@ export default class MoulinetteImporter extends FormApplication {
             count: filteredData.length,
           })}</p>`,
         });
-        const created = await Actor.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
+        const documents = await this.ensureAssets(filteredData, assetMap, assetData);
+        const folderIDs = documents.map(d => d.folder);
+        if (folderIDs.length) {
+          await this.createFolders(folderIDs);
+        }
+        const created = await Actor.createDocuments(documents, {keepId: true});
 
         // Check for compendium references within the actors and update them to local world references
         console.groupCollapsed(game.i18n.format('SCENE-PACKER.importer.converting-references', {
@@ -389,7 +386,12 @@ export default class MoulinetteImporter extends FormApplication {
             count: filteredData.length,
           })}</p>`,
         });
-        const created = await JournalEntry.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
+        const documents = await this.ensureAssets(filteredData, assetMap, assetData);
+        const folderIDs = documents.map(d => d.folder);
+        if (folderIDs.length) {
+          await this.createFolders(folderIDs);
+        }
+        const created = await JournalEntry.createDocuments(documents, {keepId: true});
         if (this.scenePackerInfo?.welcome_journal) {
           if (created.find(j => j.id === this.scenePackerInfo.welcome_journal)) {
             didCreateWelcomeJournal = true;
@@ -427,7 +429,12 @@ export default class MoulinetteImporter extends FormApplication {
             count: filteredData.length,
           })}</p>`,
         });
-        const created = await Item.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
+        const documents = await this.ensureAssets(filteredData, assetMap, assetData);
+        const folderIDs = documents.map(d => d.folder);
+        if (folderIDs.length) {
+          await this.createFolders(folderIDs);
+        }
+        const created = await Item.createDocuments(documents, {keepId: true});
 
         // Check for compendium references within the items and update them to local world references
         console.groupCollapsed(game.i18n.format('SCENE-PACKER.importer.converting-references', {
@@ -460,7 +467,12 @@ export default class MoulinetteImporter extends FormApplication {
             count: filteredData.length,
           })}</p>`,
         });
-        await Macro.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
+        const documents = await this.ensureAssets(filteredData, assetMap, assetData);
+        const folderIDs = documents.map(d => d.folder);
+        if (folderIDs.length) {
+          await this.createFolders(folderIDs);
+        }
+        await Macro.createDocuments(documents, {keepId: true});
       }
     }
 
@@ -482,7 +494,12 @@ export default class MoulinetteImporter extends FormApplication {
             count: filteredData.length,
           })}</p>`,
         });
-        await Playlist.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
+        const documents = await this.ensureAssets(filteredData, assetMap, assetData);
+        const folderIDs = documents.map(d => d.folder);
+        if (folderIDs.length) {
+          await this.createFolders(folderIDs);
+        }
+        await Playlist.createDocuments(documents, {keepId: true});
       }
     }
 
@@ -504,7 +521,12 @@ export default class MoulinetteImporter extends FormApplication {
             count: filteredData.length,
           })}</p>`,
         });
-        await Cards.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
+        const documents = await this.ensureAssets(filteredData, assetMap, assetData);
+        const folderIDs = documents.map(d => d.folder);
+        if (folderIDs.length) {
+          await this.createFolders(folderIDs);
+        }
+        await Cards.createDocuments(documents, {keepId: true});
       }
     }
 
@@ -526,7 +548,12 @@ export default class MoulinetteImporter extends FormApplication {
             count: filteredData.length,
           })}</p>`,
         });
-        const created = await RollTable.createDocuments(await this.ensureAssets(filteredData, assetMap, assetData), {keepId: true});
+        const documents = await this.ensureAssets(filteredData, assetMap, assetData);
+        const folderIDs = documents.map(d => d.folder);
+        if (folderIDs.length) {
+          await this.createFolders(folderIDs);
+        }
+        const created = await RollTable.createDocuments(documents, {keepId: true});
 
         // Check for compendium references within the roll tables and update them to local world references
         console.groupCollapsed(game.i18n.format('SCENE-PACKER.importer.converting-references', {
@@ -613,7 +640,12 @@ export default class MoulinetteImporter extends FormApplication {
         }
 
         if (dataToImport.length) {
-          await CONFIG[type].documentClass.createDocuments(await this.ensureAssets(dataToImport, assetMap, assetData), {keepId: true});
+          const documents = await this.ensureAssets(dataToImport, assetMap, assetData);
+          const folderIDs = documents.map(d => d.folder);
+          if (folderIDs.length) {
+            await this.createFolders(folderIDs);
+          }
+          await CONFIG[type].documentClass.createDocuments(documents, {keepId: true});
         }
       }
 
@@ -633,8 +665,6 @@ export default class MoulinetteImporter extends FormApplication {
     }
 
     // TODO Support running macros at the end of the import process
-
-    // TODO Potentially prompt for importing documents that are not related to scenes. These cannot be imported unless the Import All option is used.
 
     await this.updateProcessStatus({
       message: `<p>${game.i18n.localize('SCENE-PACKER.importer.complete')}</p>`,
@@ -849,23 +879,14 @@ export default class MoulinetteImporter extends FormApplication {
   }
 
   /**
-   * Downloads the JSON data for the given URL and creates the folders within the world.
-   * @param {RequestInfo} url - The URL to the folder JSON.
-   * @param {string[]} limitToParentsOfIDs - Optional. Only import folders that are parents of the given IDs.
+   * Creates the folders within the world.
+   * @param {string[]} folderIDs - Optional. Only import folders that are parents of the given IDs.
    */
-  async importFolders(url, limitToParentsOfIDs = []) {
-    const response = await Compressor.FetchWithTimeout(url, {timeout: 60000});
-    if (!response.ok) {
-      throw game.i18n.format('SCENE-PACKER.importer.invalid-url', {
-        url,
-        err: response.statusText,
-      });
-    }
-    const folderData = await response.json();
+  async createFolders(folderIDs = []) {
     let toImport = {};
 
-    const addValueAndParents = function (id) {
-      const value = folderData[id];
+    const addValueAndParents = (id) => {
+      const value = this.folderData[id];
       if (!value) {
         return;
       }
@@ -875,12 +896,12 @@ export default class MoulinetteImporter extends FormApplication {
       }
     };
 
-    if (limitToParentsOfIDs.length) {
-      for (const limitToParentsOfID of limitToParentsOfIDs) {
-        addValueAndParents(limitToParentsOfID);
+    if (folderIDs.length) {
+      for (const folderID of folderIDs) {
+        addValueAndParents(folderID);
       }
     } else {
-      toImport = folderData;
+      toImport = this.folderData;
     }
 
     /**
@@ -910,8 +931,8 @@ export default class MoulinetteImporter extends FormApplication {
         // Folder has already been imported
         continue;
       }
-      if (!entry.parent || createData.some((e) => e._id === entry.parent)) {
-        // Entry has no parent, or the parent is already added
+      if (!entry.parent || createData.some((e) => e._id === entry.parent) || (entry.parent && game.folders.has(entry.parent))) {
+        // Entry has no parent, or the parent is already added, or the parent already exists in the world
         createData.push(entry);
 
         processBuffer(entry._id);
