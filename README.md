@@ -29,9 +29,9 @@ Scene Packer is system agnostic, it doesn't matter whether you're packaging up a
 
 I have put together a site to help build your first module (with or without Scene Packer integration). It takes all of the guess work out of creating your first module, and in a lot of cases means that you don't have to do anything in a text-editor. Simply fill in the form and download your ready-to-go module zip file. https://sneat.github.io/scene-packer-module-generator/
 
-There is also a how to tutorial video which you can follow along with:
+There is also a how to tutorial video which you can follow along with (and is _highly recommended_):
 
-[![Asset Report](http://img.youtube.com/vi/cG6qtoZPczI/0.jpg)](https://www.youtube.com/watch?v=cG6qtoZPczI "Scene Packer - How to convert a World to a Module (The Sky Isles)")
+[![Scene Packer - How to convert a World to a Module (The Sky Isles)](http://img.youtube.com/vi/cG6qtoZPczI/0.jpg)](https://www.youtube.com/watch?v=cG6qtoZPczI "Scene Packer - How to convert a World to a Module (The Sky Isles)")
 
 ### Asset Report
 
@@ -177,6 +177,8 @@ This will automatically go through the Journal compendiums that belong to your m
 ## Macros
 
 There are several Macros included in the `Library: Scene Packer` compendium entry. Each macro has a comment at the top describing its purpose. It is well worth having a look at what is available there.
+
+There is even a macro there that you can use as the basis for recommending modules for use with your own module.
 
 ## Quick Encounters
 
