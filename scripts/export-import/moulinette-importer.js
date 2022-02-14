@@ -236,8 +236,8 @@ export default class MoulinetteImporter extends FormApplication {
       game.tables,
     );
     const cardData = await this.fetchDataIfMissing(
-      this.packInfo['data/RollTable.json'],
-      game.tables,
+      this.packInfo['data/Cards.json'],
+      game.cards,
     ) || [];
     const availableDocuments = {
       actors: actorData,
@@ -871,7 +871,7 @@ export default class MoulinetteImporter extends FormApplication {
       });
     }
     const data = await response.json();
-    let createData = data.filter((a) => !collection.has(a._id));
+    let createData = data.filter((a) => collection && !collection.has(a._id));
     if (onlyIDs.length) {
       createData = createData.filter((a) => onlyIDs.includes(a._id));
     }
