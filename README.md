@@ -234,6 +234,8 @@ The following libraries are utilised within the code:
 - [fast-json-stable-stringify](https://github.com/epoberezkin/fast-json-stable-stringify) (MIT License)
 - [jsHashes](https://github.com/h2non/jshashes) (BSD-3-Clause License)
 
+The green "hand truck" icon was created by [Delapouite](https://game-icons.net/1x1/delapouite/hand-truck.html).
+
 ## Support
 
 Please submit any issues via the [Bug Reporter](https://foundryvtt.com/packages/bug-reporter) module or via [GitHub Issues](https://github.com/League-of-Foundry-Developers/scene-packer/issues).
