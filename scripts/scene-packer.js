@@ -3536,7 +3536,20 @@ export default class ScenePacker {
           showUI,
         )
       }
-      await this.unpackActiveTiles(scene, tilesInfo);
+      const activeTileResponse = await this.unpackActiveTiles(ScenePacker.GetActiveTilesData(scene.data.tiles), tilesInfo);
+      if (activeTileResponse?.tilesCount && activeTileResponse?.actionsCount) {
+        this.log(
+          true,
+          game.i18n.format(
+            'SCENE-PACKER.notifications.import-entities.active-tiles-unpacked',
+            {
+              scene: scene.name,
+              tiles: activeTileResponse.tilesCount,
+              actions: activeTileResponse.actionsCount,
+            }
+          )
+        );
+      }
     }
 
     if (this.welcomeJournal && !contentPreImported) {
@@ -3652,7 +3665,7 @@ export default class ScenePacker {
 
     return tiles.filter(
       (tile) =>
-        (getProperty(tile.data, 'flags.monks-active-tiles.actions') || [])
+        (getProperty(tile.data, 'flags.monks-active-tiles.actions') || getProperty(tile, 'flags.monks-active-tiles.actions') || [])
           ?.filter(
             (a) =>
               a?.data?.macroid ||
@@ -3677,7 +3690,7 @@ export default class ScenePacker {
     const tileInfoResults = await Promise.allSettled(
       ScenePacker.GetActiveTilesData(tiles).map(async (tile) => {
         const actions = await Promise.allSettled(
-          (getProperty(tile.data, 'flags.monks-active-tiles.actions') || [])
+          (getProperty(tile.data, 'flags.monks-active-tiles.actions') || getProperty(tile, 'flags.monks-active-tiles.actions') || [])
             .filter(
               (a) => a?.data?.macroid ||
                 a?.data?.entity?.id ||
@@ -3731,7 +3744,7 @@ export default class ScenePacker {
             })
         );
         return {
-          tileID: tile.id,
+          tileID: tile.id || tile._id,
           actions: actions.filter(result => result.status === 'fulfilled').map(result => result.value),
         };
       })
@@ -3742,13 +3755,13 @@ export default class ScenePacker {
 
   /**
    * Unpacks the macros associated with Monk's Active Tiles
-   * @param {Object} scene - The scene being unpacked
+   * @param {Object[]|EmbeddedCollection} tiles - The tiles which might contain Monk's Active Tiles actions
    * @param {Object[]} tilesInfo - The tiles which contain Monk's Active Tiles data
+   * @return {Promise<{tilesCount: Number, actionsCount: Number}>}
    */
-  async unpackActiveTiles(scene, tilesInfo) {
+  async unpackActiveTiles(tiles, tilesInfo) {
     let tilesCount = 0;
     let actionsCount = 0;
-    const tiles = ScenePacker.GetActiveTilesData(scene.data.tiles);
 
     const extractEntityID = (value) => {
       const entityParts = value.split('.');
@@ -3775,13 +3788,13 @@ export default class ScenePacker {
           game.i18n.format(
             'SCENE-PACKER.notifications.import-entities.active-tiles-entity-reference-missing',
             {
-              tile: tile.id,
+              tile: tile.id || tile._id,
               ref: value,
             }
           ),
           {
             type: 'Tile',
-            id: tile.id,
+            id: tile.id || tile._id,
             action: action,
             ref: tile,
           }
@@ -3792,12 +3805,12 @@ export default class ScenePacker {
     }
 
     for (const tile of tiles) {
-      const tileInfo = tilesInfo?.find(t => t.tileID === tile.id);
+      const tileInfo = tilesInfo?.find(t => t.tileID === (tile.id || tile._id));
       if (!tileInfo) {
         continue;
       }
       let changed = false;
-      const actions = (getProperty(tile.data, 'flags.monks-active-tiles.actions') || []);
+      const actions = (getProperty(tile.data, 'flags.monks-active-tiles.actions') || getProperty(tile, 'flags.monks-active-tiles.actions') || []);
       // Unpack entity references
       for (const action of actions) {
         const compendiumSourceId = tileInfo.actions?.find(a => a.actionID === action.id)?.compendiumSourceId;
@@ -3894,23 +3907,18 @@ export default class ScenePacker {
       if (changed) {
         tilesCount++;
         let newActions = {};
-        setProperty(newActions, 'flags.monks-active-tiles.actions', actions)
-        await tile.data.update(newActions)
+        setProperty(newActions, 'flags.monks-active-tiles.actions', actions);
+        if (tile.data?.flags) {
+          await tile.data.update(newActions);
+        } else if (tile.flags) {
+          await tile.update(newActions);
+        }
       }
     }
 
-    if (tilesCount && actionsCount) {
-      this.log(
-        true,
-        game.i18n.format(
-          'SCENE-PACKER.notifications.import-entities.active-tiles-unpacked',
-          {
-            scene: scene.name,
-            tiles: tilesCount,
-            actions: actionsCount,
-          }
-        )
-      );
+    return {
+      tilesCount,
+      actionsCount
     }
   }
 
@@ -3938,7 +3946,7 @@ export default class ScenePacker {
     for (let i = 0; i < journals.length; i++) {
       const journal = journals[i];
       let quickEncounter = {};
-      const quickEncounterData = getProperty(journal.data, 'quick-encounters.quickEncounter');
+      const quickEncounterData = getProperty(journal.data, 'flags.quick-encounters.quickEncounter');
       if (!quickEncounterData) {
         continue;
       }
@@ -3951,8 +3959,15 @@ export default class ScenePacker {
         if (!quickEncounter) {
           continue;
         }
-        if (!quickEncounter.journalEntryId || !quickEncounter.journalEntryId.startsWith('Compendium.')) {
-          // Only support unpacking compendium references
+        let hasDataToChange = false;
+        if (quickEncounter.journalEntryId && quickEncounter.journalEntryId.startsWith('Compendium.')) {
+          hasDataToChange = true;
+        }
+        if (quickEncounter.savedTilesData && quickEncounter.savedTilesData.length && ScenePacker.GetActiveTilesData(quickEncounter.savedTilesData).length) {
+          hasDataToChange = true;
+        }
+
+        if (!hasDataToChange) {
           continue;
         }
       } catch (e) {
@@ -4054,6 +4069,23 @@ export default class ScenePacker {
               }
             }
           }
+        }
+      }
+
+      if (quickEncounter.savedTilesData && quickEncounter.savedTilesData.length && quickEncounter.SPTileData && quickEncounter.SPTileData.length) {
+        const activeTileResponse = await this.unpackActiveTiles(quickEncounter.savedTilesData, quickEncounter.SPTileData);
+        if (activeTileResponse?.tilesCount && activeTileResponse?.actionsCount) {
+          this.log(
+            true,
+            game.i18n.format(
+              'SCENE-PACKER.notifications.import-entities.active-tiles-unpacked',
+              {
+                scene: scene.name,
+                tiles: activeTileResponse.tilesCount,
+                actions: activeTileResponse.actionsCount,
+              }
+            )
+          );
         }
       }
 
@@ -4747,7 +4779,7 @@ export default class ScenePacker {
     }
 
     let quickEncounter = {};
-    const quickEncounterData = getProperty(journal.data, 'quick-encounters.quickEncounter');
+    const quickEncounterData = getProperty(journal.data, 'flags.quick-encounters.quickEncounter');
     if (quickEncounterData) {
       try {
         quickEncounter = JSON.parse(quickEncounterData);
@@ -4823,6 +4855,21 @@ export default class ScenePacker {
           }
         }
       }
+    }
+
+    // Update the active tile references
+    if (quickEncounter.savedTilesData) {
+      const instance = new ScenePacker({moduleName});
+      if (!instance) {
+        return;
+      }
+      quickEncounter.SPTileData = await instance.packActiveTiles(quickEncounter.savedTilesData);
+      updates.push({
+        type: 'Tile',
+        name: "Monk's Active Tile Triggers",
+        oldRef: 'N/A',
+        newRef: 'N/A',
+      });
     }
 
     if (updates.length) {
