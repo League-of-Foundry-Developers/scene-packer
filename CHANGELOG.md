@@ -7,7 +7,7 @@
   - End-users can import just the scene/s they need and all the associated assets and entities for those scenes will be automatically downloaded.
   - End-users can also import an entire adventure if the creator has enabled the option (some creators generate so much content that importing everything will slow the Foundry VTT instance down significantly).
   - Standard Moulinette features such as locking down access via Patreon tiers work.
-  - See *placeholder link* for an example of how to use the new feature.
+  - See https://www.youtube.com/watch?v=XZjuE1j_7GQ for an example of how to use the new feature.
   - This feature is still in beta, so please report any issues you find.
 - Updated wording to make it clearer when there are no modules correctly registered with Scene Packer.
   - Useful for new creators. This usually happens when you haven't quite initialised your module correctly.
