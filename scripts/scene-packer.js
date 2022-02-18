@@ -3671,6 +3671,7 @@ export default class ScenePacker {
               a?.data?.macroid ||
               a?.data?.entity?.id ||
               a?.data?.item?.id ||
+              a?.data?.location?.id ||
               a?.data?.location?.sceneId ||
               a?.data?.rolltableid
           ).length
@@ -3695,6 +3696,7 @@ export default class ScenePacker {
               (a) => a?.data?.macroid ||
                 a?.data?.entity?.id ||
                 a?.data?.item?.id ||
+                a?.data?.location?.id ||
                 a?.data?.location?.sceneId ||
                 a?.data?.rolltableid
             )
@@ -3709,15 +3711,17 @@ export default class ScenePacker {
               };
               let ref;
               if (d.data?.macroid) {
-                ref = `Macro.${d.data.macroid}`;
+                ref = d.data.macroid.startsWith('Macro.') ? d.data.macroid : `Macro.${d.data.macroid}`;
               } else if (d.data?.location?.sceneId) {
-                ref = `Scene.${d.data.location.sceneId}`;
+                ref = d.data.location.sceneId.startsWith('Scene.') ? d.data.location.sceneId : `Scene.${d.data.location.sceneId}`;
+              } else if (d.data?.location?.id) {
+                ref = d.data.location.id;
               } else if (d.data?.rolltableid) {
-                ref = `RollTable.${d.data.rolltableid}`;
-              } else if (d.data?.entity?.id) {
-                ref = d.data.entity.id;
+                ref = d.data.rolltableid.startsWith('RollTable.') ? d.data.rolltableid : `RollTable.${d.data.rolltableid}`;
               } else if (d.data?.item?.id) {
                 ref = d.data.item.id;
+              } else if (d.data?.entity?.id) {
+                ref = d.data.entity.id;
               }
               const entityParts = ref.split('.');
               if (entityParts.length < 2 ||
@@ -3851,8 +3855,25 @@ export default class ScenePacker {
             }
           }
         }
+        if (action.data?.location?.id) {
+          originalValue = action.data.location.id;
+          if (extractEntityID(originalValue)) {
+            newEntity = await findNewEntityValue(originalValue, action, tile, compendiumSourceId);
+            if (newEntity) {
+              newValue = action.data.location.id.replace(
+                extractEntityID(originalValue),
+                newEntity.id
+              );
+              if (newValue !== action.data.location.id) {
+                action.data.location.id = newValue;
+                changed = true;
+                actionsCount++;
+              }
+            }
+          }
+        }
         if (action.data?.location?.sceneId) {
-          originalValue = `Scene.${action.data.location.sceneId}`;
+          originalValue = action.data.location.sceneId.startsWith('Scene.') ? action.data.location.sceneId : `Scene.${action.data.location.sceneId}`;
           if (extractEntityID(originalValue)) {
             newEntity = await findNewEntityValue(originalValue, action, tile, compendiumSourceId);
             if (newEntity) {
@@ -3869,7 +3890,7 @@ export default class ScenePacker {
           }
         }
         if (action.data?.macroid) {
-          originalValue = `Macro.${action.data.macroid}`;
+          originalValue = action.data.macroid.startsWith('Macro.') ? action.data.macroid : `Macro.${action.data.macroid}`;
           if (extractEntityID(originalValue)) {
             newEntity = await findNewEntityValue(originalValue, action, tile, compendiumSourceId);
             if (newEntity) {
@@ -3886,7 +3907,7 @@ export default class ScenePacker {
           }
         }
         if (action.data?.rolltableid) {
-          originalValue = `RollTable.${action.data.rolltableid}`;
+          originalValue = action.data.rolltableid.startsWith('RollTable.') ? action.data.rolltableid : `RollTable.${action.data.rolltableid}`;
           if (extractEntityID(originalValue)) {
           newEntity = await findNewEntityValue(originalValue, action, tile, compendiumSourceId);
           if (newEntity) {
@@ -3918,7 +3939,7 @@ export default class ScenePacker {
 
     return {
       tilesCount,
-      actionsCount
+      actionsCount,
     }
   }
 
@@ -4074,18 +4095,13 @@ export default class ScenePacker {
 
       if (quickEncounter.savedTilesData && quickEncounter.savedTilesData.length && quickEncounter.SPTileData && quickEncounter.SPTileData.length) {
         const activeTileResponse = await this.unpackActiveTiles(quickEncounter.savedTilesData, quickEncounter.SPTileData);
-        if (activeTileResponse?.tilesCount && activeTileResponse?.actionsCount) {
-          this.log(
-            true,
-            game.i18n.format(
-              'SCENE-PACKER.notifications.import-entities.active-tiles-unpacked',
-              {
-                scene: scene.name,
-                tiles: activeTileResponse.tilesCount,
-                actions: activeTileResponse.actionsCount,
-              }
-            )
-          );
+        if (activeTileResponse?.tilesCount || activeTileResponse?.actionsCount) {
+          updates.push({
+            type: 'Tile',
+            name: "Monk's Active Tile Triggers",
+            oldRef: 'N/A',
+            newRef: 'N/A',
+          });
         }
       }
 
@@ -4778,6 +4794,11 @@ export default class ScenePacker {
       return;
     }
 
+    const instance = new ScenePacker({moduleName});
+    if (!instance) {
+      return;
+    }
+
     let quickEncounter = {};
     const quickEncounterData = getProperty(journal.data, 'flags.quick-encounters.quickEncounter');
     if (quickEncounterData) {
@@ -4834,11 +4855,6 @@ export default class ScenePacker {
 
     // Update the actor references
     if (quickEncounter.extractedActors) {
-      const instance = new ScenePacker({moduleName});
-      if (!instance) {
-        return;
-      }
-
       for (let i = 0; i < quickEncounter.extractedActors.length; i++) {
         const actor = quickEncounter.extractedActors[i];
         const worldActor = game.actors.get(actor.actorID);
@@ -4859,11 +4875,17 @@ export default class ScenePacker {
 
     // Update the active tile references
     if (quickEncounter.savedTilesData) {
-      const instance = new ScenePacker({moduleName});
-      if (!instance) {
-        return;
+      const SPTileData = await instance.packActiveTiles(quickEncounter.savedTilesData);
+      for (const spTile of SPTileData) {
+        for (const savedTileData of quickEncounter.savedTilesData) {
+          if (savedTileData._id !== spTile.tileID) {
+            continue;
+          }
+
+          setProperty(savedTileData, 'flags.scene-packer.SPTileData', [spTile]);
+          setProperty(savedTileData, 'flags.scene-packer.source-module', instance.GetModuleName());
+        }
       }
-      quickEncounter.SPTileData = await instance.packActiveTiles(quickEncounter.savedTilesData);
       updates.push({
         type: 'Tile',
         name: "Monk's Active Tile Triggers",
@@ -5307,4 +5329,27 @@ Hooks.on('createRollTable', async function (r) {
 });
 Hooks.on('createScene', async function (s) {
   await ScenePacker.updateEntityDefaultPermission(s);
+});
+
+/**
+ * Hook into tile creation to find Monk's Active Tiles data and update the references if needed.
+ */
+Hooks.on('preCreateTile', async function (document) {
+  const moduleName = getProperty(document.data, 'flags.scene-packer.source-module');
+  if (!moduleName) {
+    return;
+  }
+  const activeTileActions = getProperty(document.data, 'flags.monks-active-tiles.actions') || [];
+  if (!activeTileActions.length) {
+    return;
+  }
+  const spTileData = getProperty(document.data, 'flags.scene-packer.SPTileData') || [];
+  if (!spTileData.length) {
+    return;
+  }
+  const instance = new ScenePacker({moduleName});
+  if (!instance) {
+    return;
+  }
+  await instance.unpackActiveTiles([document], spTileData);
 });

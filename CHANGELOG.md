@@ -25,6 +25,14 @@
   - `ScenePacker.sceneUnpacked` - Called after a scene has been unpacked.
     - `Hooks.on("ScenePacker.sceneUnpacked", (data) => { const {scene, moduleName, adventureName, instance} = data; })`
 
+## v2.3.29
+
+- Updated functionality for [Monk's Active Tile Triggers](https://foundryvtt.com/packages/monks-active-tiles) and [Quick Encounters](https://foundryvtt.com/packages/quick-encounters).
+  - Supports new data references added by Monk's Active Tile Triggers.
+    - Scene teleport syntax.
+    - Rolltable syntax.
+  - Supports new active tile's created by Quick Encounters.
+
 ## v2.3.28
 
 - Fixed issue where an Actor, JournalEntry or Macro would incorrectly show as missing in the original source world due to data flags not existing on the source document.
