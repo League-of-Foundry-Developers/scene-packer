@@ -5274,7 +5274,6 @@ Hooks.on('createScene', async function (s) {
  */
 
 Hooks.on('preCreateTile', async function (document) {
-  debugger;
   const moduleName = getProperty(document.data, 'flags.scene-packer.source-module');
   if (!moduleName) {
     return;
