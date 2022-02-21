@@ -3684,7 +3684,7 @@ export default class ScenePacker {
    * @return {Promise<Object[]>}
    */
   async packActiveTiles(tiles) {
-    if (!tiles?.length) {
+    if (!tiles?.length && !tiles?.size) {
       return [];
     }
 
