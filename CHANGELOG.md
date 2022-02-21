@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.30
+
+- Fixed issue where packing a scene would not identify any [Monk's Active Tile Triggers](https://foundryvtt.com/packages/monks-active-tiles) to pack.
+
 ## v2.3.29
 
 - Updated functionality for [Monk's Active Tile Triggers](https://foundryvtt.com/packages/monks-active-tiles) and [Quick Encounters](https://foundryvtt.com/packages/quick-encounters).
