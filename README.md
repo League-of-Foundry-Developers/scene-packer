@@ -33,6 +33,12 @@ There is also a how to tutorial video which you can follow along with (and is _h
 
 [![Scene Packer - How to convert a World to a Module (The Sky Isles)](http://img.youtube.com/vi/cG6qtoZPczI/0.jpg)](https://www.youtube.com/watch?v=cG6qtoZPczI "Scene Packer - How to convert a World to a Module (The Sky Isles)")
 
+### Moulinette
+
+v2.4.0 of Scene Packer added integration with [Moulinette](https://www.moulinette.cloud/) to make it even easier to distribute your packaged adventures and content. Check out the video guide:
+
+[![Scene Packer - Moulinette Integration](http://img.youtube.com/vi/XZjuE1j_7GQ/0.jpg)](https://www.youtube.com/watch?v=XZjuE1j_7GQ "Moulinette Integration")
+
 ### Asset Report
 
 Additionally, `Scene Packer` contains an `Asset Report` (accessible via the bundled Macro or by right clicking on a Scene in the sidebar) which details which assets will have broken references when imported into someone else's world.
