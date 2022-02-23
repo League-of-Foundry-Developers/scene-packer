@@ -3559,7 +3559,8 @@ export default class ScenePacker {
         )
       }
       const activeTileResponse = await this.unpackActiveTiles(ScenePacker.GetActiveTilesData(scene.data.tiles), tilesInfo);
-      if (activeTileResponse?.tilesCount && activeTileResponse?.actionsCount) {
+      if (activeTileResponse?.tilesCount && activeTileResponse?.actionsCount && activeTileResponse?.updates?.length) {
+        await scene.updateEmbeddedDocuments('Tile', activeTileResponse.updates);
         this.log(
           true,
           game.i18n.format(
@@ -3702,7 +3703,7 @@ export default class ScenePacker {
 
   /**
    * Returns packed active tile data for the provided tiles
-   * @param {Object[]} tiles - The tiles which might contain Monk's Active Tile Trigger data
+   * @param {Object[]|EmbeddedCollection} tiles - The tiles which might contain Monk's Active Tile Trigger data
    * @return {Promise<Object[]>}
    */
   async packActiveTiles(tiles) {
@@ -3783,7 +3784,7 @@ export default class ScenePacker {
    * Unpacks the macros associated with Monk's Active Tiles
    * @param {Object[]|EmbeddedCollection} tiles - The tiles which might contain Monk's Active Tiles actions
    * @param {Object[]} tilesInfo - The tiles which contain Monk's Active Tiles data
-   * @return {Promise<{tilesCount: Number, actionsCount: Number}>}
+   * @return {Promise<{tilesCount: Number, actionsCount: Number, updates: Object[]}>}
    */
   async unpackActiveTiles(tiles, tilesInfo) {
     let tilesCount = 0;
@@ -3830,6 +3831,7 @@ export default class ScenePacker {
       return newEntity;
     }
 
+    const updates = [];
     for (const tile of tiles) {
       const tileInfo = tilesInfo?.find(t => t.tileID === (tile.id || tile._id));
       if (!tileInfo) {
@@ -3949,19 +3951,18 @@ export default class ScenePacker {
 
       if (changed) {
         tilesCount++;
-        let newActions = {};
-        setProperty(newActions, 'flags.monks-active-tiles.actions', actions);
-        if (tile.data?.flags) {
-          await tile.data.update(newActions);
-        } else if (tile.flags) {
-          await tile.update(newActions);
-        }
+        const update = {
+          _id: tile.id || tile._id,
+        };
+        setProperty(update, 'flags.monks-active-tiles.actions', actions);
+        updates.push(update);
       }
     }
 
     return {
       tilesCount,
       actionsCount,
+      updates,
     }
   }
 
@@ -4115,9 +4116,28 @@ export default class ScenePacker {
         }
       }
 
-      if (quickEncounter.savedTilesData && quickEncounter.savedTilesData.length && quickEncounter.SPTileData && quickEncounter.SPTileData.length) {
-        const activeTileResponse = await this.unpackActiveTiles(quickEncounter.savedTilesData, quickEncounter.SPTileData);
-        if (activeTileResponse?.tilesCount || activeTileResponse?.actionsCount) {
+      if (quickEncounter.savedTilesData && quickEncounter.savedTilesData.length) {
+        let updatedTiles = 0;
+        for (const savedTile of quickEncounter.savedTilesData) {
+          const SPTileData = getProperty(savedTile, 'flags.scene-packer.SPTileData');
+          if (!SPTileData) {
+            continue;
+          }
+
+          const activeTileResponse = await this.unpackActiveTiles([savedTile], SPTileData);
+          if (activeTileResponse?.updates?.length) {
+            for (const update of activeTileResponse.updates) {
+              if (savedTile._id !== update._id) {
+                continue;
+              }
+
+              mergeObject(savedTile, update);
+              updatedTiles++;
+            }
+          }
+        }
+
+        if (updatedTiles) {
           updates.push({
             type: 'Tile',
             name: "Monk's Active Tile Triggers",

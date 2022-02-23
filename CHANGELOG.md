@@ -16,8 +16,6 @@
   - Unpacking will only work if the end-user utilises the "Import All" functionality. It *will not* work for individually imported actors.
 - Updated macro `Clean up #[CF_tempEntity] entries` to support deleting the CF entities from compendiums.
   - You must manually unlock the compendium first.
-- Added support for folders with manual sort values.
-  - Documents must be exported via [Compendium Folders](https://github.com/earlSt1/vtt-compendium-folders) "Export Folder Structure" functionality.
 - Added new `Hooks`:
   - `ScenePacker.importAllComplete` - Called after all documents in a pack have been imported.
     - `Hooks.on("ScenePacker.importAllComplete", (data) => { const {moduleName, adventureName, instance} = data; })`
@@ -25,6 +23,12 @@
     - `Hooks.on("ScenePacker.importMoulinetteComplete", (data) => { const {sceneID, actorID, info} = data; })`
   - `ScenePacker.sceneUnpacked` - Called after a scene has been unpacked.
     - `Hooks.on("ScenePacker.sceneUnpacked", (data) => { const {scene, moduleName, adventureName, instance} = data; })`
+
+## v2.3.31
+
+- Support folder sorting via [Compendium Folders](https://github.com/earlSt1/vtt-compendium-folders/pull/135).
+- Fixed another interaction issue between [Monk's Active Tile Triggers](https://foundryvtt.com/packages/monks-active-tiles) and [Quick Encounters](https://foundryvtt.com/packages/quick-encounters).
+  - MATT values would be updated correctly, but wouldn't persist after a refresh. This has now been fixed.
 
 ## v2.3.30
 
