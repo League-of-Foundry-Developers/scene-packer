@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.3.31
+
+- Fixed another interaction issue between [Monk's Active Tile Triggers](https://foundryvtt.com/packages/monks-active-tiles) and [Quick Encounters](https://foundryvtt.com/packages/quick-encounters).
+  - MATT values would be updated correctly, but wouldn't persist after a refresh. This has now been fixed.
+
 ## v2.3.30
 
 - Fixed issue where packing a scene would not identify any [Monk's Active Tile Triggers](https://foundryvtt.com/packages/monks-active-tiles) to pack.
