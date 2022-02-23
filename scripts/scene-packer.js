@@ -500,6 +500,11 @@ export default class ScenePacker {
                 }
               }
 
+              // Set the sorting value
+              if (cData.flags?.cf?.sort) {
+                cData.sort = cData.flags.cf.sort;
+              }
+
               // Patch "Sight angle must be between 1 and 360 degrees." error
               if (packType === 'Actor') {
                 if (cData.token?.sightAngle === 0) {
@@ -663,6 +668,12 @@ export default class ScenePacker {
       if (response.folderMap.has(cfPath)) {
         continue;
       }
+      let cfSorting = entity.data?.flags?.cf?.sorting;
+      const cfSort = entity.data?.flags?.cf?.sort;
+      if (cfSort && !cfSorting) {
+        // This document has a sort value, so it implies manual folder sorting
+        cfSorting = 'm';
+      }
 
       const pathParts = cfPath.split(CONSTANTS.CF_SEPARATOR);
       for (let j = 0; j < pathParts.length; j++) {
@@ -692,6 +703,7 @@ export default class ScenePacker {
           type: entityType,
           parent: parent?.id || null,
           color: cfColor || null,
+          sorting: cfSorting,
         });
         response.folderMap.set(pathPart, folder);
       }
@@ -2568,6 +2580,11 @@ export default class ScenePacker {
             }
             cData['flags.core.sourceId'] = c.uuid;
 
+            // Set the sorting value
+            if (cData.flags?.cf?.sort) {
+              cData.sort = cData.flags.cf.sort;
+            }
+
             // Patch "Sight angle must be between 1 and 360 degrees." error
             if (cData.token?.sightAngle === 0) {
               cData.token.sightAngle = 360;
@@ -3399,6 +3416,11 @@ export default class ScenePacker {
       update.folder = folderData.folderMap.get(cfPath)?.id || null;
     } else if (folderData.folderId) {
       update.folder = folderData.folderId;
+    }
+
+    // Set the sorting value
+    if (entity.data?.flags?.cf?.sort) {
+      update.sort = entity.data.flags.cf.sort;
     }
 
     if (!isNewerVersion('0.8.0', game.data.version)) {

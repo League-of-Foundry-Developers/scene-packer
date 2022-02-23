@@ -2,6 +2,7 @@
 
 ## v2.3.31
 
+- Support folder sorting via [Compendium Folders](https://github.com/earlSt1/vtt-compendium-folders/pull/135).
 - Fixed another interaction issue between [Monk's Active Tile Triggers](https://foundryvtt.com/packages/monks-active-tiles) and [Quick Encounters](https://foundryvtt.com/packages/quick-encounters).
   - MATT values would be updated correctly, but wouldn't persist after a refresh. This has now been fixed.
 
