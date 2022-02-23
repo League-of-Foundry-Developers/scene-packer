@@ -8,7 +8,6 @@
   - End-users can also import an entire adventure if the creator has enabled the option (some creators generate so much content that importing everything will slow the Foundry VTT instance down significantly).
   - Standard Moulinette features such as locking down access via Patreon tiers work.
   - See https://www.youtube.com/watch?v=XZjuE1j_7GQ for an example of how to use the new feature.
-  - This feature is still in beta, so please report any issues you find.
 - Updated wording to make it clearer when there are no modules correctly registered with Scene Packer.
   - Useful for new creators. This usually happens when you haven't quite initialised your module correctly.
   - A reminder that the [module generator](https://sneat.github.io/scene-packer-module-generator/) is a good starting point for generating modules that are compatible with Scene Packer.
@@ -17,10 +16,12 @@
   - Unpacking will only work if the end-user utilises the "Import All" functionality. It *will not* work for individually imported actors.
 - Updated macro `Clean up #[CF_tempEntity] entries` to support deleting the CF entities from compendiums.
   - You must manually unlock the compendium first.
+- Added support for folders with manual sort values.
+  - Documents must be exported via [Compendium Folders](https://github.com/earlSt1/vtt-compendium-folders) "Export Folder Structure" functionality.
 - Added new `Hooks`:
-  - `ScenePacker.importAllComplete` - Called after all entities in a pack have been imported.
+  - `ScenePacker.importAllComplete` - Called after all documents in a pack have been imported.
     - `Hooks.on("ScenePacker.importAllComplete", (data) => { const {moduleName, adventureName, instance} = data; })`
-  - `ScenePacker.importMoulinetteComplete` - Called after entities in a pack from Moulinette have been imported.
+  - `ScenePacker.importMoulinetteComplete` - Called after documents in a pack from Moulinette have been imported.
     - `Hooks.on("ScenePacker.importMoulinetteComplete", (data) => { const {sceneID, actorID, info} = data; })`
   - `ScenePacker.sceneUnpacked` - Called after a scene has been unpacked.
     - `Hooks.on("ScenePacker.sceneUnpacked", (data) => { const {scene, moduleName, adventureName, instance} = data; })`
