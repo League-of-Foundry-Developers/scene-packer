@@ -1,5 +1,30 @@
 # Changelog
 
+## v2.4.0
+
+- New feature: Distributing packed scenes and adventures via [Moulinette](https://www.moulinette.cloud/)
+  - This feature allows content creators to distribute their creations to the community without needing to create modules for every release, reducing the number of modules an end-user needs to have installed.
+  - End-users can import just the scene/s they need and all the associated assets and entities for those scenes will be automatically downloaded.
+  - End-users can also import an entire adventure if the creator has enabled the option (some creators generate so much content that importing everything will slow the Foundry VTT instance down significantly).
+  - Standard Moulinette features such as locking down access via Patreon tiers work.
+  - See https://www.youtube.com/watch?v=XZjuE1j_7GQ for an example of how to use the new feature.
+  - Join the [Scene Packer Discord Server](https://discord.gg/HY3xhBEf2A) if you have any questions, comments, suggestions, or would like to organise a demo.
+- Updated wording to make it clearer when there are no modules correctly registered with Scene Packer.
+  - Useful for new creators. This usually happens when you haven't quite initialised your module correctly.
+  - A reminder that the [module generator](https://sneat.github.io/scene-packer-module-generator/) is a good starting point for generating modules that are compatible with Scene Packer.
+- Added initial support for unpacking [Automated Evocations](https://github.com/theripper93/automated-evocations#store-companions-on-actor) companions.
+  - Companion data must be stored on the actor prior to exporting to your compendium. See the [Automated Evocations module readme](https://github.com/theripper93/automated-evocations#store-companions-on-actor) for details.
+  - Unpacking will only work if the end-user utilises the "Import All" functionality. It *will not* work for individually imported actors.
+- Updated macro `Clean up #[CF_tempEntity] entries` to support deleting the CF entities from compendiums.
+  - You must manually unlock the compendium first.
+- Added new `Hooks`:
+  - `ScenePacker.importAllComplete` - Called after all documents in a pack have been imported.
+    - `Hooks.on("ScenePacker.importAllComplete", (data) => { const {moduleName, adventureName, instance} = data; })`
+  - `ScenePacker.importMoulinetteComplete` - Called after documents in a pack from Moulinette have been imported.
+    - `Hooks.on("ScenePacker.importMoulinetteComplete", (data) => { const {sceneID, actorID, info} = data; })`
+  - `ScenePacker.sceneUnpacked` - Called after a scene has been unpacked.
+    - `Hooks.on("ScenePacker.sceneUnpacked", (data) => { const {scene, moduleName, adventureName, instance} = data; })`
+
 ## v2.3.31
 
 - Support folder sorting via [Compendium Folders](https://github.com/earlSt1/vtt-compendium-folders/pull/135).

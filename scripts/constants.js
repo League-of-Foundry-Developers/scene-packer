@@ -14,6 +14,12 @@ export const CONSTANTS = Object.freeze({
   CF_SEPARATOR: '#/CF_SEP/',
 
   /**
+   * DOM Parser provides the ability to parse HTML into a DOM Document.
+   * @link https://developer.mozilla.org/en-US/docs/Web/API/DOMParser
+   */
+  DOM_PARSER: new DOMParser(),
+
+  /**
    * The flag used to store default permissions values.
    */
   FLAGS_DEFAULT_PERMISSION: 'defaultPermission',
@@ -64,6 +70,40 @@ export const CONSTANTS = Object.freeze({
   FLAGS_TOKENS: 'tokens',
 
   /**
+   * The hook to call when importing all entities in the pack is complete.
+   * Called with a single argument of type {@link ImportedAllEntities}.
+   */
+  HOOKS_IMPORT_ALL_COMPLETE: 'ScenePacker.importAllComplete',
+
+  /**
+   * The hook to call when importing entities in a pack from Moulinette is complete.
+   * Called with a single argument of type {@link ImportedMoulinetteEntities}.
+   */
+  HOOKS_IMPORTED_MOULINETTE_COMPLETE: 'ScenePacker.importMoulinetteComplete',
+
+  /**
+   * The hook to call when the Scene Packer class is available to being called.
+   * Called with a single argument of type {@link ScenePacker}.
+   */
+  HOOKS_SCENE_PACKER_READY: 'scenePackerReady',
+
+  /**
+   * The hook to call when a scene is unpacked.
+   * Called with a single argument of type {@link UnpackedScene}.
+   */
+  HOOKS_SCENE_UNPACKED: 'ScenePacker.sceneUnpacked',
+
+  /**
+   * Regular expression to match document links within journal entries.
+   * Matches references like:
+   *   @Actor[obe2mDyYDXYmxHJb]{Something or other}
+   *   @Actor[obe2mDyYDXYmxHJb#sub-link]{Something or other}
+   *   @Compendium[scene-packer.journals.LSbUJA9hw0vmYeSZ]{Something or other}
+   *   @Compendium[scene-packer.journals.LSbUJA9hw0vmYeSZ#sub-link]{Something or other}
+   */
+  LINK_REGEX: /@(\w+)\[([-.\w]+)(#[^\]]+)?]{([^}]+)}/g,
+
+  /**
    * The minimum version of packed scenes supported by this version.
    */
   MINIMUM_SUPPORTED_PACKER_VERSION: '2.0.0',
@@ -74,15 +114,25 @@ export const CONSTANTS = Object.freeze({
   MODULE_NAME: 'scene-packer',
 
   /**
+   * The location to store assets downloaded from Moulinette during imports by Scene Packer.
+   */
+  MOULINETTE_PATH: 'moulinette/adventures',
+
+  /**
    * The order of types to import when importing all content from compendiums.
    * @type {string[]}
    */
-  PACK_IMPORT_ORDER: ['Playlist', 'Macro', 'Item', 'Actor', 'RollTable', 'JournalEntry', 'Scene'],
+  PACK_IMPORT_ORDER: ['Playlist', 'Macro', 'Item', 'Actor', 'Cards', 'RollTable', 'JournalEntry', 'Scene'],
 
   /**
    * The setting key for whether to display the context menu on the Scene sidebar.
    */
   SETTING_ENABLE_CONTEXT_MENU: 'enableContextMenu',
+
+  /**
+   * The setting key for triggering the Exporter class.
+   */
+  SETTING_EXPORT_TO_MOULINETTE: 'exportToMoulinette',
 
   /**
    * The setting key for what version has been imported already. Used for tracking which dialogs to display.
@@ -101,24 +151,120 @@ export const CONSTANTS = Object.freeze({
 
   /**
    * Lookup entity types and get their common language strings.
-   * @type {{Item: string, Playlist: string, Macro: string, RollTable: string, Actor: string, Scene: string, JournalEntry: string}}
+   * @type {{Actor: string, Card: string, Cards: string, Item: string, JournalEntry: string, Macro: string, Playlist: string, RollTable: string, Scene: string}}
+   * @enum {string}
    */
   TYPE_HUMANISE: {
-    Playlist: 'playlists',
-    Macro: 'macros',
-    Item: 'items',
     Actor: 'actors',
-    RollTable: 'roll tables',
+    Card: 'card',
+    Cards: 'cards',
+    Item: 'items',
     JournalEntry: 'journal entries',
+    Macro: 'macros',
+    Playlist: 'playlists',
+    RollTable: 'roll tables',
     Scene: 'scenes',
+  },
+
+  /**
+   * Returns the version of the game instance.
+   * Handles the storage structure that changed over time.
+   * @return {string}
+   */
+  Version() {
+    return game.version || game.data.version;
+  },
+
+  /**
+   * Returns whether the version is at least V7
+   * @param {string} version - The version to test. Defaults to the current game instance version.
+   * @return {boolean}
+   */
+  IsV7orNewer(version = this.Version()) {
+    return version === '0.7.0' || isNewerVersion(version, '0.7.0');
+  },
+
+  /**
+   * Returns whether the version is V7
+   * @param {string} version - The version to test. Defaults to the current game instance version.
+   * @return {boolean}
+   */
+  IsV7(version = this.Version()) {
+    return this.IsV7orNewer(version) && isNewerVersion('0.8.0', version);
+  },
+
+  /**
+   * Returns whether the version is at least V8
+   * @param {string} version - The version to test. Defaults to the current game instance version.
+   * @return {boolean}
+   */
+  IsV8orNewer(version = this.Version()) {
+    return version === '0.8.0' || isNewerVersion(version, '0.8.0');
+  },
+
+  /**
+   * Returns whether the version is V8
+   * @param {string} version - The version to test. Defaults to the current game instance version.
+   * @return {boolean}
+   */
+  IsV8(version = this.Version()) {
+    return this.IsV8orNewer(version) && isNewerVersion('9', version);
+  },
+
+  /**
+   * Returns whether the version is at least V9
+   * @param {string} version - The version to test. Defaults to the current game instance version.
+   * @return {boolean}
+   */
+  IsV9orNewer(version = this.Version()) {
+    return version === '9.0' || isNewerVersion(version, '9');
+  },
+
+  /**
+   * Returns whether the version is V9
+   * @param {string} version - The version to test. Defaults to the current game instance version.
+   * @return {boolean}
+   */
+  IsV9(version = this.Version()) {
+    return this.IsV9orNewer(version) && isNewerVersion('10', version);
   },
 });
 
 /**
- * Fake Entity is used in place of a real entity, for times where operating against a real entity would throw errors.
+ * Returns whether the instance is running on the forge
+ * @return {boolean}
+ */
+export const IsUsingTheForge = () => {
+  return typeof ForgeVTT !== 'undefined' && ForgeVTT.usingTheForge;
+};
+
+/**
+ * Fake Entity is used in place of a real entity, for times when operating against a real entity would throw errors.
  * @type {{update: FakeEntity.update}}
  */
 export const FakeEntity = {
   update: () => {
   },
 };
+
+/**
+ * @typedef ImportedAllEntities
+ * @property {string} moduleName - The module name.
+ * @property {string} adventureName - The name of the adventure.
+ * @property {ScenePacker} instance - The instance of Scene Packer that was used to pack the scene.
+ */
+
+/**
+ * @typedef ImportedMoulinetteEntities
+ * @property {string} sceneID - Optional. The specific SceneID that was imported, along with any related data.
+ * @property {string} actorID - Optional. The specific ActorID that was imported, along with any related data.
+ * @property {ExporterData} info - Information about the pack that was imported.
+ */
+
+/**
+ * @typedef UnpackedScene
+ * @property {Object} scene - The scene that was unpacked.
+ * @property {string} moduleName - The module name.
+ * @property {string} adventureName - The name of the adventure.
+ * @property {ScenePacker} instance - The instance of Scene Packer that was used to pack the scene.
+ */

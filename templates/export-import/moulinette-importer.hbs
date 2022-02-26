@@ -1,0 +1,80 @@
+{{#*inline "loading"}}
+  <section class="content loading">
+    <div class="lds-ring"><div></div><div></div><div></div><div></div></div>
+    <p>{{localize 'SCENE-PACKER.importer.loading'}}</p>
+  </section>
+{{/inline}}
+
+{{#*inline "processing"}}
+  <section class="content processing">
+    <h3>{{pack.name}}</h3>
+    {{#if pack.description}}
+      <div class="description">
+        {{{pack.description}}}
+      </div>
+    {{/if}}
+
+    <hr>
+
+    {{{processingMessage}}}
+  </section>
+{{/inline}}
+
+<form autocomplete="off">
+  {{#unless processing}}
+  {{#if loading}}
+    {{> loading}}
+  {{else}}
+  <section class="content">
+    {{#if coverImage}}
+      <div class="cover-image">
+        <img src="{{coverImage}}" alt="{{pack.name}}">
+      </div>
+    {{/if}}
+    <h2>{{pack.name}}</h2>
+    {{#if pack.description}}
+      <div class="description">
+        {{{pack.description}}}
+      </div>
+    {{/if}}
+    <div><hr></div>
+    {{#if selectedEntity}}
+      <h3>{{localize "SCENE-PACKER.importer.selected-entity" type=importType}}</h3>
+    {{/if}}
+    {{#if previewImage}}
+      <div class="preview-image">
+        <img src="{{previewImage}}" alt="{{pack.name}}">
+      </div>
+    {{/if}}
+    {{#if selectedEntity}}
+      <h4>{{selectedEntity}}</h4>
+    {{/if}}
+    <p>
+      {{localize "SCENE-PACKER.importer.version"}} {{pack.version}}
+    </p>
+    <p>
+      {{localize "SCENE-PACKER.importer.author"}} {{pack.author}}
+    </p>
+    {{#if pack.external_link}}
+      <p>
+        {{localize "SCENE-PACKER.importer.more-info"}} <a href="{{pack.external_link}}" target="_blank">{{pack.external_link}}</a>
+      </p>
+    {{/if}}
+  </section>
+  {{/if}}
+
+  <footer class="app-footer flexrow">
+    <button type="submit" name="import-all" value="1" {{#if loading}}disabled{{/if}}>
+      <i class="fas fa-check-double"></i> {{localize 'SCENE-PACKER.importer.import-all' count=totalPackCount}}
+    </button>
+    <button type="submit" name="import-one" value="1" {{#if loading}}disabled{{/if}}>
+      <i class="fas fa-check"></i> {{localize 'SCENE-PACKER.importer.import-one'}} {{importType}}
+    </button>
+    <button type="button" name="close" style="flex:0.5">
+      <i class="fas fa-times"></i> {{localize 'Cancel'}}
+    </button>
+  </footer>
+  {{else}}
+    {{> processing}}
+  {{/unless}}
+</form>

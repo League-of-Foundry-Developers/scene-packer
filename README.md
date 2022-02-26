@@ -29,9 +29,15 @@ Scene Packer is system agnostic, it doesn't matter whether you're packaging up a
 
 I have put together a site to help build your first module (with or without Scene Packer integration). It takes all of the guess work out of creating your first module, and in a lot of cases means that you don't have to do anything in a text-editor. Simply fill in the form and download your ready-to-go module zip file. https://sneat.github.io/scene-packer-module-generator/
 
-There is also a how to tutorial video which you can follow along with:
+There is also a how to tutorial video which you can follow along with (and is _highly recommended_):
 
-[![Asset Report](http://img.youtube.com/vi/cG6qtoZPczI/0.jpg)](https://www.youtube.com/watch?v=cG6qtoZPczI "Scene Packer - How to convert a World to a Module (The Sky Isles)")
+[![Scene Packer - How to convert a World to a Module (The Sky Isles)](http://img.youtube.com/vi/cG6qtoZPczI/0.jpg)](https://www.youtube.com/watch?v=cG6qtoZPczI "Scene Packer - How to convert a World to a Module (The Sky Isles)")
+
+### Moulinette
+
+v2.4.0 of Scene Packer added integration with [Moulinette](https://www.moulinette.cloud/) to make it even easier to distribute your packaged adventures and content. Check out the video guide:
+
+[![Scene Packer - Moulinette Integration](http://img.youtube.com/vi/XZjuE1j_7GQ/0.jpg)](https://www.youtube.com/watch?v=XZjuE1j_7GQ "Moulinette Integration")
 
 ### Asset Report
 
@@ -178,9 +184,47 @@ This will automatically go through the Journal compendiums that belong to your m
 
 There are several Macros included in the `Library: Scene Packer` compendium entry. Each macro has a comment at the top describing its purpose. It is well worth having a look at what is available there.
 
+There is even a macro there that you can use as the basis for recommending modules for use with your own module.
+
 ## Quick Encounters
 
 Support for packing Scenes with embedded [Quick Encounters](https://foundryvtt.com/packages/quick-encounters) data was added in v2.2.0 of Scene Packer. There is a Journal Entry bundled in the Scene Packer compendium which describes how to pack these scenes.
+
+## Hooks
+
+There are several [Hooks](https://foundryvtt.com/api/Hooks.html) exposed by Scene Packer.
+
+`scenePackerReady`
+- This hook is called when the Scene Packer class is available to be called.
+- Called with a single argument of type `ScenePacker`.
+  - See [Module Code Requirements](https://github.com/League-of-Foundry-Developers/scene-packer#module-code-requirements) for how to initialise your module with Scene Packer.
+
+`ScenePacker.importAllComplete`
+- Called after all documents in a pack have been imported.
+- Called with a single argument of type `ImportedAllEntities`.
+```js
+Hooks.on("ScenePacker.importAllComplete", (data) => {
+ const [moduleName, adventureName, instance] = data;
+});
+```
+
+`ScenePacker.importMoulinetteComplete`
+- Called after documents in a pack have been imported from Moulinette.
+- Called with a single argument of type `ImportedMoulinetteEntities`.
+```js
+Hooks.on("ScenePacker.importMoulinetteComplete", (data) => {
+ const [sceneID, actorID, info] = data;
+});
+```
+
+`ScenePacker.sceneUnpacked`
+- Called after a scene has been unpacked.
+- Called with a single argument of type `UnpackedScene`.
+```js
+Hooks.on("ScenePacker.sceneUnpacked", (data) => {
+  const [scene, moduleName, adventureName, instance] = data;
+});
+```
 
 ## Example module use
 
@@ -195,6 +239,8 @@ Thanks to [Baileywiki](https://www.patreon.com/baileywiki) for their initial tes
 The following libraries are utilised within the code:
 - [fast-json-stable-stringify](https://github.com/epoberezkin/fast-json-stable-stringify) (MIT License)
 - [jsHashes](https://github.com/h2non/jshashes) (BSD-3-Clause License)
+
+The green "hand truck" icon was created by [Delapouite](https://game-icons.net/1x1/delapouite/hand-truck.html).
 
 ## Support
 

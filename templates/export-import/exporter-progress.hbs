@@ -1,0 +1,30 @@
+<form autocomplete="off" class="flexcol">
+  <section class="content">
+    <h2>{{localize 'SCENE-PACKER.exporter.progress.title' name=packageName}}</h2>
+
+    <h3>{{localize 'SCENE-PACKER.exporter.progress.status' total=selected.length}}</h3>
+    <hr>
+    <div class="status">{{{status}}}</div>
+  </section>
+
+  <footer class="app-footer">
+    <hr>
+    <div class="flexrow">
+      <progress id="progress" max="100" value="{{percent}}"></progress>
+  <div class="info"><i class="fas fa-download"></i> <span class="speed" title="{{localize 'SCENE-PACKER.exporter.progress.speed'}}">{{#HumanFileSize bytes=speed}}{{/HumanFileSize}}/s</span></div>
+      <div class="info"><i class="fas fa-save"></i> <span class="size" title="{{localize 'SCENE-PACKER.exporter.progress.size'}}">{{#HumanFileSize bytes=totalSize}}{{/HumanFileSize}}</span></div>
+    </div>
+    <hr>
+  </footer>
+  <footer class="app-footer">
+    {{#unless complete}}
+      <button type="button" name="wait" disabled>
+        <i class="fas fa-hourglass-half"></i> {{localize 'SCENE-PACKER.exporter.progress.please-wait'}}
+      </button>
+    {{else}}
+      <button type="button" name="close">
+        <i class="fas fa-times"></i> {{localize 'Close'}}
+      </button>
+    {{/unless}}
+  </footer>
+</form>

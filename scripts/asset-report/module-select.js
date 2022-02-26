@@ -1,3 +1,6 @@
+import AssetReport from '../asset-report.js';
+import {CONSTANTS} from '../constants.js';
+
 /**
  * Module Selection for the Asset Report
  */
@@ -54,7 +57,7 @@ export default class ModuleSelect extends FormApplication {
     // Prepare modules
     const modules = game.data.modules.reduce((arr, m) => {
       let mod;
-      if (!isNewerVersion('0.8.0', game.data.version)) {
+      if (CONSTANTS.IsV8orNewer()) {
         mod = m.data.toObject();
       } else {
         mod = duplicate(m.data);
@@ -178,8 +181,8 @@ export default class ModuleSelect extends FormApplication {
 
   /** @inheritdoc */
   _onSearchFilter(event, query, rgx, html) {
-    if (isNewerVersion('0.8.1', game.data.version)) {
-      // rgx and SearchFilter wer added in 0.8.1, previously the arguments were
+    if (isNewerVersion('0.8.1', CONSTANTS.Version())) {
+      // rgx and SearchFilter were added in 0.8.1, previously the arguments were
       // event, query, html
       html = rgx;
       rgx = new RegExp(RegExp.escape(query || ''), 'i');
@@ -193,7 +196,7 @@ export default class ModuleSelect extends FormApplication {
       const title = (li.querySelector('.package-title')?.textContent || '').trim();
       const author = (li.querySelector('.author')?.textContent || '').trim();
       let match = false;
-      if (!isNewerVersion('0.8.1', game.data.version)) {
+      if (!isNewerVersion('0.8.1', CONSTANTS.Version())) {
         match = rgx.test(SearchFilter.cleanQuery(name)) ||
           rgx.test(SearchFilter.cleanQuery(title)) ||
           rgx.test(SearchFilter.cleanQuery(author));

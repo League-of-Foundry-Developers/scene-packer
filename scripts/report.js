@@ -1,3 +1,5 @@
+import {CONSTANTS} from './constants.js';
+
 /**
  * Report on the performance of the current scene.
  */
@@ -90,7 +92,7 @@ export default class Report {
     let background = `${canvas.background?.img?.texture?.width} x ${canvas.background?.img?.texture?.height}`;
     let tiles = canvas.tiles?.placeables?.length || 0;
 
-    if (!isNewerVersion('0.8.0', game.data.version)) {
+    if (CONSTANTS.IsV8orNewer()) {
       tiles = canvas.background?.placeables?.length
       background = `${canvas.background?.bg?.texture?.width} x ${canvas.background?.bg?.texture?.height}`;
     }

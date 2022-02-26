@@ -73,3 +73,117 @@
 .dialog.welcome-prompt .dialog-buttons button.dialog-button.close {
   flex-basis: 75px;
 }
+#scene-packer-exporter nav {
+  border-bottom: 1px solid #000000;
+  padding-bottom: 5px;
+}
+#scene-packer-exporter section.directory {
+  height: 570px;
+  overflow-y: auto;
+}
+#scene-packer-exporter li.folder.collapsed > .folder-header {
+  background: inherit;
+}
+#scene-packer-exporter li.folder > .folder-header h3 {
+  color: inherit;
+}
+#scene-packer-exporter .entity label {
+  align-items: center;
+}
+#scene-packer-exporter .entity h4 {
+  line-height: 1.5em;
+  margin: 0;
+}
+#scene-packer-exporter .form-group {
+  align-items: baseline;
+}
+#scene-packer-exporter .form-group.file-picker input {
+  margin-left: -3px;
+}
+#scene-packer-exporter .form-group textarea {
+  padding: 3px;
+  border: 1px solid #7a7971;
+}
+#scene-packer-exporter-progress .app-footer {
+  flex: 0;
+  margin-top: auto;
+}
+#scene-packer-exporter-progress .app-footer progress {
+  flex-basis: 70%;
+  flex-shrink: 10;
+}
+#scene-packer-exporter-progress .app-footer .speed,
+#scene-packer-exporter-progress .app-footer .size {
+  text-align: right;
+}
+#scene-packer-exporter-progress .app-footer .info {
+  white-space: nowrap;
+  margin-left: 5px;
+}
+
+#scene-packer-importer .content {
+  display: flex;
+  flex-direction: column;
+  height: 625px;
+  user-select: text;
+  overflow: hidden auto;
+}
+
+#scene-packer-importer .content.loading {
+  justify-content: center;
+  text-align: center;
+}
+
+#scene-packer-importer .lds-ring {
+  margin: 0 auto;
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+#scene-packer-importer .lds-ring div {
+  box-sizing: border-box;
+  display: block;
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  margin: 8px;
+  border: 8px solid #fff;
+  border-radius: 50%;
+  animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  border-color: #fff transparent transparent transparent;
+}
+#scene-packer-importer .lds-ring div:nth-child(1) {
+  animation-delay: -0.45s;
+}
+#scene-packer-importer .lds-ring div:nth-child(2) {
+  animation-delay: -0.3s;
+}
+#scene-packer-importer .lds-ring div:nth-child(3) {
+  animation-delay: -0.15s;
+}
+@keyframes lds-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+#scene-packer-importer footer,
+#scene-packer-importer-unrelated-data footer{
+  margin-top: 5px;
+  border-top: 1px solid #7a7971;
+  padding-top: 5px;
+}
+
+#scene-packer-importer-unrelated-data .content {
+  height: 585px;
+  user-select: text;
+  overflow: hidden auto;
+}
+
+#scene-packer-importer-unrelated-data .content a.entity-link {
+  line-height: 1.6em;
+}
