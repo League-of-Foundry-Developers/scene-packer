@@ -96,13 +96,40 @@
 }
 #scene-packer-exporter .form-group {
   align-items: baseline;
+  gap: 1em;
+}
+#scene-packer-exporter .form-group label {
+  align-self: flex-start;
+}
+#scene-packer-exporter .package-description {
+  height: 300px;
+  flex: 4;
+  border: 1px solid #7a7971;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 3px;
+}
+#scene-packer-exporter .editor {
+  height: 100%;
+}
+#scene-packer-exporter .tox { height: 100%; min-height: 100%; }
+#scene-packer-exporter .adventure-categorisation .form-group label {
+  flex: 1;
+}
+#scene-packer-exporter .adventure-categorisation .form-group label > input[type="checkbox"] {
+  position: relative;
+  top: 5px;
+}
+#scene-packer-exporter .sp-player-levels .spacer {
+  flex: 0.5;
+}
+#scene-packer-exporter #SP-export-player-levels-add {
+  position: relative;
+  top: -1.5em;
+  right: 1em;
+  align-self: end;
 }
 #scene-packer-exporter .form-group.file-picker input {
   margin-left: -3px;
-}
-#scene-packer-exporter .form-group textarea {
-  padding: 3px;
-  border: 1px solid #7a7971;
 }
 #scene-packer-exporter-progress .app-footer {
   flex: 0;

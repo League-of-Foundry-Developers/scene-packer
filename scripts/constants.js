@@ -135,6 +135,31 @@ export const CONSTANTS = Object.freeze({
   SETTING_EXPORT_TO_MOULINETTE: 'exportToMoulinette',
 
   /**
+   * The setting key for tracking previously used author in the Moulinette Exporter.
+   */
+  SETTING_EXPORT_TO_MOULINETTE_AUTHOR: 'exportToMoulinetteAuthor',
+
+  /**
+   * The setting key for tracking previously used discord in the Moulinette Exporter.
+   */
+  SETTING_EXPORT_TO_MOULINETTE_DISCORD: 'exportToMoulinetteDiscord',
+
+  /**
+   * The setting key for tracking previously used email in the Moulinette Exporter.
+   */
+  SETTING_EXPORT_TO_MOULINETTE_EMAIL: 'exportToMoulinetteEmail',
+
+  /**
+   * The setting key for tracking previously used tags in the Moulinette Exporter.
+   */
+  SETTING_EXPORT_TO_MOULINETTE_TAGS: 'exportToMoulinetteTags',
+
+  /**
+   * The setting key for tracking previously used themes in the Moulinette Exporter.
+   */
+  SETTING_EXPORT_TO_MOULINETTE_THEMES: 'exportToMoulinetteThemes',
+
+  /**
    * The setting key for what version has been imported already. Used for tracking which dialogs to display.
    */
   SETTING_IMPORTED_VERSION: 'imported',

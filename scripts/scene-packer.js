@@ -5268,6 +5268,41 @@ Hooks.once('setup', () => {
     type: Exporter,
     restricted: true,
   })
+
+  game.settings.register(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_AUTHOR, {
+    scope: 'client',
+    config: false,
+    type: String,
+    default: false,
+  });
+
+  game.settings.register(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_DISCORD, {
+    scope: 'client',
+    config: false,
+    type: String,
+    default: false,
+  });
+
+  game.settings.register(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_EMAIL, {
+    scope: 'client',
+    config: false,
+    type: String,
+    default: false,
+  });
+
+  game.settings.register(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_TAGS, {
+    scope: 'client',
+    config: false,
+    type: Array,
+    default: false,
+  });
+
+  game.settings.register(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_THEMES, {
+    scope: 'client',
+    config: false,
+    type: Array,
+    default: false,
+  });
 });
 
 /**

@@ -2,8 +2,8 @@ import { CONSTANTS } from '../constants.js';
 import ExporterProgress from './exporter-progress.js';
 
 export default class Exporter extends FormApplication {
-  constructor() {
-    super();
+  constructor(object, options) {
+    super(object, options);
 
     // TODO Support updating an "existing" export in a nice way
 
@@ -28,6 +28,62 @@ export default class Exporter extends FormApplication {
     this.Macro = this.initialize('Macro');
     this.selected = [];
     this.complete = false;
+
+    this.adventureCategoryOptions = [
+      {key: 'one-shot', label: 'SCENE-PACKER.exporter.options.adventure-category-one-shot'},
+      {key: 'short-campaign', label: 'SCENE-PACKER.exporter.options.adventure-category-short-campaign'},
+      {key: 'long-campaign', label: 'SCENE-PACKER.exporter.options.adventure-category-long-campaign'},
+      {key: 'prefab', label: 'SCENE-PACKER.exporter.options.adventure-category-prefab'},
+    ];
+
+    const adventureThemeSuggestions = [
+      {key: 'dungeon', label: 'SCENE-PACKER.exporter.options.adventure-themes.dungeon'},
+      {key: 'wilderness', label: 'SCENE-PACKER.exporter.options.adventure-themes.wilderness'},
+      {key: 'town', label: 'SCENE-PACKER.exporter.options.adventure-themes.town'},
+      {key: 'city', label: 'SCENE-PACKER.exporter.options.adventure-themes.city'},
+      {key: 'forest', label: 'SCENE-PACKER.exporter.options.adventure-themes.forest'},
+      {key: 'stronghold', label: 'SCENE-PACKER.exporter.options.adventure-themes.stronghold'},
+      {key: 'cave', label: 'SCENE-PACKER.exporter.options.adventure-themes.cave'},
+      {key: 'mountain', label: 'SCENE-PACKER.exporter.options.adventure-themes.mountain'},
+      {key: 'ruins', label: 'SCENE-PACKER.exporter.options.adventure-themes.ruins'},
+      {key: 'temple', label: 'SCENE-PACKER.exporter.options.adventure-themes.temple'},
+      {key: 'mansion', label: 'SCENE-PACKER.exporter.options.adventure-themes.mansion'},
+      {key: 'swamp', label: 'SCENE-PACKER.exporter.options.adventure-themes.swamp'},
+      {key: 'ship', label: 'SCENE-PACKER.exporter.options.adventure-themes.ship'},
+      {key: 'island', label: 'SCENE-PACKER.exporter.options.adventure-themes.island'},
+      {key: 'desert', label: 'SCENE-PACKER.exporter.options.adventure-themes.desert'},
+      {key: 'underdark', label: 'SCENE-PACKER.exporter.options.adventure-themes.underdark'},
+      {key: 'sewer', label: 'SCENE-PACKER.exporter.options.adventure-themes.sewer'},
+      {key: 'feywild', label: 'SCENE-PACKER.exporter.options.adventure-themes.feywild'},
+      {key: 'abyss', label: 'SCENE-PACKER.exporter.options.adventure-themes.abyss'},
+      {key: 'horror', label: 'SCENE-PACKER.exporter.options.adventure-themes.horror'},
+      {key: 'mystery', label: 'SCENE-PACKER.exporter.options.adventure-themes.mystery'},
+      {key: 'snow', label: 'SCENE-PACKER.exporter.options.adventure-themes.snow'},
+      {key: 'mega-dungeon', label: 'SCENE-PACKER.exporter.options.adventure-themes.mega-dungeon'},
+      {key: 'shadowfell', label: 'SCENE-PACKER.exporter.options.adventure-themes.shadowfell'},
+      {key: 'air', label: 'SCENE-PACKER.exporter.options.adventure-themes.air'},
+    ];
+    this.adventureThemeSuggestions = new Set();
+    const themeSuggestions = game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_THEMES);
+    for (const themeSuggestion of themeSuggestions) {
+      const theme = themeSuggestion.toLowerCase().trim();
+      if (theme && !Array.from(this.adventureThemeSuggestions).find(t => t.key === theme)) {
+        this.adventureThemeSuggestions.add({key: theme, label: theme});
+      }
+    }
+    for (const adventureThemeSuggestion of adventureThemeSuggestions) {
+      if (!Array.from(this.adventureThemeSuggestions).find(t => t.key === adventureThemeSuggestion.key)) {
+        this.adventureThemeSuggestions.add(adventureThemeSuggestion);
+      }
+    }
+
+    const tagSuggestions = game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_TAGS);
+    this.adventureTagSuggestions = tagSuggestions.map(e => e.trim()).filter(e => e).map(e => {
+      return {key: e, label: e};
+    });
+
+    this.hasSquareGrids = game.scenes.some(s => s.data.gridType === CONST.GRID_TYPES.SQUARE)
+    this.hasHexGrids = game.scenes.some(s => [CONST.GRID_TYPES.HEXODDR, CONST.GRID_TYPES.HEXEVENR, CONST.GRID_TYPES.HEXODDQ, CONST.GRID_TYPES.HEXEVENQ].includes(s.data.gridType))
   }
 
   initialize(type) {
@@ -86,6 +142,7 @@ export default class Exporter extends FormApplication {
       template: 'modules/scene-packer/templates/export-import/exporter.hbs',
       width: 700,
       height: 720,
+      closeOnSubmit: false,
       classes: ['scene-packer'],
       scrollY: ['ol.directory-list'],
       filters: filters,
@@ -126,16 +183,33 @@ export default class Exporter extends FormApplication {
           this.Macro.documents.length,
       }),
       complete: this.complete,
+      packageName: game.world.data.title,
+      packageAuthor: game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_AUTHOR) || '',
+      packageVersion: game.world.data.version || '1.0.0',
+      packageCover: game.world.data.background,
+      packageDescription: game.world.data.description,
+      packageDiscord: game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_DISCORD) || '',
+      packageEmail: game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_EMAIL) || '',
+      adventureSystem: game.system.id,
+      adventureCategoryOptions: this.adventureCategoryOptions,
+      adventureThemeSuggestions: Array.from(this.adventureThemeSuggestions),
+      adventureTagSuggestions: this.adventureTagSuggestions,
+      hasSquareGrids: this.hasSquareGrids,
+      hasHexGrids: this.hasHexGrids,
     };
   }
 
   /** @inheritdoc */
   async _updateObject(event, formData) {
+    if (event?.type === 'mcesave') {
+      // Hitting save on the editor triggers a form submit, which we don't want to process.
+      return;
+    }
+
     this._updateCounts();
 
-    // TODO Implement validation properly
     const invalid = [];
-    for (const field of ['packageName', 'packageDescription']) {
+    for (const field of ['packageName', 'author']) {
       if (!formData[field]) {
         invalid.push(field);
       }
@@ -158,9 +232,48 @@ export default class Exporter extends FormApplication {
       );
     }
 
+    const packageDescription = this.editors?.packageDescription?.mce?.getContent() || '';
+
+    const themes = Array.from(new Set(formData.themes.split(',').map(e => e.toLowerCase().trim()).filter(e => e)));
+    game.settings.set(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_THEMES, themes);
+
+    const tags = Array.from(new Set(formData.tags.split(',').map(e => e.toLowerCase().trim()).filter(e => e)));
+    game.settings.set(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_TAGS, tags);
+
+    game.settings.set(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_AUTHOR, formData.author);
+    game.settings.set(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_DISCORD, formData.discordId || '');
+    game.settings.set(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_EMAIL, formData.email || '');
+
+    const playerLevels = [];
+    if (typeof formData.playerLevelRecommended === 'number') {
+      const recommended = parseInt(formData.playerLevelRecommended, 10);
+      const min = parseInt(formData.playerLevelMin, 10) || recommended;
+      const max = parseInt(formData.playerLevelMax, 10) || recommended;
+
+      if (min && max && recommended) {
+        playerLevels.push({min, max, recommended});
+      }
+    }
+
+    if (formData.playerLevelMin?.length
+      && formData.playerLevelMin?.length === formData.playerLevelMax?.length
+      && formData.playerLevelMax?.length === formData.playerLevelRecommended?.length) {
+      for (let i = 0; i < formData.playerLevelMin.length; i++) {
+        const recommended = parseInt(formData.playerLevelRecommended[i], 10);
+        const min = parseInt(formData.playerLevelMin[i], 10) || recommended;
+        const max = parseInt(formData.playerLevelMax[i], 10) || recommended;
+
+        if (min && max && recommended) {
+          playerLevels.push({min, max, recommended});
+        }
+      }
+    }
+
+    const recommendedPlayerCount = parseInt(formData.playersRecommended, 10) || 0;
+
     const exporter = new ExporterProgress({
       packageName: formData.packageName,
-      packageDescription: formData.packageDescription,
+      packageDescription: packageDescription,
       packageCover: formData.packageCover,
       email: formData.email,
       discordId: formData.discordId,
@@ -174,11 +287,26 @@ export default class Exporter extends FormApplication {
         discordId: formData.discordId,
         externalLink: formData.externalLink,
         welcomeJournal: formData.welcomeJournal,
+        system: formData.system || '',
+        category: formData.adventureCategory || '',
+        playHours: parseInt(formData.duration, 10) || 0,
+        players: {
+          min: parseInt(formData.playersMin, 10) || recommendedPlayerCount,
+          max: parseInt(formData.playersMax, 10) || recommendedPlayerCount,
+          recommended: recommendedPlayerCount,
+        },
+        playerLevels: playerLevels,
+        themes: themes,
+        tokenStyles: formData.tokenStyles,
+        pregen: formData.pregen === 'yes',
+        grid: formData.grid,
+        tags: tags,
         allowCompleteImport: formData.allowCompleteImport === 'yes',
         version: formData.version,
       }),
     }).render(true);
     setTimeout((exporter) => {
+      this.close();
       exporter.Process().then(({ dataZip } = response) => {
         dataZip.Download();
         this.complete = true;
@@ -206,6 +334,36 @@ export default class Exporter extends FormApplication {
       "input[type='checkbox']",
       this._onClickCheckbox.bind(this)
     );
+
+    const themesInput = html.find('#SP-export-theme');
+    html.find('#SP-export-theme-suggestions').on('change', (event) => {
+      const themes = new Set(themesInput.val().split(',').map(e => e.trim()).filter(e => e));
+      const theme = event.target.value;
+      if (theme && !themes.has(theme)) {
+        themes.add(theme);
+        themesInput.val(Array.from(themes).join(', '));
+      }
+    });
+
+    const tagsInput = html.find('#SP-export-tags');
+    html.find('#SP-export-tags-suggestions').on('change', (event) => {
+      const tags = new Set(tagsInput.val().split(',').map(e => e.trim()).filter(e => e));
+      const tag = event.target.value;
+      if (tag && !tags.has(tag)) {
+        tags.add(tag);
+        tagsInput.val(Array.from(tags).join(', '));
+      }
+    });
+
+    html.find('#SP-export-player-levels-add').on('click', (event) => {
+      const playerLevelContent = `<div class="form-group">
+              <input type="number" name="playerLevelRecommended" min="0" value="" placeholder="${game.i18n.localize('SCENE-PACKER.exporter.options.adventure-player-level-recommended-placeholder')}" autocomplete="off">
+              <input type="number" name="playerLevelMin" min="0" value="" placeholder="${game.i18n.localize('SCENE-PACKER.exporter.options.adventure-player-level-min-placeholder')}" autocomplete="off">
+              <input type="number" name="playerLevelMax" min="0" value="" placeholder="${game.i18n.localize('SCENE-PACKER.exporter.options.adventure-player-level-max-placeholder')}" autocomplete="off">
+              <span class="spacer"></span>
+            </div>`;
+      $(playerLevelContent).insertBefore($(event.target));
+    });
 
     // Intersection Observer
     for (const directoryElement of directory) {
@@ -422,6 +580,16 @@ export class ExporterData {
     discordId = '',
     externalLink = '',
     welcomeJournal = '',
+    system = '',
+    category = '',
+    playHours = 0,
+    players = {min: 0, max: 0, recommended: 0},
+    playerLevels = [],
+    tokenStyles = [],
+    pregen = false,
+    grid = [],
+    themes = [],
+    tags = [],
     allowCompleteImport = true,
     version = '1.0.0',
   } = {}) {
@@ -434,6 +602,16 @@ export class ExporterData {
     this.email = email;
     this.discordId = discordId;
     this.allow_complete_import = allowCompleteImport;
+    this.system = system;
+    this.category = category;
+    this.play_hours = playHours;
+    this.players = players;
+    this.player_levels = playerLevels;
+    this.token_styles = tokenStyles;
+    this.pregen = pregen;
+    this.grid = grid;
+    this.themes = themes;
+    this.tags = tags;
     this.welcome_journal = welcomeJournal;
     /**
      * @type {Object<string, number>}

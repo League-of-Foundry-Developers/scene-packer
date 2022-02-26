@@ -213,36 +213,38 @@
           <b>{{localize 'SCENE-PACKER.exporter.options.package-name'}}</b>
           <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.package-name-help'}}"></i>
         </label>
-        <input type="text" id="SP-export-packageName" name="packageName" value="" maxlength="50" required>
+        <input type="text" id="SP-export-packageName" name="packageName" value="{{packageName}}" maxlength="50" required>
       </div>
       <div class="form-group">
         <label for="SP-export-version">
           <b>{{localize 'SCENE-PACKER.exporter.options.version'}}</b>
           <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.version-help'}}"></i>
         </label>
-        <input type="text" id="SP-export-version" name="version" value="1.0.0" required>
+        <input type="text" id="SP-export-version" name="version" value="{{packageVersion}}" required>
       </div>
       <div class="form-group">
         <label for="SP-export-author">
           <b>{{localize 'SCENE-PACKER.exporter.options.author'}}</b>
           <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.author-help'}}"></i>
         </label>
-        <input type="text" id="SP-export-author" name="author" value="" required>
+        <input type="text" id="SP-export-author" name="author" value="{{packageAuthor}}" required>
       </div>
       <div class="form-group">
         <label for="SP-export-packageDescription">
           <b>{{localize 'SCENE-PACKER.exporter.options.package-description'}}</b>
           <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.package-description-help'}}"></i>
         </label>
-        <textarea id="SP-export-packageDescription" name="packageDescription" spellcheck="true" rows="6"></textarea>
+        <div class="package-description">
+          {{editor content=packageDescription target="packageDescription" button=false editable=true owner=true}}
+        </div>
       </div>
-      <div class="form-group">
+      <div class="form-group file-picker">
         <label for="SP-export-packageCover">
           <b>{{localize 'SCENE-PACKER.exporter.options.package-cover'}}</b>
           <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.package-cover-help'}}"></i>
         </label>
         <div class="form-fields">
-          <input type="text" id="SP-export-packageCover" name="packageCover" value="" placeholder="https://example.com/adventure.png">
+          <input type="text" id="SP-export-packageCover" name="packageCover" value="{{packageCover}}" placeholder="https://example.com/adventure.png">
           {{filePicker target="packageCover" type="image"}}
         </div>
       </div>
@@ -251,14 +253,14 @@
           <b>{{localize 'SCENE-PACKER.exporter.options.email'}}</b>
           <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.email-help'}}"></i>
         </label>
-        <input type="text" id="SP-export-email" name="email" value="">
+        <input type="text" id="SP-export-email" name="email" value="{{packageEmail}}">
       </div>
       <div class="form-group">
         <label for="SP-export-discordId">
           <b>{{localize 'SCENE-PACKER.exporter.options.discord-id'}}</b>
           <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.discord-id-help'}}"></i>
         </label>
-        <input type="text" id="SP-export-discordId" name="discordId" value="">
+        <input type="text" id="SP-export-discordId" name="discordId" value="{{packageDiscord}}">
       </div>
       <div class="form-group">
         <label for="SP-export-externalLink">
@@ -275,8 +277,10 @@
         <input type="text" id="SP-export-welcomeJournal" name="welcomeJournal" value="" placeholder="{{localize 'SCENE-PACKER.exporter.options.welcome-journal-drop-text'}}" autocomplete="off">
       </div>
       <div class="form-group">
-        <b>{{localize 'SCENE-PACKER.exporter.options.allow-complete-import'}}</b>
-        <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.allow-complete-import-help'}}"></i>
+        <div>
+          <b>{{localize 'SCENE-PACKER.exporter.options.allow-complete-import'}}</b>
+          <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.allow-complete-import-help'}}"></i>
+        </div>
         <label for="SP-export-allow-import-yes">
           <input type="radio" id="SP-export-allow-import-yes" name="allowCompleteImport" value="yes" checked>
           <b>{{localize 'Yes'}}</b>
@@ -288,10 +292,152 @@
       </div>
 
       <hr>
+      <div class="adventure-categorisation">
+        <h2>{{localize 'SCENE-PACKER.exporter.options.adventure-categorisation'}}</h2>
+        <div class="form-group">
+          <label for="SP-export-system">
+            <b>{{localize 'SCENE-PACKER.exporter.options.adventure-system'}}</b>
+            <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.adventure-system-help'}}"></i>
+          </label>
+          <input type="text" id="SP-export-system" name="system" value="{{adventureSystem}}" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label for="SP-export-adventureCategory">
+          <b>{{localize 'SCENE-PACKER.exporter.options.adventure-category'}}</b>
+          <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.adventure-category-help'}}"></i>
+          </label>
+          <label for="SP-export-duration">
+          <b>{{localize 'SCENE-PACKER.exporter.options.adventure-duration'}}</b>
+          <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.adventure-duration-help'}}"></i>
+          </label>
+        </div>
+        <div class="form-group">
+          <select id="SP-export-adventureCategory" name="adventureCategory">
+            {{selectOptions adventureCategoryOptions nameAttr="key" labelAttr="label" localize=true blank=""}}
+          </select>
+          <input type="number" id="SP-export-duration" name="duration" min="0" value="" placeholder="{{localize 'SCENE-PACKER.exporter.options.adventure-duration-placeholder'}}" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label for="SP-export-playersRecommended">
+            <b>{{localize 'SCENE-PACKER.exporter.options.adventure-players-recommended'}}</b>
+            <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.adventure-players-recommended-help'}}"></i>
+          </label>
+          <label for="SP-export-playersMin">
+            <b>{{localize 'SCENE-PACKER.exporter.options.adventure-players-min'}}</b>
+            <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.adventure-players-min-help'}}"></i>
+          </label>
+          <label for="SP-export-playersMax">
+            <b>{{localize 'SCENE-PACKER.exporter.options.adventure-players-max'}}</b>
+            <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.adventure-players-max-help'}}"></i>
+          </label>
+        </div>
+        <div class="form-group">
+          <input type="number" id="SP-export-playersRecommended" name="playersRecommended" min="0" value="" autocomplete="off">
+          <input type="number" id="SP-export-playersMin" name="playersMin" min="0" value="" autocomplete="off">
+          <input type="number" id="SP-export-playersMax" name="playersMax" min="0" value="" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label for="SP-export-playersMin">
+          <b>{{localize 'SCENE-PACKER.exporter.options.adventure-player-level'}}</b>
+          <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.adventure-player-level-help'}}"></i>
+          </label>
+          <div class="sp-player-levels flexcol">
+            <div class="form-group">
+              <input type="number" name="playerLevelRecommended" min="0" value="" placeholder="{{localize 'SCENE-PACKER.exporter.options.adventure-player-level-recommended-placeholder'}}" autocomplete="off">
+              <input type="number" name="playerLevelMin" min="0" value="" placeholder="{{localize 'SCENE-PACKER.exporter.options.adventure-player-level-min-placeholder'}}" autocomplete="off">
+              <input type="number" name="playerLevelMax" min="0" value="" placeholder="{{localize 'SCENE-PACKER.exporter.options.adventure-player-level-max-placeholder'}}" autocomplete="off">
+              <span class="spacer"></span>
+            </div>
+            <i id="SP-export-player-levels-add" class="fas fa-plus-circle" title="{{localize 'SCENE-PACKER.exporter.options.adventure-player-level-add'}}"></i>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="SP-export-grid">
+            <b>{{localize 'SCENE-PACKER.exporter.options.adventure-grid-type'}}</b>
+            <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.adventure-grid-type-help'}}"></i>
+          </label>
+          <div class="sp-tokenStyle">
+            <label for="SP-export-grid-square">
+              <input type="checkbox" id="SP-export-grid-square" name="grid" value="square" {{checked hasSquareGrids}}>
+              {{localize 'SCENE-PACKER.exporter.options.adventure-grid-type-square'}}
+            </label>
+            <label for="SP-export-grid-hex">
+              <input type="checkbox" id="SP-export-grid-hex" name="grid" value="hex" {{checked hasHexGrids}}>
+              {{localize 'SCENE-PACKER.exporter.options.adventure-grid-type-hex'}}
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="SP-export-tokenStyle">
+            <b>{{localize 'SCENE-PACKER.exporter.options.adventure-token-style'}}</b>
+            <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.adventure-token-style-help'}}"></i>
+          </label>
+          <div class="sp-tokenStyle">
+            <label for="SP-export-tokenStyle-topDown">
+              <input type="checkbox" id="SP-export-tokenStyle-topDown" name="tokenStyles" value="top-down">
+              {{localize 'SCENE-PACKER.exporter.options.adventure-token-style-top-down'}}
+            </label>
+            <label for="SP-export-tokenStyle-token">
+              <input type="checkbox" id="SP-export-tokenStyle-token" name="tokenStyles" value="token">
+              {{localize 'SCENE-PACKER.exporter.options.adventure-token-style-token'}}
+            </label>
+            <label for="SP-export-tokenStyle-iso">
+              <input type="checkbox" id="SP-export-tokenStyle-iso" name="tokenStyles" value="iso">
+              {{localize 'SCENE-PACKER.exporter.options.adventure-token-style-iso'}}
+            </label>
+            <label for="SP-export-tokenStyle-other">
+              <input type="checkbox" id="SP-export-tokenStyle-other" name="tokenStyles" value="other">
+              {{localize 'SCENE-PACKER.exporter.options.adventure-token-style-other'}}
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="SP-export-pregen" style="flex:3">
+            <b>{{localize 'SCENE-PACKER.exporter.options.adventure-pregen-characters'}}</b>
+            <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.adventure-pregen-characters-help'}}"></i>
+          </label>
+          <div class="sp-pregen">
+            <label for="SP-export-pregen-yes">
+              <input type="radio" id="SP-export-pregen-yes" name="pregen" value="yes">
+              {{localize 'Yes'}}
+            </label>
+            <label for="SP-export-pregen-no">
+              <input type="radio" id="SP-export-pregen-no" name="pregen" value="no" checked>
+              {{localize 'No'}}
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="SP-export-theme">
+          <b>{{localize 'SCENE-PACKER.exporter.options.adventure-theme'}}</b>
+          <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.adventure-theme-help'}}"></i>
+          </label>
+          <div class="form-group">
+            <input class="flex3" type="text" id="SP-export-theme" name="themes" value="" placeholder="{{localize 'SCENE-PACKER.exporter.options.adventure-theme-placeholder'}}" autocomplete="off">
+            <select id="SP-export-theme-suggestions" name="adventureThemeSuggestions">
+              {{selectOptions adventureThemeSuggestions nameAttr="key" labelAttr="label" localize=true blank="SCENE-PACKER.exporter.options.adventure-tag-suggestions"}}
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="SP-export-tags">
+            <b>{{localize 'SCENE-PACKER.exporter.options.adventure-tags'}}</b>
+            <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.adventure-tags-help'}}"></i>
+          </label>
+          <div class="form-group">
+            <input class="flex3" type="text" id="SP-export-tags" name="tags" value="" placeholder="{{localize 'SCENE-PACKER.exporter.options.adventure-tags-placeholder'}}" autocomplete="off">
+            <select id="SP-export-tags-suggestions" name="adventureTagSuggestions">
+              {{selectOptions adventureTagSuggestions nameAttr="key" labelAttr="label" localize=true blank="SCENE-PACKER.exporter.options.adventure-tag-suggestions"}}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <hr>
       <p>{{{localize 'SCENE-PACKER.exporter.options.next'}}}</p>
       <p>{{{localize 'SCENE-PACKER.exporter.options.help'}}}</p>
       <hr>
-      <p class="options-help"></p>
+      <p><i class="fas fa-money-bill-alt"></i> {{{localize 'SCENE-PACKER.exporter.options.support'}}} <i class="fas fa-smile"></i></p>
     </div>
   </section>
 
