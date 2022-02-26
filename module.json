@@ -4,7 +4,7 @@
   "description": "A module to assist with Scene and Adventure packing and unpacking.",
   "version": "2.4.0",
   "library": "true",
-  "manifestPlusVersion": "1.1.0",
+  "manifestPlusVersion": "1.2.0",
   "minimumCoreVersion": "0.7.9",
   "compatibleCoreVersion": "9",
   "author": "Blair McMillan",
@@ -24,6 +24,18 @@
     {
       "type": "cover",
       "url": "https://raw.githubusercontent.com/League-of-Foundry-Developers/scene-packer/main/assets/cover.png"
+    },
+    {
+      "type": "video",
+      "url": "https://www.youtube.com/watch?v=cG6qtoZPczI",
+      "thumbnail": "http://img.youtube.com/vi/cG6qtoZPczI/0.jpg",
+      "caption": "Scene Packer - How to convert a World to a Module (The Sky Isles)"
+    },
+    {
+      "type": "video",
+      "url": "https://www.youtube.com/watch?v=XZjuE1j_7GQ",
+      "thumbnail": "http://img.youtube.com/vi/XZjuE1j_7GQ/0.jpg",
+      "caption": "Scene Packer and Moulinette Integration"
     }
   ],
   "packs": [
