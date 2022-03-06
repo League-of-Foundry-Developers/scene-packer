@@ -4300,7 +4300,7 @@ export default class ScenePacker {
         const packs = game.packs.filter(p => {
           const isCorrectType = (p.documentName || p.entity) === type;
           const isCorrectModule = instance.packs.modules.includes(p.metadata.package);
-          const isCorrectSystem = typeof p.metadata.system === 'Undefined' || p.metadata.system === game.system.id;
+          const isCorrectSystem = typeof p.metadata.system === 'undefined' || p.metadata.system === game.system.id;
           return isCorrectType && isCorrectModule && isCorrectSystem;
         });
         for (const pack of packs) {
