@@ -8,6 +8,8 @@
 
 ![Scene Packer - Moulinette export settings example](https://raw.githubusercontent.com/League-of-Foundry-Developers/scene-packer/main/assets/scene-packer-moulinette-export-settings.png)
 
+- Fixed typo that would prevent Relinking entities in some circumstances
+
 ## v2.4.0
 
 - New feature: Distributing packed scenes and adventures via [Moulinette](https://www.moulinette.cloud/)
