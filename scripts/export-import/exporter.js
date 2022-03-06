@@ -62,6 +62,7 @@ export default class Exporter extends FormApplication {
       {key: 'mega-dungeon', label: 'SCENE-PACKER.exporter.options.adventure-themes.mega-dungeon'},
       {key: 'shadowfell', label: 'SCENE-PACKER.exporter.options.adventure-themes.shadowfell'},
       {key: 'air', label: 'SCENE-PACKER.exporter.options.adventure-themes.air'},
+      {key: 'heist', label: 'SCENE-PACKER.exporter.options.adventure-themes.heist'},
     ];
     this.adventureThemeSuggestions = new Set();
     const themeSuggestions = game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_THEMES);
