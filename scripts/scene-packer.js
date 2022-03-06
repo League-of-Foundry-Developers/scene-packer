@@ -484,6 +484,7 @@ export default class ScenePacker {
               newFlags['core'] = {sourceId: c.uuid};
               if (CONSTANTS.IsV8orNewer()) {
                 cData = collection.fromCompendium(c);
+                cData._id = c.id; // Preserve the original ID
               }
               if (!cData.flags) {
                 cData.flags = {};
