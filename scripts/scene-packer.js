@@ -484,6 +484,7 @@ export default class ScenePacker {
               newFlags['core'] = {sourceId: c.uuid};
               if (CONSTANTS.IsV8orNewer()) {
                 cData = collection.fromCompendium(c);
+                cData._id = c.id; // Preserve the original ID
               }
               if (!cData.flags) {
                 cData.flags = {};
@@ -4300,7 +4301,7 @@ export default class ScenePacker {
         const packs = game.packs.filter(p => {
           const isCorrectType = (p.documentName || p.entity) === type;
           const isCorrectModule = instance.packs.modules.includes(p.metadata.package);
-          const isCorrectSystem = typeof p.metadata.system === 'Undefined' || p.metadata.system === game.system.id;
+          const isCorrectSystem = typeof p.metadata.system === 'undefined' || p.metadata.system === game.system.id;
           return isCorrectType && isCorrectModule && isCorrectSystem;
         });
         for (const pack of packs) {
@@ -5268,6 +5269,41 @@ Hooks.once('setup', () => {
     type: Exporter,
     restricted: true,
   })
+
+  game.settings.register(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_AUTHOR, {
+    scope: 'client',
+    config: false,
+    type: String,
+    default: false,
+  });
+
+  game.settings.register(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_DISCORD, {
+    scope: 'client',
+    config: false,
+    type: String,
+    default: false,
+  });
+
+  game.settings.register(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_EMAIL, {
+    scope: 'client',
+    config: false,
+    type: String,
+    default: false,
+  });
+
+  game.settings.register(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_TAGS, {
+    scope: 'client',
+    config: false,
+    type: Array,
+    default: false,
+  });
+
+  game.settings.register(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_THEMES, {
+    scope: 'client',
+    config: false,
+    type: Array,
+    default: false,
+  });
 });
 
 /**
