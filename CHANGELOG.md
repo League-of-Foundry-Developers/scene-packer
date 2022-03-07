@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.4.2
+
+- Ensure that scenes imported from a compendium have a default navigation value set.
+  - Works around this issue until it is fixed in core: https://gitlab.com/foundrynet/foundryvtt/-/issues/6812
+
 ## v2.4.1
 
 - Improved Moulinette Exporter

@@ -4245,6 +4245,11 @@ export default class ScenePacker {
    * @return {Promise<void>}
    */
   static async updateEntityDefaultPermission(entity) {
+    // Ensure that there's a default permission set
+    if (entity.data?.permission && typeof entity.data.permission.default === 'undefined') {
+      await entity.update({permission: {default: CONST.ENTITY_PERMISSIONS.NONE}});
+    }
+
     const sourceId = entity.getFlag('core', 'sourceId');
     if (!sourceId) {
       return;
@@ -4256,8 +4261,8 @@ export default class ScenePacker {
     if (sourceId.startsWith('Compendium.scene-packer') || scenePackerInstances.some(p => sourceId.startsWith(`Compendium.${p}.`))) {
       // Import was from an active Scene Packer compendium, update the default permission if possible
       const defaultPermission = entity.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_DEFAULT_PERMISSION);
-      if (defaultPermission && typeof entity.data?.permission?.default !== 'undefined' && entity.data?.permission?.default !== defaultPermission) {
-        entity.update({permission: {default: defaultPermission}});
+      if (defaultPermission && entity.data?.permission?.default !== defaultPermission) {
+        await entity.update({permission: {default: defaultPermission}});
       }
     }
   }
