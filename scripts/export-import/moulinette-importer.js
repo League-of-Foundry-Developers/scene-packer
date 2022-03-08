@@ -50,6 +50,7 @@ export default class MoulinetteImporter extends FormApplication {
 
     this.processing = false;
     this.processingMessage = '';
+    this.errorMessage = '';
     this.loading = true;
 
     if (!this.packInfo || !this.packInfo['mtte.json']) {
@@ -59,6 +60,8 @@ export default class MoulinetteImporter extends FormApplication {
         true,
         game.i18n.localize('SCENE-PACKER.importer.invalid-pack-data'),
       );
+      this.errorMessage = game.i18n.localize('SCENE-PACKER.importer.invalid-pack-data');
+      this.render();
 
       return;
     }
@@ -126,6 +129,7 @@ export default class MoulinetteImporter extends FormApplication {
       totalPackCount: totalPackCount,
       processing: this.processing,
       processingMessage: this.processingMessage,
+      errorMessage: this.errorMessage,
       importType: this.importType,
       coverImage: coverImage,
     };

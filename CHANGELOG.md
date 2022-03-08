@@ -4,6 +4,8 @@
 
 - Ensure that scenes imported from a compendium have a default navigation value set.
   - Works around this issue until it is fixed in core: https://gitlab.com/foundrynet/foundryvtt/-/issues/6812
+- Moulinette Importer improvement
+  - Now shows an error message if it fails to download data from Moulinette correctly.
 - Bulk asset replacer now supports replacing scene thumbnails as well.
 
 ## v2.4.1

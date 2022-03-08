@@ -1,7 +1,11 @@
 {{#*inline "loading"}}
   <section class="content loading">
+    {{#unless errorMessage}}
     <div class="lds-ring"><div></div><div></div><div></div><div></div></div>
     <p>{{localize 'SCENE-PACKER.importer.loading'}}</p>
+    {{else}}
+      <p>{{errorMessage}}</p>
+    {{/unless}}
   </section>
 {{/inline}}
 
