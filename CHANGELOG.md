@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.4.2
+
+- Added support for [Monk's Enhanced Journal](https://foundryvtt.com/packages/monks-enhanced-journal) Encounters.
+- Ensure that scenes imported from a compendium have a default navigation value set.
+  - Works around this issue until it is fixed in core: https://gitlab.com/foundrynet/foundryvtt/-/issues/6812
+- Moulinette Importer improvement
+  - [Quick Encounters](https://foundryvtt.com/packages/quick-encounters) and [Monk's Enhanced Journal](https://foundryvtt.com/packages/monks-enhanced-journal) Encounters are now supported.
+  - Added several new categorisation values.
+  - Now shows an error message if it fails to download data from Moulinette correctly.
+- Bulk asset replacer now supports replacing scene thumbnails as well.
+
 ## v2.4.1
 
 - Improved Moulinette Exporter

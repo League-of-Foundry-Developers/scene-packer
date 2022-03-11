@@ -1,3 +1,5 @@
+import {CONSTANTS} from '../../constants.js';
+import {ExtractRelatedActiveTileData} from './active-tiles.js';
 import {ExtractUUIDsFromContent, RelatedData, ResolvePath} from './related-data.js';
 
 /**
@@ -40,7 +42,111 @@ export function ExtractRelatedJournalData(journal) {
     }
   }
 
-  // TODO Extract Quick Encounter data
+  relatedData.AddRelatedData(ExtractRelatedQuickEncounterData(journal));
+  relatedData.AddRelatedData(ExtractRelatedEnhancedJournalData(journal));
 
   return relatedData;
+}
+
+/**
+ * ExtractRelatedQuickEncounterData - extracts the entity UUIDs that are related to the Quick Encounter embedded within the journal entry.
+ * @param {JournalEntry|ClientDocumentMixin} journal - the journal to extract the related data from.
+ * @return {RelatedData}
+ */
+export function ExtractRelatedQuickEncounterData(journal) {
+  const relatedData = new RelatedData();
+  if (!journal) {
+    return relatedData;
+  }
+
+  let quickEncounter = {};
+  const path = 'flags.quick-encounters.quickEncounter';
+  const quickEncounterData = getProperty(journal.data, path);
+  if (!quickEncounterData) {
+    return relatedData;
+  }
+
+  try {
+    if (typeof quickEncounterData === 'string') {
+      quickEncounter = JSON.parse(quickEncounterData);
+    } else if (typeof quickEncounterData === 'object') {
+      quickEncounter = quickEncounterData;
+    }
+    if (!quickEncounter) {
+      return relatedData;
+    }
+  } catch (e) {
+    return relatedData;
+  }
+
+  const id = journal.id || journal._id;
+  const uuid = journal.uuid || `${JournalEntry.documentName}.${id}`;
+
+  if (quickEncounter.journalEntryId) {
+    const journal = game.journal.find((a) => {
+      return (
+        (a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === quickEncounter.journalEntryId ||
+          a.getFlag('core', 'sourceId') === quickEncounter.journalEntryId ||
+          a.id === quickEncounter.journalEntryId) &&
+        !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated')
+      );
+    });
+    if (journal && journal.id !== id) {
+      const journalUUID = journal.uuid || `Journal.${journal.id}`;
+      relatedData.AddRelation(uuid, {uuid: journalUUID, path});
+    }
+  }
+
+  if (quickEncounter.extractedActors) {
+    for (let i = 0; i < quickEncounter.extractedActors.length; i++) {
+      const extractedActor = quickEncounter.extractedActors[i];
+      const actor = game.actors.find((a) => {
+        return (
+          (a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === extractedActor.actorID ||
+            a.getFlag('core', 'sourceId') === extractedActor.actorID ||
+            a.id === extractedActor.actorID) &&
+          !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated')
+        );
+      });
+      if (actor) {
+        relatedData.AddRelation(uuid, {uuid: actor.uuid, path});
+      }
+    }
+  }
+
+  relatedData.AddRelatedData(ExtractRelatedActiveTileData(quickEncounter.savedTilesData, uuid));
+
+  return relatedData;
+}
+
+/**
+ * ExtractRelatedEnhancedJournalData - extracts the entity UUIDs that are related to Monk's Enhanced Journal data.
+ * @param {JournalEntry|ClientDocumentMixin} journal - the journal to extract the related data from.
+ * @return {RelatedData}
+ */
+export function ExtractRelatedEnhancedJournalData(journal) {
+  const relatedData = new RelatedData();
+  if (!journal) {
+    return relatedData;
+  }
+
+  const enhancedJournalData = getProperty(journal, 'data.flags.monks-enhanced-journal');
+  if (!enhancedJournalData) {
+    return relatedData;
+  }
+
+  const id = journal.id || journal._id;
+  const uuid = journal.uuid || `${JournalEntry.documentName}.${id}`;
+
+  for (const relationship of enhancedJournalData.relationships || []) {
+    if (relationship?.id) {
+      relatedData.AddRelation(uuid, {uuid: `Journal.${relationship.id}`, path: 'flags.monks-enhanced-journal.relationships'});
+    }
+  }
+
+  for (const actor of enhancedJournalData.actors || []) {
+    if (actor?.uuid) {
+      relatedData.AddRelation(uuid, {uuid: actor.uuid, path: 'flags.monks-enhanced-journal.actors'});
+    }
+  }
 }

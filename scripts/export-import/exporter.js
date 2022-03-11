@@ -34,6 +34,7 @@ export default class Exporter extends FormApplication {
       {key: 'short-campaign', label: 'SCENE-PACKER.exporter.options.adventure-category-short-campaign'},
       {key: 'long-campaign', label: 'SCENE-PACKER.exporter.options.adventure-category-long-campaign'},
       {key: 'prefab', label: 'SCENE-PACKER.exporter.options.adventure-category-prefab'},
+      {key: 'supplement', label: 'SCENE-PACKER.exporter.options.adventure-category-supplement'},
     ];
 
     const adventureThemeSuggestions = [

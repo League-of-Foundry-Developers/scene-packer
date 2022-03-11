@@ -576,7 +576,7 @@ export default class ScenePacker {
                   let needsUpdate = false;
                   for (let companionData of automatedEvocationsCompanions) {
                     // Look for the new entity and update the reference
-                    const newCompanion = this.findEntity(`Actor.${companionData.id}`);
+                    const newCompanion = ScenePacker.FindEntity(`Actor.${companionData.id}`);
                     if (newCompanion?.id) {
                       companionData.id = newCompanion.id;
                       needsUpdate = true;
@@ -1465,7 +1465,7 @@ export default class ScenePacker {
                         if (!sourceId) {
                           continue;
                         }
-                        const localScene = instance.findEntity(sourceId);
+                        const localScene = instance.FindEntity(sourceId);
                         if (!localScene?.id) {
                           continue;
                         }
@@ -2969,7 +2969,7 @@ export default class ScenePacker {
   findMissingEntities(entities) {
     const response = [];
     for (const entity of entities) {
-      const existingEntity = this.findEntity(entity.sourceId);
+      const existingEntity = ScenePacker.FindEntity(entity.sourceId);
       if (!existingEntity) {
         response.push(entity);
       }
@@ -2982,7 +2982,7 @@ export default class ScenePacker {
    * @param {String} entityReference - The reference to the entity. For example "Scene.WUrQ30AHjLwcBrmZ"
    * @returns {Object}
    */
-  findEntity(entityReference) {
+  static FindEntity(entityReference) {
     if (!entityReference) {
       return undefined;
     }
@@ -3152,7 +3152,7 @@ export default class ScenePacker {
       }
     }
 
-    const existingEntity = this.findEntity(entityReference);
+    const existingEntity = ScenePacker.FindEntity(entityReference);
     if (existingEntity) {
       const compendiumSourceId = existingEntity.getFlag('core', 'sourceId');
       if (compendiumSourceId && searchPacks.some(p => compendiumSourceId.startsWith(`Compendium.${p}.`))) {
@@ -3755,7 +3755,7 @@ export default class ScenePacker {
                 return response;
               }
               const entityType = entityParts[0];
-              const entity = this.findEntity(ref);
+              const entity = ScenePacker.FindEntity(ref);
               const compendiumEntity = await this.findCompendiumEntity(
                 ref,
                 entity?.name,
@@ -3802,7 +3802,7 @@ export default class ScenePacker {
 
     const findNewEntityValue = async (value, action, tile, compendiumSourceId) => {
       let newEntity;
-      newEntity = this.findEntity(value);
+      newEntity = ScenePacker.FindEntity(value);
       if (!newEntity) {
         // Try to find the entity by compendium reference
         if (compendiumSourceId) {
@@ -3964,6 +3964,64 @@ export default class ScenePacker {
       tilesCount,
       actionsCount,
       updates,
+    }
+  }
+
+  /**
+   * Unpacks and relinks Monk's Enhanced Journal Encounter data.
+   * @param {JournalEntry} journal - The journal entry to process.
+   */
+  static async UnpackEnhancedJournalData(journal) {
+    if (!game.user.isGM) {
+      return;
+    }
+
+    if (!journal?.data) {
+      return;
+    }
+
+    if (!getProperty(journal, 'data.flags.scene-packer')) {
+      return;
+    }
+
+    const encounterData = getProperty(journal, 'data.flags.monks-enhanced-journal');
+    if (encounterData?.type !== 'encounter') {
+      return;
+    }
+    const actors = encounterData.actors || [];
+    if (!actors.length) {
+      return;
+    }
+
+    let hasChanges = false;
+    for (const actor of actors) {
+      const newRef = ScenePacker.FindEntity(actor.uuid);
+      if (!newRef || newRef.uuid === actor.uuid) {
+        continue;
+      }
+
+      ScenePacker.logType(
+        CONSTANTS.MODULE_NAME,
+        'info',
+        false,
+        game.i18n.format(
+          'SCENE-PACKER.world-conversion.compendiums.monks-enhanced-journal-encounter.updating-references-console',
+          {
+            journal: journal.name,
+            oldRef: actor.uuid,
+            newRef: newRef.uuid,
+          },
+        ),
+      );
+      actor.uuid = newRef.uuid;
+
+      hasChanges = true;
+    }
+
+    if (hasChanges) {
+      await journal.update({
+        'flags.monks-enhanced-journal.actors': actors,
+      });
     }
   }
 
@@ -4245,6 +4303,11 @@ export default class ScenePacker {
    * @return {Promise<void>}
    */
   static async updateEntityDefaultPermission(entity) {
+    // Ensure that there's a default permission set
+    if (entity.data?.permission && typeof entity.data.permission.default === 'undefined') {
+      await entity.update({permission: {default: CONST.ENTITY_PERMISSIONS.NONE}});
+    }
+
     const sourceId = entity.getFlag('core', 'sourceId');
     if (!sourceId) {
       return;
@@ -4256,8 +4319,8 @@ export default class ScenePacker {
     if (sourceId.startsWith('Compendium.scene-packer') || scenePackerInstances.some(p => sourceId.startsWith(`Compendium.${p}.`))) {
       // Import was from an active Scene Packer compendium, update the default permission if possible
       const defaultPermission = entity.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_DEFAULT_PERMISSION);
-      if (defaultPermission && typeof entity.data?.permission?.default !== 'undefined' && entity.data?.permission?.default !== defaultPermission) {
-        entity.update({permission: {default: defaultPermission}});
+      if (defaultPermission && entity.data?.permission?.default !== defaultPermission) {
+        await entity.update({permission: {default: defaultPermission}});
       }
     }
   }
@@ -5395,6 +5458,7 @@ Hooks.on('createItem', async function (i) {
 });
 Hooks.on('createJournalEntry', async function (j) {
   await ScenePacker.updateEntityDefaultPermission(j);
+  await ScenePacker.UnpackEnhancedJournalData(j);
 });
 Hooks.on('createMacro', async function (m) {
   await ScenePacker.updateEntityDefaultPermission(m);
