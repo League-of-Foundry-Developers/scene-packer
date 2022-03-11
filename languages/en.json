@@ -371,6 +371,7 @@
         "adventure-category-short-campaign": "Short Campaign",
         "adventure-category-long-campaign": "Long Campaign",
         "adventure-category-prefab": "Prefab Actors",
+        "adventure-category-supplement": "Supplement",
         "adventure-duration": "Adventure Duration (hours)",
         "adventure-duration-help": "Approximately how long does the adventure take to complete?",
         "adventure-duration-placeholder": "Approximate play time in hours",
