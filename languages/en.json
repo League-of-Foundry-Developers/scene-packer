@@ -257,6 +257,9 @@
           "could-not-parse": "Could not parse quick encounter data for journal \"{journal}\". Error: {error}",
           "updating-references": "Changing {count} Quick Encounter references in: \"{journal}\"",
           "updating-references-console": "Changing {type} {name} reference {oldRef} -> {newRef}"
+        },
+        "monks-enhanced-journal-encounter": {
+          "updating-references-console": "Changing Monk's Enhanced Journal Encounter reference in \"{journal}\" {oldRef} -> {newRef}"
         }
       }
     },

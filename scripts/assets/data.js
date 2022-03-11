@@ -153,6 +153,18 @@ export class AssetData {
       );
     }
   }
+
+  /**
+   * Adds asset data references.
+   * @param {AssetData} assetData - The asset data to add.
+   */
+  AddAssetData(assetData) {
+    if (!assetData?.assets?.length) {
+      return;
+    }
+
+    this.assets.push(...assetData.assets);
+  }
 }
 
 /**
