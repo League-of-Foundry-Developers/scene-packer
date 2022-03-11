@@ -8,6 +8,10 @@ export const ItemDataLocations = [
   // dnd5e, pf2e, harn, alienrpg etc
   'data.description.value',
   'data.data.description.value',
+  'data.description.chat',
+  'data.data.description.chat',
+  'data.description.unidentified',
+  'data.data.description.unidentified',
 
   // pf2e
   'data.identification.identified.data.description.value',
