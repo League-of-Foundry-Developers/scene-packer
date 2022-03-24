@@ -113,28 +113,44 @@ Include the following in your [module javascript](https://foundryvtt.com/article
    * Set to the following to disable:
    *   const creaturePacks = [];
    */
-  const creaturePacks = [`${moduleName}.actors`, 'dnd5e.monsters'];
+  const creaturePacks = [];
   /**
    * journalPacks is a list of compendium packs to look in for Journals by name (in prioritised order).
    * The first entry here assumes that you have a Journal pack in your module with the "name" of "journals".
    * Set to the following to disable:
    *   const journalPacks = [];
    */
-  const journalPacks = [`${moduleName}.journals`];
+  const journalPacks = [];
   /**
    * macroPacks is a list of compendium packs to look in for Macros by name (in prioritised order).
    * The first entry here assumes that you have a Macro pack in your module with the "name" of "macros".
    * Set to the following to disable:
    *   const macroPacks = [];
    */
-  const macroPacks = [`${moduleName}.macros`];
+  const macroPacks = [];
   /**
    * playlistPacks is a list of compendium packs to look in for Playlists by name (in prioritised order).
    * The first entry here assumes that you have a Playlist pack in your module with the "name" of "playlists".
    * Set to the following to disable:
    *   const playlistPacks = [];
    */
-  const playlistPacks = [`${moduleName}.playlists`];
+  const playlistPacks = [];
+  /**
+   * additionalModulePacks is a list of modules whose compendium packs can be looked in for entities by name (in prioritised order).
+   * Enter just the "name" of the module/s or system/s you want to be considered.
+   *
+   * By default, all packs within your module will be included along with those from the dnd5e system.
+   *
+   * For example, if you wanted to allow the packs from
+   * the [Free Loot Tavern's Magic Item Vault]{@link https://foundryvtt.com/packages/free-loot-tavern-compendium}
+   * and [Dynamic Active Effects SRD]{@link https://foundryvtt.com/packages/Dynamic-Effects-SRD}
+   * modules to be searchable:
+   *   const additionalModulePacks= ['free-loot-tavern-compendium', 'Dynamic-Effects-SRD'];
+   *
+   * Set to the following to disable:
+   *   const additionalModulePacks = [];
+   */
+  const additionalModulePacks = [moduleName, 'dnd5e'];
 
   Hooks.once('scenePackerReady', ScenePacker => {
     // Initialise the Scene Packer with your adventure name and module name
@@ -145,6 +161,7 @@ Include the following in your [module javascript](https://foundryvtt.com/article
       journalPacks,
       macroPacks,
       playlistPacks,
+      additionalModulePacks,
       welcomeJournal,
       additionalJournals,
       additionalMacros,

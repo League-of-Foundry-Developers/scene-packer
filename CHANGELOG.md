@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.4.3
+
+- Enhance the methods of matching compendium entities to world entities to reduce the number of times that an existing entity is missed.
+  - When a world entity was incorrectly thought to be missing, Scene Packer would try to import it again. This was causing either duplicates, or an error due to a "unique key constraint".
+- Update references to deprecated methods that are being removed in V10.
+
 ## v2.4.2
 
 - Added support for [Monk's Enhanced Journal](https://foundryvtt.com/packages/monks-enhanced-journal) Encounters.

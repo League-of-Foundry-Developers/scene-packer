@@ -119,7 +119,7 @@ Hooks.once('setup', function () {
           // Need to specify the sourceId, so copied and modified from foundry.js
 
           // Step 1 - optionally, create a folder
-          if (FOLDER_ENTITY_TYPES.includes(this.entity)) {
+          if ((CONST.FOLDER_DOCUMENT_TYPES || CONST.FOLDER_ENTITY_TYPES).includes(this.entity)) {
             const f = folderId ? game.folders.get(folderId, {strict: true}) : await Folder.create({
               name: folderName || this.metadata.label,
               type: this.entity,
