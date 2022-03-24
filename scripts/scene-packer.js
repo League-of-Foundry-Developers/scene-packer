@@ -4305,7 +4305,8 @@ export default class ScenePacker {
   static async updateEntityDefaultPermission(entity) {
     // Ensure that there's a default permission set
     if (entity.data?.permission && typeof entity.data.permission.default === 'undefined') {
-      await entity.update({permission: {default: CONST.ENTITY_PERMISSIONS.NONE}});
+      const permissionOptions = CONST.DOCUMENT_PERMISSION_LEVELS || CONST.ENTITY_PERMISSIONS;
+      await entity.update({permission: {default: permissionOptions.NONE}});
     }
 
     const sourceId = entity.getFlag('core', 'sourceId');
