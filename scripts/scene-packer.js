@@ -314,7 +314,7 @@ export default class ScenePacker {
       let label = game.i18n.localize('SCENE-PACKER.welcome.yes-all-fallback');
       if (CONSTANTS.IsV8orNewer()) {
         let totalCount = game.packs.filter(
-          (p) => p.metadata.package === this.moduleName,
+          (p) => (p.metadata.packageName || p.metadata.package) === this.moduleName,
         ).reduce((a, currentValue) => a + (currentValue?.index?.size || currentValue?.index?.length || 0), 0);
         label = game.i18n.format('SCENE-PACKER.welcome.yes-all', {
           count: new Intl.NumberFormat().format(totalCount),
@@ -334,11 +334,11 @@ export default class ScenePacker {
             label: game.i18n.localize('SCENE-PACKER.welcome.let-me-choose'),
             callback: () => {
               game.packs.filter(
-                (p) => p.metadata.package === this.moduleName && (p.documentName || p.entity) === 'Scene',
+                (p) => (p.metadata.packageName || p.metadata.package) === this.moduleName && (p.documentName || p.entity) === 'Scene',
               ).forEach(c => c.render(true));
               game.settings.set(this.moduleName, CONSTANTS.SETTING_PROMPTED, moduleVersion);
             },
-            condition: game.packs.filter((p) => p.metadata.package === this.moduleName && (p.documentName || p.entity) === 'Scene').length,
+            condition: game.packs.filter((p) => (p.metadata.packageName || p.metadata.package) === this.moduleName && (p.documentName || p.entity) === 'Scene').length,
           },
           close: {
             icon: '<i class="fas fa-times"></i>',
@@ -390,7 +390,7 @@ export default class ScenePacker {
         type: game.i18n.format(CONSTANTS.TYPE_HUMANISE[packType]),
       })}</p>`;
       di.render();
-      const packs = game.packs.filter((p) => p.metadata.package === this.moduleName && (p.documentName || p.entity) === packType);
+      const packs = game.packs.filter((p) => (p.metadata.packageName || p.metadata.package) === this.moduleName && (p.documentName || p.entity) === packType);
       for (let i = 0; i < packs.length; i++) {
         let createData = [];
         const pack = packs[i];
@@ -776,7 +776,7 @@ export default class ScenePacker {
     if (this.packs.modules.length) {
       const filteredPacks = game.packs.filter((p) => {
         const isCorrectType = (p.documentName || p.entity) === type;
-        const isCorrectModule = this.packs.modules.includes(p.metadata.package);
+        const isCorrectModule = this.packs.modules.includes(p.metadata.packageName || p.metadata.package);
         const isCorrectSystem = typeof p.metadata.system === 'undefined' || p.metadata.system === game.system.id;
         return isCorrectType && isCorrectModule && isCorrectSystem;
       });
@@ -787,7 +787,7 @@ export default class ScenePacker {
 
     if (!packs.size) {
       // No packs have explicitly been set, default to those belonging to this module
-      const filteredPacks = game.packs.filter(p => p.metadata.package === this.moduleName);
+      const filteredPacks = game.packs.filter(p => (p.metadata.packageName || p.metadata.package) === this.moduleName);
       for (const pack of filteredPacks) {
         packs.add(pack.collection);
       }
@@ -1433,7 +1433,7 @@ export default class ScenePacker {
                     if (!instance) {
                       return displaySummary(moduleName, missing);
                     }
-                    const packs = game.packs.filter(p => p.metadata.package === moduleName && (p.documentName || p.entity) === 'Scene');
+                    const packs = game.packs.filter(p => (p.metadata.packageName || p.metadata.package) === moduleName && (p.documentName || p.entity) === 'Scene');
                     if (!packs.length) {
                       return displaySummary(moduleName, missing);
                     }
@@ -1731,7 +1731,7 @@ export default class ScenePacker {
       ui.notifications.error(
         game.i18n.localize('SCENE-PACKER.notifications.find-journal-compendium.no-packs'),
       );
-      const packs = game.packs.filter(p => p.metadata.package === this.moduleName && (p.documentName || p.entity) === 'JournalEntry');
+      const packs = game.packs.filter(p => (p.metadata.packageName || p.metadata.package) === this.moduleName && (p.documentName || p.entity) === 'JournalEntry');
       const packOptions = packs.length ?
                           `"${packs.map(p => p.collection).join('", "')}"` :
                           game.i18n.localize('SCENE-PACKER.notifications.find-journal-compendium.no-packs-in-module');
@@ -1900,7 +1900,7 @@ export default class ScenePacker {
       ui.notifications.error(
         game.i18n.localize('SCENE-PACKER.notifications.actor-journal-compendium.no-packs'),
       );
-      const packs = game.packs.filter(p => p.metadata.package === this.moduleName && (p.documentName || p.entity) === 'Actor');
+      const packs = game.packs.filter(p => (p.metadata.packageName || p.metadata.package) === this.moduleName && (p.documentName || p.entity) === 'Actor');
       const packOptions = packs.length ?
                           `"${packs.map(p => p.collection).join('", "')}"` :
                           game.i18n.localize('SCENE-PACKER.notifications.find-actor-compendium.no-packs-in-module');
@@ -4319,10 +4319,10 @@ export default class ScenePacker {
     }
 
     locked = !!locked;
-    const compendiums = game.packs.filter(p => p.metadata.package === moduleName);
+    const compendiums = game.packs.filter(p => (p.metadata.packageName || p.metadata.package) === moduleName);
     const settings = {};
     compendiums.forEach((p) => {
-      settings[`${p.metadata.package}.${p.metadata.name}`] = {locked};
+      settings[`${(p.metadata.packageName || p.metadata.package)}.${p.metadata.name}`] = {locked};
     });
     if (Object.keys(settings).length) {
       let key = locked ?
@@ -4388,7 +4388,7 @@ export default class ScenePacker {
     }
 
     // Get all of the compendium packs that belong to the requested module
-    const allPacks = game.packs.filter(p => p.metadata.package === moduleName);
+    const allPacks = game.packs.filter(p => (p.metadata.packageName || p.metadata.package) === moduleName);
     const instance = new ScenePacker({moduleName});
     /**
      * @type {{ActorPacks: *[], ItemPacks: *[], ScenePacks: *[], JournalEntryPacks: *[], MacroPacks: *[], RollTablePacks: *[], PlaylistPacks: *[]}}
@@ -4407,7 +4407,7 @@ export default class ScenePacker {
       if (instance.packs.modules.length) {
         const packs = game.packs.filter(p => {
           const isCorrectType = (p.documentName || p.entity) === type;
-          const isCorrectModule = instance.packs.modules.includes(p.metadata.package);
+          const isCorrectModule = instance.packs.modules.includes((p.metadata.packageName || p.metadata.package));
           const isCorrectSystem = typeof p.metadata.system === 'undefined' || p.metadata.system === game.system.id;
           return isCorrectType && isCorrectModule && isCorrectSystem;
         });
@@ -4509,7 +4509,7 @@ export default class ScenePacker {
         typeName = 'table';
         break;
     }
-    for (const pack of entryPacks.filter(p => p.metadata.package === moduleName)) {
+    for (const pack of entryPacks.filter(p => (p.metadata.packageName || p.metadata.package) === moduleName)) {
       ui.notifications.info(
         game.i18n.format(
           'SCENE-PACKER.world-conversion.compendiums.checking-and-updating',

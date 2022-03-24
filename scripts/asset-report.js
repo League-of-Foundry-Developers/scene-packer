@@ -60,7 +60,7 @@ export default class AssetReport extends FormApplication {
             icon: '<i class="fas fa-atlas"></i>',
             label: game.i18n.localize('Module'),
             callback: () => {
-              let modules = game.data.modules.filter(m => m.packs?.length && m.active);
+              let modules = game.data.modules.filter(m => (m.data?.packs?.size || m.packs?.length) && m.active);
               let content = `<p>${game.i18n.localize('SCENE-PACKER.asset-report.module-select.mini')}</p>`;
               if (!modules.length) {
                 content += `<p>${game.i18n.localize('SCENE-PACKER.asset-report.module-select.none')}</p>`;
@@ -637,7 +637,7 @@ export default class AssetReport extends FormApplication {
    */
   async getPackContents(type) {
     const entities = [];
-    const modules = this.moduleToCheck.packs.filter(p => p.entity === type);
+    const modules = this.moduleToCheck.packs.filter(p => (p.type || p.entity) === type);
     for (let i = 0; i < modules.length; i++) {
       const module = modules[i];
       const pack = game.packs.get(`${module.package}.${module.name}`);
