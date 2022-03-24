@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.4.3
+
+- Update references to deprecated methods that are being removed in V10.
+
 ## v2.4.2
 
 - Added support for [Monk's Enhanced Journal](https://foundryvtt.com/packages/monks-enhanced-journal) Encounters.

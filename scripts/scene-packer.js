@@ -495,7 +495,7 @@ export default class ScenePacker {
               }
               cData.flags[CONSTANTS.MODULE_NAME].hash = Hash.SHA1(cData);
 
-              if ((CONST.FOLDER_ENTITY_TYPES || CONST.FOLDER_DOCUMENT_TYPES).includes(packType)) {
+              if ((CONST.FOLDER_DOCUMENT_TYPES || CONST.FOLDER_ENTITY_TYPES).includes(packType)) {
                 // Utilise the folder structure as defined by the Compendium Folder if it exists, otherwise
                 // fall back to the default folder.
                 const cfPath = cData.flags?.cf?.path;
@@ -635,7 +635,7 @@ export default class ScenePacker {
     if (!content.length) {
       return response;
     }
-    if (!(CONST.FOLDER_ENTITY_TYPES || CONST.FOLDER_DOCUMENT_TYPES).includes(entityType)) {
+    if (!(CONST.FOLDER_DOCUMENT_TYPES || CONST.FOLDER_ENTITY_TYPES).includes(entityType)) {
       // Entity type does not support folders
       return response;
     }
@@ -755,7 +755,7 @@ export default class ScenePacker {
 
   /**
    * Gets the compendium search packs for the requested type.
-   * @param {String} type - The type to search for. One of CONST.COMPENDIUM_ENTITY_TYPES (['Actor', 'Item', 'Scene', 'JournalEntry', 'Macro', 'RollTable', 'Playlist'])
+   * @param {String} type - The type to search for. One of CONST.COMPENDIUM_DOCUMENT_TYPES (['Actor', 'Cards', 'Item', 'JournalEntry', 'Macro', 'Playlist', 'RollTable', 'Scene', 'Adventure'])
    */
   getSearchPacksForType(type) {
     const packs = new Set();
@@ -4351,8 +4351,9 @@ export default class ScenePacker {
      * @type {{ActorPacks: *[], ItemPacks: *[], ScenePacks: *[], JournalEntryPacks: *[], MacroPacks: *[], RollTablePacks: *[], PlaylistPacks: *[]}}
      */
     const packs = {};
-    for (let i = 0; i < CONST.COMPENDIUM_ENTITY_TYPES.length; i++) {
-      const type = CONST.COMPENDIUM_ENTITY_TYPES[i];
+    const compendiumTypes = CONST.COMPENDIUM_DOCUMENT_TYPES || CONST.COMPENDIUM_ENTITY_TYPES;
+    for (let i = 0; i < compendiumTypes.length; i++) {
+      const type = compendiumTypes[i];
       const uniquePacks = new Set(allPacks.filter((p) => {
         if (CONSTANTS.IsV8orNewer()) {
           return p.documentName === type;
