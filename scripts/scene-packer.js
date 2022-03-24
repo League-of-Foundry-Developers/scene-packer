@@ -445,7 +445,7 @@ export default class ScenePacker {
             let sourceId = e.getFlag(CONSTANTS.MODULE_NAME, 'sourceId');
             let coreSourceId = e.getFlag('core', 'sourceId');
             if (sourceId || coreSourceId) {
-              const existingEntries = collection.filter(f => (sourceId && f.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === sourceId) || (coreSourceId && f.getFlag('core', 'sourceId') === coreSourceId));
+              const existingEntries = collection.filter(f => f.id === e.id || (sourceId && f.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === sourceId) || (coreSourceId && f.getFlag('core', 'sourceId') === coreSourceId));
               if (existingEntries.length && forceImport && renameOriginals) {
                 // Update the existing entry names
                 const newFlags = {};
