@@ -3422,18 +3422,60 @@ export default class ScenePacker {
       }
     }
 
+    if (!collection) {
+      return;
+    }
+
+    const existing = collection.get(entity.id);
+    if (existing) {
+      return existing;
+    }
+
     const hasUuid = !!entity.uuid;
-    const hasSourceId = !!entity.getFlag(CONSTANTS.MODULE_NAME, 'sourceId');
+    const entityCoreSourceId = entity.getFlag('core', 'sourceId');
+    const entitySourceId = entity.getFlag(CONSTANTS.MODULE_NAME, 'sourceId');
+    const hasSourceId = !!entitySourceId;
+
     const existingEntities = collection.filter(p => {
-      return (hasUuid && p.getFlag('core', 'sourceId') === entity.uuid) ||
-        (hasSourceId && p.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === entity.getFlag(CONSTANTS.MODULE_NAME, 'sourceId'));
+      const coreSourceId = p.getFlag('core', 'sourceId');
+      const sourceId = p.getFlag(CONSTANTS.MODULE_NAME, 'sourceId');
+
+      if (hasUuid && coreSourceId === entity.uuid) {
+        return true;
+      }
+
+      if (hasSourceId && sourceId === entitySourceId) {
+        return true;
+      }
+
+      if (coreSourceId === `${type}.${entity.id}`) {
+        return true;
+      }
+
+      if (sourceId === `${type}.${entity.id}`) {
+        return true;
+      }
+
+      if (coreSourceId && coreSourceId === entityCoreSourceId) {
+        return true;
+      }
+
+      if (entityCoreSourceId && entityCoreSourceId === p.uuid) {
+        return true;
+      }
+
+      if (entitySourceId && entitySourceId === p.uuid) {
+        return true;
+      }
+
+      return false;
     });
     if (existingEntities.length) {
       if (existingEntities.length === 1) {
         return existingEntities[0];
       }
       // Multiple matches exist, prefer a local source
-      const existingEntity = collection.find(p => p.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === entity.getFlag(CONSTANTS.MODULE_NAME, 'sourceId'));
+      const existingEntity = collection.find(p => hasSourceId && p.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === entitySourceId);
       if (existingEntity) {
         return existingEntity;
       }
