@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.4.4
+
+- Further enhance the methods of matching added in v2.4.3.
+
 ## v2.4.3
 
 - Enhance the methods of matching compendium entities to world entities to reduce the number of times that an existing entity is missed.
