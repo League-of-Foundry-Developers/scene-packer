@@ -4776,6 +4776,20 @@ export default class ScenePacker {
           },
         ),
       );
+      ScenePacker.logType(
+        moduleName,
+        'error',
+        true,
+        containerName,
+        game.i18n.format(
+          'SCENE-PACKER.world-conversion.compendiums.invalid-ref-type',
+          {
+            type: type,
+          },
+        ),
+        entry,
+        oldRef,
+      );
       return [];
     }
     let entity = collection.get(oldRef);
