@@ -4346,9 +4346,15 @@ export default class ScenePacker {
    */
   static async updateEntityDefaultPermission(entity) {
     // Ensure that there's a default permission set
-    if (entity.data?.permission && typeof entity.data.permission.default === 'undefined') {
-      const permissionOptions = CONST.DOCUMENT_PERMISSION_LEVELS || CONST.ENTITY_PERMISSIONS;
-      await entity.update({permission: {default: permissionOptions.NONE}});
+    if (CONSTANTS.IsV10orNewer()) {
+      if (entity.ownership && typeof entity.ownership.default === 'undefined') {
+        await entity.updateSource({ownership: {default: CONST.DOCUMENT_OWNERSHIP_LEVELS.NONE}});
+      }
+    } else {
+      if (entity.data?.permission && typeof entity.data.permission.default === 'undefined') {
+        const permissionOptions = CONST.DOCUMENT_PERMISSION_LEVELS || CONST.ENTITY_PERMISSIONS;
+        await entity.update({permission: {default: permissionOptions.NONE}});
+      }
     }
 
     const sourceId = entity.getFlag('core', 'sourceId');
@@ -4362,8 +4368,13 @@ export default class ScenePacker {
     if (sourceId.startsWith('Compendium.scene-packer') || scenePackerInstances.some(p => sourceId.startsWith(`Compendium.${p}.`))) {
       // Import was from an active Scene Packer compendium, update the default permission if possible
       const defaultPermission = entity.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_DEFAULT_PERMISSION);
-      if (defaultPermission && entity.data?.permission?.default !== defaultPermission) {
-        await entity.update({permission: {default: defaultPermission}});
+      const currentPermission = entity.ownership?.default || entity.data?.permission?.default;
+      if (defaultPermission && currentPermission !== defaultPermission) {
+        if (CONSTANTS.IsV10orNewer()) {
+          await entity.updateSource({ownership: {default: defaultPermission}});
+        } else {
+          await entity.update({permission: {default: defaultPermission}});
+        }
       }
     }
   }
@@ -5508,27 +5519,33 @@ Hooks.on('ready', () => {
  * Hook into the create methods to set default permission levels for entities coming from Scene Packer
  * enabled modules.
  */
-Hooks.on('createActor', async function (a) {
+Hooks.on('preCreateActor', async function (a) {
   await ScenePacker.updateEntityDefaultPermission(a);
 });
-Hooks.on('createItem', async function (i) {
+Hooks.on('preCreateItem', async function (i) {
   await ScenePacker.updateEntityDefaultPermission(i);
 });
-Hooks.on('createJournalEntry', async function (j) {
+Hooks.on('preCreateJournalEntry', async function (j) {
   await ScenePacker.updateEntityDefaultPermission(j);
-  await ScenePacker.UnpackEnhancedJournalData(j);
 });
-Hooks.on('createMacro', async function (m) {
+Hooks.on('preCreateMacro', async function (m) {
   await ScenePacker.updateEntityDefaultPermission(m);
 });
-Hooks.on('createPlaylist', async function (p) {
+Hooks.on('preCreatePlaylist', async function (p) {
   await ScenePacker.updateEntityDefaultPermission(p);
 });
-Hooks.on('createRollTable', async function (r) {
+Hooks.on('preCreateRollTable', async function (r) {
   await ScenePacker.updateEntityDefaultPermission(r);
 });
-Hooks.on('createScene', async function (s) {
+Hooks.on('preCreateScene', async function (s) {
   await ScenePacker.updateEntityDefaultPermission(s);
+});
+
+/**
+ * Hook into journal creation to unpack Monk's Enhanced Journal data if needed.
+ */
+Hooks.on('createJournalEntry', async function (j) {
+  await ScenePacker.UnpackEnhancedJournalData(j);
 });
 
 /**
