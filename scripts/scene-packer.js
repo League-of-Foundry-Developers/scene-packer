@@ -5519,25 +5519,25 @@ Hooks.on('ready', () => {
  * Hook into the create methods to set default permission levels for entities coming from Scene Packer
  * enabled modules.
  */
-Hooks.on('preCreateActor', async function (a) {
+Hooks.on('createActor', async function (a) {
   await ScenePacker.updateEntityDefaultPermission(a);
 });
-Hooks.on('preCreateItem', async function (i) {
+Hooks.on('createItem', async function (i) {
   await ScenePacker.updateEntityDefaultPermission(i);
 });
-Hooks.on('preCreateJournalEntry', async function (j) {
+Hooks.on('createJournalEntry', async function (j) {
   await ScenePacker.updateEntityDefaultPermission(j);
 });
-Hooks.on('preCreateMacro', async function (m) {
+Hooks.on('createMacro', async function (m) {
   await ScenePacker.updateEntityDefaultPermission(m);
 });
-Hooks.on('preCreatePlaylist', async function (p) {
+Hooks.on('createPlaylist', async function (p) {
   await ScenePacker.updateEntityDefaultPermission(p);
 });
-Hooks.on('preCreateRollTable', async function (r) {
+Hooks.on('createRollTable', async function (r) {
   await ScenePacker.updateEntityDefaultPermission(r);
 });
-Hooks.on('preCreateScene', async function (s) {
+Hooks.on('createScene', async function (s) {
   await ScenePacker.updateEntityDefaultPermission(s);
 });
 
