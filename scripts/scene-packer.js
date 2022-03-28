@@ -1,6 +1,6 @@
 import AssetReport from './asset-report.js';
 import {Compressor} from './export-import/compressor.js';
-import {CONSTANTS, FakeEntity} from './constants.js';
+import {CONSTANTS} from './constants.js';
 import Exporter from './export-import/exporter.js';
 import Hash from './hash.js';
 import MoulinetteImporter from './export-import/moulinette-importer.js';

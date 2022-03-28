@@ -282,15 +282,6 @@ export const IsUsingTheForge = () => {
 };
 
 /**
- * Fake Entity is used in place of a real entity, for times when operating against a real entity would throw errors.
- * @type {{update: FakeEntity.update}}
- */
-export const FakeEntity = {
-  update: () => {
-  },
-};
-
-/**
  * @typedef ImportedAllEntities
  * @property {string} moduleName - The module name.
  * @property {string} adventureName - The name of the adventure.
