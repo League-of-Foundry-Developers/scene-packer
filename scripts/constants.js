@@ -253,6 +253,24 @@ export const CONSTANTS = Object.freeze({
   IsV9(version = this.Version()) {
     return this.IsV9orNewer(version) && isNewerVersion('10', version);
   },
+
+  /**
+   * Returns whether the version is at least V10
+   * @param {string} version - The version to test. Defaults to the current game instance version.
+   * @return {boolean}
+   */
+  IsV10orNewer(version = this.Version()) {
+    return version === '10.0' || isNewerVersion(version, '10');
+  },
+
+  /**
+   * Returns whether the version is V10
+   * @param {string} version - The version to test. Defaults to the current game instance version.
+   * @return {boolean}
+   */
+  IsV10(version = this.Version()) {
+    return this.IsV10orNewer(version) && isNewerVersion('11', version);
+  },
 });
 
 /**

@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.5.0
+
+- Removed support for v0.7.X of Foundry VTT.
+  - Minimum supported version is now 0.8.6 (the earliest stable release in the v8 line).
+- Added support for v10 of Foundry VTT.
+  - Removed various warnings related to the new data models behind the scene.
+
 ## v2.4.4
 
 - Further enhance the methods of matching added in v2.4.3.
