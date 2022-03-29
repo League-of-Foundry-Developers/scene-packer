@@ -2707,16 +2707,17 @@ export default class ScenePacker {
     }
 
     if (folder?.id) {
-      actor = game.actors.contents.find(
-        (a) => a.data.name === tokenName && a.data.folder === folder.id && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated'),
-      );
+      actor = game.actors.contents.find((a) => {
+        const data = CONSTANTS.IsV10orNewer() ? a : a.data;
+        return data.name === tokenName && data.folder === folder.id && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated')
+      });
       if (actor) {
         // Found a direct Token <-> Actor name match in the Adventure folder
         return actor;
       }
     }
 
-    actor = game.actors.contents.find((a) => a.data.name === tokenName && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated'));
+    actor = game.actors.contents.find((a) => a.name === tokenName && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated'));
     if (actor) {
       // Found a direct Token <-> Actor name match in world
       return actor;
