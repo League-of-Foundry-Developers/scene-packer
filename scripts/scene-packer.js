@@ -2610,14 +2610,16 @@ export default class ScenePacker {
           folderNames.push(pack.metadata.label);
         }
       });
-      const folderIDs = game.folders.filter(
-        (j) => j.data.type === 'JournalEntry' && folderNames.includes(j.data.name),
-      ).map((f) => f.id);
+      const folderIDs = game.folders.filter((f) => {
+        const data = CONSTANTS.IsV10orNewer() ? f : f.data;
+        return data.type === 'JournalEntry' && folderNames.includes(data.name)
+        }).map((f) => f.id);
       missing = Array.from(missing_name_matches)
         .filter((info) => {
           // Filter for only the entries that are missing, or are in a different folder.
           const j = game.journal.getName(info?.journalName);
-          return j == null || (folderIDs.length && !folderIDs.includes(j.data.folder));
+          const jData = CONSTANTS.IsV10orNewer() ? j : j.data;
+          return j == null || (folderIDs.length && !folderIDs.includes(jData.folder));
         });
     }
 
