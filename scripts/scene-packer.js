@@ -3276,9 +3276,10 @@ export default class ScenePacker {
       await scene.update({initial: sceneInitialPosition});
     }
 
+    const sceneData = CONSTANTS.IsV10orNewer() ? scene : scene.data;
     if (scenePlaylist) {
       const playlist = await this.ImportByUuid(scenePlaylist);
-      if (playlist?.id !== scene.data.playlist) {
+      if (playlist?.id !== sceneData.playlist) {
         await scene.update({playlist: playlist.id});
       }
     }
@@ -3335,7 +3336,7 @@ export default class ScenePacker {
           showUI,
         )
       }
-      const activeTileResponse = await this.unpackActiveTiles(ScenePacker.GetActiveTilesData(scene.data.tiles), tilesInfo);
+      const activeTileResponse = await this.unpackActiveTiles(ScenePacker.GetActiveTilesData(sceneData.tiles), tilesInfo);
       if (activeTileResponse?.tilesCount && activeTileResponse?.actionsCount && activeTileResponse?.updates?.length) {
         await scene.updateEmbeddedDocuments('Tile', activeTileResponse.updates);
         this.log(
