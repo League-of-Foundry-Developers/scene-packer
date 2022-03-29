@@ -4267,24 +4267,35 @@ export default class ScenePacker {
         let content;
         switch (type) {
           case 'JournalEntryPacks':
-            content = document?.data?.content;
+            if (CONSTANTS.IsV10orNewer()) {
+              content = document?.content;
+            } else {
+              content = document?.data?.content;
+            }
             break;
           case 'ItemPacks':
-            content = document?.data?.data?.description?.value;
+            if (CONSTANTS.IsV10orNewer()) {
+              content = document?.system?.description?.value;
+            } else {
+              content = document?.data?.data?.description?.value;
+            }
             break;
           case 'RollTablePacks':
             // Rolltables don't have content like normal but instead have references to other results
-            for (const result of document?.data?.results || []) {
-              if (!result?.data?.resultId || !result?.data?.collection) {
+            const results = CONSTANTS.IsV10orNewer() ? document?.results : document?.data?.results;
+            for (const result of results || []) {
+              const resultId = CONSTANTS.IsV10orNewer() ? result?.resultId : result?.data?.resultId;
+              const collection = CONSTANTS.IsV10orNewer() ? result?.collection : result?.data?.collection;
+              if (!resultId || !collection) {
                 // This result is not a reference to another entity
                 continue;
               }
-              if ((result.data.collection || '').includes('.')) {
+              if ((collection || '').includes('.')) {
                 // This result is already a reference to a compendium
                 continue;
               }
-              const existingEntry = game.collections.get(result.data.collection)?.get(result.data.resultId);
-              let newRef = await this.findNewReferences(result.data.collection, existingEntry.id, existingEntry.name, existingEntry, document.name, moduleName, packs);
+              const existingEntry = game.collections.get(collection)?.get(resultId);
+              let newRef = await this.findNewReferences(collection, existingEntry.id, existingEntry.name, existingEntry, document.name, moduleName, packs);
               if (newRef.length !== 1) {
                 // Skip any reference update that isn't a one to one replacement
                 continue;
@@ -4298,8 +4309,8 @@ export default class ScenePacker {
                   {
                     pack: pack.collection,
                     journalEntryId: entry._id,
-                    type: result.data.collection,
-                    oldRef: result.data.resultId,
+                    type: collection,
+                    oldRef: resultId,
                     newRefPack: newRef[0].pack,
                     newRef: newRef[0].ref,
                   },
@@ -4469,7 +4480,12 @@ export default class ScenePacker {
                 await document.update({content: newContent}, {pack: pack.collection});
                 break;
               case 'ItemPacks':
-                await document.update({data: {description: {value: newContent}}}, {pack: pack.collection});
+                const update = {description: {value: newContent}};
+                if (CONSTANTS.IsV10orNewer()) {
+                  await document.update({system: update}, {pack: pack.collection});
+                } else {
+                  await document.update({data: update}, {pack: pack.collection});
+                }
                 break;
             }
           }
