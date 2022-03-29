@@ -1477,30 +1477,39 @@ export default class ScenePacker {
       }
     }
     await scene.setFlag(this.moduleName, CONSTANTS.FLAGS_SCENE_JOURNAL, sceneJournalInfo);
-    await scene.setFlag(this.moduleName, CONSTANTS.FLAGS_SCENE_POSITION, scene.data?.initial);
+
+    const initialSceneLocation = CONSTANTS.IsV10orNewer() ? scene.initial : scene.data?.initial;
+    if (initialSceneLocation) {
+      await scene.setFlag(this.moduleName, CONSTANTS.FLAGS_SCENE_POSITION, initialSceneLocation);
+    }
+
     if (scene.playlist) {
       const compendiumPlaylist = await this.FindPlaylistInCompendiums(scene.playlist, this.getSearchPacksForType('Playlist'));
       if (compendiumPlaylist) {
-        await scene.setFlag(this.moduleName, CONSTANTS.FLAGS_PLAYLIST, compendiumPlaylist?.uuid);
+        await scene.setFlag(this.moduleName, CONSTANTS.FLAGS_PLAYLIST, compendiumPlaylist.uuid);
       }
     }
 
+    const sceneNotes = CONSTANTS.IsV10orNewer() ? scene.notes : scene.data.notes;
     /**
      * journalInfo is the data that gets passed to findMissingJournals
      */
-    const journalInfoResults = await Promise.allSettled(scene.data.notes.map(async note => {
+    const journalInfoResults = await Promise.allSettled(sceneNotes.map(async note => {
       note = note.toObject();
       const journalData = game.journal.get(note.entryId);
       const compendiumJournal = await this.FindJournalInCompendiums(journalData, this.getSearchPacksForType('JournalEntry'));
 
       // Take a copy of the original note adding in the sourceId, journal name and folder name it belongs to
+      const folderId = CONSTANTS.IsV10orNewer() ? journalData?.folder : journalData?.data?.folder;
+      const folder = game.folders.get(folderId);
+      const folderName = CONSTANTS.IsV10orNewer() ? folder?.name : folder?.data?.name;
       return mergeObject(
         note,
         {
           sourceId: journalData?.uuid,
           compendiumSourceId: compendiumJournal?.uuid,
           journalName: journalData?.name,
-          folderName: game.folders.get(journalData?.data?.folder)?.data?.name,
+          folderName: folderName,
         },
         {inplace: false},
       );
@@ -1536,10 +1545,11 @@ export default class ScenePacker {
       );
     }
 
+    const sceneTiles = CONSTANTS.IsV10orNewer() ? scene.tiles : scene.data?.tiles;
     /**
      * tileInfo is the data referenced by Monk's Active Tile Triggers that needs packing.
      */
-    const tileInfo = await this.packActiveTiles(scene.data?.tiles);
+    const tileInfo = await this.packActiveTiles(sceneTiles);
 
     if (tileInfo.length > 0) {
       ui.notifications.info(
@@ -1566,10 +1576,11 @@ export default class ScenePacker {
       await scene.setFlag(this.moduleName, CONSTANTS.FLAGS_TILES, tileInfo);
     }
 
+    const sceneTokens = CONSTANTS.IsV10orNewer() ? scene.tokens : scene.data.tokens;
     /**
      * tokenInfo is the data that gets passed to findMissingTokens
      */
-    const tokenInfoResults = await Promise.allSettled(scene.data.tokens.filter(a => a?.actorId || a?.data?.actorId)
+    const tokenInfoResults = await Promise.allSettled(sceneTokens.filter(a => a?.actorId || a?.data?.actorId)
       .map(async token => {
         // Pull the sourceId of the actor, preferring the Actor entry in the module's compendium.
         let sourceId = '';
@@ -1585,7 +1596,9 @@ export default class ScenePacker {
             if (!sourceId) {
               sourceId = actor.uuid;
             }
-            if (actor.data?.name) {
+            if (CONSTANTS.IsV10orNewer() && actor.name) {
+              actorName = actor.name;
+            } else if (actor.data?.name) {
               actorName = actor.data.name;
             }
             compendiumSourceId = actor.getFlag('core', 'sourceId');
