@@ -3442,11 +3442,12 @@ export default class ScenePacker {
    * @return {boolean}
    */
   static ActorHasActiveTilesData(actor) {
-    if (!actor?.data) {
+    const data = CONSTANTS.IsV10orNewer() ? actor : actor?.data;
+    if (!data) {
       return false;
     }
 
-    let tokenAttacherData = getProperty(actor.data, 'token.flags.token-attacher.prototypeAttached');
+    let tokenAttacherData = getProperty(data, 'token.flags.token-attacher.prototypeAttached');
     if (!tokenAttacherData?.Tile?.length) {
       return false;
     }
@@ -3465,18 +3466,19 @@ export default class ScenePacker {
     }
 
     return tiles.filter(
-      (tile) =>
-        (getProperty(tile.data, 'flags.monks-active-tiles.actions') || getProperty(tile, 'flags.monks-active-tiles.actions') || [])
-          ?.filter(
-            (a) =>
-              a?.data?.macroid ||
-              a?.data?.entity?.id ||
-              a?.data?.item?.id ||
-              a?.data?.location?.id ||
-              a?.data?.location?.sceneId ||
-              a?.data?.rolltableid
-          ).length
-    );
+      (tile) => {
+        const tileData = CONSTANTS.IsV10orNewer() ? tile : tile?.data || tile;
+        const actions = getProperty(tileData, 'flags.monks-active-tiles.actions') || [];
+        actions.filter((a) => {
+          const data = CONSTANTS.IsV10orNewer() ? a : a?.data;
+          return data?.macroid ||
+            data?.entity?.id ||
+            data?.item?.id ||
+            data?.location?.id ||
+            data?.location?.sceneId ||
+            data?.rolltableid;
+        }).length;
+      });
   }
 
   /**
@@ -3491,16 +3493,18 @@ export default class ScenePacker {
 
     const tileInfoResults = await Promise.allSettled(
       ScenePacker.GetActiveTilesData(tiles).map(async (tile) => {
+        const tileData = CONSTANTS.IsV10orNewer() ? tile : tile?.data || tile;
         const actions = await Promise.allSettled(
-          (getProperty(tile.data, 'flags.monks-active-tiles.actions') || getProperty(tile, 'flags.monks-active-tiles.actions') || [])
-            .filter(
-              (a) => a?.data?.macroid ||
-                a?.data?.entity?.id ||
-                a?.data?.item?.id ||
-                a?.data?.location?.id ||
-                a?.data?.location?.sceneId ||
-                a?.data?.rolltableid
-            )
+          (getProperty(tileData, 'flags.monks-active-tiles.actions') || [])
+            .filter((a) => {
+              const data = CONSTANTS.IsV10orNewer() ? a : a?.data;
+              return data?.macroid ||
+                data?.entity?.id ||
+                data?.item?.id ||
+                data?.location?.id ||
+                data?.location?.sceneId ||
+                data?.rolltableid;
+            })
             .map(async (d) => {
               const response = {
                 action: d,
@@ -3511,18 +3515,19 @@ export default class ScenePacker {
                 entityType: undefined,
               };
               let ref;
-              if (d.data?.macroid) {
-                ref = d.data.macroid.startsWith('Macro.') ? d.data.macroid : `Macro.${d.data.macroid}`;
-              } else if (d.data?.location?.sceneId) {
-                ref = d.data.location.sceneId.startsWith('Scene.') ? d.data.location.sceneId : `Scene.${d.data.location.sceneId}`;
-              } else if (d.data?.location?.id) {
-                ref = d.data.location.id;
-              } else if (d.data?.rolltableid) {
-                ref = d.data.rolltableid.startsWith('RollTable.') ? d.data.rolltableid : `RollTable.${d.data.rolltableid}`;
-              } else if (d.data?.item?.id) {
-                ref = d.data.item.id;
-              } else if (d.data?.entity?.id) {
-                ref = d.data.entity.id;
+              const data = CONSTANTS.IsV10orNewer() ? d : d.data;
+              if (data?.macroid) {
+                ref = data.macroid.startsWith('Macro.') ? data.macroid : `Macro.${data.macroid}`;
+              } else if (data?.location?.sceneId) {
+                ref = data.location.sceneId.startsWith('Scene.') ? data.location.sceneId : `Scene.${data.location.sceneId}`;
+              } else if (data?.location?.id) {
+                ref = data.location.id;
+              } else if (data?.rolltableid) {
+                ref = data.rolltableid.startsWith('RollTable.') ? data.rolltableid : `RollTable.${data.rolltableid}`;
+              } else if (data?.item?.id) {
+                ref = data.item.id;
+              } else if (data?.entity?.id) {
+                ref = data.entity.id;
               }
               const entityParts = ref.split('.');
               if (entityParts.length < 2 ||
