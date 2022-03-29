@@ -3760,15 +3760,16 @@ export default class ScenePacker {
       return;
     }
 
-    if (!journal?.data) {
+    const journalData = CONSTANTS.IsV10orNewer() ? journal : journal?.data;
+    if (!journalData) {
       return;
     }
 
-    if (!getProperty(journal, 'data.flags.scene-packer')) {
+    if (!getProperty(journalData, 'flags.scene-packer')) {
       return;
     }
 
-    const encounterData = getProperty(journal, 'data.flags.monks-enhanced-journal');
+    const encounterData = getProperty(journalData, 'flags.monks-enhanced-journal');
     if (encounterData?.type !== 'encounter') {
       return;
     }
