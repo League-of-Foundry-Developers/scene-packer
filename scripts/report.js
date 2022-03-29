@@ -63,8 +63,8 @@ export default class Report {
    */
   static GetCoreDetails() {
     return {
-      Foundry: game.data.version,
-      System: `${game.system.id} version ${game.system.data.version}`,
+      Foundry: CONSTANTS.Version(),
+      System: `${game.system.id} version ${game.system.version || game.system.data.version}`,
     };
   }
 
