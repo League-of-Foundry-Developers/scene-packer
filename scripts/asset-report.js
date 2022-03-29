@@ -644,13 +644,8 @@ export default class AssetReport extends FormApplication {
       if (!pack) {
         continue;
       }
-      if (CONSTANTS.IsV8orNewer()) {
-        const contents = await pack.getDocuments();
-        entities.push(...contents.filter(s => s.name !== CONSTANTS.CF_TEMP_ENTITY_NAME));
-      } else {
-        const contents = await pack.getContent();
-        entities.push(...contents.filter(s => s.name !== CONSTANTS.CF_TEMP_ENTITY_NAME));
-      }
+      const contents = await pack.getDocuments();
+      entities.push(...contents.filter(s => s.name !== CONSTANTS.CF_TEMP_ENTITY_NAME));
     }
 
     return entities;
@@ -669,10 +664,8 @@ export default class AssetReport extends FormApplication {
     } else if (this.moduleToCheck) {
       const contents = await this.getPackContents('Scene');
       entities.push(...contents);
-    } else if (CONSTANTS.IsV8orNewer()) {
-      entities.push(...game[AssetReport.Sources.Scene].contents);
     } else {
-      entities.push(...game[AssetReport.Sources.Scene].entities);
+      entities.push(...game[AssetReport.Sources.Scene].contents);
     }
     for (let i = 0; i < entities.length; i++) {
       const scene = entities[i];
@@ -704,38 +697,20 @@ export default class AssetReport extends FormApplication {
       const tokens = [];
       const sounds = [];
 
-      if (CONSTANTS.IsV8orNewer()) {
-        if (scene.data.notes?.size) {
-          notes.push(...Array.from(scene.data.notes.values()));
-        }
-        if (scene.data.tiles?.size) {
-          tiles.push(...Array.from(scene.data.tiles.values()));
-        }
-        if (scene.data.drawings?.size) {
-          drawings.push(...Array.from(scene.data.drawings.values()));
-        }
-        if (scene.data.tokens?.size) {
-          tokens.push(...Array.from(scene.data.tokens.values()));
-        }
-        if (scene.data.sounds?.size) {
-          sounds.push(...Array.from(scene.data.sounds.values()));
-        }
-      } else {
-        if (scene.data.notes?.length) {
-          notes.push(...scene.data.notes);
-        }
-        if (scene.data.tiles?.length) {
-          tiles.push(...scene.data.tiles);
-        }
-        if (scene.data.drawings?.length) {
-          drawings.push(...scene.data.drawings);
-        }
-        if (scene.data.tokens?.length) {
-          tokens.push(...scene.data.tokens);
-        }
-        if (scene.data.sounds?.length) {
-          sounds.push(...scene.data.sounds);
-        }
+      if (scene.data.notes?.size) {
+        notes.push(...Array.from(scene.data.notes.values()));
+      }
+      if (scene.data.tiles?.size) {
+        tiles.push(...Array.from(scene.data.tiles.values()));
+      }
+      if (scene.data.drawings?.size) {
+        drawings.push(...Array.from(scene.data.drawings.values()));
+      }
+      if (scene.data.tokens?.size) {
+        tokens.push(...Array.from(scene.data.tokens.values()));
+      }
+      if (scene.data.sounds?.size) {
+        sounds.push(...Array.from(scene.data.sounds.values()));
       }
 
       notes.forEach(note => {
@@ -805,10 +780,8 @@ export default class AssetReport extends FormApplication {
     if (this.moduleToCheck) {
       const contents = await this.getPackContents('Actor');
       entities.push(...contents);
-    } else if (CONSTANTS.IsV8orNewer()) {
-      entities.push(...game[AssetReport.Sources.Actor].contents);
     } else {
-      entities.push(...game[AssetReport.Sources.Actor].entities);
+      entities.push(...game[AssetReport.Sources.Actor].contents);
     }
     for (let i = 0; i < entities.length; i++) {
       const actor = entities[i];
@@ -838,20 +811,11 @@ export default class AssetReport extends FormApplication {
       const items = [];
       const effects = [];
 
-      if (CONSTANTS.IsV8orNewer()) {
-        if (actor.data.items?.size) {
-          items.push(...Array.from(actor.data.items.values()));
-        }
-        if (actor.data.effects?.size) {
-          effects.push(...Array.from(actor.data.effects.values()));
-        }
-      } else {
-        if (actor.data.items?.length) {
-          items.push(...actor.data.items);
-        }
-        if (actor.data.effects?.length) {
-          effects.push(...actor.data.effects);
-        }
+      if (actor.data.items?.size) {
+        items.push(...Array.from(actor.data.items.values()));
+      }
+      if (actor.data.effects?.size) {
+        effects.push(...Array.from(actor.data.effects.values()));
       }
 
       items.forEach(item => {
@@ -884,10 +848,8 @@ export default class AssetReport extends FormApplication {
     if (this.moduleToCheck) {
       const contents = await this.getPackContents('JournalEntry');
       entities.push(...contents);
-    } else if (CONSTANTS.IsV8orNewer()) {
-      entities.push(...game[AssetReport.Sources.JournalEntry].contents);
     } else {
-      entities.push(...game[AssetReport.Sources.JournalEntry].entities);
+      entities.push(...game[AssetReport.Sources.JournalEntry].contents);
     }
     for (let i = 0; i < entities.length; i++) {
       const journal = entities[i];
@@ -935,10 +897,8 @@ export default class AssetReport extends FormApplication {
     if (this.moduleToCheck) {
       const contents = await this.getPackContents('Item');
       entities.push(...contents);
-    } else if (CONSTANTS.IsV8orNewer()) {
-      entities.push(...game[AssetReport.Sources.Item].contents);
     } else {
-      entities.push(...game[AssetReport.Sources.Item].entities);
+      entities.push(...game[AssetReport.Sources.Item].contents);
     }
     for (let i = 0; i < entities.length; i++) {
       const item = entities[i];
@@ -961,14 +921,8 @@ export default class AssetReport extends FormApplication {
       }
 
       const effects = [];
-      if (CONSTANTS.IsV8orNewer()) {
-        if (item.data.effects?.size) {
-          effects.push(...Array.from(item.data.effects.values()));
-        }
-      } else {
-        if (item.data.effects?.length) {
-          effects.push(...item.data.effects);
-        }
+      if (item.data.effects?.size) {
+        effects.push(...Array.from(item.data.effects.values()));
       }
 
       effects.forEach(effect => {
@@ -1005,10 +959,8 @@ export default class AssetReport extends FormApplication {
     if (this.moduleToCheck) {
       const contents = await this.getPackContents('Playlist');
       entities.push(...contents);
-    } else if (CONSTANTS.IsV8orNewer()) {
-      entities.push(...game[AssetReport.Sources.Playlist].contents);
     } else {
-      entities.push(...game[AssetReport.Sources.Playlist].entities);
+      entities.push(...game[AssetReport.Sources.Playlist].contents);
     }
     for (let i = 0; i < entities.length; i++) {
       const playlist = entities[i];
@@ -1028,14 +980,8 @@ export default class AssetReport extends FormApplication {
 
       const sounds = [];
 
-      if (CONSTANTS.IsV8orNewer()) {
-        if (playlist.data.sounds?.size) {
-          sounds.push(...Array.from(playlist.data.sounds.values()));
-        }
-      } else {
-        if (playlist.data.sounds?.length) {
-          sounds.push(...playlist.data.sounds);
-        }
+      if (playlist.data.sounds?.size) {
+        sounds.push(...Array.from(playlist.data.sounds.values()));
       }
 
       sounds.forEach(sound => {
@@ -1066,10 +1012,8 @@ export default class AssetReport extends FormApplication {
     if (this.moduleToCheck) {
       const contents = await this.getPackContents('Macro');
       entities.push(...contents);
-    } else if (CONSTANTS.IsV8orNewer()) {
-      entities.push(...game[AssetReport.Sources.Macro].contents);
     } else {
-      entities.push(...game[AssetReport.Sources.Macro].entities);
+      entities.push(...game[AssetReport.Sources.Macro].contents);
     }
     for (let i = 0; i < entities.length; i++) {
       const macro = entities[i];
@@ -1107,10 +1051,8 @@ export default class AssetReport extends FormApplication {
     if (this.moduleToCheck) {
       const contents = await this.getPackContents('RollTable');
       entities.push(...contents);
-    } else if (CONSTANTS.IsV8orNewer()) {
-      entities.push(...game[AssetReport.Sources.RollTable].contents);
     } else {
-      entities.push(...game[AssetReport.Sources.RollTable].entities);
+      entities.push(...game[AssetReport.Sources.RollTable].contents);
     }
     for (let i = 0; i < entities.length; i++) {
       const table = entities[i];
@@ -1134,14 +1076,8 @@ export default class AssetReport extends FormApplication {
 
       const results = [];
 
-      if (CONSTANTS.IsV8orNewer()) {
-        if (table.data.results?.size) {
-          results.push(...Array.from(table.data.results.values()));
-        }
-      } else {
-        if (table.data.results?.length) {
-          results.push(...table.data.results);
-        }
+      if (table.data.results?.size) {
+        results.push(...Array.from(table.data.results.values()));
       }
 
       results.forEach(tableResult => {

@@ -46,20 +46,11 @@ export async function ExtractActorAssets(actor) {
   const items = [];
   const effects = [];
 
-  if (CONSTANTS.IsV8orNewer()) {
-    if (actor.data.items?.size) {
-      items.push(...Array.from(actor.data.items.values()));
-    }
-    if (actor.data.effects?.size) {
-      effects.push(...Array.from(actor.data.effects.values()));
-    }
-  } else {
-    if (actor.data.items?.length) {
-      items.push(...actor.data.items);
-    }
-    if (actor.data.effects?.length) {
-      effects.push(...actor.data.effects);
-    }
+  if (actor.data.items?.size) {
+    items.push(...Array.from(actor.data.items.values()));
+  }
+  if (actor.data.effects?.size) {
+    effects.push(...Array.from(actor.data.effects.values()));
   }
 
   for (const item of items) {

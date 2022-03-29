@@ -48,38 +48,20 @@ export async function ExtractSceneAssets(scene) {
   const tokens = [];
   const sounds = [];
 
-  if (CONSTANTS.IsV8orNewer()) {
-    if (scene.data.notes?.size) {
-      notes.push(...Array.from(scene.data.notes.values()));
-    }
-    if (scene.data.tiles?.size) {
-      tiles.push(...Array.from(scene.data.tiles.values()));
-    }
-    if (scene.data.drawings?.size) {
-      drawings.push(...Array.from(scene.data.drawings.values()));
-    }
-    if (scene.data.tokens?.size) {
-      tokens.push(...Array.from(scene.data.tokens.values()));
-    }
-    if (scene.data.sounds?.size) {
-      sounds.push(...Array.from(scene.data.sounds.values()));
-    }
-  } else {
-    if (scene.data.notes?.length) {
-      notes.push(...scene.data.notes);
-    }
-    if (scene.data.tiles?.length) {
-      tiles.push(...scene.data.tiles);
-    }
-    if (scene.data.drawings?.length) {
-      drawings.push(...scene.data.drawings);
-    }
-    if (scene.data.tokens?.length) {
-      tokens.push(...scene.data.tokens);
-    }
-    if (scene.data.sounds?.length) {
-      sounds.push(...scene.data.sounds);
-    }
+  if (scene.data.notes?.size) {
+    notes.push(...Array.from(scene.data.notes.values()));
+  }
+  if (scene.data.tiles?.size) {
+    tiles.push(...Array.from(scene.data.tiles.values()));
+  }
+  if (scene.data.drawings?.size) {
+    drawings.push(...Array.from(scene.data.drawings.values()));
+  }
+  if (scene.data.tokens?.size) {
+    tokens.push(...Array.from(scene.data.tokens.values()));
+  }
+  if (scene.data.sounds?.size) {
+    sounds.push(...Array.from(scene.data.sounds.values()));
   }
 
   for (const note of notes) {

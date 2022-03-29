@@ -32,14 +32,8 @@ export async function ExtractItemAssets(item) {
 
   const effects = [];
 
-  if (CONSTANTS.IsV8orNewer()) {
-    if (item.data.effects?.size) {
-      effects.push(...Array.from(item.data.effects.values()));
-    }
-  } else {
-    if (item.data.effects?.length) {
-      effects.push(...item.data.effects);
-    }
+  if (item.data.effects?.size) {
+    effects.push(...Array.from(item.data.effects.values()));
   }
 
   for (const effect of effects) {

@@ -57,10 +57,10 @@ export default class ModuleSelect extends FormApplication {
     // Prepare modules
     const modules = game.data.modules.reduce((arr, m) => {
       let mod;
-      if (CONSTANTS.IsV8orNewer()) {
-        mod = m.data.toObject();
+      if (CONSTANTS.IsV10orNewer()) {
+        mod = m.toObject();
       } else {
-        mod = duplicate(m.data);
+        mod = m.data.toObject();
       }
       mod.activeModule = m.active;
       mod.hasPacks = mod.packs.length > 0;

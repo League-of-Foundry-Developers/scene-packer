@@ -32,14 +32,8 @@ export async function ExtractRollTableAssets(table) {
 
   const results = [];
 
-  if (CONSTANTS.IsV8orNewer()) {
-    if (table.data.results?.size) {
-      results.push(...Array.from(table.data.results.values()));
-    }
-  } else {
-    if (table.data.results?.length) {
-      results.push(...table.data.results);
-    }
+  if (table.data.results?.size) {
+    results.push(...Array.from(table.data.results.values()));
   }
 
   for (const tableResult of results) {

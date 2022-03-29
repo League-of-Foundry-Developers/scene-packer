@@ -20,14 +20,8 @@ export async function ExtractPlaylistAssets(playlist) {
 
   const sounds = [];
 
-  if (CONSTANTS.IsV8orNewer()) {
-    if (playlist.data.sounds?.size) {
-      sounds.push(...Array.from(playlist.data.sounds.values()));
-    }
-  } else {
-    if (playlist.data.sounds?.length) {
-      sounds.push(...playlist.data.sounds);
-    }
+  if (playlist.data.sounds?.size) {
+    sounds.push(...Array.from(playlist.data.sounds.values()));
   }
 
   for (const sound of sounds) {
