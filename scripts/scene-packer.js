@@ -3239,7 +3239,8 @@ export default class ScenePacker {
     let folderData = await this.buildFolderStructureForPackContent([entity], type, this.adventureName);
 
     // Check for Compendium Folder structure data
-    const cfPath = entity.data?.flags?.cf?.path;
+    const entityData = CONSTANTS.IsV10orNewer() ? entity : entity.data;
+    const cfPath = entityData?.flags?.cf?.path;
     if (cfPath && folderData.folderMap.has(cfPath)) {
       update.folder = folderData.folderMap.get(cfPath)?.id || null;
     } else if (folderData.folderId) {
@@ -3247,8 +3248,8 @@ export default class ScenePacker {
     }
 
     // Set the sorting value
-    if (entity.data?.flags?.cf?.sort) {
-      update.sort = entity.data.flags.cf.sort;
+    if (entityData?.flags?.cf?.sort) {
+      update.sort = entityData.flags.cf.sort;
     }
 
     return collection.importFromCompendium(game.packs.get(entity.compendium.collection), entity.id, update, {keepId: true});
