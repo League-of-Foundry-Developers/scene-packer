@@ -3621,15 +3621,17 @@ export default class ScenePacker {
         continue;
       }
       let changed = false;
-      const actions = (getProperty(tile.data, 'flags.monks-active-tiles.actions') || getProperty(tile, 'flags.monks-active-tiles.actions') || []);
+      const tileData = CONSTANTS.IsV10orNewer() ? tile : tile?.data || tile;
+      const actions = getProperty(tileData, 'flags.monks-active-tiles.actions') || [];
       // Unpack entity references
       for (const action of actions) {
         const compendiumSourceId = tileInfo.actions?.find(a => a.actionID === action.id)?.compendiumSourceId;
         let originalValue;
         let newEntity;
         let newValue;
-        if (action.data?.entity?.id) {
-          originalValue = action.data.entity.id;
+        const actionData = CONSTANTS.IsV10orNewer() ? action : action.data;
+        if (actionData?.entity?.id) {
+          originalValue = actionData.entity.id;
           if (extractEntityID(originalValue)) {
             newEntity = await findNewEntityValue(originalValue, action, tile, compendiumSourceId);
             if (newEntity) {
@@ -3638,15 +3640,15 @@ export default class ScenePacker {
                 newEntity.id
               );
               if (newValue !== originalValue) {
-                action.data.entity.id = newValue;
+                actionData.entity.id = newValue;
                 changed = true;
                 actionsCount++;
               }
             }
           }
         }
-        if (action.data?.item?.id) {
-          originalValue = action.data.item.id;
+        if (actionData?.item?.id) {
+          originalValue = actionData.item.id;
           if (extractEntityID(originalValue)) {
             newEntity = await findNewEntityValue(originalValue, action, tile, compendiumSourceId);
             if (newEntity) {
@@ -3655,75 +3657,75 @@ export default class ScenePacker {
                 newEntity.id
               );
               if (newValue !== originalValue) {
-                action.data.item.id = newValue;
+                actionData.item.id = newValue;
                 changed = true;
                 actionsCount++;
               }
             }
           }
         }
-        if (action.data?.location?.id) {
-          originalValue = action.data.location.id;
+        if (actionData?.location?.id) {
+          originalValue = actionData.location.id;
           if (extractEntityID(originalValue)) {
             newEntity = await findNewEntityValue(originalValue, action, tile, compendiumSourceId);
             if (newEntity) {
-              newValue = action.data.location.id.replace(
+              newValue = actionData.location.id.replace(
                 extractEntityID(originalValue),
                 newEntity.id
               );
-              if (newValue !== action.data.location.id) {
-                action.data.location.id = newValue;
+              if (newValue !== actionData.location.id) {
+                actionData.location.id = newValue;
                 changed = true;
                 actionsCount++;
               }
             }
           }
         }
-        if (action.data?.location?.sceneId) {
-          originalValue = action.data.location.sceneId.startsWith('Scene.') ? action.data.location.sceneId : `Scene.${action.data.location.sceneId}`;
+        if (actionData?.location?.sceneId) {
+          originalValue = actionData.location.sceneId.startsWith('Scene.') ? actionData.location.sceneId : `Scene.${actionData.location.sceneId}`;
           if (extractEntityID(originalValue)) {
             newEntity = await findNewEntityValue(originalValue, action, tile, compendiumSourceId);
             if (newEntity) {
-              newValue = action.data.location.sceneId.replace(
+              newValue = actionData.location.sceneId.replace(
                 extractEntityID(originalValue),
                 newEntity.id
               );
-              if (newValue !== action.data.location.sceneId) {
-                action.data.location.sceneId = newValue;
+              if (newValue !== actionData.location.sceneId) {
+                actionData.location.sceneId = newValue;
                 changed = true;
                 actionsCount++;
               }
             }
           }
         }
-        if (action.data?.macroid) {
-          originalValue = action.data.macroid.startsWith('Macro.') ? action.data.macroid : `Macro.${action.data.macroid}`;
+        if (actionData?.macroid) {
+          originalValue = actionData.macroid.startsWith('Macro.') ? actionData.macroid : `Macro.${actionData.macroid}`;
           if (extractEntityID(originalValue)) {
             newEntity = await findNewEntityValue(originalValue, action, tile, compendiumSourceId);
             if (newEntity) {
-              newValue = action.data.macroid.replace(
+              newValue = actionData.macroid.replace(
                 extractEntityID(originalValue),
                 newEntity.id
               );
-              if (newValue !== action.data.macroid) {
-                action.data.macroid = newValue;
+              if (newValue !== actionData.macroid) {
+                actionData.macroid = newValue;
                 changed = true;
                 actionsCount++;
               }
             }
           }
         }
-        if (action.data?.rolltableid) {
-          originalValue = action.data.rolltableid.startsWith('RollTable.') ? action.data.rolltableid : `RollTable.${action.data.rolltableid}`;
+        if (actionData?.rolltableid) {
+          originalValue = actionData.rolltableid.startsWith('RollTable.') ? actionData.rolltableid : `RollTable.${actionData.rolltableid}`;
           if (extractEntityID(originalValue)) {
           newEntity = await findNewEntityValue(originalValue, action, tile, compendiumSourceId);
           if (newEntity) {
-            newValue = action.data.rolltableid.replace(
+            newValue = actionData.rolltableid.replace(
               extractEntityID(originalValue),
               newEntity.id
             );
-            if (newValue !== action.data.rolltableid) {
-              action.data.rolltableid = newValue;
+            if (newValue !== actionData.rolltableid) {
+              actionData.rolltableid = newValue;
               changed = true;
               actionsCount++;
             }
