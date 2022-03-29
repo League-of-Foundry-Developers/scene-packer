@@ -2831,6 +2831,9 @@ export default class ScenePacker {
         case 'Actor':
           collection = game.actors;
           break;
+        case 'Cards':
+          collection = game.cards;
+          break;
         case 'JournalEntry':
           collection = game.journal;
           break;
