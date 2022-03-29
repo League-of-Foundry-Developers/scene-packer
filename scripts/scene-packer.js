@@ -563,8 +563,14 @@ export default class ScenePacker {
       return response;
     }
 
-    const hasCFData = content.some(p => p.data?.flags?.cf?.path);
-    const allHaveCFData = content.every(p => p.data?.flags?.cf?.path);
+    const hasCFData = content.some(p => {
+      const data = CONSTANTS.IsV10orNewer() ? p : p.data;
+      return data.flags?.cf?.path;
+    });
+    const allHaveCFData = content.every(p => {
+      const data = CONSTANTS.IsV10orNewer() ? p : p.data;
+      return data.flags?.cf?.path;
+    });
 
     if (!allHaveCFData && fallbackFolderName) {
       // Need the fallback folder to exist
@@ -589,8 +595,10 @@ export default class ScenePacker {
     // Sort the content so that folders are progressively built by building the shallow paths first and then
     // non-compendium folder last (to make use of folders built by CF).
     content.sort((e1, e2) => {
-      const cfPath1 = e1.data?.flags?.cf?.path;
-      const cfPath2 = e2.data?.flags?.cf?.path;
+      const e1Data = CONSTANTS.IsV10orNewer() ? e1 : e1.data;
+      const e2Data = CONSTANTS.IsV10orNewer() ? e2 : e2.data;
+      const cfPath1 = e1Data?.flags?.cf?.path;
+      const cfPath2 = e2Data?.flags?.cf?.path;
       if (!cfPath1 && !cfPath2) {
         // Neither have CF data
         return 0;
@@ -620,16 +628,17 @@ export default class ScenePacker {
     // Build the Compendium Folder structure paths
     for (let i = 0; i < content.length; i++) {
       const entity = content[i];
-      const cfPath = entity.data?.flags?.cf?.path;
-      const cfColor = entity.data?.flags?.cf?.color;
+      const eData = CONSTANTS.IsV10orNewer() ? entity : entity.data;
+      const cfPath = eData?.flags?.cf?.path;
+      const cfColor = eData?.flags?.cf?.color;
       if (!cfPath) {
         continue;
       }
       if (response.folderMap.has(cfPath)) {
         continue;
       }
-      let cfSorting = entity.data?.flags?.cf?.sorting;
-      const cfSort = entity.data?.flags?.cf?.sort;
+      let cfSorting = eData?.flags?.cf?.sorting;
+      const cfSort = eData?.flags?.cf?.sort;
       if (cfSort && !cfSorting) {
         // This document has a sort value, so it implies manual folder sorting
         cfSorting = 'm';
@@ -650,9 +659,10 @@ export default class ScenePacker {
           }
         }
         // See if a folder already exists
-        let folder = game.folders.find(
-          (folder) => folder.name === pathPart && folder.type === entityType && folder.data.parent === (parent?.id || null),
-        );
+        let folder = game.folders.find((folder) => {
+          const data = CONSTANTS.IsV10orNewer() ? folder : folder.data;
+          return folder.name === pathPart && folder.type === entityType && data.parent === (parent?.id || null)
+        });
         if (folder) {
           response.folderMap.set(pathPart, folder);
           continue;
