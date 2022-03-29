@@ -3834,7 +3834,8 @@ export default class ScenePacker {
     for (let i = 0; i < journals.length; i++) {
       const journal = journals[i];
       let quickEncounter = {};
-      const quickEncounterData = getProperty(journal.data, 'flags.quick-encounters.quickEncounter');
+      const journalData = CONSTANTS.IsV10orNewer() ? journal : journal.data;
+      const quickEncounterData = getProperty(journalData, 'flags.quick-encounters.quickEncounter');
       if (!quickEncounterData) {
         continue;
       }
@@ -4006,7 +4007,7 @@ export default class ScenePacker {
 
         let newFlags = {};
         setProperty(newFlags, 'flags.quick-encounters.quickEncounter', JSON.stringify(quickEncounter));
-        await journal.data.update(newFlags);
+        await journalData.update(newFlags);
       }
     }
   }
