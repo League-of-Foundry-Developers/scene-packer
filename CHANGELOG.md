@@ -6,6 +6,7 @@
   - Minimum supported version is now 0.8.6 (the earliest stable release in the v8 line).
 - Added support for v10 of Foundry VTT.
   - Removed various warnings related to the new data models behind the scene.
+- Upgraded the [libWrapper shim](https://github.com/ruipin/fvtt-lib-wrapper/blob/master/shim/SHIM.md) version.
 
 ## v2.4.4
 
