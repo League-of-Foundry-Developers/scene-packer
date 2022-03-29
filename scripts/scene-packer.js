@@ -2064,7 +2064,9 @@ export default class ScenePacker {
     // There is more than one possible match, check the Playlist contents for an exact match.
     for (let i = 0; i < possibleMatches.length; i++) {
       const entity = possibleMatches[i];
-      if (Array.from(playlist.data.sounds.keys()) === Array.from(entity.data.sounds.keys())) {
+      const playlistSounds = CONSTANTS.IsV10orNewer() ? playlist.sounds : playlist.data.sounds;
+      const entitySounds = CONSTANTS.IsV10orNewer() ? entity.sounds : entity.data.sounds;
+      if (Array.from(playlistSounds.keys()) === Array.from(entitySounds.keys())) {
         compendiumPlaylist = entity;
         break;
       }
