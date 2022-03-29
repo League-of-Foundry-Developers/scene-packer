@@ -5276,15 +5276,16 @@ Hooks.on('createJournalEntry', async function (j) {
  * Hook into tile creation to find Monk's Active Tiles data and update the references if needed.
  */
 Hooks.on('preCreateTile', async function (document) {
-  const moduleName = getProperty(document.data, 'flags.scene-packer.source-module');
+  const data = CONSTANTS.IsV10orNewer() ? document : document.data;
+  const moduleName = getProperty(data, 'flags.scene-packer.source-module');
   if (!moduleName) {
     return;
   }
-  const activeTileActions = getProperty(document.data, 'flags.monks-active-tiles.actions') || [];
+  const activeTileActions = getProperty(data, 'flags.monks-active-tiles.actions') || [];
   if (!activeTileActions.length) {
     return;
   }
-  const spTileData = getProperty(document.data, 'flags.scene-packer.SPTileData') || [];
+  const spTileData = getProperty(data, 'flags.scene-packer.SPTileData') || [];
   if (!spTileData.length) {
     return;
   }
