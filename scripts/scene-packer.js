@@ -3012,13 +3012,15 @@ export default class ScenePacker {
       return Promise.resolve();
     }
 
-    const folder = game.folders.find(
-      (j) => j.data.type === 'Actor' && j.data.name === this.adventureName,
-    );
+    const folder = game.folders.find((f) => {
+      const data = CONSTANTS.IsV10orNewer() ? f : f.data;
+      return data.type === 'Actor' && data.name === this.adventureName;
+    });
     let updates = [];
     let missing = [];
 
-    scene.data.tokens.forEach((t) => {
+    const sceneData = CONSTANTS.IsV10orNewer() ? scene : scene.data;
+    sceneData.tokens.forEach((t) => {
       let actor = this.findActorForToken(t, tokenInfo, folder);
       if (actor) {
         updates.push({
