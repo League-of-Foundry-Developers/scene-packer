@@ -18,7 +18,8 @@ export async function ExtractItemAssets(item) {
     return data;
   }
 
-  if (item.data.img) {
+  const itemData = CONSTANTS.IsV10orNewer() ? item : item.data;
+  if (itemData.img) {
     await data.AddAsset({
       id: item.id,
       key: 'img',
@@ -26,18 +27,19 @@ export async function ExtractItemAssets(item) {
       parentType: item.documentName,
       documentType: item.documentName,
       location: AssetReport.Locations.ItemImage,
-      asset: item.data.img,
+      asset: itemData.img,
     });
   }
 
   const effects = [];
 
-  if (item.data.effects?.size) {
-    effects.push(...Array.from(item.data.effects.values()));
+  if (itemData.effects?.size) {
+    effects.push(...Array.from(itemData.effects.values()));
   }
 
   for (const effect of effects) {
-    const img = effect?.data?.img;
+    const effectData = CONSTANTS.IsV10orNewer() ? effect : effect?.data;
+    const img = effectData?.img;
     if (img) {
       await data.AddAsset({
         id: effect.id,
@@ -49,7 +51,7 @@ export async function ExtractItemAssets(item) {
         asset: img,
       });
     }
-    const icon = effect?.data?.icon;
+    const icon = effectData?.icon;
     if (icon) {
       await data.AddAsset({
         id: effect.id,
@@ -63,8 +65,12 @@ export async function ExtractItemAssets(item) {
     }
   }
 
-  const itemDescription =
-    item.data?.description?.value || item.data?.data?.description?.value;
+  let itemDescription;
+  if (CONSTANTS.IsV10orNewer()) {
+    itemDescription = itemData?.description?.value || itemData?.system?.description?.value;
+  } else {
+    itemDescription = itemData?.description?.value || itemData?.data?.description?.value;
+  }
   if (itemDescription) {
     const doc = new DOMParser().parseFromString(itemDescription, 'text/html');
     const images = doc.getElementsByTagName('img');

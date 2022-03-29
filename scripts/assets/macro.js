@@ -1,5 +1,6 @@
 import { AssetData } from './data.js';
 import AssetReport from '../asset-report.js';
+import {CONSTANTS} from '../constants.js';
 
 /**
  * Extract assets from the given macro
@@ -17,7 +18,8 @@ export async function ExtractMacroAssets(macro) {
     return data;
   }
 
-  if (macro.data.img) {
+  const macroData = CONSTANTS.IsV10orNewer() ? macro : macro.data;
+  if (macroData.img) {
     await data.AddAsset({
       id: macro.id,
       key: 'img',
@@ -25,7 +27,7 @@ export async function ExtractMacroAssets(macro) {
       parentType: macro.documentName,
       documentType: macro.documentName,
       location: AssetReport.Locations.MacroImage,
-      asset: macro.data.img,
+      asset: macroData.img,
     });
   }
 

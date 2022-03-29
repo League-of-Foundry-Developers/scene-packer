@@ -20,12 +20,14 @@ export async function ExtractPlaylistAssets(playlist) {
 
   const sounds = [];
 
-  if (playlist.data.sounds?.size) {
-    sounds.push(...Array.from(playlist.data.sounds.values()));
+  const playlistData = CONSTANTS.IsV10orNewer() ? playlist : playlist.data;
+  if (playlistData.sounds?.size) {
+    sounds.push(...Array.from(playlistData.sounds.values()));
   }
 
   for (const sound of sounds) {
-    const path = sound?.data?.path || sound?.path;
+    const soundData = CONSTANTS.IsV10orNewer() ? sound : sound?.data;
+    const path = soundData?.path || sound?.path;
     if (path) {
       await data.AddAsset({
         id: sound.id,
