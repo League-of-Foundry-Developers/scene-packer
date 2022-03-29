@@ -3147,18 +3147,7 @@ export default class ScenePacker {
           }),
         );
       }
-      const sceneNoteIDs = scene.data.notes.map((n) => n.id);
-      const updateIDs = updates.map((n) => n._id);
-      if (
-        isNewerVersion(scene.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_PACKED_VERSION), '2.1.99') &&
-        updateIDs.every((n) => sceneNoteIDs.includes(n))
-      ) {
-        // Packed with a version >= 2.2.0 that supports updating the notes and the embedded note ID remained consistent.
-        return scene.updateEmbeddedDocuments('Note', updates);
-      } else {
-        await scene.deleteEmbeddedDocuments('Note', scene.data.notes.map((n) => n.id));
-        return scene.createEmbeddedDocuments('Note', updates, {keepId: true});
-      }
+      return await scene.updateEmbeddedDocuments('Note', updates);
     }
     return Promise.resolve();
   }
