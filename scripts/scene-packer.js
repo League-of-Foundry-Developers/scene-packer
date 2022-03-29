@@ -1788,7 +1788,9 @@ export default class ScenePacker {
     // There is more than one possible match, check the Journal contents for an exact match.
     for (let i = 0; i < possibleMatches.length; i++) {
       const entity = possibleMatches[i];
-      if (journal.data.content === entity.data.content) {
+      const journalContent = CONSTANTS.IsV10orNewer() ? journal.content : journal.data.content;
+      const entityContent = CONSTANTS.IsV10orNewer() ? entity.content : entity.data.content;
+      if (journalContent === entityContent) {
         compendiumJournal = entity;
         break;
       }
