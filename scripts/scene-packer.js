@@ -1257,7 +1257,7 @@ export default class ScenePacker {
     }
 
     const sceneInfo = new Map();
-    const scenes = game.scenes.contents || game.scenes.entities;
+    const scenes = game.scenes.contents;
 
     for (let i = 0; i < scenes.length; i++) {
       const scene = scenes[i];
