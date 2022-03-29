@@ -1,3 +1,4 @@
+import {CONSTANTS} from '../../constants.js';
 import {ExtractRelatedItemData} from './item.js';
 import {ExtractUUIDsFromContent, RelatedData, ResolvePath} from './related-data.js';
 import ScenePacker from '../../scene-packer.js';
@@ -96,7 +97,12 @@ export function ExtractRelatedActorData(actor) {
       const relatedItems = ExtractRelatedItemData(item);
       for (const relations of relatedItems.data.values()) {
         for (const relation of relations) {
-          relatedData.AddRelation(uuid, {path: 'items', uuid: relation.uuid, embeddedId: item.id, embeddedPath: relation.path});
+          relatedData.AddRelation(uuid, {
+            path: 'items',
+            uuid: relation.uuid,
+            embeddedId: item.id,
+            embeddedPath: relation.path,
+          });
         }
       }
     }
@@ -113,7 +119,8 @@ export function ExtractRelatedActorData(actor) {
  */
 export function ExtractRelatedTokenAttacherData(actor) {
   const relatedData = new RelatedData();
-  if (!actor?.data) {
+  const actorData = CONSTANTS.IsV10orNewer() ? actor : actor?.data;
+  if (!actorData) {
     return relatedData;
   }
 
@@ -121,28 +128,33 @@ export function ExtractRelatedTokenAttacherData(actor) {
   const uuid = actor.uuid || `${Actor.documentName}.${id}`;
 
   let path = 'token.flags.token-attacher.prototypeAttached';
-  let tokenAttacherData = getProperty(actor.data, path);
+  let tokenAttacherData = getProperty(actorData, path);
   if (tokenAttacherData?.Tile?.length) {
     // Extract Monk's Active Tile related actions
     ScenePacker.GetActiveTilesData(tokenAttacherData.Tile).forEach(tile => {
-      (getProperty(tile.data, 'flags.monks-active-tiles.actions') || [])
+      const tileData = CONSTANTS.IsV10orNewer() ? tile : tile.data;
+      (getProperty(tileData, 'flags.monks-active-tiles.actions') || [])
         .filter(
-          (a) => a?.data?.macroid ||
-            a?.data?.entity?.id ||
-            a?.data?.item?.id ||
-            a?.data?.location?.sceneId ||
-            a?.data?.rolltableid,
+          (a) => {
+            const actionData = CONSTANTS.IsV10orNewer() ? a : a?.data;
+            return actionData?.macroid ||
+              actionData?.entity?.id ||
+              actionData?.item?.id ||
+              actionData?.location?.sceneId ||
+              actionData?.rolltableid;
+          },
         ).forEach(action => {
-        if (action.data?.macroid) {
-          relatedData.AddRelation(uuid, {uuid: `Macro.${action.data.macroid}`, path});
-        } else if (action.data?.location?.sceneId) {
-          relatedData.AddRelation(uuid, {uuid: `Scene.${action.data.location.sceneId}`, path});
-        } else if (action.data?.rolltableid) {
-          relatedData.AddRelation(uuid, {uuid: `RollTable.${action.data.rolltableid}`, path});
-        } else if (action.data?.entity?.id) {
-          relatedData.AddRelation(uuid, {uuid: action.data.entity.id, path});
-        } else if (action.data?.item?.id) {
-          relatedData.AddRelation(uuid, {uuid: action.data.item.id, path});
+        const ActionData = CONSTANTS.IsV10orNewer() ? action : action.data;
+        if (ActionData?.macroid) {
+          relatedData.AddRelation(uuid, {uuid: `Macro.${ActionData.macroid}`, path});
+        } else if (ActionData?.location?.sceneId) {
+          relatedData.AddRelation(uuid, {uuid: `Scene.${ActionData.location.sceneId}`, path});
+        } else if (ActionData?.rolltableid) {
+          relatedData.AddRelation(uuid, {uuid: `RollTable.${ActionData.rolltableid}`, path});
+        } else if (ActionData?.entity?.id) {
+          relatedData.AddRelation(uuid, {uuid: ActionData.entity.id, path});
+        } else if (ActionData?.item?.id) {
+          relatedData.AddRelation(uuid, {uuid: ActionData.item.id, path});
         }
       });
     });

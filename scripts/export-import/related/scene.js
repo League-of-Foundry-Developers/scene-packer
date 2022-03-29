@@ -1,3 +1,4 @@
+import {CONSTANTS} from '../../constants.js';
 import {ExtractRelatedActiveTileData} from './active-tiles.js';
 import {RelatedData} from './related-data.js';
 
@@ -23,22 +24,24 @@ export function ExtractRelatedSceneData(scene) {
     relatedData.AddRelation(uuid, {uuid: `Playlist.${scene.playlist.id}`, path: 'playlist'});
   }
 
-  // TODO Test V7
-  const notes = scene.data.notes.map(n => {
-    return {uuid: `JournalEntry.${n.data.entryId}`, path: 'notes'};
+  const sceneData = CONSTANTS.IsV10orNewer() ? scene : scene.data;
+  const notes = sceneData.notes.map(n => {
+    const noteData = CONSTANTS.IsV10orNewer() ? n : n.data;
+    return {uuid: `JournalEntry.${noteData.entryId}`, path: 'notes'};
   }).filter(d => d);
   if (notes.length) {
     relatedData.AddRelations(uuid, notes);
   }
 
-  const tokens = scene.data.tokens.map(t => {
-    return {uuid: `Actor.${t.data.actorId}`, path: 'tokens'};
+  const tokens = sceneData.tokens.map(t => {
+    const tokenData = CONSTANTS.IsV10orNewer() ? t : t.data;
+    return {uuid: `Actor.${tokenData.actorId}`, path: 'tokens'};
   }).filter(d => d);
   if (tokens.length) {
     relatedData.AddRelations(uuid, tokens);
   }
 
-  relatedData.AddRelatedData(ExtractRelatedActiveTileData(scene.data?.tiles, uuid));
+  relatedData.AddRelatedData(ExtractRelatedActiveTileData(sceneData?.tiles, uuid));
 
   return relatedData;
 }
