@@ -7,6 +7,7 @@
 - Added support for v10 of Foundry VTT.
   - Removed various warnings related to the new data models behind the scene.
 - Upgraded the [libWrapper shim](https://github.com/ruipin/fvtt-lib-wrapper/blob/master/shim/SHIM.md) version.
+- Visually differentiate between running the Asset Report in "World" or "Module" mode. No functional changes.
 
 ## v2.4.4
 

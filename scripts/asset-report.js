@@ -303,6 +303,7 @@ export default class AssetReport extends FormApplication {
     return {
       sources: AssetReport.Sources,
       sceneName: this.sceneName,
+      mode: this.mode,
       dependencies,
       ...assetData,
     };

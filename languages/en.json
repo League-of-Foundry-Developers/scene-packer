@@ -46,7 +46,7 @@
     "asset-report": {
       "name": "Asset Report",
       "selector": "Select whether to run the Asset Report against the local World or against a Module's compendiums.",
-      "notes": "Below is the Asset Report showing which entities in your world have assets that depend on external locations. It does not support wildcard tokens.",
+      "notes": "Below is the Asset Report showing which entities in your {mode} have assets that depend on external locations. It does not support wildcard tokens.",
       "copy": "Copy JSON to clipboard",
       "copied-to-clipboard": "Asset Report copied to clipboard!",
       "scenes": "Scenes",
