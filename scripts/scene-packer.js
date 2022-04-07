@@ -3469,7 +3469,7 @@ export default class ScenePacker {
       (tile) => {
         const tileData = CONSTANTS.IsV10orNewer() ? tile : tile?.data || tile;
         const actions = getProperty(tileData, 'flags.monks-active-tiles.actions') || [];
-        actions.filter((a) => {
+        return actions.filter((a) => {
           const data = CONSTANTS.IsV10orNewer() ? a : a?.data;
           return data?.macroid ||
             data?.entity?.id ||
@@ -4007,7 +4007,7 @@ export default class ScenePacker {
 
         let newFlags = {};
         setProperty(newFlags, 'flags.quick-encounters.quickEncounter', JSON.stringify(quickEncounter));
-        await journalData.update(newFlags);
+        await journal.update(newFlags);
       }
     }
   }
