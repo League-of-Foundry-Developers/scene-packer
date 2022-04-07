@@ -6,6 +6,8 @@
   - Minimum supported version is now 0.8.6 (the earliest stable release in the v8 line).
 - Added support for v10 of Foundry VTT.
   - Removed various warnings related to the new data models behind the scene.
+- Updated the `Bulk replace asset references` macro to better handle all asset locations.
+  - This change comes at the cost of unnecessary updates until [Core V10](https://gitlab.com/foundrynet/foundryvtt/-/issues/6813) is released.
 - Upgraded the [libWrapper shim](https://github.com/ruipin/fvtt-lib-wrapper/blob/master/shim/SHIM.md) version.
 - Visually differentiate between running the Asset Report in "World" or "Module" mode. No functional changes.
 
