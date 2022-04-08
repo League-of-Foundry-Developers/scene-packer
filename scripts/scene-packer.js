@@ -372,10 +372,6 @@ export default class ScenePacker {
 
           // Filter down to those that are still missing
           packContent = packContent.filter(e => {
-            if (e.name === CONSTANTS.CF_TEMP_ENTITY_NAME) {
-              // Exclude Compendium Folder temporary entities
-              return false;
-            }
             if (forceImport && !renameOriginals) {
               return true;
             }
@@ -454,6 +450,9 @@ export default class ScenePacker {
               return cData;
             }),
           );
+
+          // Exclude Compendium Folder temporary entities
+          createData = createData.filter(c => c.name !== CONSTANTS.CF_TEMP_ENTITY_NAME);
 
           if (createData.length > 0) {
             di.data.content = `<p>${game.i18n.format('SCENE-PACKER.welcome.import-all.creating-data', {
@@ -599,9 +598,14 @@ export default class ScenePacker {
       const e2Data = CONSTANTS.IsV10orNewer() ? e2 : e2.data;
       const cfPath1 = e1Data?.flags?.cf?.path;
       const cfPath2 = e2Data?.flags?.cf?.path;
+      const e1Name = e1.name;
+      const e2Name = e2.name;
+      const e1Sort = e1Data.sort ?? 0;
+      const e2Sort = e2Data.sort ?? 0;
+
       if (!cfPath1 && !cfPath2) {
-        // Neither have CF data
-        return 0;
+        // Neither have CF data, use the sort order
+        return e1Sort - e2Sort;
       }
       if (cfPath1 && !cfPath2) {
         // Sort e1 first as it has CF data
@@ -611,11 +615,20 @@ export default class ScenePacker {
         // Sort e2 first as it has CF data
         return 1;
       }
+      if (e1Name === CONSTANTS.CF_TEMP_ENTITY_NAME && e2Name !== CONSTANTS.CF_TEMP_ENTITY_NAME) {
+        // Sort e1 first as it is a CF temp folder entity
+        return -1;
+      }
+      if (e1Name !== CONSTANTS.CF_TEMP_ENTITY_NAME && e2Name === CONSTANTS.CF_TEMP_ENTITY_NAME) {
+        // Sort e2 first as it is a CF temp folder entity
+        return 1;
+      }
+
       const e1Segments = cfPath1.split(CONSTANTS.CF_SEPARATOR);
       const e2Segments = cfPath2.split(CONSTANTS.CF_SEPARATOR);
       if (e1Segments.length === e2Segments.length) {
-        // Both at the same depth
-        return 0;
+        // Both at the same depth, use the sort order
+        return e1Sort - e2Sort;
       }
       if (e1Segments.length < e2Segments.length) {
         // Sort e1 first as it has fewer segments
@@ -638,7 +651,7 @@ export default class ScenePacker {
         continue;
       }
       let cfSorting = eData?.flags?.cf?.sorting;
-      const cfSort = eData?.flags?.cf?.sort;
+      const cfSort = eData?.flags?.cf?.sort ?? eData.sort ?? 0;
       if (cfSort && !cfSorting) {
         // This document has a sort value, so it implies manual folder sorting
         cfSorting = 'm';
@@ -674,6 +687,7 @@ export default class ScenePacker {
           parent: parent?.id || null,
           color: cfColor || null,
           sorting: cfSorting,
+          sort: cfSort,
         });
         response.folderMap.set(pathPart, folder);
       }
