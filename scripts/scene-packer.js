@@ -3483,15 +3483,15 @@ export default class ScenePacker {
       (tile) => {
         const tileData = CONSTANTS.IsV10orNewer() ? tile : tile?.data || tile;
         const actions = getProperty(tileData, 'flags.monks-active-tiles.actions') || [];
-        return actions.filter((a) => {
-          const data = CONSTANTS.IsV10orNewer() ? a : a?.data;
-          return data?.macroid ||
-            data?.entity?.id ||
-            data?.item?.id ||
-            data?.location?.id ||
-            data?.location?.sceneId ||
-            data?.rolltableid;
-        }).length;
+        return actions.filter(
+          (a) =>
+            a?.data?.macroid ||
+            a?.data?.entity?.id ||
+            a?.data?.item?.id ||
+            a?.data?.location?.id ||
+            a?.data?.location?.sceneId ||
+            a?.data?.rolltableid,
+        ).length;
       });
   }
 
@@ -3510,15 +3510,15 @@ export default class ScenePacker {
         const tileData = CONSTANTS.IsV10orNewer() ? tile : tile?.data || tile;
         const actions = await Promise.allSettled(
           (getProperty(tileData, 'flags.monks-active-tiles.actions') || [])
-            .filter((a) => {
-              const data = CONSTANTS.IsV10orNewer() ? a : a?.data;
-              return data?.macroid ||
-                data?.entity?.id ||
-                data?.item?.id ||
-                data?.location?.id ||
-                data?.location?.sceneId ||
-                data?.rolltableid;
-            })
+            .filter(
+              (a) =>
+                a?.data?.macroid ||
+                a?.data?.entity?.id ||
+                a?.data?.item?.id ||
+                a?.data?.location?.id ||
+                a?.data?.location?.sceneId ||
+                a?.data?.rolltableid,
+            )
             .map(async (d) => {
               const response = {
                 action: d,
@@ -3529,7 +3529,7 @@ export default class ScenePacker {
                 entityType: undefined,
               };
               let ref;
-              const data = CONSTANTS.IsV10orNewer() ? d : d.data;
+              const data = d.data;
               if (data?.macroid) {
                 ref = data.macroid.startsWith('Macro.') ? data.macroid : `Macro.${data.macroid}`;
               } else if (data?.location?.sceneId) {
@@ -3643,7 +3643,7 @@ export default class ScenePacker {
         let originalValue;
         let newEntity;
         let newValue;
-        const actionData = CONSTANTS.IsV10orNewer() ? action : action.data;
+        const actionData = action.data;
         if (actionData?.entity?.id) {
           originalValue = actionData.entity.id;
           if (extractEntityID(originalValue)) {
