@@ -13,6 +13,11 @@
 - Upgraded the [libWrapper shim](https://github.com/ruipin/fvtt-lib-wrapper/blob/master/shim/SHIM.md) version.
 - Visually differentiate between running the Asset Report in "World" or "Module" mode. No functional changes.
 
+## v2.4.5
+
+- Better support for relinking [Monk's Enhanced Journal](https://foundryvtt.com/packages/monks-enhanced-journal)'s relationships between Journals.
+  - Please raise an [issue](https://github.com/League-of-Foundry-Developers/scene-packer/issues) if you encounter any problems.
+
 ## v2.4.4
 
 - Further enhance the methods of matching added in v2.4.3.

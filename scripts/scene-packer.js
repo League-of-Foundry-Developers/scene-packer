@@ -3766,7 +3766,7 @@ export default class ScenePacker {
   }
 
   /**
-   * Unpacks and relinks Monk's Enhanced Journal Encounter data.
+   * Unpacks and relinks Monk's Enhanced Journal data.
    * @param {JournalEntry} journal - The journal entry to process.
    */
   static async UnpackEnhancedJournalData(journal) {
@@ -3783,16 +3783,175 @@ export default class ScenePacker {
       return;
     }
 
-    const encounterData = getProperty(journalData, 'flags.monks-enhanced-journal');
-    if (encounterData?.type !== 'encounter') {
+    await ScenePacker.UnpackEnhancedJournalRelationshipData(journal);
+    await ScenePacker.UnpackEnhancedJournalActorData(journal);
+    await ScenePacker.UnpackEnhancedJournalEncounterData(journal);
+  }
+
+  /**
+   * Unpacks and relinks Monk's Enhanced Journal Actor data.
+   * @param {JournalEntry} journal - The journal entry to process.
+   */
+  static async UnpackEnhancedJournalActorData(journal) {
+    if (!game.user.isGM) {
       return;
     }
-    const actors = encounterData.actors || [];
-    if (!actors.length) {
+
+    const journalData = CONSTANTS.IsV10orNewer() ? journal : journal?.data;
+    if (!journalData) {
+      return;
+    }
+
+    const enhancedJournal = getProperty(journalData, 'flags.monks-enhanced-journal');
+    let enhancedActor = enhancedJournal?.actor;
+    if (!enhancedActor) {
+      return;
+    }
+
+    if (typeof enhancedActor === 'string') {
+      const actor = ScenePacker.FindEntity(`Actor.${enhancedActor}`);
+      if (!actor || enhancedActor === actor.id) {
+        return;
+      }
+
+      enhancedActor = actor.id;
+    } else if (enhancedActor.uuid) {
+      const actor = ScenePacker.FindEntity(enhancedActor.uuid);
+      if (!actor || enhancedActor.id === actor.id) {
+        return;
+      }
+
+      enhancedActor.id = actor.id;
+      enhancedActor.uuid = actor.uuid;
+    }
+
+    ScenePacker.logType(
+      CONSTANTS.MODULE_NAME,
+      'info',
+      false,
+      game.i18n.format(
+        'SCENE-PACKER.world-conversion.compendiums.monks-enhanced-journal-actor.updating-references-console',
+        {
+          journal: journal.name,
+          oldRef: enhancedJournal.actor.uuid || `Actor.${enhancedJournal.actor}`,
+          newRef: enhancedActor.uuid || `Actor.${enhancedActor}`,
+        },
+      ),
+    );
+
+    await journal.update({'flags.monks-enhanced-journal.actor': enhancedActor});
+  }
+
+  /**
+   * Unpacks and relinks Monk's Enhanced Journal Relationship data.
+   * @param {JournalEntry} journal - The journal entry to process.
+   */
+  static async UnpackEnhancedJournalRelationshipData(journal) {
+    if (!game.user.isGM) {
+      return;
+    }
+
+    const journalData = CONSTANTS.IsV10orNewer() ? journal : journal?.data;
+    if (!journalData) {
+      return;
+    }
+
+    const enhancedJournal = getProperty(journalData, 'flags.monks-enhanced-journal');
+    if (!enhancedJournal?.relationships?.length) {
+      return;
+    }
+
+    const journalSourceID = (getProperty(journalData, 'flags.scene-packer.sourceId') || `JournalEntry.${journal.id}`).split('.').pop();
+    let hasChanges = false;
+    const relationships = enhancedJournal.relationships;
+    for (const relationship of relationships) {
+      if (!relationship.id) {
+        continue;
+      }
+
+      // Check if the related document exists in the world.
+      const relatedJournal = ScenePacker.FindEntity(`JournalEntry.${relationship.id}`);
+      if (relatedJournal) {
+        // Check to see if the forward reference needs updating
+        if (relationship.id !== relatedJournal.id) {
+          ScenePacker.logType(
+            CONSTANTS.MODULE_NAME,
+            'info',
+            false,
+            game.i18n.format(
+              'SCENE-PACKER.world-conversion.compendiums.monks-enhanced-journal-relationship.updating-references-console',
+              {
+                journal: journal.name,
+                newRelation: relatedJournal.name,
+              },
+            ),
+          );
+          relationship.id = relatedJournal.id;
+          hasChanges = true;
+        }
+
+        const relatedJournalData = CONSTANTS.IsV10orNewer() ? relatedJournal : relatedJournal?.data;
+
+        // See if there's a backreference that needs adding or updating
+        let backreferenceNeedsSaving = false;
+        let relationships = getProperty(relatedJournalData, 'flags.monks-enhanced-journal.relationships') || [];
+        const existingReference = relationships.find(r => r.id === journal.id || r.id === journalSourceID);
+        if (existingReference) {
+          if (existingReference.id !== journal.id) {
+            // Update the reference
+            existingReference.id = journal.id;
+            backreferenceNeedsSaving = true;
+          }
+        } else {
+          // Add a new reference
+          relationships.push({ id: journal.id, hidden: relationship.hidden });
+          backreferenceNeedsSaving = true;
+        }
+
+        if (backreferenceNeedsSaving) {
+          ScenePacker.logType(
+            CONSTANTS.MODULE_NAME,
+            'info',
+            false,
+            game.i18n.format(
+              'SCENE-PACKER.world-conversion.compendiums.monks-enhanced-journal-relationship.updating-references-console',
+              {
+                journal: relatedJournal.name,
+                newRelation: journal.name,
+              },
+            ),
+          );
+          await relatedJournal.update({'flags.monks-enhanced-journal.relationships': relationships});
+        }
+      }
+    }
+
+    if (hasChanges) {
+      await journal.update({'flags.monks-enhanced-journal.relationships': relationships});
+    }
+  }
+
+  /**
+   * Unpacks and relinks Monk's Enhanced Journal Encounter data.
+   * @param {JournalEntry} journal - The journal entry to process.
+   */
+  static async UnpackEnhancedJournalEncounterData(journal) {
+    if (!game.user.isGM) {
+      return;
+    }
+
+    const journalData = CONSTANTS.IsV10orNewer() ? journal : journal?.data;
+    if (!journalData) {
+      return;
+    }
+
+    const enhancedJournal = getProperty(journalData, 'flags.monks-enhanced-journal');
+    if (!enhancedJournal?.actors?.length) {
       return;
     }
 
     let hasChanges = false;
+    const actors = enhancedJournal.actors;
     for (const actor of actors) {
       const newRef = ScenePacker.FindEntity(actor.uuid);
       if (!newRef || newRef.uuid === actor.uuid) {
@@ -3818,9 +3977,7 @@ export default class ScenePacker {
     }
 
     if (hasChanges) {
-      await journal.update({
-        'flags.monks-enhanced-journal.actors': actors,
-      });
+      await journal.update({'flags.monks-enhanced-journal.actors': actors});
     }
   }
 
