@@ -260,6 +260,12 @@
         },
         "monks-enhanced-journal-encounter": {
           "updating-references-console": "Changing Monk's Enhanced Journal Encounter reference in \"{journal}\" {oldRef} -> {newRef}"
+        },
+        "monks-enhanced-journal-actor": {
+          "updating-references-console": "Changing Monk's Enhanced Journal Actor reference in \"{journal}\" {oldRef} -> {newRef}"
+        },
+        "monks-enhanced-journal-relationships": {
+          "updating-references-console": "Changing Monk's Enhanced Journal Relationship reference in \"{journal}\" adding \"{newRelation}\""
         }
       }
     },

@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.4.5
+
+- Better support for relinking [Monk's Enhanced Journal](https://foundryvtt.com/packages/monks-enhanced-journal)'s relationships between Journals.
+  - Please raise an [issue](https://github.com/League-of-Foundry-Developers/scene-packer/issues) if you encounter any problems.
+
 ## v2.4.4
 
 - Further enhance the methods of matching added in v2.4.3.
