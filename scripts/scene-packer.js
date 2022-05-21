@@ -495,7 +495,7 @@ export default class ScenePacker {
                 // Check if the actors had embedded Automated Evocations data
                 // @see https://github.com/theripper93/automated-evocations#store-companions-on-actor
                 for (let createdEntity of createdEntities) {
-                  let documentFlags = createdEntity.data.flags || {};
+                  let documentFlags = createdEntity.flags || createdEntity.data.flags || {};
                   let automatedEvocationsCompanions = documentFlags['automated-evocations']?.companions || [];
                   let needsUpdate = false;
                   for (let companionData of automatedEvocationsCompanions) {
@@ -1292,15 +1292,18 @@ export default class ScenePacker {
         sceneData.sources.push('playlist');
       }
 
-      if (scene.data?.notes?.size || scene.data?.notes?.length) {
+      const notes = CONSTANTS.IsV10orNewer() ? scene.notes : scene.data?.notes;
+      if (notes?.size || notes?.length) {
         sceneData.sources.push('notes');
       }
 
-      if (scene.data?.tokens?.size || scene.data?.tokens?.length) {
+      const tokens = CONSTANTS.IsV10orNewer() ? scene.tokens : scene.data?.tokens;
+      if (tokens?.size || tokens?.length) {
         sceneData.sources.push('tokens');
       }
 
-      if (ScenePacker.GetActiveTilesData(scene.data?.tiles).length) {
+      const tiles = CONSTANTS.IsV10orNewer() ? scene.tiles : scene.data?.tiles;
+      if (ScenePacker.GetActiveTilesData(tiles).length) {
         sceneData.sources.push('monks-active-tiles');
       }
 
@@ -1636,8 +1639,8 @@ export default class ScenePacker {
           compendiumSourceId: compendiumSourceId,
           tokenName: token?.name,
           actorName: actorName,
-          x: token?.x || token?.data?.x,
-          y: token?.y || token?.data?.y,
+          x: token?.x ?? token?.data?.x,
+          y: token?.y ?? token?.data?.y,
         };
       }));
     const tokenInfo = tokenInfoResults.filter(result => result.status === 'fulfilled').map(result => result.value);
@@ -2794,8 +2797,8 @@ export default class ScenePacker {
     // No direct name lookup found, get the Actor name from the token world data at the same
     // coordinates with the same Token name
     let actorRef = tokenWorldData.find((a) => {
-      let tokenX = token?.x || token?.data?.x;
-      let tokenY = token?.y || token?.data?.y;
+      let tokenX = token?.x ?? token?.data?.x;
+      let tokenY = token?.y ?? token?.data?.y;
       return a.x === tokenX && a.y === tokenY && a.tokenName === token?.name;
     });
     if (actorRef) {
