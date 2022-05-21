@@ -1413,7 +1413,7 @@ export default class ScenePacker {
                         if (!sourceId) {
                           continue;
                         }
-                        const localScene = instance.FindEntity(sourceId);
+                        const localScene = ScenePacker.FindEntity(sourceId);
                         if (!localScene?.id) {
                           continue;
                         }
