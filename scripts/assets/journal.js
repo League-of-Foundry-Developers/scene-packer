@@ -19,7 +19,8 @@ export async function ExtractJournalEntryAssets(journal) {
     return data;
   }
 
-  if (journal.data.img) {
+  const journalData = CONSTANTS.IsV10orNewer() ? journal : journal.data;
+  if (journalData.img) {
     await data.AddAsset({
       id: journal.id,
       key: 'img',
@@ -27,13 +28,13 @@ export async function ExtractJournalEntryAssets(journal) {
       parentType: journal.documentName,
       documentType: journal.documentName,
       location: AssetReport.Locations.JournalImage,
-      asset: journal.data.img,
+      asset: journalData.img,
     });
   }
 
-  if (journal.data.content) {
+  if (journalData.content) {
     const doc = new DOMParser().parseFromString(
-      journal.data.content,
+      journalData.content,
       'text/html'
     );
     const images = doc.getElementsByTagName('img');
@@ -76,7 +77,8 @@ export async function ExtractQuickEncounterAssets(journal) {
 
   let quickEncounter = {};
   const path = 'flags.quick-encounters.quickEncounter';
-  const quickEncounterData = getProperty(journal.data, path);
+  const journalData = CONSTANTS.IsV10orNewer() ? journal : journal.data;
+  const quickEncounterData = getProperty(journalData, path);
   if (!quickEncounterData) {
     return data;
   }
@@ -161,7 +163,8 @@ export async function ExtractMonksEnhancedJournalAssets(journal) {
     return data;
   }
 
-  const enhancedJournalData = getProperty(journal, 'data.flags.monks-enhanced-journal');
+  const journalData = CONSTANTS.IsV10orNewer() ? journal : journal.data;
+  const enhancedJournalData = getProperty(journalData, 'flags.monks-enhanced-journal');
   if (!enhancedJournalData) {
     return data;
   }

@@ -1,5 +1,5 @@
-import {RelatedData} from './related-data.js';
 import {CONSTANTS} from '../../constants.js';
+import {RelatedData} from './related-data.js';
 
 /**
  * ExtractRelatedRollTableData - extracts the entity UUIDs that are related to the given roll table.
@@ -15,9 +15,11 @@ export function ExtractRelatedRollTableData(table) {
   const id = table.id || table._id;
   const uuid = table.uuid || `${RollTable.documentName}.${id}`;
 
-  for (const result of table.data?.results) {
-    let collection = result.data?.collection;
-    const resultId = result.data?.resultId;
+  const tableData = CONSTANTS.IsV10orNewer() ? table : table.data;
+  for (const result of tableData?.results) {
+    const resultData = CONSTANTS.IsV10orNewer() ? result : result.data;
+    let collection = resultData?.collection;
+    const resultId = resultData?.resultId;
 
     if (!CONSTANTS.PACK_IMPORT_ORDER.includes(collection)) {
       // Make the uuid reference consistent with "standard" ones.

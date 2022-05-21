@@ -47,8 +47,10 @@ var hMap = function(cd, mb, r) {
   var s = cd.length;
   var i = 0;
   var l = new u16(mb);
-  for (; i < s; ++i)
-    ++l[cd[i] - 1];
+  for (; i < s; ++i) {
+    if (cd[i])
+      ++l[cd[i] - 1];
+  }
   var le = new u16(mb);
   for (i = 0; i < mb; ++i) {
     le[i] = le[i - 1] + l[i - 1] << 1;
@@ -115,7 +117,7 @@ var slc = function(v, s, e) {
     s = 0;
   if (e == null || e > v.length)
     e = v.length;
-  var n = new (v instanceof u16 ? u16 : v instanceof u32 ? u32 : u8)(e - s);
+  var n = new (v.BYTES_PER_ELEMENT == 2 ? u16 : v.BYTES_PER_ELEMENT == 4 ? u32 : u8)(e - s);
   n.set(v.subarray(s, e));
   return n;
 };
@@ -508,12 +510,10 @@ var dflt = function(dat, lvl, plvl, pre, post, lst) {
   if (!lvl || s < 8) {
     for (var i = 0; i <= s; i += 65535) {
       var e = i + 65535;
-      if (e < s) {
-        pos = wfblk(w, pos, dat.subarray(i, e));
-      } else {
-        w[i] = lst;
-        pos = wfblk(w, pos, dat.subarray(i, s));
+      if (e >= s) {
+        w[pos >> 3] = lst;
       }
+      pos = wfblk(w, pos + 1, dat.subarray(i, e));
     }
   } else {
     var opt = deo[lvl - 1];
@@ -649,7 +649,7 @@ var mrg = function(a, b) {
 var wcln = function(fn, fnStr, td2) {
   var dt = fn();
   var st = fn.toString();
-  var ks = st.slice(st.indexOf("[") + 1, st.lastIndexOf("]")).replace(/ /g, "").split(",");
+  var ks = st.slice(st.indexOf("[") + 1, st.lastIndexOf("]")).replace(/\s+/g, "").split(",");
   for (var i = 0; i < dt.length; ++i) {
     var v = dt[i], k = ks[i];
     if (typeof v == "function") {
@@ -675,8 +675,9 @@ var ch = [];
 var cbfs = function(v) {
   var tl = [];
   for (var k in v) {
-    if (v[k] instanceof u8 || v[k] instanceof u16 || v[k] instanceof u32)
+    if (v[k].buffer) {
       tl.push((v[k] = new v[k].constructor(v[k])).buffer);
+    }
   }
   return tl;
 };
@@ -1202,13 +1203,15 @@ function decompressSync(data, out) {
 }
 var fltn = function(d, p, t, o) {
   for (var k in d) {
-    var val = d[k], n = p + k;
+    var val = d[k], n = p + k, op = o;
+    if (Array.isArray(val))
+      op = mrg(o, val[1]), val = val[0];
     if (val instanceof u8)
-      t[n] = [val, o];
-    else if (Array.isArray(val))
-      t[n] = [val[0], mrg(o, val[1])];
-    else
-      fltn(val, n + "/", t, o);
+      t[n] = [val, op];
+    else {
+      t[n += "/"] = [new u8(0), op];
+      fltn(val, n, t, o);
+    }
   }
 };
 var te = typeof TextEncoder != "undefined" && /* @__PURE__ */ new TextEncoder();

@@ -1,5 +1,18 @@
 # Changelog
 
+## v2.5.0
+
+- Removed support for v0.7.X of Foundry VTT.
+  - Minimum supported version is now 0.8.6 (the earliest stable release in the v8 line).
+- Added support for v10 of Foundry VTT.
+  - Removed various warnings related to the new data models behind the scene.
+- Sorting of Folders is now supported for compendiums built via [Compendium Folders](https://github.com/earlSt1/vtt-compendium-folders/pull/140).
+  - Previously, only the documents inside folders were sorted, folders were always listed alphabetically.
+- Updated the `Bulk replace asset references` macro to better handle all asset locations.
+  - This change comes at the cost of unnecessary updates until [Core V10](https://gitlab.com/foundrynet/foundryvtt/-/issues/6813) is released.
+- Upgraded the [libWrapper shim](https://github.com/ruipin/fvtt-lib-wrapper/blob/master/shim/SHIM.md) version.
+- Visually differentiate between running the Asset Report in "World" or "Module" mode. No functional changes.
+
 ## v2.4.5
 
 - Better support for relinking [Monk's Enhanced Journal](https://foundryvtt.com/packages/monks-enhanced-journal)'s relationships between Journals.

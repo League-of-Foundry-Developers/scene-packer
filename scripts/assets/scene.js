@@ -18,7 +18,8 @@ export async function ExtractSceneAssets(scene) {
     return data;
   }
 
-  if (scene.data.img) {
+  const sceneData = CONSTANTS.IsV10orNewer() ? scene : scene.data;
+  if (sceneData.img) {
     await data.AddAsset({
       id: scene.id,
       key: 'img',
@@ -26,11 +27,11 @@ export async function ExtractSceneAssets(scene) {
       parentType: scene.documentName,
       documentType: scene.documentName,
       location: AssetReport.Locations.SceneBackground,
-      asset: scene.data.img,
+      asset: sceneData.img,
     });
   }
 
-  if (scene.data.foreground) {
+  if (sceneData.foreground) {
     await data.AddAsset({
       id: scene.id,
       key: 'foreground',
@@ -38,7 +39,7 @@ export async function ExtractSceneAssets(scene) {
       parentType: scene.documentName,
       documentType: scene.documentName,
       location: AssetReport.Locations.SceneForeground,
-      asset: scene.data.foreground,
+      asset: sceneData.foreground,
     });
   }
 
@@ -48,42 +49,25 @@ export async function ExtractSceneAssets(scene) {
   const tokens = [];
   const sounds = [];
 
-  if (CONSTANTS.IsV8orNewer()) {
-    if (scene.data.notes?.size) {
-      notes.push(...Array.from(scene.data.notes.values()));
-    }
-    if (scene.data.tiles?.size) {
-      tiles.push(...Array.from(scene.data.tiles.values()));
-    }
-    if (scene.data.drawings?.size) {
-      drawings.push(...Array.from(scene.data.drawings.values()));
-    }
-    if (scene.data.tokens?.size) {
-      tokens.push(...Array.from(scene.data.tokens.values()));
-    }
-    if (scene.data.sounds?.size) {
-      sounds.push(...Array.from(scene.data.sounds.values()));
-    }
-  } else {
-    if (scene.data.notes?.length) {
-      notes.push(...scene.data.notes);
-    }
-    if (scene.data.tiles?.length) {
-      tiles.push(...scene.data.tiles);
-    }
-    if (scene.data.drawings?.length) {
-      drawings.push(...scene.data.drawings);
-    }
-    if (scene.data.tokens?.length) {
-      tokens.push(...scene.data.tokens);
-    }
-    if (scene.data.sounds?.length) {
-      sounds.push(...scene.data.sounds);
-    }
+  if (sceneData.notes?.size) {
+    notes.push(...Array.from(sceneData.notes.values()));
+  }
+  if (sceneData.tiles?.size) {
+    tiles.push(...Array.from(sceneData.tiles.values()));
+  }
+  if (sceneData.drawings?.size) {
+    drawings.push(...Array.from(sceneData.drawings.values()));
+  }
+  if (sceneData.tokens?.size) {
+    tokens.push(...Array.from(sceneData.tokens.values()));
+  }
+  if (sceneData.sounds?.size) {
+    sounds.push(...Array.from(sceneData.sounds.values()));
   }
 
   for (const note of notes) {
-    const icon = note?.data?.icon || note?.icon;
+    const noteData = CONSTANTS.IsV10orNewer() ? note : note?.data;
+    const icon = noteData?.icon || note?.icon;
     if (icon) {
       await data.AddAsset({
         id: note.id,
@@ -98,7 +82,8 @@ export async function ExtractSceneAssets(scene) {
   }
 
   for (const tile of tiles) {
-    const img = tile?.data?.img || tile?.img;
+    const tileData = CONSTANTS.IsV10orNewer() ? tile : tile?.data;
+    const img = tileData?.img || tile?.img;
     if (img) {
       await data.AddAsset({
         id: tile.id,
@@ -113,7 +98,8 @@ export async function ExtractSceneAssets(scene) {
   }
 
   for (const drawing of drawings) {
-    const texture = drawing?.data?.texture || drawing?.texture;
+    const drawingData = CONSTANTS.IsV10orNewer() ? drawing : drawing?.data;
+    const texture = drawingData?.texture || drawing?.texture;
     if (texture) {
       await data.AddAsset({
         id: drawing.id,
@@ -128,7 +114,8 @@ export async function ExtractSceneAssets(scene) {
   }
 
   for (const token of tokens) {
-    const img = token?.data?.img || token?.img;
+    const tokenData = CONSTANTS.IsV10orNewer() ? token : token?.data;
+    const img = tokenData?.img || token?.img;
     if (img) {
       await data.AddAsset({
         id: token.id,
@@ -143,7 +130,8 @@ export async function ExtractSceneAssets(scene) {
   }
 
   for (const sound of sounds) {
-    let path = sound?.data?.path || sound?.path;
+    const soundData = CONSTANTS.IsV10orNewer() ? sound : sound?.data;
+    let path = soundData?.path || sound?.path;
     if (path) {
       await data.AddAsset({
         id: sound.id,

@@ -18,7 +18,8 @@ export async function ExtractActorAssets(actor) {
     return data;
   }
 
-  if (actor.data.img) {
+  const actorData = CONSTANTS.IsV10orNewer() ? actor : actor.data;
+  if (actorData.img) {
     await data.AddAsset({
       id: actor.id,
       key: 'img',
@@ -26,11 +27,11 @@ export async function ExtractActorAssets(actor) {
       parentType: actor.documentName,
       documentType: actor.documentName,
       location: AssetReport.Locations.ActorImage,
-      asset: actor.data.img,
+      asset: actorData.img,
     });
   }
 
-  const tokenImage = actor.token?.img || actor.data?.token?.img;
+  const tokenImage = actor.token?.img || actorData?.token?.img;
   if (tokenImage) {
     await data.AddAsset({
       id: actor.id,
@@ -46,24 +47,16 @@ export async function ExtractActorAssets(actor) {
   const items = [];
   const effects = [];
 
-  if (CONSTANTS.IsV8orNewer()) {
-    if (actor.data.items?.size) {
-      items.push(...Array.from(actor.data.items.values()));
-    }
-    if (actor.data.effects?.size) {
-      effects.push(...Array.from(actor.data.effects.values()));
-    }
-  } else {
-    if (actor.data.items?.length) {
-      items.push(...actor.data.items);
-    }
-    if (actor.data.effects?.length) {
-      effects.push(...actor.data.effects);
-    }
+  if (actorData.items?.size) {
+    items.push(...Array.from(actorData.items.values()));
+  }
+  if (actorData.effects?.size) {
+    effects.push(...Array.from(actorData.effects.values()));
   }
 
   for (const item of items) {
-    const img = item?.data?.img || item?.img;
+    const itemData = CONSTANTS.IsV10orNewer() ? item : item?.data;
+    const img = itemData?.img || item?.img;
     if (img) {
       await data.AddAsset({
         id: item.id,
@@ -78,7 +71,8 @@ export async function ExtractActorAssets(actor) {
   }
 
   for (const effect of effects) {
-    const img = effect?.data?.img;
+    const effectData = CONSTANTS.IsV10orNewer() ? effect : effect?.data;
+    const img = effectData?.img;
     if (img) {
       await data.AddAsset({
         id: effect.id,
@@ -90,7 +84,7 @@ export async function ExtractActorAssets(actor) {
         asset: img,
       });
     }
-    const icon = effect?.data?.img || effect?.data?.icon;
+    const icon = effectData?.img || effectData?.icon;
     if (icon) {
       await data.AddAsset({
         id: effect.id,
@@ -105,7 +99,7 @@ export async function ExtractActorAssets(actor) {
   }
 
   // Add token attacher assets
-  const tokenAttacherData = actor.data.token?.flags['token-attacher']?.prototypeAttached;
+  const tokenAttacherData = actorData.token?.flags['token-attacher']?.prototypeAttached;
   if (tokenAttacherData) {
     for (const tile of (tokenAttacherData.Tile || [])) {
       if (tile?.img) {

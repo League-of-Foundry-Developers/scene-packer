@@ -253,6 +253,24 @@ export const CONSTANTS = Object.freeze({
   IsV9(version = this.Version()) {
     return this.IsV9orNewer(version) && isNewerVersion('10', version);
   },
+
+  /**
+   * Returns whether the version is at least V10
+   * @param {string} version - The version to test. Defaults to the current game instance version.
+   * @return {boolean}
+   */
+  IsV10orNewer(version = this.Version()) {
+    return version === '10.0' || isNewerVersion(version, '10');
+  },
+
+  /**
+   * Returns whether the version is V10
+   * @param {string} version - The version to test. Defaults to the current game instance version.
+   * @return {boolean}
+   */
+  IsV10(version = this.Version()) {
+    return this.IsV10orNewer(version) && isNewerVersion('11', version);
+  },
 });
 
 /**
@@ -261,15 +279,6 @@ export const CONSTANTS = Object.freeze({
  */
 export const IsUsingTheForge = () => {
   return typeof ForgeVTT !== 'undefined' && ForgeVTT.usingTheForge;
-};
-
-/**
- * Fake Entity is used in place of a real entity, for times when operating against a real entity would throw errors.
- * @type {{update: FakeEntity.update}}
- */
-export const FakeEntity = {
-  update: () => {
-  },
 };
 
 /**

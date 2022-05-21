@@ -18,7 +18,8 @@ export async function ExtractRollTableAssets(table) {
     return data;
   }
 
-  if (table.data.img) {
+  const tableData = CONSTANTS.IsV10orNewer() ? table : table.data;
+  if (tableData.img) {
     await data.AddAsset({
       id: table.id,
       key: 'img',
@@ -26,24 +27,19 @@ export async function ExtractRollTableAssets(table) {
       parentType: table.documentName,
       documentType: table.documentName,
       location: AssetReport.Locations.RollTableImage,
-      asset: table.data.img,
+      asset: tableData.img,
     });
   }
 
   const results = [];
 
-  if (CONSTANTS.IsV8orNewer()) {
-    if (table.data.results?.size) {
-      results.push(...Array.from(table.data.results.values()));
-    }
-  } else {
-    if (table.data.results?.length) {
-      results.push(...table.data.results);
-    }
+  if (tableData.results?.size) {
+    results.push(...Array.from(tableData.results.values()));
   }
 
   for (const tableResult of results) {
-    const img = tableResult?.data?.img || tableResult?.icon;
+    const tableResultData = CONSTANTS.IsV10orNewer() ? tableResult : tableResult?.data;
+    const img = tableResultData?.img || tableResult?.icon;
     if (img) {
       await data.AddAsset({
         id: tableResult.id,

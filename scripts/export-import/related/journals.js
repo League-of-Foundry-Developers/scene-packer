@@ -61,7 +61,8 @@ export function ExtractRelatedQuickEncounterData(journal) {
 
   let quickEncounter = {};
   const path = 'flags.quick-encounters.quickEncounter';
-  const quickEncounterData = getProperty(journal.data, path);
+  const journalData = CONSTANTS.IsV10orNewer() ? journal : journal.data;
+  const quickEncounterData = getProperty(journalData, path);
   if (!quickEncounterData) {
     return relatedData;
   }
