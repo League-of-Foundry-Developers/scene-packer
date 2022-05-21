@@ -142,7 +142,8 @@ export default class ScenePacker {
     });
 
     let promptedVersion = game.settings.get(this.moduleName, CONSTANTS.SETTING_PROMPTED) || '0.0.0';
-    let moduleVersion = game.modules.get(this.moduleName)?.data?.version || '0.0.0';
+    const module = game.modules.get(this.moduleName);
+    const moduleVersion = (CONSTANTS.IsV10orNewer() ? module?.version : module?.data?.version) || '0.0.0';
     if (this.allowImportPrompts && isNewerVersion(moduleVersion, promptedVersion) && game.settings.get(this.moduleName, CONSTANTS.SETTING_SHOW_WELCOME_PROMPTS)) {
       // A newer version of the module is installed from what was last prompted
       let content = game.i18n.format('SCENE-PACKER.welcome.intro', {
@@ -477,7 +478,8 @@ export default class ScenePacker {
                 // Display the Welcome Journal once per new module version
                 if (this.welcomeJournal) {
                   let importedVersion = game.settings.get(this.moduleName, CONSTANTS.SETTING_IMPORTED_VERSION) || '0.0.0';
-                  let moduleVersion = game.modules.get(this.moduleName)?.data?.version || '0.0.0';
+                  const module = game.modules.get(this.moduleName);
+                  const moduleVersion = (CONSTANTS.IsV10orNewer() ? module?.version : module?.data?.version) || '0.0.0';
                   // Note that the imported version gets set during ProcessScene, but JournalEntries are processed before Scenes,
                   // so the current version flag won't have been set yet.
                   if (isNewerVersion(moduleVersion, importedVersion)) {
@@ -866,7 +868,8 @@ export default class ScenePacker {
     }
 
     let importedVersion = game.settings.get(this.moduleName, CONSTANTS.SETTING_IMPORTED_VERSION) || '0.0.0';
-    let moduleVersion = game.modules.get(this.moduleName)?.data?.version || '0.0.0';
+    const module = game.modules.get(this.moduleName);
+    const moduleVersion = (CONSTANTS.IsV10orNewer() ? module?.version : module?.data?.version) || '0.0.0';
     if (this.welcomeJournal && isNewerVersion(moduleVersion, importedVersion)) {
       // Display the welcome journal once per new module version
       const j = game.journal.find(j => j.name === this.welcomeJournal && j.getFlag('core', 'sourceId')
@@ -1478,7 +1481,9 @@ export default class ScenePacker {
 
     // Store details about which module and version packed the Scene
     await scene.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_SOURCE_MODULE, this.moduleName);
-    await scene.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_PACKED_VERSION, game.modules.get(CONSTANTS.MODULE_NAME).data.version);
+    const module = game.modules.get(this.moduleName);
+    const moduleVersion = (CONSTANTS.IsV10orNewer() ? module?.version : module?.data?.version) || '0.0.0';
+    await scene.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_PACKED_VERSION, moduleVersion);
 
 
     const sceneJournalInfo = {};
@@ -4258,7 +4263,7 @@ export default class ScenePacker {
       }
     } else {
       if (entity.data?.permission && typeof entity.data.permission.default === 'undefined') {
-        const permissionOptions = CONST.DOCUMENT_PERMISSION_LEVELS || CONST.ENTITY_PERMISSIONS;
+        const permissionOptions = CONST.DOCUMENT_PERMISSION_LEVELS ?? CONST.ENTITY_PERMISSIONS;
         await entity.update({permission: {default: permissionOptions.NONE}});
       }
     }
@@ -4274,7 +4279,7 @@ export default class ScenePacker {
     if (sourceId.startsWith('Compendium.scene-packer') || scenePackerInstances.some(p => sourceId.startsWith(`Compendium.${p}.`))) {
       // Import was from an active Scene Packer compendium, update the default permission if possible
       const defaultPermission = entity.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_DEFAULT_PERMISSION);
-      const currentPermission = entity.ownership?.default || entity.data?.permission?.default;
+      const currentPermission = entity.ownership?.default ?? entity.data?.permission?.default;
       if (defaultPermission && currentPermission !== defaultPermission) {
         if (CONSTANTS.IsV10orNewer()) {
           await entity.updateSource({ownership: {default: defaultPermission}});
