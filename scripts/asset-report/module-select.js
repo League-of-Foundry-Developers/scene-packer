@@ -26,7 +26,7 @@ export default class ModuleSelect extends FormApplication {
         // Automatically include dependencies too
         const module = game.modules.get(name);
         if (module) {
-          const dependencies = module.data?.dependencies || [];
+          const dependencies = (CONSTANTS.IsV10orNewer() ? module.dependencies : module.data?.dependencies) || [];
           dependencies.forEach(dep => {
             if (dep?.name) {
               this._checked[dep.name] = true;
@@ -55,7 +55,7 @@ export default class ModuleSelect extends FormApplication {
   /** @inheritdoc */
   getData(options) {
     // Prepare modules
-    const modules = game.data.modules.reduce((arr, m) => {
+    const modules = (CONSTANTS.IsV10orNewer() ? game.modules : game.data.modules).map(m => {
       let mod;
       if (CONSTANTS.IsV10orNewer()) {
         mod = m.toObject();
@@ -70,11 +70,13 @@ export default class ModuleSelect extends FormApplication {
       mod.systemTag = game.system.id;
       mod.incompatible = m.incompatible;
       mod.unavailable = m.unavailable;
-      mod.dependencies = mod.dependencies ? mod.dependencies.map(d => d.name) : null;
-      return arr.concat([mod]);
-    }, []).sort((a, b) => {
-      if (this._checked[a.name] !== this._checked[b.name]) {
-        return (this._checked[b.name] || 0) - (this._checked[a.name] || 0);
+      mod.dependencies = mod.dependencies ? mod.dependencies.map(d => CONSTANTS.IsV10orNewer() ? d.id : d.name) : null;
+      return mod;
+    }).sort((a, b) => {
+      const aName = CONSTANTS.IsV10orNewer() ? a.id : a.name;
+      const bName = CONSTANTS.IsV10orNewer() ? b.id : b.name;
+      if (this._checked[aName] !== this._checked[bName]) {
+        return (this._checked[bName] || 0) - (this._checked[aName] || 0);
       }
       if (a.activeModule !== b.activeModule) {
         return b.activeModule - a.activeModule;

@@ -1,4 +1,4 @@
-import { CONSTANTS } from './constants.js';
+import {CONSTANTS} from './constants.js';
 import ModuleSelect from './asset-report/module-select.js';
 
 /**
@@ -60,7 +60,10 @@ export default class AssetReport extends FormApplication {
             icon: '<i class="fas fa-atlas"></i>',
             label: game.i18n.localize('Module'),
             callback: () => {
-              let modules = game.data.modules.filter(m => (m.data?.packs?.size || m.packs?.length) && m.active);
+              let modules = (CONSTANTS.IsV10orNewer() ? game.modules : game.data.modules).filter(m => {
+                const packs = m.packs ?? m.data.packs;
+                return (packs?.size || packs?.length) && m.active;
+              });
               let content = `<p>${game.i18n.localize('SCENE-PACKER.asset-report.module-select.mini')}</p>`;
               if (!modules.length) {
                 content += `<p>${game.i18n.localize('SCENE-PACKER.asset-report.module-select.none')}</p>`;
@@ -179,7 +182,7 @@ export default class AssetReport extends FormApplication {
         // Wrap in a setTimeout to make sure the application has finished rendering it, otherwise it won't close.
         setTimeout(() => {
           di.close({force: true});
-        }, 0)
+        }, 0);
       }
 
       /**
@@ -247,7 +250,7 @@ export default class AssetReport extends FormApplication {
           // Wrap in a setTimeout to make sure the application has finished rendering it, otherwise it won't close.
           setTimeout(() => {
             d.close({force: true});
-          }, 0)
+          }, 0);
         }
         // Store whether the asset resolves.
         for (let i = 0; i < assetResponses.length; i++) {
@@ -411,7 +414,11 @@ export default class AssetReport extends FormApplication {
    * @private
    */
   _onToggleHideOk(event) {
-    $(event.currentTarget).closest('footer').siblings('div.report-details').find('ul.asset-list > li:not(.has-dependencies)').toggle();
+    $(event.currentTarget)
+      .closest('footer')
+      .siblings('div.report-details')
+      .find('ul.asset-list > li:not(.has-dependencies)')
+      .toggle();
   }
 
   /**
@@ -684,12 +691,13 @@ export default class AssetReport extends FormApplication {
         pack: scene.pack,
       };
 
-      if (scene.data.img) {
-        this.CheckAsset(scene.id, AssetReport.Sources.Scene, scene.data.img, AssetReport.Locations.SceneBackground);
+      const sceneData = CONSTANTS.IsV10orNewer() ? scene : scene.data;
+      if (sceneData.img) {
+        this.CheckAsset(scene.id, AssetReport.Sources.Scene, sceneData.img, AssetReport.Locations.SceneBackground);
       }
 
-      if (scene.data.foreground) {
-        this.CheckAsset(scene.id, AssetReport.Sources.Scene, scene.data.foreground, AssetReport.Locations.SceneForeground);
+      if (sceneData.foreground) {
+        this.CheckAsset(scene.id, AssetReport.Sources.Scene, sceneData.foreground, AssetReport.Locations.SceneForeground);
       }
 
       const notes = [];
@@ -698,55 +706,57 @@ export default class AssetReport extends FormApplication {
       const tokens = [];
       const sounds = [];
 
-      if (scene.data.notes?.size) {
-        notes.push(...Array.from(scene.data.notes.values()));
+      if (sceneData.notes?.size) {
+        notes.push(...Array.from(sceneData.notes.values()));
       }
-      if (scene.data.tiles?.size) {
-        tiles.push(...Array.from(scene.data.tiles.values()));
+      if (sceneData.tiles?.size) {
+        tiles.push(...Array.from(sceneData.tiles.values()));
       }
-      if (scene.data.drawings?.size) {
-        drawings.push(...Array.from(scene.data.drawings.values()));
+      if (sceneData.drawings?.size) {
+        drawings.push(...Array.from(sceneData.drawings.values()));
       }
-      if (scene.data.tokens?.size) {
-        tokens.push(...Array.from(scene.data.tokens.values()));
+      if (sceneData.tokens?.size) {
+        tokens.push(...Array.from(sceneData.tokens.values()));
       }
-      if (scene.data.sounds?.size) {
-        sounds.push(...Array.from(scene.data.sounds.values()));
+      if (sceneData.sounds?.size) {
+        sounds.push(...Array.from(sceneData.sounds.values()));
       }
 
       notes.forEach(note => {
-        const icon = note?.data?.icon || note?.icon;
+        const icon = CONSTANTS.IsV10orNewer() ? note?.texture?.src : note?.data?.icon ?? note?.icon;
         if (icon) {
           this.CheckAsset(scene.id, AssetReport.Sources.Scene, icon, AssetReport.Locations.SceneNoteIcon);
         }
       });
 
       tiles.forEach(tile => {
-        const img = tile?.data?.img || tile?.img;
+        const img = CONSTANTS.IsV10orNewer() ? tile?.texture?.src : tile?.img ?? tile?.data?.img;
         if (img) {
           this.CheckAsset(scene.id, AssetReport.Sources.Scene, img, AssetReport.Locations.SceneTileImage);
         }
       });
 
       drawings.forEach(drawing => {
-        const texture = drawing?.data?.texture || drawing?.texture;
+        const texture = CONSTANTS.IsV10orNewer() ? drawing?.texture : drawing?.texture ?? drawing?.data?.texture;
         if (texture) {
           this.CheckAsset(scene.id, AssetReport.Sources.Scene, texture, AssetReport.Locations.SceneDrawingImage);
         }
       });
 
       tokens.forEach(token => {
-        const img = token?.data?.img || token?.img;
+        const img = CONSTANTS.IsV10orNewer() ? token?.texture?.src : token?.img ?? token?.data?.img;
         if (img) {
           this.CheckAsset(scene.id, AssetReport.Sources.Scene, img, AssetReport.Locations.SceneTokenImage);
         }
-        let effects = token?.data?.actorData?.effects || token?.actorData?.effects || [];
+        let effects = (CONSTANTS.IsV10orNewer() ?
+                       token?.actorData?.effects :
+                       token?.actorData?.effects ?? token?.data?.actorData?.effects) || [];
         if (token?.actor?.effects?.size) {
           effects.push([...token.actor.effects.values()]);
         }
         for (let j = 0; j < effects.length; j++) {
           const effect = effects[j];
-          const icon = effect?.data?.icon || effect?.icon;
+          const icon = CONSTANTS.IsV10orNewer() ? effect?.icon : effect?.icon ?? effect?.data?.icon;
           if (icon) {
             this.CheckAsset(scene.id, AssetReport.Sources.Scene, icon, AssetReport.Locations.SceneTokenEffectIcon);
           }
@@ -754,9 +764,9 @@ export default class AssetReport extends FormApplication {
       });
 
       sounds.forEach(sound => {
-        let path = sound?.data?.path || sound?.path;
+        let path = CONSTANTS.IsV10orNewer() ? sound?.path : sound?.path ?? sound?.data?.path;
         if (path) {
-          const flags = sound?.data?.flags || sound?.flags;
+          const flags = CONSTANTS.IsV10orNewer() ? sound?.flags : sound?.flags ?? sound?.data?.flags;
           if (flags?.bIsStreamed && flags?.streamingApi === 'youtube' && flags?.streamingId) {
             // This is a streaming sound from youtube
             path = `https://www.youtube.com/watch?v=${flags.streamingId}`;
@@ -800,11 +810,12 @@ export default class AssetReport extends FormApplication {
         pack: actor.pack,
       };
 
-      if (actor.data.img) {
-        this.CheckAsset(actor.id, AssetReport.Sources.Actor, actor.data.img, AssetReport.Locations.ActorImage);
+      const actorData = CONSTANTS.IsV10orNewer() ? actor : actor.data;
+      if (actorData.img) {
+        this.CheckAsset(actor.id, AssetReport.Sources.Actor, actorData.img, AssetReport.Locations.ActorImage);
       }
 
-      const tokenImage = actor.token?.img || actor.data?.token?.img;
+      const tokenImage = CONSTANTS.IsV10orNewer() ? actor.token?.img : actor.token?.img || actorData?.token?.img;
       if (tokenImage) {
         this.CheckAsset(actor.id, AssetReport.Sources.Actor, tokenImage, AssetReport.Locations.ActorTokenImage);
       }
@@ -812,22 +823,22 @@ export default class AssetReport extends FormApplication {
       const items = [];
       const effects = [];
 
-      if (actor.data.items?.size) {
-        items.push(...Array.from(actor.data.items.values()));
+      if (actorData.items?.size) {
+        items.push(...Array.from(actorData.items.values()));
       }
-      if (actor.data.effects?.size) {
-        effects.push(...Array.from(actor.data.effects.values()));
+      if (actorData.effects?.size) {
+        effects.push(...Array.from(actorData.effects.values()));
       }
 
       items.forEach(item => {
-        const img = item?.data?.img || item?.img;
+        const img = CONSTANTS.IsV10orNewer() ? item?.img : item?.img ?? item?.data?.img;
         if (img) {
           this.CheckAsset(actor.id, AssetReport.Sources.Actor, img, AssetReport.Locations.ActorItemImage);
         }
       });
 
       effects.forEach(effect => {
-        const img = effect?.data?.img || effect?.icon;
+        const img = CONSTANTS.IsV10orNewer() ? effect?.icon : effect?.icon ?? effect?.data?.img;
         if (img) {
           this.CheckAsset(actor.id, AssetReport.Sources.Actor, img, AssetReport.Locations.ActorEffectImage);
         }
@@ -868,12 +879,13 @@ export default class AssetReport extends FormApplication {
         pack: journal.pack,
       };
 
-      if (journal.data.img) {
-        this.CheckAsset(journal.id, AssetReport.Sources.JournalEntry, journal.data.img, AssetReport.Locations.JournalImage);
+      const journalData = CONSTANTS.IsV10orNewer() ? journal : journal.data;
+      if (journalData.img) {
+        this.CheckAsset(journal.id, AssetReport.Sources.JournalEntry, journalData.img, AssetReport.Locations.JournalImage);
       }
 
-      if (journal.data.content) {
-        const doc = this.domParser.parseFromString(journal.data.content, 'text/html');
+      if (journalData.content) {
+        const doc = this.domParser.parseFromString(journalData.content, 'text/html');
         const images = doc.getElementsByTagName('img');
         for (const image of images) {
           if (image?.src) {
@@ -917,23 +929,26 @@ export default class AssetReport extends FormApplication {
         pack: item.pack,
       };
 
-      if (item.data.img) {
-        this.CheckAsset(item.id, AssetReport.Sources.Item, item.data.img, AssetReport.Locations.ItemImage);
+      const itemData = CONSTANTS.IsV10orNewer() ? item : item.data;
+      if (itemData.img) {
+        this.CheckAsset(item.id, AssetReport.Sources.Item, itemData.img, AssetReport.Locations.ItemImage);
       }
 
       const effects = [];
-      if (item.data.effects?.size) {
-        effects.push(...Array.from(item.data.effects.values()));
+      if (itemData.effects?.size) {
+        effects.push(...Array.from(itemData.effects.values()));
       }
 
       effects.forEach(effect => {
-        const icon = effect?.data?.icon || effect?.icon;
+        const icon = CONSTANTS.IsV10orNewer() ? effect?.icon : effect?.icon ?? effect?.data?.icon;
         if (icon) {
           this.CheckAsset(item.id, AssetReport.Sources.Item, icon, AssetReport.Locations.ItemEffectImage);
         }
       });
 
-      const itemDescription = item.data?.description?.value || item.data?.data?.description?.value;
+      const itemDescription = CONSTANTS.IsV10orNewer() ?
+                              itemData?.description?.value :
+                              itemData?.description?.value ?? itemData?.data?.description?.value;
       if (itemDescription) {
         const doc = this.domParser.parseFromString(itemDescription, 'text/html');
         const images = doc.getElementsByTagName('img');
@@ -981,14 +996,15 @@ export default class AssetReport extends FormApplication {
 
       const sounds = [];
 
-      if (playlist.data.sounds?.size) {
-        sounds.push(...Array.from(playlist.data.sounds.values()));
+      const playlistData = CONSTANTS.IsV10orNewer() ? playlist : playlist.data;
+      if (playlistData.sounds?.size) {
+        sounds.push(...Array.from(playlistData.sounds.values()));
       }
 
       sounds.forEach(sound => {
-        let path = sound?.data?.path || sound?.path;
+        let path = CONSTANTS.IsV10orNewer() ? sound?.path : sound?.path ?? sound?.data?.path;
         if (path) {
-          const flags = sound?.data?.flags || sound?.flags;
+          const flags = CONSTANTS.IsV10orNewer() ? sound?.flags : sound?.flags ?? sound?.data?.flags;
           if (flags?.bIsStreamed && flags?.streamingApi === 'youtube' && flags?.streamingId) {
             // This is a streaming sound from youtube
             path = `https://www.youtube.com/watch?v=${flags.streamingId}`;
@@ -1032,8 +1048,9 @@ export default class AssetReport extends FormApplication {
         pack: macro.pack,
       };
 
-      if (macro.data.img) {
-        this.CheckAsset(macro.id, AssetReport.Sources.Macro, macro.data.img, AssetReport.Locations.MacroImage);
+      const macroData = CONSTANTS.IsV10orNewer() ? macro : macro.data;
+      if (macroData.img) {
+        this.CheckAsset(macro.id, AssetReport.Sources.Macro, macroData.img, AssetReport.Locations.MacroImage);
       }
 
       this.assetMaps[AssetReport.Sources.Macro].set(entityData.id, entityData);
@@ -1071,18 +1088,19 @@ export default class AssetReport extends FormApplication {
         pack: table.pack,
       };
 
-      if (table.data.img) {
-        this.CheckAsset(table.id, AssetReport.Sources.RollTable, table.data.img, AssetReport.Locations.RollTableImage);
+      const tableData = CONSTANTS.IsV10orNewer() ? table : table.data;
+      if (tableData.img) {
+        this.CheckAsset(table.id, AssetReport.Sources.RollTable, tableData.img, AssetReport.Locations.RollTableImage);
       }
 
       const results = [];
 
-      if (table.data.results?.size) {
-        results.push(...Array.from(table.data.results.values()));
+      if (tableData.results?.size) {
+        results.push(...Array.from(tableData.results.values()));
       }
 
       results.forEach(tableResult => {
-        const img = tableResult?.data?.img || tableResult?.img;
+        const img = CONSTANTS.IsV10orNewer() ? tableResult?.img : tableResult?.img ?? tableResult?.data?.img;
         if (img) {
           this.CheckAsset(table.id, AssetReport.Sources.RollTable, img, AssetReport.Locations.RollTableResultImage);
         }
