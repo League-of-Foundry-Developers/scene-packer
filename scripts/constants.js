@@ -125,6 +125,11 @@ export const CONSTANTS = Object.freeze({
   PACK_IMPORT_ORDER: ['Playlist', 'Macro', 'Item', 'Actor', 'Cards', 'RollTable', 'JournalEntry', 'Scene'],
 
   /**
+   * The setting key for tracking the timeout value when processing assets.
+   */
+  SETTING_ASSET_TIMEOUT: 'assetTimeout',
+
+  /**
    * The setting key for whether to display the context menu on the Scene sidebar.
    */
   SETTING_ENABLE_CONTEXT_MENU: 'enableContextMenu',

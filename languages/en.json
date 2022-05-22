@@ -326,6 +326,8 @@
       "name": "Export to Moulinette",
       "label": "Open Exporter wizard",
       "hint": "The exporter wizard will allow you to package up an adventure for distribution via Moulinette Cloud.",
+      "timeout": "Asset timeout",
+      "timeout-help": "The amount of time in seconds to wait for an asset to be downloaded. Set to 0 to disable timeouts.",
       "unsupported": "Export to Moulinette is only supported in versions >= 0.8.0",
       "selected-count": "{count} entities selected for export.",
       "toggle-checkboxes": "Toggle All Checkboxes",

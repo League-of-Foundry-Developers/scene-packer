@@ -2640,8 +2640,11 @@ export default class ScenePacker {
         .filter((info) => {
           // Filter for only the entries that are missing, or are in a different folder.
           const j = game.journal.getName(info?.journalName);
+          if (!j) {
+            return true;
+          }
           const jData = CONSTANTS.IsV10orNewer() ? j : j.data;
-          return j == null || (folderIDs.length && !folderIDs.includes(jData.folder));
+          return folderIDs.length && !folderIDs.includes(jData.folder);
         });
     }
 
@@ -2701,8 +2704,11 @@ export default class ScenePacker {
         .filter((info) => {
           // Filter for only the entries that are missing, or are in a different folder.
           const m = game.macros.getName(info?.name);
+          if (!m) {
+            return true;
+          }
           const mData = CONSTANTS.IsV10orNewer() ? m : m.data;
-          return m == null || (folderIDs.length && !folderIDs.includes(mData.folder));
+          return folderIDs.length && !folderIDs.includes(mData.folder);
         });
     }
 
@@ -5304,6 +5310,15 @@ Hooks.once('setup', () => {
     type: Exporter,
     restricted: true,
   })
+
+  game.settings.register(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_ASSET_TIMEOUT, {
+    name: game.i18n.localize('SCENE-PACKER.exporter.timeout'),
+    hint: game.i18n.localize('SCENE-PACKER.exporter.timeout-help'),
+    scope: 'client',
+    config: true,
+    type: Number,
+    default: 120,
+  });
 
   game.settings.register(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_AUTHOR, {
     scope: 'client',

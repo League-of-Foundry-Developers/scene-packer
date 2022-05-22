@@ -83,7 +83,7 @@ export class Compressor {
     }
 
     try {
-      let file = await Compressor.FetchWithTimeout(url, { timeout: 15000 })
+      let file = await Compressor.FetchWithTimeout(url)
         .then((r) => r.blob())
         .then(
           (blobFile) => new File([blobFile], filename, { type: blobFile.type })
@@ -289,22 +289,33 @@ export class Compressor {
 
   /**
    * Wrapper around {@link fetch} to include a timeout.
-   * Defaults to 15sec.
    * @param {RequestInfo} resource
-   * @param {RequestInit|{timeout: number}} options
-   * @return {Response}
+   * @param {RequestInit|{timeout: number}} [options]
+   * @return {Promise<Response>}
    */
   static async FetchWithTimeout(resource, options) {
-    const { timeout = 15000 } = options;
+    let timeout = game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_ASSET_TIMEOUT) || 60;
+    if (options?.timeout) {
+      timeout = options.timeout;
+    }
+    if (timeout < 0) {
+      timeout = 5;
+    }
+    timeout = timeout * 1000;
 
     const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), timeout);
+    let id;
+    if (timeout) {
+      id = setTimeout(() => controller.abort(), timeout);
+    }
 
     const response = await fetch(resource, {
       ...options,
       signal: controller.signal,
     });
-    clearTimeout(id);
+    if (id) {
+      clearTimeout(id);
+    }
 
     return response;
   }

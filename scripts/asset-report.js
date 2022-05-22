@@ -423,22 +423,33 @@ export default class AssetReport extends FormApplication {
 
   /**
    * Wrapper around {@link fetch} to include a timeout.
-   * Defaults to 5sec.
    * @param {RequestInfo} resource
-   * @param {RequestInit} options
+   * @param {RequestInit} [options]
    * @return {Promise<Response>}
    */
   static async FetchWithTimeout(resource, options) {
-    const {timeout = 5000} = options;
+    let timeout = game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_ASSET_TIMEOUT) || 60;
+    if (options?.timeout) {
+      timeout = options.timeout;
+    }
+    if (timeout < 0) {
+      timeout = 5;
+    }
+    timeout = timeout * 1000;
 
     const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), timeout);
+    let id;
+    if (timeout) {
+      id = setTimeout(() => controller.abort(), timeout);
+    }
 
     const response = await fetch(resource, {
       ...options,
       signal: controller.signal,
     });
-    clearTimeout(id);
+    if (id) {
+      clearTimeout(id);
+    }
 
     return response;
   }

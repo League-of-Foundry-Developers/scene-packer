@@ -819,7 +819,7 @@ export default class MoulinetteImporter extends FormApplication {
    * @return {Promise<Object>}
    */
   async fetchData(url) {
-    const response = await Compressor.FetchWithTimeout(url, {timeout: 60000});
+    const response = await Compressor.FetchWithTimeout(url);
     if (!response.ok) {
       throw game.i18n.format('SCENE-PACKER.importer.invalid-url', {
         url,
@@ -867,7 +867,7 @@ export default class MoulinetteImporter extends FormApplication {
    */
   async fetchDataIfMissing(url, collection, onlyIDs = []) {
     // TODO Look into a nice way to handle updating existing data.
-    const response = await Compressor.FetchWithTimeout(url, {timeout: 60000});
+    const response = await Compressor.FetchWithTimeout(url);
     if (!response.ok) {
       throw game.i18n.format('SCENE-PACKER.importer.invalid-url', {
         url,
