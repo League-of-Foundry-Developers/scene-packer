@@ -4,6 +4,7 @@
 
 - Added configurable asset timeout.
   - This is used as part of the Moulinette integration and can be adjusted to suit your needs based on your download speed. Particularly useful if you are loading in assets that are large such as animated videos.
+- Fixed a bug where unpacking a scene wouldn't correctly identify Journals as missing.
 
 ## v2.5.0
 

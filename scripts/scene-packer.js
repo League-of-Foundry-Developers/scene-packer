@@ -2640,8 +2640,11 @@ export default class ScenePacker {
         .filter((info) => {
           // Filter for only the entries that are missing, or are in a different folder.
           const j = game.journal.getName(info?.journalName);
+          if (!j) {
+            return true;
+          }
           const jData = CONSTANTS.IsV10orNewer() ? j : j.data;
-          return j == null || (folderIDs.length && !folderIDs.includes(jData.folder));
+          return folderIDs.length && !folderIDs.includes(jData.folder);
         });
     }
 
@@ -2701,8 +2704,11 @@ export default class ScenePacker {
         .filter((info) => {
           // Filter for only the entries that are missing, or are in a different folder.
           const m = game.macros.getName(info?.name);
+          if (!m) {
+            return true;
+          }
           const mData = CONSTANTS.IsV10orNewer() ? m : m.data;
-          return m == null || (folderIDs.length && !folderIDs.includes(mData.folder));
+          return folderIDs.length && !folderIDs.includes(mData.folder);
         });
     }
 
