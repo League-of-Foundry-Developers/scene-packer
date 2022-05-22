@@ -143,7 +143,7 @@ export default class ScenePacker {
 
     let promptedVersion = game.settings.get(this.moduleName, CONSTANTS.SETTING_PROMPTED) || '0.0.0';
     const module = game.modules.get(this.moduleName);
-    const moduleVersion = (CONSTANTS.IsV10orNewer() ? module?.version : module?.data?.version) || '0.0.0';
+    const moduleVersion = (module?.version ?? module?.data?.version) || '0.0.0';
     if (this.allowImportPrompts && isNewerVersion(moduleVersion, promptedVersion) && game.settings.get(this.moduleName, CONSTANTS.SETTING_SHOW_WELCOME_PROMPTS)) {
       // A newer version of the module is installed from what was last prompted
       let content = game.i18n.format('SCENE-PACKER.welcome.intro', {
@@ -479,7 +479,7 @@ export default class ScenePacker {
                 if (this.welcomeJournal) {
                   let importedVersion = game.settings.get(this.moduleName, CONSTANTS.SETTING_IMPORTED_VERSION) || '0.0.0';
                   const module = game.modules.get(this.moduleName);
-                  const moduleVersion = (CONSTANTS.IsV10orNewer() ? module?.version : module?.data?.version) || '0.0.0';
+                  const moduleVersion = (module?.version ?? module?.data?.version) || '0.0.0';
                   // Note that the imported version gets set during ProcessScene, but JournalEntries are processed before Scenes,
                   // so the current version flag won't have been set yet.
                   if (isNewerVersion(moduleVersion, importedVersion)) {
@@ -869,7 +869,7 @@ export default class ScenePacker {
 
     let importedVersion = game.settings.get(this.moduleName, CONSTANTS.SETTING_IMPORTED_VERSION) || '0.0.0';
     const module = game.modules.get(this.moduleName);
-    const moduleVersion = (CONSTANTS.IsV10orNewer() ? module?.version : module?.data?.version) || '0.0.0';
+    const moduleVersion = (module?.version ?? module?.data?.version) || '0.0.0';
     if (this.welcomeJournal && isNewerVersion(moduleVersion, importedVersion)) {
       // Display the welcome journal once per new module version
       const j = game.journal.find(j => j.name === this.welcomeJournal && j.getFlag('core', 'sourceId')
@@ -1485,7 +1485,7 @@ export default class ScenePacker {
     // Store details about which module and version packed the Scene
     await scene.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_SOURCE_MODULE, this.moduleName);
     const module = game.modules.get(this.moduleName);
-    const moduleVersion = (CONSTANTS.IsV10orNewer() ? module?.version : module?.data?.version) || '0.0.0';
+    const moduleVersion = (module?.version ?? module?.data?.version) || '0.0.0';
     await scene.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_PACKED_VERSION, moduleVersion);
 
 
