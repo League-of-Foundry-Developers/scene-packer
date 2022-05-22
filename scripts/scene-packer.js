@@ -5305,6 +5305,15 @@ Hooks.once('setup', () => {
     restricted: true,
   })
 
+  game.settings.register(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_ASSET_TIMEOUT, {
+    name: game.i18n.localize('SCENE-PACKER.exporter.timeout'),
+    hint: game.i18n.localize('SCENE-PACKER.exporter.timeout-help'),
+    scope: 'client',
+    config: true,
+    type: Number,
+    default: 120,
+  });
+
   game.settings.register(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_AUTHOR, {
     scope: 'client',
     config: false,

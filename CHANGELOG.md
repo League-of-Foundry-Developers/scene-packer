@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.5.1
+
+- Added configurable asset timeout.
+  - This is used as part of the Moulinette integration and can be adjusted to suit your needs based on your download speed. Particularly useful if you are loading in assets that are large such as animated videos.
+
 ## v2.5.0
 
 - Removed support for v0.7.X of Foundry VTT.
