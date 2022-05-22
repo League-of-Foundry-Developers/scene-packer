@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.5.2
+
+- Fixed incorrect version checking which would mark packaged modules as outdated.
+  - If you packed a scene with version 2.5.0 or 2.5.1 you will need to pack them again.
+
 ## v2.5.1
 
 - Added configurable asset timeout.
