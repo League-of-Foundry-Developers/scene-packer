@@ -1484,7 +1484,7 @@ export default class ScenePacker {
 
     // Store details about which module and version packed the Scene
     await scene.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_SOURCE_MODULE, this.moduleName);
-    const module = game.modules.get(this.moduleName);
+    const module = game.modules.get(CONSTANTS.MODULE_NAME);
     const moduleVersion = (module?.version ?? module?.data?.version) || '0.0.0';
     await scene.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS_PACKED_VERSION, moduleVersion);
 
