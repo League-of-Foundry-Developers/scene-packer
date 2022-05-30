@@ -18,8 +18,8 @@ export function ExtractRelatedRollTableData(table) {
   const tableData = CONSTANTS.IsV10orNewer() ? table : table.data;
   for (const result of tableData?.results) {
     const resultData = CONSTANTS.IsV10orNewer() ? result : result.data;
-    let collection = resultData?.collection;
-    const resultId = resultData?.resultId;
+    let collection = CONSTANTS.IsV10orNewer() ? resultData?.documentCollection : resultData?.collection;
+    const resultId = CONSTANTS.IsV10orNewer() ? resultData?.documentId : resultData?.resultId;
 
     if (!CONSTANTS.PACK_IMPORT_ORDER.includes(collection)) {
       // Make the uuid reference consistent with "standard" ones.

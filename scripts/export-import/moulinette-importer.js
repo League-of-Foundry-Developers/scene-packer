@@ -572,11 +572,19 @@ export default class MoulinetteImporter extends FormApplication {
               continue;
             }
 
-            await table.updateEmbeddedDocuments('TableResult', {
-              _id: tableUpdate.embeddedId,
-              collection: tableUpdate.collection,
-              resultId: tableUpdate.resultId,
-            });
+            if (CONSTANTS.IsV10orNewer()) {
+              await table.updateEmbeddedDocuments('TableResult', {
+                _id: tableUpdate.embeddedId,
+                documentCollection: tableUpdate.collection,
+                documentId: tableUpdate.resultId,
+              });
+            } else {
+              await table.updateEmbeddedDocuments('TableResult', {
+                _id: tableUpdate.embeddedId,
+                collection: tableUpdate.collection,
+                resultId: tableUpdate.resultId,
+              });
+            }
           }
         }
         console.groupEnd();

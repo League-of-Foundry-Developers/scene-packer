@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.5.3
+
+- Handle the case where an actor on a scene is a duplicate of another existing actor, but renamed.
+  - Fixes a bug where a token would not be relinked correctly due to the mismatch.
+- Wait for Actors to finish be imported when unpacking a scene to avoid edge cases due to timing issues.
+- Switch away from using deprecated RollTable functions in V10.
+- Added new format for V10 compatibility definition.
+
 ## v2.5.2
 
 - Fixed incorrect version checking which would mark packaged modules as outdated.
