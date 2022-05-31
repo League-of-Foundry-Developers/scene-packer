@@ -2773,7 +2773,7 @@ export default class ScenePacker {
     if (actorId) {
       const tData = tokenWorldData.find(t => t.sourceId === `Actor.${actorId}` && t.compendiumSourceId);
       if (tData) {
-        const actor = game.actors.contents.find(a => a.getFlag('core', 'sourceId') === tData.compendiumSourceId && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated'));
+        const actor = game.actors.contents.find(a => (a.getFlag('core', 'sourceId') === tData.compendiumSourceId || a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === tData.sourceId) && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated'));
         if (actor) {
           return actor;
         }
@@ -3219,6 +3219,10 @@ export default class ScenePacker {
       const coreSourceId = p.getFlag('core', 'sourceId');
       const sourceId = p.getFlag(CONSTANTS.MODULE_NAME, 'sourceId');
 
+      if (entity.name !== p.name) {
+        return false;
+      }
+
       if (hasUuid && coreSourceId === entity.uuid) {
         return true;
       }
@@ -3280,7 +3284,7 @@ export default class ScenePacker {
       update.sort = entityData.flags.cf.sort;
     }
 
-    return collection.importFromCompendium(game.packs.get(entity.compendium.collection), entity.id, update, {keepId: true});
+    return await collection.importFromCompendium(game.packs.get(entity.compendium.collection), entity.id, update, {keepId: true});
   }
 
   /**
@@ -4469,8 +4473,8 @@ export default class ScenePacker {
             // Rolltables don't have content like normal but instead have references to other results
             const results = CONSTANTS.IsV10orNewer() ? document?.results : document?.data?.results;
             for (const result of results || []) {
-              const resultId = CONSTANTS.IsV10orNewer() ? result?.resultId : result?.data?.resultId;
-              const collection = CONSTANTS.IsV10orNewer() ? result?.collection : result?.data?.collection;
+              const resultId = CONSTANTS.IsV10orNewer() ? result?.documentId : result?.data?.resultId;
+              const collection = CONSTANTS.IsV10orNewer() ? result?.documentCollection : result?.data?.collection;
               if (!resultId || !collection) {
                 // This result is not a reference to another entity
                 continue;

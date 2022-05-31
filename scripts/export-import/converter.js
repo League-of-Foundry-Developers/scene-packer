@@ -224,7 +224,7 @@ export function ReplaceCompendiumReferences(context, documents, availableDocumen
           continue;
         }
 
-        if (typeof oldValue === 'object' && oldValue._id && oldValue.collection && oldValue.resultId) {
+        if (typeof oldValue === 'object' && oldValue._id && (oldValue.documentCollection ?? oldValue.collection) && (oldValue.documentId ?? oldValue.resultId)) {
           // This is a roll table result.
           updates.push({
             _id: dataId,
