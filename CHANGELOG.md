@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.5.4
+- Adjusted the way in which packs are searched, to handle an edge case where a pack might be referenced, but not available.
+
 ## v2.5.3
 
 - Handle the case where an actor on a scene is a duplicate of another existing actor, but renamed.
