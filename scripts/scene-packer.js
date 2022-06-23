@@ -2367,7 +2367,7 @@ export default class ScenePacker {
 
     let createData = [];
 
-    const exampleEntity = game.packs.get(searchPacks[0])?.documentName;
+    const exampleEntity = game.packs.get(searchPacks.find(searchPack => game.packs.get(searchPack)?.documentName))?.documentName;
     if (!exampleEntity) {
       ui.notifications.error(
         game.i18n.format(
