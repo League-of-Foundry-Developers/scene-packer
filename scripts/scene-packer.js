@@ -5007,7 +5007,7 @@ export default class ScenePacker {
       if (!dryRun) {
         let newFlags = {};
         setProperty(newFlags, 'flags.quick-encounters.quickEncounter', JSON.stringify(quickEncounter));
-        await journalData.update(newFlags);
+        await journal.update(newFlags);
       }
     }
   }

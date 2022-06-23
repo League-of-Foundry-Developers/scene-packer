@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.5.5
+- Fixed a bug that was preventing Quick Encounters from being relinked correctly.
+  - The bug was introduced in v2.5.0 as part of the v10 changes.
+
 ## v2.5.4
 - Adjusted the way in which packs are searched, to handle an edge case where a pack might be referenced, but not available.
 
