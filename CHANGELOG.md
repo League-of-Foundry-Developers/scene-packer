@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.5.6
+
+- Fixed long-standing Asset Report bug where it would incorrectly mark http/https assets as "External" regardless of what the checkbox was set to.
+- Fixed issue where Asset Report would mark assets as "External" even if they are part of an "allowed" module.
+  - Issue was introduced as part of the changes to support v10.
+
 ## v2.5.5
 - Fixed a bug that was preventing Quick Encounters from being relinked correctly.
   - The bug was introduced in v2.5.0 as part of the v10 changes.

@@ -237,7 +237,6 @@ export default class AssetReport extends FormApplication {
           assetRequests[index] = assetRequest;
           assetResponses[index] = await AssetReport.FetchWithTimeout(assetRequest, {
             method: 'HEAD',
-            mode: 'no-cors',
           });
         }
       };
