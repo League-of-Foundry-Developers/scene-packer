@@ -62,6 +62,7 @@ export default class ModuleSelect extends FormApplication {
       } else {
         mod = m.data.toObject();
       }
+      mod.id = m.id;
       mod.activeModule = m.active;
       mod.hasPacks = mod.packs.length > 0;
       mod.hasScripts = mod.scripts.length > 0;
