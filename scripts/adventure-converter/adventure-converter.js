@@ -528,7 +528,13 @@ export default class AdventureConverter extends FormApplication {
         let [type, target, hash, name] = match.slice(1, 5);
         let id = target.split('.')
           .pop();
-        let doc = await fromUuid(`${type}.${target}`);
+        let doc;
+        try {
+          doc = await fromUuid(`${type}.${target}`);
+        } catch (e) {
+          console.warn(`Could not find ${type}.${target}`, match);
+          continue;
+        }
         if (!doc) {
           continue;
         }
