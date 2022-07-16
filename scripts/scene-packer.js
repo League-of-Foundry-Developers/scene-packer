@@ -1,3 +1,4 @@
+import AdventureConverter from './adventure-converter/adventure-converter.js';
 import AssetReport from './asset-report.js';
 import {Compressor} from './export-import/compressor.js';
 import {CONSTANTS} from './constants.js';
@@ -19,6 +20,7 @@ const globalScenePacker = {
   FLAGS_DEFAULT_PERMISSION: CONSTANTS.FLAGS_DEFAULT_PERMISSION,
   Compressor,
   MoulinetteImporter: MoulinetteImporter,
+  AdventureConverter: AdventureConverter,
 };
 
 /**
@@ -5314,6 +5316,17 @@ Hooks.once('setup', () => {
     type: Exporter,
     restricted: true,
   })
+
+  if (CONSTANTS.IsV10orNewer()) {
+    game.settings.registerMenu(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_CONVERT_TO_ADVENTURE_DOCUMENT, {
+      name: game.i18n.localize('SCENE-PACKER.adventure-converter.name'),
+      label: game.i18n.localize('SCENE-PACKER.adventure-converter.sitting-label'),
+      hint: game.i18n.localize('SCENE-PACKER.adventure-converter.setting-hint'),
+      icon: "fas fa-arrow-right-from-bracket",
+      type: AdventureConverter,
+      restricted: true,
+    })
+  }
 
   game.settings.register(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_ASSET_TIMEOUT, {
     name: game.i18n.localize('SCENE-PACKER.exporter.timeout'),

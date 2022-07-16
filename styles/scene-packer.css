@@ -101,17 +101,20 @@
 #scene-packer-exporter .form-group label {
   align-self: flex-start;
 }
-#scene-packer-exporter .package-description {
+#scene-packer-exporter .package-description,
+#sp-adventure-converter .textarea {
   height: 300px;
   flex: 4;
   border: 1px solid #7a7971;
   background: rgba(0, 0, 0, 0.05);
   border-radius: 3px;
 }
-#scene-packer-exporter .editor {
+#scene-packer-exporter .editor,
+#sp-adventure-converter .editor{
   height: 100%;
 }
-#scene-packer-exporter .tox { height: 100%; min-height: 100%; }
+#scene-packer-exporter .tox,
+#sp-adventure-converter .tox { height: 100%; min-height: 100%; }
 #scene-packer-exporter .adventure-categorisation .form-group label {
   flex: 1;
 }
@@ -213,4 +216,11 @@
 
 #scene-packer-importer-unrelated-data .content a.entity-link {
   line-height: 1.6em;
+}
+
+#sp-adventure-converter .adventure-overview {
+  flex: 2;
+}
+#sp-adventure-converter .adventure-contents {
+  margin-left: 1rem;
 }
