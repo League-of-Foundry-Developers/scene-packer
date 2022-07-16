@@ -724,6 +724,7 @@ export default class MoulinetteImporter extends FormApplication {
       return entities;
     }
 
+    const baseURL = await game.moulinette.applications.MoulinetteFileUtil.getBaseURL() || '';
     const adventureFolder = `${this.scenePackerInfo.author}-${this.scenePackerInfo.name}`.slugify({strict: true}) || 'scene-packer-fallback';
     const returnEntities = [];
     console.groupCollapsed(
@@ -773,7 +774,7 @@ export default class MoulinetteImporter extends FormApplication {
 
         const folder = localAsset.substring(0, localAsset.lastIndexOf('/'));
         const filename = asset.split('/').pop();
-        const newAssetLocation = `${folder}/${encodeURIComponent(filename)}`;
+        const newAssetLocation = `${baseURL}${folder}/${encodeURIComponent(filename)}`;
 
         if (needsDownloading) {
           const assetURL = this.packInfo['data/assets/' + asset];

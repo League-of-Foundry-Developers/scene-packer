@@ -1,8 +1,9 @@
 {
+  "id": "scene-packer",
   "name": "scene-packer",
   "title": "Library: Scene Packer",
   "description": "A module to assist with Scene and Adventure packing and unpacking.",
-  "version": "2.5.6",
+  "version": "2.5.7",
   "library": "true",
   "manifestPlusVersion": "1.2.0",
   "minimumCoreVersion": "0.8.6",
@@ -33,13 +34,13 @@
     {
       "type": "video",
       "url": "https://www.youtube.com/watch?v=cG6qtoZPczI",
-      "thumbnail": "http://img.youtube.com/vi/cG6qtoZPczI/0.jpg",
+      "thumbnail": "https://img.youtube.com/vi/cG6qtoZPczI/0.jpg",
       "caption": "Scene Packer - How to convert a World to a Module (The Sky Isles)"
     },
     {
       "type": "video",
       "url": "https://www.youtube.com/watch?v=XZjuE1j_7GQ",
-      "thumbnail": "http://img.youtube.com/vi/XZjuE1j_7GQ/0.jpg",
+      "thumbnail": "https://img.youtube.com/vi/XZjuE1j_7GQ/0.jpg",
       "caption": "Scene Packer and Moulinette Integration"
     }
   ],
@@ -50,7 +51,6 @@
       "path": "/packs/journals.db",
       "entity": "JournalEntry",
       "type": "JournalEntry",
-      "module": "scene-packer",
       "private": false
     },
     {
@@ -59,7 +59,6 @@
       "path": "/packs/macros.db",
       "entity": "Macro",
       "type": "Macro",
-      "module": "scene-packer",
       "private": false
     }
   ],
@@ -68,7 +67,7 @@
     "/scripts/wrapped.js"
   ],
   "styles": [
-    "./styles/scene-packer.css"
+    "styles/scene-packer.css"
   ],
   "languages": [
     {
@@ -84,6 +83,5 @@
   "changelog": "https://github.com/League-of-Foundry-Developers/scene-packer/blob/main/CHANGELOG.md",
   "flags": {
     "allowBugReporter": true
-  },
-  "allowBugReporter": true
+  }
 }

@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.5.7
+
+- Fixed issue with the Moulinette importer where asset references would point to the wrong place if you are using an S3 bucket.
+  - It was failing to use the S3 bucket URL prefix.
+
 ## v2.5.6
 
 - Fixed long-standing Asset Report bug where it would incorrectly mark http/https assets as "External" regardless of what the checkbox was set to.
