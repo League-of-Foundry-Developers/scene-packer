@@ -506,6 +506,7 @@
       "manifest-upgrade-next-steps-3": "Save the file.",
       "manifest-upgrade-next-steps-4": "Exit this world, returning to the setup screen (this reloads the module details).",
       "manifest-upgrade-next-steps-5": "Load the world again and return to the Adventure Converter. Select the module you just updated and proceed with the conversion.",
+      "manifest-upgrade-automated-steps": "The following file has been created automatically to store the Adventure compendium database. If you have chosen to use a format that is different than the suggested <code>module.json</code> changes above, then you may need to create your own compendium database file.",
       "manifest-upgrade-ok": "I've followed the steps above.",
       "manifest-upgrade-error": "Error generating recommended changes to module.json. Please check the console (F12) for more information.",
       "manifest-upgrade-module-not-found": "Module \"{name}\" does not exist within the world.",

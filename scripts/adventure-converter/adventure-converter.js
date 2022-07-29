@@ -1,4 +1,5 @@
 import { CONSTANTS } from '../constants.js';
+import { FileExists, UploadFile } from '../assets/file.js';
 import { ResolvePath } from '../export-import/related/related-data.js';
 import { ActorDataLocations } from '../export-import/related/actor.js';
 import { ItemDataLocations } from '../export-import/related/item.js';
@@ -261,6 +262,11 @@ export default class AdventureConverter extends FormApplication {
 
     AdventureConverter.RecommendModuleManifestUpdates(this.object?.adventureModule)
       .then((manifest) => {
+        // Create the blank adventure compendium database if it doesn't already exist
+        if (!FileExists(`modules/${this.object.adventureModule}/packs/adventure.db`)) {
+          UploadFile(new File([], 'adventure.db'), `modules/${this.object.adventureModule}/packs`, { notify: false });
+        }
+
         const modulePath = `modules/${this.object.adventureModule}/module.json`;
         let content = `<p>${game.i18n.format('SCENE-PACKER.adventure-converter.manifest-upgrade-detail-1', { module: modulePath })}</p>`;
         content += `<ul><li>${game.i18n.localize('SCENE-PACKER.adventure-converter.manifest-upgrade-detail-2')}</li>`;
@@ -276,6 +282,8 @@ export default class AdventureConverter extends FormApplication {
         content += `<li>${game.i18n.localize('SCENE-PACKER.adventure-converter.manifest-upgrade-next-steps-5')}</li>`;
         content += '</ol>';
         content += `<textarea rows="20">${JSON.stringify(manifest, null, 2)}</textarea>`;
+        content += `<p>${game.i18n.localize('SCENE-PACKER.adventure-converter.manifest-upgrade-automated-steps')}</p>`;
+        content += `<ul><li><code>modules/${this.object.adventureModule}/packs/adventure.db</code></li>`;
         content += '<hr>';
         new Dialog({
           title: modulePath,
@@ -745,6 +753,7 @@ export default class AdventureConverter extends FormApplication {
       name: 'adventure',
       path: '/packs/adventure.db',
       type: 'Adventure',
+      system: game.system.id,
     });
 
     const manifest = Module.migrateData(module);
