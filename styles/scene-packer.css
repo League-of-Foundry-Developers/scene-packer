@@ -224,3 +224,30 @@
 #sp-adventure-converter .adventure-contents {
   margin-left: 1rem;
 }
+
+.sp-welcome-journal.journal-sheet form .editor {
+  height: calc(100% - 55px);
+}
+.sp-welcome-journal input[name=name],
+.sp-welcome-journal select[name=folder] {
+  display: none;
+}
+
+.sp-welcome-journal .sp-footer {
+  max-height: 55px;
+  justify-content: space-around;
+  gap: 0 1em;
+  padding: 0 1em 10px 1em;
+  display: flex;
+  flex-wrap: wrap;
+}
+.sp-welcome-journal .sp-footer button {
+  flex: 1;
+}
+.sp-welcome-journal .sp-footer button.sp-import-close {
+  max-width: max-content;
+  padding: 0 10px;
+}
+.sp-welcome-journal .sp-footer hr {
+  width: 100%;
+}

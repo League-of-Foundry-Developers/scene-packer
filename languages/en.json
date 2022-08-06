@@ -472,7 +472,7 @@
     },
     "adventure-converter": {
       "name": "Adventure Converter",
-      "setting-hint": "Convert your existing Scene Packer adventure to the V10 Adventure Document format.",
+      "setting-hint": "Convert your existing Scene Packer adventure to the V10 Adventure Document format. (Only useful to creators. It serves no purpose for end-users.)",
       "sitting-label": "Open Adventure Converter",
       "summary": "Use this tool to convert your existing Scene Packer adventure to the V10 Adventure Document format. You may wish to {link} before using this tool.",
       "view-tutorial": "view the tutorial video",
@@ -516,6 +516,12 @@
       "process-error-no-instance": "No Scene Packer instance found for module \"{moduleName}\"",
       "process-error-no-module-found": "Module not found within world with name \"{moduleName}\"",
       "process-error-no-pack-found": "A compendium pack with name \"{packName}\" was not found with name \"{moduleName}\""
+    },
+    "welcome-journal": {
+      "import-all": "Import all {totalCount} entities from module",
+      "import-replace": "Replace existing content",
+      "import-rename": "Rename existing content",
+      "import-close": "Don't show again"
     }
   }
 }

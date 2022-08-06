@@ -1,0 +1,10 @@
+<footer class="sp-footer">
+  <hr>
+  {{#unless alreadyImported}}
+  <button class="sp-import sp-import-all"><i class="fas fa-download"></i> {{localize "SCENE-PACKER.welcome-journal.import-all" totalCount=totalCount}}</button>
+  {{else}}
+  <button class="sp-import sp-import-replace"><i class="fas fa-trash-restore"></i> {{localize "SCENE-PACKER.welcome-journal.import-replace"}}</button>
+  <button class="sp-import sp-import-rename"><i class="fas fa-copy"></i> {{localize "SCENE-PACKER.welcome-journal.import-rename"}}</button>
+  {{/unless}}
+  <button class="sp-import sp-import-close"><i class="fas fa-times"></i> {{localize "SCENE-PACKER.welcome-journal.import-close"}}</button>
+</footer>

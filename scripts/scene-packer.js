@@ -6,6 +6,7 @@ import Exporter from './export-import/exporter.js';
 import Hash from './hash.js';
 import MoulinetteImporter from './export-import/moulinette-importer.js';
 import Report from './report.js';
+import WelcomeJournal from './welcome-journal.js';
 
 /**
  * Tracks the initialised instances of Scene Packer and also exposes some methods to globalThis.
@@ -21,6 +22,7 @@ const globalScenePacker = {
   Compressor,
   MoulinetteImporter: MoulinetteImporter,
   AdventureConverter: AdventureConverter,
+  WelcomeJournal: WelcomeJournal,
 };
 
 /**
@@ -51,7 +53,7 @@ export default class ScenePacker {
   allowImportPrompts = true;
 
   /**
-   * @param {String} adventureName The human readable name of the adventure.
+   * @param {String} adventureName The human-readable name of the adventure.
    * @param {String} moduleName The name of the module this is part of.
    * @param {String[]} creaturePacks Set which Actor packs should be used when searching for Actors.
    * @param {String[]} journalPacks Set which Journal packs should be used when searching for Journals.
@@ -147,193 +149,242 @@ export default class ScenePacker {
     const module = game.modules.get(this.moduleName);
     const moduleVersion = (module?.version ?? module?.data?.version) || '0.0.0';
     if (this.allowImportPrompts && isNewerVersion(moduleVersion, promptedVersion) && game.settings.get(this.moduleName, CONSTANTS.SETTING_SHOW_WELCOME_PROMPTS)) {
-      // A newer version of the module is installed from what was last prompted
-      let content = game.i18n.format('SCENE-PACKER.welcome.intro', {
-        adventure: this.adventureName,
-      });
+      let usingWelcomeJournalImporter = false;
+      if (this.welcomeJournal) {
+        for (const packName of this.getSearchPacksForType('JournalEntry')) {
+          const pack = game.packs.get(packName);
+          const j = pack.index.getName(this.welcomeJournal);
+          if (j?._id) {
+            usingWelcomeJournalImporter = true;
+            pack.getDocument(j._id)
+              .then(journal => {
+                new WelcomeJournal(journal, {
+                    moduleName: this.moduleName,
+                    shareable: false,
+                    editable: false,
+                  },
+                ).render(true);
+              });
+            break;
+          }
+        }
+      }
 
-      let yesCallback = async () => {
-        game.settings.set(this.moduleName, CONSTANTS.SETTING_PROMPTED, moduleVersion);
-        await this.importAllContent();
-      };
-      if (promptedVersion === '0.0.0') {
-        content += game.i18n.format('SCENE-PACKER.welcome.brand-new', {
+      if (!usingWelcomeJournalImporter) {
+        // A newer version of the module is installed from what was last prompted
+        let content = game.i18n.format('SCENE-PACKER.welcome.intro', {
           adventure: this.adventureName,
         });
-      } else {
-        content += game.i18n.format('SCENE-PACKER.welcome.update-available', {
-          existing: promptedVersion,
-          version: moduleVersion,
-        });
-        yesCallback = async () => {
-          // The yes callback during an upgrade of a module removes all existing entries that came from this module before
-          // importing everything in again.
-          // Folders are untouched.
-          const scenes = game.scenes.filter(s => s.getFlag('core', 'sourceId')
-            ?.startsWith(`Compendium.${this.moduleName}`));
-          const actors = game.actors.filter(s => s.getFlag('core', 'sourceId')
-            ?.startsWith(`Compendium.${this.moduleName}`));
-          const items = game.items.filter(s => s.getFlag('core', 'sourceId')
-            ?.startsWith(`Compendium.${this.moduleName}`));
-          const journals = game.journal.filter(s => s.getFlag('core', 'sourceId')
-            ?.startsWith(`Compendium.${this.moduleName}`));
-          const rollTables = game.tables.filter(s => s.getFlag('core', 'sourceId')
-            ?.startsWith(`Compendium.${this.moduleName}`));
-          const playlists = game.playlists.filter(s => s.getFlag('core', 'sourceId')
-            ?.startsWith(`Compendium.${this.moduleName}`));
-          const macros = game.macros.filter(s => s.getFlag('core', 'sourceId')
-            ?.startsWith(`Compendium.${this.moduleName}`));
 
-          let listToDelete = '';
-          if (scenes.length) {
-            listToDelete += `<li>${game.i18n.localize('Scenes')}: ${scenes.length}</li>`;
-          }
-          if (actors.length) {
-            listToDelete += `<li>${game.i18n.localize('Actors')}: ${actors.length}</li>`;
-          }
-          if (items.length) {
-            listToDelete += `<li>${game.i18n.localize('Items')}: ${items.length}</li>`;
-          }
-          if (journals.length) {
-            listToDelete += `<li>${game.i18n.localize('Journals')}: ${journals.length}</li>`;
-          }
-          if (rollTables.length) {
-            listToDelete += `<li>${game.i18n.localize('Roll tables')}: ${rollTables.length}</li>`;
-          }
-          if (playlists.length) {
-            listToDelete += `<li>${game.i18n.localize('Playlists')}: ${playlists.length}</li>`;
-          }
-          if (macros.length) {
-            listToDelete += `<li>${game.i18n.localize('Macros')}: ${macros.length}</li>`;
-          }
-          if (listToDelete) {
-            listToDelete = `<p>${game.i18n.localize('SCENE-PACKER.welcome.update-warning-list-to-delete')}</p><ul>${listToDelete}</ul>`;
-          }
+        let yesCallback = async () => {
+          game.settings.set(this.moduleName, CONSTANTS.SETTING_PROMPTED, moduleVersion);
+          await this.importAllContent();
+        };
+        if (promptedVersion === '0.0.0') {
+          content += game.i18n.format('SCENE-PACKER.welcome.brand-new', {
+            adventure: this.adventureName,
+          });
+        } else {
+          content += game.i18n.format('SCENE-PACKER.welcome.update-available', {
+            existing: promptedVersion,
+            version: moduleVersion,
+          });
+          yesCallback = async () => {
+            // The yes callback during an upgrade of a module removes all existing entries that came from this module before
+            // importing everything in again.
+            // Folders are untouched.
+            const scenes = game.scenes.filter(s => s.getFlag('core', 'sourceId')
+              ?.startsWith(`Compendium.${this.moduleName}`));
+            const actors = game.actors.filter(s => s.getFlag('core', 'sourceId')
+              ?.startsWith(`Compendium.${this.moduleName}`));
+            const items = game.items.filter(s => s.getFlag('core', 'sourceId')
+              ?.startsWith(`Compendium.${this.moduleName}`));
+            const journals = game.journal.filter(s => s.getFlag('core', 'sourceId')
+              ?.startsWith(`Compendium.${this.moduleName}`));
+            const rollTables = game.tables.filter(s => s.getFlag('core', 'sourceId')
+              ?.startsWith(`Compendium.${this.moduleName}`));
+            const playlists = game.playlists.filter(s => s.getFlag('core', 'sourceId')
+              ?.startsWith(`Compendium.${this.moduleName}`));
+            const macros = game.macros.filter(s => s.getFlag('core', 'sourceId')
+              ?.startsWith(`Compendium.${this.moduleName}`));
+            const cards = game.cards.filter(s => s.getFlag('core', 'sourceId')
+              ?.startsWith(`Compendium.${this.moduleName}`));
 
-          const doReplacement = async function () {
-            const sceneIDs = game.scenes.filter(s => s.getFlag('core', 'sourceId')
-              ?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
-            if (sceneIDs.length) {
-              await Scene.deleteDocuments(sceneIDs);
+            let listToDelete = '';
+            if (scenes.length) {
+              listToDelete += `<li>${game.i18n.localize('Scenes')}: ${scenes.length}</li>`;
             }
-            const actorIDs = game.actors.filter(s => s.getFlag('core', 'sourceId')
-              ?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
-            if (actorIDs.length) {
-              await Actor.deleteDocuments(actorIDs);
+            if (actors.length) {
+              listToDelete += `<li>${game.i18n.localize('Actors')}: ${actors.length}</li>`;
             }
-            const itemIDs = game.items.filter(s => s.getFlag('core', 'sourceId')
-              ?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
-            if (itemIDs.length) {
-              await Item.deleteDocuments(itemIDs);
+            if (items.length) {
+              listToDelete += `<li>${game.i18n.localize('Items')}: ${items.length}</li>`;
             }
-            const journalIDs = game.journal.filter(s => s.getFlag('core', 'sourceId')
-              ?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
-            if (journalIDs.length) {
-              await JournalEntry.deleteDocuments(journalIDs);
+            if (journals.length) {
+              listToDelete += `<li>${game.i18n.localize('Journals')}: ${journals.length}</li>`;
             }
-            const rollTableIDs = game.tables.filter(s => s.getFlag('core', 'sourceId')
-              ?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
-            if (rollTableIDs.length) {
-              await RollTable.deleteDocuments(rollTableIDs);
+            if (rollTables.length) {
+              listToDelete += `<li>${game.i18n.localize('Roll tables')}: ${rollTables.length}</li>`;
             }
-            const playlistIDs = game.playlists.filter(s => s.getFlag('core', 'sourceId')
-              ?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
-            if (playlistIDs.length) {
-              await Playlist.deleteDocuments(playlistIDs);
+            if (playlists.length) {
+              listToDelete += `<li>${game.i18n.localize('Playlists')}: ${playlists.length}</li>`;
             }
-            const macroIDs = game.macros.filter(s => s.getFlag('core', 'sourceId')
-              ?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
-            if (macroIDs.length) {
-              await Macro.deleteDocuments(macroIDs);
+            if (macros.length) {
+              listToDelete += `<li>${game.i18n.localize('Macros')}: ${macros.length}</li>`;
             }
-            game.settings.set(this.moduleName, CONSTANTS.SETTING_PROMPTED, moduleVersion);
-            await this.importAllContent();
-          }.bind(this);
+            if (cards.length) {
+              listToDelete += `<li>${game.i18n.localize('Cards')}: ${cards.length}</li>`;
+            }
+            if (listToDelete) {
+              listToDelete = `<p>${game.i18n.localize('SCENE-PACKER.welcome.update-warning-list-to-delete')}</p><ul>${listToDelete}</ul>`;
+            }
 
-          new Dialog({
-            title: game.i18n.localize('SCENE-PACKER.welcome.update-warning-title'),
-            content: game.i18n.format('SCENE-PACKER.welcome.update-warning-content', {
-              module: moduleName,
-              world: game.world.id,
-              listToDelete: listToDelete,
-            }),
-            buttons: {
-              replace: {
-                icon: '<i class="fas fa-trash-restore"></i>',
-                label: game.i18n.localize('Replace'),
-                callback: doReplacement,
-              },
-              duplicate: {
-                icon: '<i class="fas fa-copy"></i>',
-                label: game.i18n.localize('Rename'),
-                callback: async () => {
-                  game.settings.set(this.moduleName, CONSTANTS.SETTING_PROMPTED, moduleVersion);
-                  await this.importAllContent({forceImport: true, renameOriginals: true});
+            const doReplacement = async function () {
+              const sceneIDs = game.scenes.filter(s => s.getFlag('core', 'sourceId')
+                ?.startsWith(`Compendium.${this.moduleName}`))
+                .map(s => s.id);
+              if (sceneIDs.length) {
+                await Scene.deleteDocuments(sceneIDs);
+              }
+              const actorIDs = game.actors.filter(s => s.getFlag('core', 'sourceId')
+                ?.startsWith(`Compendium.${this.moduleName}`))
+                .map(s => s.id);
+              if (actorIDs.length) {
+                await Actor.deleteDocuments(actorIDs);
+              }
+              const itemIDs = game.items.filter(s => s.getFlag('core', 'sourceId')
+                ?.startsWith(`Compendium.${this.moduleName}`))
+                .map(s => s.id);
+              if (itemIDs.length) {
+                await Item.deleteDocuments(itemIDs);
+              }
+              const journalIDs = game.journal.filter(s => s.getFlag('core', 'sourceId')
+                ?.startsWith(`Compendium.${this.moduleName}`))
+                .map(s => s.id);
+              if (journalIDs.length) {
+                await JournalEntry.deleteDocuments(journalIDs);
+              }
+              const rollTableIDs = game.tables.filter(s => s.getFlag('core', 'sourceId')
+                ?.startsWith(`Compendium.${this.moduleName}`))
+                .map(s => s.id);
+              if (rollTableIDs.length) {
+                await RollTable.deleteDocuments(rollTableIDs);
+              }
+              const playlistIDs = game.playlists.filter(s => s.getFlag('core', 'sourceId')
+                ?.startsWith(`Compendium.${this.moduleName}`))
+                .map(s => s.id);
+              if (playlistIDs.length) {
+                await Playlist.deleteDocuments(playlistIDs);
+              }
+              const macroIDs = game.macros.filter(s => s.getFlag('core', 'sourceId')
+                ?.startsWith(`Compendium.${this.moduleName}`))
+                .map(s => s.id);
+              if (macroIDs.length) {
+                await Macro.deleteDocuments(macroIDs);
+              }
+              const cardIDs = game.cards.filter(s => s.getFlag('core', 'sourceId')
+                ?.startsWith(`Compendium.${this.moduleName}`))
+                .map(s => s.id);
+              if (cardIDs.length) {
+                await Card.deleteDocuments(cardIDs);
+              }
+              game.settings.set(this.moduleName, CONSTANTS.SETTING_PROMPTED, moduleVersion);
+              await this.importAllContent();
+            }.bind(this);
+
+            new Dialog({
+              title: game.i18n.localize('SCENE-PACKER.welcome.update-warning-title'),
+              content: game.i18n.format('SCENE-PACKER.welcome.update-warning-content', {
+                module: moduleName,
+                world: game.world.id,
+                listToDelete: listToDelete,
+              }),
+              buttons: {
+                replace: {
+                  icon: '<i class="fas fa-trash-restore"></i>',
+                  label: game.i18n.localize('Replace'),
+                  callback: doReplacement,
+                },
+                duplicate: {
+                  icon: '<i class="fas fa-copy"></i>',
+                  label: game.i18n.localize('Rename'),
+                  callback: async () => {
+                    game.settings.set(this.moduleName, CONSTANTS.SETTING_PROMPTED, moduleVersion);
+                    await this.importAllContent({
+                      forceImport: true,
+                      renameOriginals: true
+                    });
+                  },
+                },
+                cancel: {
+                  icon: '<i class="fas fa-times"></i>',
+                  label: game.i18n.localize('Cancel'),
+                  callback: () => this.logWarn(true, game.i18n.format('SCENE-PACKER.welcome.update-cancelled', {
+                    from: promptedVersion,
+                    to: moduleVersion,
+                    module: moduleName,
+                  })),
                 },
               },
-              cancel: {
-                icon: '<i class="fas fa-times"></i>',
-                label: game.i18n.localize('Cancel'),
-                callback: () => this.logWarn(true, game.i18n.format('SCENE-PACKER.welcome.update-cancelled', {
-                  from: promptedVersion,
-                  to: moduleVersion,
-                  module: moduleName,
-                })),
+              default: 'cancel',
+            }).render(true);
+
+          };
+        }
+        const totalCount = game.packs.filter(
+          (p) => (p.metadata.packageName || p.metadata.package) === this.moduleName,
+        )
+          .reduce((
+            a,
+            currentValue
+          ) => a + (currentValue?.index?.size || currentValue?.index?.length || 0), 0);
+        const label = game.i18n.format('SCENE-PACKER.welcome.yes-all', {
+          count: new Intl.NumberFormat().format(totalCount),
+        });
+        let d = new Dialog({
+          title: game.i18n.localize('SCENE-PACKER.welcome.title'),
+          content: content,
+          buttons: {
+            yesAll: {
+              icon: '<i class="fas fa-check-double"></i>',
+              label: label,
+              callback: yesCallback,
+            },
+            choose: {
+              icon: '<i class="fas fa-clipboard-check"></i>',
+              label: game.i18n.localize('SCENE-PACKER.welcome.let-me-choose'),
+              callback: () => {
+                game.packs.filter(
+                  (p) => (p.metadata.packageName || p.metadata.package) === this.moduleName && (p.documentName || p.entity) === 'Scene',
+                )
+                  .forEach(c => c.render(true));
+                game.settings.set(this.moduleName, CONSTANTS.SETTING_PROMPTED, moduleVersion);
+              },
+              condition: game.packs.filter((p) => (p.metadata.packageName || p.metadata.package) === this.moduleName && (p.documentName || p.entity) === 'Scene').length,
+            },
+            close: {
+              icon: '<i class="fas fa-times"></i>',
+              label: game.i18n.localize('SCENE-PACKER.welcome.close'),
+              callback: () => {
+                game.settings.set(this.moduleName, CONSTANTS.SETTING_PROMPTED, moduleVersion);
               },
             },
-            default: 'cancel',
-          }).render(true);
-
-        };
+          },
+        }, {
+          // Set the width to somewhere between 400 and 640 pixels.
+          width: Math.max(400, Math.min(640, Math.floor(window.innerWidth / 2))),
+          classes: ['dialog', 'welcome-prompt'],
+        });
+        d.render(true);
       }
-      const totalCount = game.packs.filter(
-        (p) => (p.metadata.packageName || p.metadata.package) === this.moduleName,
-      ).reduce((a, currentValue) => a + (currentValue?.index?.size || currentValue?.index?.length || 0), 0);
-      const label = game.i18n.format('SCENE-PACKER.welcome.yes-all', {
-        count: new Intl.NumberFormat().format(totalCount),
-      });
-      let d = new Dialog({
-        title: game.i18n.localize('SCENE-PACKER.welcome.title'),
-        content: content,
-        buttons: {
-          yesAll: {
-            icon: '<i class="fas fa-check-double"></i>',
-            label: label,
-            callback: yesCallback,
-          },
-          choose: {
-            icon: '<i class="fas fa-clipboard-check"></i>',
-            label: game.i18n.localize('SCENE-PACKER.welcome.let-me-choose'),
-            callback: () => {
-              game.packs.filter(
-                (p) => (p.metadata.packageName || p.metadata.package) === this.moduleName && (p.documentName || p.entity) === 'Scene',
-              ).forEach(c => c.render(true));
-              game.settings.set(this.moduleName, CONSTANTS.SETTING_PROMPTED, moduleVersion);
-            },
-            condition: game.packs.filter((p) => (p.metadata.packageName || p.metadata.package) === this.moduleName && (p.documentName || p.entity) === 'Scene').length,
-          },
-          close: {
-            icon: '<i class="fas fa-times"></i>',
-            label: game.i18n.localize('SCENE-PACKER.welcome.close'),
-            callback: () => {
-              game.settings.set(this.moduleName, CONSTANTS.SETTING_PROMPTED, moduleVersion);
-            },
-          },
-        },
-      }, {
-        // Set the width to somewhere between 400 and 640 pixels.
-        width: Math.max(400, Math.min(640, Math.floor(window.innerWidth / 2))),
-        classes: ['dialog', 'welcome-prompt'],
-      });
-      d.render(true);
     }
 
     globalScenePacker.instances[this.moduleName] = this;
   }
 
   /**
-   * Imports all of the content for the current adventure module.
-   * @param {boolean} forceImport - Optional. Whether to force import all of the content in this module. The default false
+   * Imports all the content for the current adventure module.
+   * @param {boolean} forceImport - Optional. Whether to force import all the content in this module. The default false
    *                                option will skip entries which already exist in the world.
    * @param {boolean} renameOriginals - Optional. Whether to rename existing entries within the world to be able to distinguish
    *                                    between the old and new versions. Only valid when "forceImport" is true.
@@ -372,6 +423,8 @@ export default class ScenePacker {
           let packContent = await pack.getDocuments();
 
           const existingEntriesToUpdate = [];
+          const existingEntriesToDelete = [];
+          const entriesToCreate = [];
 
           // Filter down to those that are still missing
           packContent = packContent.filter(e => {
@@ -380,18 +433,28 @@ export default class ScenePacker {
             }
             let sourceId = e.getFlag(CONSTANTS.MODULE_NAME, 'sourceId');
             let coreSourceId = e.getFlag('core', 'sourceId');
-            if (sourceId || coreSourceId) {
+            const hasExistingEntryWithID = collection.get(e.id);
+            if (hasExistingEntryWithID || sourceId || coreSourceId) {
               const existingEntries = collection.filter(f => f.id === e.id || (sourceId && f.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === sourceId) || (coreSourceId && f.getFlag('core', 'sourceId') === coreSourceId));
               if (existingEntries.length && forceImport && renameOriginals) {
                 // Update the existing entry names
                 const newFlags = {};
                 newFlags[CONSTANTS.MODULE_NAME] = {deprecated: true};
                 for (const existingEntry of existingEntries) {
-                  existingEntriesToUpdate.push({
-                    _id: existingEntry.id,
-                    name: `${existingEntry.name} (old)`,
-                    flags: newFlags,
-                  });
+                  if (collection.get(existingEntry.id)) {
+                    // Entry already exists in the world and would fail the Unique constraint.
+                    existingEntriesToDelete.push(existingEntry.id);
+                    entriesToCreate.push(existingEntry.clone({
+                      name: `${existingEntry.name} (old)`,
+                      flags: newFlags,
+                    }).toObject());
+                  } else {
+                    existingEntriesToUpdate.push({
+                      _id: existingEntry.id,
+                      name: `${existingEntry.name} (old)`,
+                      flags: newFlags,
+                    });
+                  }
                 }
               }
               // Import the entry if we are forcing, or it doesn't already exist in the world.
@@ -399,6 +462,12 @@ export default class ScenePacker {
             }
             return true;
           });
+          if (existingEntriesToDelete.length) {
+            await entityClass.deleteDocuments(existingEntriesToDelete);
+          }
+          if (entriesToCreate.length) {
+            await entityClass.createDocuments(entriesToCreate);
+          }
           if (existingEntriesToUpdate.length) {
             await entityClass.updateDocuments(existingEntriesToUpdate);
           }
@@ -910,6 +979,10 @@ export default class ScenePacker {
     if (typeof args[0] === 'object') {
       Object.assign(options, args.shift());
     }
+    const instance = globalScenePacker.instances[options?.moduleName];
+    if (instance) {
+      return instance;
+    }
     return new ScenePacker(options, ...args);
   }
 
@@ -987,7 +1060,7 @@ export default class ScenePacker {
   }
 
   /**
-   * Set the human readable name of the adventure. This will populate folder names etc.
+   * Set the human-readable name of the adventure. This will populate folder names etc.
    * @param {String} adventureName
    * @returns this to support chaining
    */
@@ -1003,7 +1076,7 @@ export default class ScenePacker {
   }
 
   /**
-   * Gets the human readable name of the adventure this Scene Packer was set up with.
+   * Gets the human-readable name of the adventure this Scene Packer was set up with.
    * @returns {String}
    */
   GetAdventureName() {
@@ -1520,6 +1593,9 @@ export default class ScenePacker {
      */
     const journalInfoResults = await Promise.allSettled(sceneNotes.map(async note => {
       note = note.toObject();
+      if (!note.icon && note.texture?.src) {
+        note.icon = note.texture.src
+      }
       const journalData = game.journal.get(note.entryId);
       const compendiumJournal = await this.FindJournalInCompendiums(journalData, this.getSearchPacksForType('JournalEntry'));
 
@@ -2763,7 +2839,7 @@ export default class ScenePacker {
    *   - direct name match in a folder named after the Adventure
    *   - direct name match in any folder
    *   - look up the original actor name from the token and do the same name based search
-   *     (this handles look ups for tokens that have a different name to the Actor they represent)
+   *     (this handles look-ups for tokens that have a different name to the Actor they represent)
    * @param {Object} token the token on the scene
    * @param {Object} tokenWorldData the data embedded in the scene during PackScene()
    * @param {Object} folder the game.folders entity to prioritise the search to
@@ -3133,22 +3209,32 @@ export default class ScenePacker {
 
     function getIconForNote(note) {
       // Replace icon with a Book if the image doesn't exist.
-      let icon = note.icon;
+      let icon = note.texture?.src | note.icon;
+      if (!icon) {
+        return 'icons/svg/book.svg';
+      }
       // Test the icon exists and replace it if it doesn't
       $.get(icon).fail(() => icon = 'icons/svg/book.svg');
       return icon;
     }
 
     journalInfo.forEach((note) => {
+      const update = {
+        icon: getIconForNote(note),
+        entryId: findJournalIDForNote(note),
+        name: note.journalName || note.name || note.text,
+        '-=journalName': null,
+        '-=folderName': null,
+      };
+      const icon = getIconForNote(note);
+      if (CONSTANTS.IsV10orNewer()) {
+        update.icon = icon;
+      } else {
+        update['texture.src'] = icon;
+      }
       updates.push(mergeObject(
         note,
-        {
-          icon: getIconForNote(note),
-          entryId: findJournalIDForNote(note),
-          name: note.journalName || note.name || note.text,
-          '-=journalName': null,
-          '-=folderName': null,
-        },
+        update,
         {inplace: false},
       ));
     });
@@ -4324,7 +4410,7 @@ export default class ScenePacker {
       return;
     }
 
-    // Get all of the compendium packs that belong to the requested module
+    // Get all the compendium packs that belong to the requested module
     const allPacks = game.packs.filter(p => (p.metadata.packageName || p.metadata.package) === moduleName);
     const instance = new ScenePacker({moduleName});
     /**
@@ -4416,7 +4502,7 @@ export default class ScenePacker {
    *   Macros
    *   Playlists
    * @param {String} moduleName - The name of the module that owns the compendiums to be updated
-   * @param {String} type - The type of entries to search though. Currently "JournalEntryPacks", "ItemPacks" and "RollTablePacks"
+   * @param {String} type - The type of entries to search though. Currently, "JournalEntryPacks", "ItemPacks" and "RollTablePacks"
    * @param {Boolean} dryRun - Whether to do a dry-run (no changes committed, just calculations and logs)
    * @param {{ActorPacks: *[], ItemPacks: *[], ScenePacks: *[], JournalEntryPacks: *[], MacroPacks: *[], RollTablePacks: *[], PlaylistPacks: *[]}} packs - The packs to search within
    * @param {RegExp} rex - The regular expression to search for. Default matches things like: @Actor[obe2mDyYDXYmxHJb]{Something or other}

@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.6.0
+
+- Added a new import dialog for modules that utilise a "Welcome Journal".
+- Added an "Adventure Converter" to assist Creators in converting their existing Scene Packed adventures to the new Adventure format available in V10 of Foundry VTT.
+  - As a creator, you can launch this via the Module Settings.
+  - This feature serves no purpose to end-users and is only useful to module creators.
+
 ## v2.5.7
 
 - Fixed issue with the Moulinette importer where asset references would point to the wrong place if you are using an S3 bucket.
