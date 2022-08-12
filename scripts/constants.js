@@ -101,7 +101,7 @@ export const CONSTANTS = Object.freeze({
    *   @Compendium[scene-packer.journals.LSbUJA9hw0vmYeSZ]{Something or other}
    *   @Compendium[scene-packer.journals.LSbUJA9hw0vmYeSZ#sub-link]{Something or other}
    */
-  LINK_REGEX: /@(\w+)\[([-.\w]+)(#[^\]]+)?]{([^}]+)}/g,
+  LINK_REGEX: /@(\w+)\[([^#\]]+)(?:#([^\]]+))?](?:{([^}]+)})/g,
 
   /**
    * The minimum version of packed scenes supported by this version.
@@ -128,6 +128,11 @@ export const CONSTANTS = Object.freeze({
    * The setting key for tracking the timeout value when processing assets.
    */
   SETTING_ASSET_TIMEOUT: 'assetTimeout',
+
+  /**
+   * The setting key for triggering the AdventureConverter class.
+   */
+  SETTING_CONVERT_TO_ADVENTURE_DOCUMENT: 'convertToAdventureDocument',
 
   /**
    * The setting key for whether to display the context menu on the Scene sidebar.
@@ -181,11 +186,12 @@ export const CONSTANTS = Object.freeze({
 
   /**
    * Lookup entity types and get their common language strings.
-   * @type {{Actor: string, Card: string, Cards: string, Item: string, JournalEntry: string, Macro: string, Playlist: string, RollTable: string, Scene: string}}
+   * @type {{Actor: string, Adventure: string, Card: string, Cards: string, Item: string, JournalEntry: string, Macro: string, Playlist: string, RollTable: string, Scene: string}}
    * @enum {string}
    */
   TYPE_HUMANISE: {
     Actor: 'actors',
+    Adventure: 'adventures',
     Card: 'card',
     Cards: 'cards',
     Item: 'items',

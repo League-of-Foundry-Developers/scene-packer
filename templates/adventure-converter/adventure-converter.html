@@ -1,0 +1,97 @@
+<form>
+  <h2>{{localize "SCENE-PACKER.adventure-converter.name"}}</h2>
+  <div class="summary">{{{localize "SCENE-PACKER.adventure-converter.summary" link=(concat '<a href="about:blank" target="_blank">' (localize "SCENE-PACKER.adventure-converter.view-tutorial") '</a>')}}}</div>
+  <div class="summary-help"><i class="fas fa-question-circle"></i> {{{localize "SCENE-PACKER.adventure-converter.summary-help" img="<img src='https://github.com/League-of-Foundry-Developers/scene-packer/raw/main/assets/icons/hand-truck.png' alt='icon' height='24' valign='middle' style='max-width:100%;border:0;'>" link=(concat '<a href="https://discord.com/invite/HY3xhBEf2A" target="_blank">' (localize "SCENE-PACKER.adventure-converter.discord-name") '</a>')}}}</div>
+
+  <hr>
+
+  <div class="form-group">
+    <label for="adventure-module">{{localize "SCENE-PACKER.adventure-converter.select-adventure"}}</label>
+    <div class="form-fields">
+      <select id="adventure-module" name="adventureModule">
+        {{selectOptions instances selected=object.adventureModule nameAttr="moduleName" labelAttr="adventureName"}}
+      </select>
+    </div>
+  </div>
+
+  {{#unless hasInstances}}
+    <div class="notification warning">{{localize "SCENE-PACKER.adventure-converter.no-adventures"}}</div>
+    <hr>
+  {{else}}
+    <hr>
+    {{#unless object.adventureModule}}
+      <div class="notification info">{{localize "SCENE-PACKER.adventure-converter.select-adventure-details"}}</div>
+    {{else}}
+      <div class="flexrow">
+      {{#unless hasAdventureCapabilities}}
+        <div class="notification info">
+          {{localize "SCENE-PACKER.adventure-converter.missing-adventure-pack"}}
+          <a href="javascript:void(0);" class="recommend-json">{{{localize "SCENE-PACKER.adventure-converter.missing-adventure-pack-link"}}}</a>
+        </div>
+      {{else}}
+        <section class="adventure-overview">
+          <h2>{{ selectedInstance.adventureName }}</h2>
+          <div class="form-group">
+            <label>{{ localize "ADVENTURE.Image" }}:</label>
+            <div class="form-fields">
+              {{filePicker target="img" type="image"}}
+              <input class="image" type="text" name="img" placeholder="path/image.png" value="{{object.img}}"/>
+            </div>
+            <p class="hint">{{ localize "ADVENTURE.ImageHint" }}</p>
+          </div>
+
+          <div class="form-group stacked">
+            <label for="caption">{{localize "ADVENTURE.Caption"}}</label>
+            <div class="form-fields">
+              <textarea id="caption" name="caption">{{object.caption}}</textarea>
+            </div>
+            <p class="hint">{{ localize "ADVENTURE.CaptionHint" }}</p>
+          </div>
+
+          <div class="form-group stacked">
+            <label for="description">{{localize "ADVENTURE.Description"}}</label>
+            <div class="form-fields">
+              <textarea id="description" name="description">{{object.description}}</textarea>
+            </div>
+            <p class="hint">{{ localize "ADVENTURE.DescriptionHint" }}</p>
+          </div>
+
+          <div class="form-group">
+            <label for="welcome-journal">{{localize "SCENE-PACKER.adventure-converter.welcome-journal"}}</label>
+            <div class="form-fields">
+              <input id="welcome-journal" name="welcome-journal" type="text" value="{{object.welcomeJournal.id}}" />
+            </div>
+            {{#if object.welcomeJournal}}
+            <p class="hint">{{{ welcomeJournalDescription }}}</p>
+            {{else}}
+            <p class="hint">{{ localize "SCENE-PACKER.adventure-converter.welcome-journal-hint" }}</p>
+            {{/if}}
+          </div>
+        </section>
+
+        <section class="adventure-contents">
+          <h2>{{localize "ADVENTURE.ImportHeaderContents"}}</h2>
+          <ul>
+            {{#each contents}}
+            <li><i class="{{this.icon}} fa-fw"></i> {{this.count}} {{this.label}}</li>
+            {{/each}}
+          </ul>
+        </section>
+      {{/unless}}
+      </div>
+    {{/unless}}
+  {{/unless}}
+
+  <footer class="adventure-footer">
+    <hr>
+    <button type="submit" {{#unless canConvert}}disabled title="{{localize "SCENE-PACKER.adventure-converter.no-adventures"}}"{{/unless}}>
+      <i class="fas fa-arrow-right-from-bracket"></i>
+      {{localize "SCENE-PACKER.adventure-converter.submit"}}
+    </button>
+    <p>&nbsp;</p>
+    <p class="notification warning">
+      {{ localize "SCENE-PACKER.adventure-converter.backup-warning" }}
+      <a href="https://foundryvtt.com/article/configuration/#backup" target="_blank">{{ localize "SCENE-PACKER.adventure-converter.backup-warning-link" }}</a>
+    </p>
+  </footer>
+</form>

@@ -10,6 +10,7 @@ export const JournalDataLocations = [
   // dnd5e, pf2e, aliengrpg etc
   'content',
   'data.content',
+  'pages',
 
   // gm-notes module (https://github.com/syl3r86/gm-notes)
   'flags.gm-notes.notes',
@@ -32,6 +33,15 @@ export function ExtractRelatedJournalData(journal) {
 
   for (const path of JournalDataLocations) {
     const content = ResolvePath(path, journal);
+    if (path === 'pages') {
+      for (const text of content.filter(c => c.type === 'text')) {
+        const relations = ExtractUUIDsFromContent(text.content, path);
+        if (relations.length) {
+          relatedData.AddRelations(uuid, relations);
+        }
+      }
+    }
+
     if (typeof content !== 'string') {
       continue;
     }

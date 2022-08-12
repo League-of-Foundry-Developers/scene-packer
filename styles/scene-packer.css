@@ -101,17 +101,20 @@
 #scene-packer-exporter .form-group label {
   align-self: flex-start;
 }
-#scene-packer-exporter .package-description {
+#scene-packer-exporter .package-description,
+#sp-adventure-converter .textarea {
   height: 300px;
   flex: 4;
   border: 1px solid #7a7971;
   background: rgba(0, 0, 0, 0.05);
   border-radius: 3px;
 }
-#scene-packer-exporter .editor {
+#scene-packer-exporter .editor,
+#sp-adventure-converter .editor{
   height: 100%;
 }
-#scene-packer-exporter .tox { height: 100%; min-height: 100%; }
+#scene-packer-exporter .tox,
+#sp-adventure-converter .tox { height: 100%; min-height: 100%; }
 #scene-packer-exporter .adventure-categorisation .form-group label {
   flex: 1;
 }
@@ -213,4 +216,38 @@
 
 #scene-packer-importer-unrelated-data .content a.entity-link {
   line-height: 1.6em;
+}
+
+#sp-adventure-converter .adventure-overview {
+  flex: 2;
+}
+#sp-adventure-converter .adventure-contents {
+  margin-left: 1rem;
+}
+
+.sp-welcome-journal.journal-sheet form .editor {
+  height: calc(100% - 55px);
+}
+.sp-welcome-journal input[name=name],
+.sp-welcome-journal select[name=folder] {
+  display: none;
+}
+
+.sp-welcome-journal .sp-footer {
+  max-height: 55px;
+  justify-content: space-around;
+  gap: 0 1em;
+  padding: 0 1em 10px 1em;
+  display: flex;
+  flex-wrap: wrap;
+}
+.sp-welcome-journal .sp-footer button {
+  flex: 1;
+}
+.sp-welcome-journal .sp-footer button.sp-import-close {
+  max-width: max-content;
+  padding: 0 10px;
+}
+.sp-welcome-journal .sp-footer hr {
+  width: 100%;
 }
