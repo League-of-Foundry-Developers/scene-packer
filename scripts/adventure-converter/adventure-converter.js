@@ -749,13 +749,15 @@ export default class AdventureConverter extends FormApplication {
       rejectClose: false,
     });
 
-    module.packs.add({
+    const packs = Array.from(module.packs);
+    packs.push({
       label,
       name: 'adventure',
-      path: '/packs/adventure.db',
+      path: './packs/adventure.db',
       type: 'Adventure',
       system: game.system.id,
     });
+    await module.update({packs})
 
     const manifest = Module.migrateData(module);
 
