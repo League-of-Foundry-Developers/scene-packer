@@ -19,6 +19,7 @@ export default class AdventureConverter extends FormApplication {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       template: 'modules/scene-packer/templates/adventure-converter/adventure-converter.html',
+      title: game.i18n.localize('SCENE-PACKER.adventure-converter.name'),
       id: 'sp-adventure-converter',
       classes: ['sheet', 'adventure', 'scene-packer', 'adventure-converter'],
       width: 890,
@@ -748,13 +749,15 @@ export default class AdventureConverter extends FormApplication {
       rejectClose: false,
     });
 
-    module.packs.add({
+    const packs = Array.from(module.packs);
+    packs.push({
       label,
       name: 'adventure',
-      path: '/packs/adventure.db',
+      path: './packs/adventure.db',
       type: 'Adventure',
       system: game.system.id,
     });
+    await module.update({packs})
 
     const manifest = Module.migrateData(module);
 
