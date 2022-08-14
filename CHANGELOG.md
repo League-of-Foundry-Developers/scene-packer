@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.6.1
+
+- Fixed "Adventure Converter" to correctly suggest manifest json file updated for v10.
+
 ## v2.6.0
 
 - Added a new import dialog for modules that utilise a "Welcome Journal".
