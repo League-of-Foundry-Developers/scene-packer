@@ -33,6 +33,9 @@ export function ExtractRelatedJournalData(journal) {
 
   for (const path of JournalDataLocations) {
     const content = ResolvePath(path, journal);
+    if (!content) {
+      continue
+    }
     if (path === 'pages') {
       for (const text of content.filter(c => c.type === 'text')) {
         const relations = ExtractUUIDsFromContent(text.content, path);

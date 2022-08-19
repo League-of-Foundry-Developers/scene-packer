@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.6.2
+
+- Fixed issue relating to extracting related documents from Journals in v9 and below.
+
 ## v2.6.1
 
 - Fixed "Adventure Converter" to correctly suggest manifest json file updated for v10.
