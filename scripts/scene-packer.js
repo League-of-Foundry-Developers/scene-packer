@@ -407,6 +407,7 @@ export default class ScenePacker {
       default: 'close',
     });
     di.render(true);
+    const createdRollTables = [];
     for (let i = 0; i < CONSTANTS.PACK_IMPORT_ORDER.length; i++) {
       const packType = CONSTANTS.PACK_IMPORT_ORDER[i];
       di.data.content = `<p>${game.i18n.format('SCENE-PACKER.welcome.import-all.wait', {
@@ -587,6 +588,10 @@ export default class ScenePacker {
                     });
                   }
                 }
+                break;
+              case 'RollTable':
+                createdRollTables.push(...createdEntities);
+                break;
             }
           }
         } catch (e) {
@@ -594,11 +599,48 @@ export default class ScenePacker {
         }
       }
     }
+
+    if (createdRollTables.length > 0) {
+      // RollTable results that reference compendiums should be converted to their local instance.
+      for (const table of createdRollTables) {
+        const updates = [];
+        for (const result of (table.results || table.data.results || [])) {
+          if ((result.type || result.data.type) !== CONST.TABLE_RESULT_TYPES.COMPENDIUM) {
+            continue;
+          }
+
+          const packReference = CONSTANTS.IsV10orNewer() ? result.documentCollection : result.data.collection;
+          const pack = game.packs.get(packReference);
+          if (!pack) {
+            continue;
+          }
+
+          const referenceExists = game.collections.get((pack.metadata.type || pack.metadata.entity))?.getName((result.text || result.data.text));
+          if (!referenceExists) {
+            continue;
+          }
+
+          updates.push({
+            _id: result.id,
+            collection: pack.metadata.type || pack.metadata.entity,
+            type: CONST.TABLE_RESULT_TYPES.DOCUMENT || CONST.TABLE_RESULT_TYPES.ENTITY,
+          })
+        }
+
+        if (updates.length > 0) {
+          await table.updateEmbeddedDocuments('TableResult', updates);
+        }
+      }
+    }
+
     ui.notifications.info(
       game.i18n.format('SCENE-PACKER.welcome.import-all.complete', {
         name: this.adventureName,
       }),
     );
+    this.log(true, game.i18n.format('SCENE-PACKER.welcome.import-all.complete', {
+      name: this.adventureName,
+    }));
 
     /**
      * Trigger any hooks for importing all packs in the module. Receives argument: {@link ImportedAllEntities}

@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.6.3
+
+- RollTables imported via the "Import All" method will now change their compendium references to local world documents where possible.
+  - This resolves an issue that was occurring when a RollTable was referencing a Quick Encounter Journal Entry.
+
 ## v2.6.2
 
 - Fixed issue relating to extracting related documents from Journals in v9 and below.
