@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.6.4
+
+- Updated the "Relink compendium Entries" macro to better handle Quick Encounter data matching.
+  - It will now fall back to name based matching if it fails to match by ID. If it doesn't find a direct match still, it will put a warning into the console (F12).
+
 ## v2.6.3
 
 - RollTables imported via the "Import All" method will now change their compendium references to local world documents where possible.
