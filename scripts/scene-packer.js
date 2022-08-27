@@ -5049,7 +5049,26 @@ export default class ScenePacker {
 
     // Update the journal reference
     if (quickEncounter.journalEntryId && quickEncounter.journalEntryId !== journal.uuid) {
-      const worldJournal = game.journal.get(quickEncounter.journalEntryId);
+      let worldJournal = game.journal.get(quickEncounter.journalEntryId);
+      if (!worldJournal) {
+        // See if we have a single named journal that we can use instead
+        const worldJournals = game.journal.filter(a => a.name === journal.name);
+        if (worldJournals.length === 1) {
+          worldJournal = worldJournals[0];
+        } else {
+          ScenePacker.logType(
+            moduleName,
+            'warn',
+            true,
+            game.i18n.format(
+              'SCENE-PACKER.world-conversion.compendiums.quick-encounters.missing-journal-reference',
+              {
+                journal: journal.name,
+              },
+            ),
+          );
+        }
+      }
       if (worldJournal) {
         // Add a back reference
         if (!dryRun) {
@@ -5075,7 +5094,27 @@ export default class ScenePacker {
     if (quickEncounter.extractedActors) {
       for (let i = 0; i < quickEncounter.extractedActors.length; i++) {
         const actor = quickEncounter.extractedActors[i];
-        const worldActor = game.actors.get(actor.actorID);
+        let worldActor = game.actors.get(actor.actorID);
+        if (!worldActor) {
+          // See if we have a single named actor that we can use instead
+          const worldActors = game.actors.filter(a => a.name === actor.name);
+          if (worldActors.length === 1) {
+            worldActor = worldActors[0];
+          } else {
+            ScenePacker.logType(
+              moduleName,
+              'warn',
+              true,
+              game.i18n.format(
+                'SCENE-PACKER.world-conversion.compendiums.quick-encounters.missing-actor-reference',
+                {
+                  journal: journal.name,
+                  actor: actor.name,
+                },
+              ),
+            );
+          }
+        }
         if (worldActor) {
           const compendiumActor = await instance.FindActorInCompendiums(worldActor, instance.getSearchPacksForType('Actor'));
           if (compendiumActor?.uuid) {
