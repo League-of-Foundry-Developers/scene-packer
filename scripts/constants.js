@@ -175,6 +175,11 @@ export const CONSTANTS = Object.freeze({
   SETTING_IMPORTED_VERSION: 'imported',
 
   /**
+   * The setting key for the version of the system that last had a Scene Packer migration run against it.
+   */
+  SETTING_SYSTEM_MIGRATION_VERSION: 'migrationSystemVersion',
+
+  /**
    * The setting key for what version has been prompted.
    */
   SETTING_PROMPTED: 'prompted',

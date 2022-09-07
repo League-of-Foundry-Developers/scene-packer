@@ -21,6 +21,8 @@
       "yes-all-fallback": "Yes import <strong>all entities</strong>",
       "let-me-choose": "Let me choose individual <strong>Scenes</strong>",
       "close": "Close",
+      "migration-wait": "Please wait while the compendiums for \"{module}\" are migrated...",
+      "migration-complete": "Migrations of \"{module}\" compendiums complete.",
       "import-all": {
         "title": "Please wait...",
         "wait-title": "Please wait... importing all content from {name}.",
