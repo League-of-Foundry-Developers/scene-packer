@@ -4613,8 +4613,12 @@ export default class ScenePacker {
                 // This result is already a reference to a compendium
                 continue;
               }
+              let existingName = CONSTANTS.IsV10orNewer() ? result?.text : result?.data?.text;
               const existingEntry = game.collections.get(collection)?.get(resultId);
-              let newRef = await this.findNewReferences(collection, existingEntry.id, existingEntry.name, existingEntry, document.name, moduleName, packs);
+              if (existingEntry?.name) {
+                existingName = existingEntry.name;
+              }
+              let newRef = await this.findNewReferences(collection, existingEntry?.id, existingName, existingEntry, document.name, moduleName, packs);
               if (newRef.length !== 1) {
                 // Skip any reference update that isn't a one to one replacement
                 continue;
@@ -4895,7 +4899,7 @@ export default class ScenePacker {
     let entity = collection.get(oldRef);
     if (!entity) {
       // Try looking up by name
-      entity = collection.getName(oldRef);
+      entity = collection.getName(oldName);
       if (!entity) {
         ui.notifications.error(
           game.i18n.format(

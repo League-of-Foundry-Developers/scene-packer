@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.6.5
+
+- Updated "Relink compendium entries" macro  to better handle matching by name within rolltable entries.
+
 ## v2.6.4
 
 - Updated the "Relink compendium Entries" macro to better handle Quick Encounter data matching.
