@@ -2,6 +2,7 @@
 
 ## v2.6.5
 
+- Reduce v10 warnings 
 - Updated "Relink compendium entries" macro  to better handle matching by name within rolltable entries.
 
 ## v2.6.4

@@ -511,8 +511,8 @@ export default class ScenePacker {
                 cData.sort = cData.flags.cf.sort;
               }
 
-              // Patch "Sight angle must be between 1 and 360 degrees." error
-              if (packType === 'Actor') {
+              if (packType === 'Actor' && !CONSTANTS.IsV10orNewer()) {
+                // Patch "Sight angle must be between 1 and 360 degrees." error
                 if (cData.token?.sightAngle === 0) {
                   cData.token.sightAngle = 360;
                 }
@@ -615,7 +615,7 @@ export default class ScenePacker {
             continue;
           }
 
-          const referenceExists = game.collections.get((pack.metadata.type || pack.metadata.entity))?.getName((result.text || result.data.text));
+          const referenceExists = game.collections.get((pack.metadata.type || pack.metadata.entity))?.getName((result.text ?? result.data.text));
           if (!referenceExists) {
             continue;
           }
@@ -2628,12 +2628,14 @@ export default class ScenePacker {
               cData.sort = cData.flags.cf.sort;
             }
 
-            // Patch "Sight angle must be between 1 and 360 degrees." error
-            if (cData.token?.sightAngle === 0) {
-              cData.token.sightAngle = 360;
-            }
-            if (cData.token?.lightAngle === 0) {
-              cData.token.lightAngle = 360;
+            if (!CONSTANTS.IsV10orNewer()) {
+              // Patch "Sight angle must be between 1 and 360 degrees." error
+              if (cData.token?.sightAngle === 0) {
+                cData.token.sightAngle = 360;
+              }
+              if (cData.token?.lightAngle === 0) {
+                cData.token.lightAngle = 360;
+              }
             }
             return cData;
           }),
