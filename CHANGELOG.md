@@ -5,6 +5,7 @@
 - Migrate actor and token images where needed for D&D5e system updates.
 - Reduce v10 warnings 
 - Updated "Relink compendium entries" macro  to better handle matching by name within rolltable entries.
+- Updated libwrapper shim to 1.12.2.
 
 ## v2.6.4
 
