@@ -605,7 +605,7 @@ export default class ScenePacker {
       for (const table of createdRollTables) {
         const updates = [];
         for (const result of (table.results || table.data.results || [])) {
-          if ((result.type || result.data.type) !== CONST.TABLE_RESULT_TYPES.COMPENDIUM) {
+          if ((result.type ?? result.data.type) !== CONST.TABLE_RESULT_TYPES.COMPENDIUM) {
             continue;
           }
 
