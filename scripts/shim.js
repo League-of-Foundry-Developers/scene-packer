@@ -7,7 +7,7 @@
 // A shim for the libWrapper library
 export let libWrapper = undefined;
 
-export const VERSIONS       = [1,12,1];
+export const VERSIONS       = [1,12,2];
 export const TGT_SPLIT_RE   = new RegExp("([^.[]+|\\[('([^'\\\\]|\\\\.)+?'|\"([^\"\\\\]|\\\\.)+?\")\\])", 'g');
 export const TGT_CLEANUP_RE = new RegExp("(^\\['|'\\]$|^\\[\"|\"\\]$)", 'g');
 
@@ -90,9 +90,10 @@ Hooks.once('init', () => {
       if(match?.length !== 3) return [null,null];
       const dirs = match[2].split('/');
       if(match[1] === 'worlds') return dirs.find(n => n && game.world.id === n) ? [game.world.id, game.world.title] : [null,null];
-      if(match[1] === 'systems') return dirs.find(n => n && game.system.id === n) ? [game.system.id, game.system.data.title] : [null,null];
+      if(match[1] === 'systems') return dirs.find(n => n && game.system.id === n) ? [game.system.id, game.system.title ?? game.system.data.title] : [null,null];
       const id = dirs.find(n => n && game.modules.has(n));
-      return [id, game.modules.get(id)?.data?.title];
+      const mdl = game.modules.get(id);
+      return [id, mdl?.title ?? mdl?.data?.title];
     })();
 
     if(!PACKAGE_ID || !PACKAGE_TITLE) {
@@ -118,7 +119,6 @@ Hooks.once('init', () => {
       console.warn(`${PACKAGE_TITLE}: libWrapper not present, using fallback implementation.`);
       game.settings.register(PACKAGE_ID, DONT_REMIND_AGAIN_KEY, { name: '', default: false, type: Boolean, scope: 'world', config: false });
       if(game.user.isGM && !game.settings.get(PACKAGE_ID, DONT_REMIND_AGAIN_KEY)) {
-        ui.notifications.warn(`${PACKAGE_TITLE}: libWrapper not present, using fallback implementation. See console for more details.`)
         console.group(`${PACKAGE_TITLE} warning: libWrapper not present`)
         console.warn('A fallback implementation will be used, which increases the chance of compatibility issues with other modules. If you find that some functionality if not working correctly, please consider installing the "libWrapper" module.');
         console.info("'libWrapper' is a library which provides package developers with a simple way to modify core Foundry VTT code, while reducing the likelihood of conflict with other packages.");
