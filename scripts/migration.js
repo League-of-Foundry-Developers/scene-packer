@@ -39,6 +39,14 @@ export default class Migration {
             if (!['Actor', 'Item', 'Scene'].includes(pack.documentName)) {
               continue;
             }
+            let migrationData = {};
+            try {
+              migrationData = await dnd5e.migrations.getMigrationData();
+            } catch (err) {
+              migrationData = {};
+              err.message = `Failed to get dnd5e system migration data: ${err.message}`;
+              console.error(err);
+            }
 
             // Unlock the pack for editing
             const wasLocked = pack.locked;
@@ -52,11 +60,35 @@ export default class Migration {
                   updateData = Migration.MigrateDnd5eTokenImage(actorData, updateData);
 
                   // Save the entry, if data was changed
-                  if (foundry.utils.isEmpty(updateData)) {
-                    continue;
+                  if (!foundry.utils.isEmpty(updateData)) {
+                    console.log(`Migrating Actor document "${doc.name}" in Compendium "${pack.collection}"`);
+                    await doc.update(updateData);
                   }
-                  await doc.update(updateData);
-                  console.log(`Migrated ${pack.documentName} document "${doc.name}" in Compendium "${pack.collection}"`);
+
+                  try {
+                    const updateData = dnd5e.migrations.migrateActorData(doc.toObject(), migrationData);
+                    if (!foundry.utils.isEmpty(updateData)) {
+                      console.log(`Migrating Actor document "${doc.name}" in Compendium "${pack.collection}"`);
+                      await doc.update(updateData, { enforceTypes: false });
+                    }
+                  } catch (err) {
+                    err.message = `Failed dnd5e system migration for Actor "${doc.name}" in Compendium "${pack.collection}": ${err.message}`;
+                    console.error(err);
+                  }
+                }
+                break;
+              case 'Item':
+                for (const doc of await pack.getDocuments()) {
+                  try {
+                    const updateData = dnd5e.migrations.migrateItemData(doc.toObject(), migrationData);
+                    if (!foundry.utils.isEmpty(updateData)) {
+                      console.log(`Migrating Item document "${doc.name}" in Compendium "${pack.collection}"`);
+                      await doc.update(updateData, { enforceTypes: false });
+                    }
+                  } catch (err) {
+                    err.message = `Failed dnd5e system migration for Item "${doc.name}" in Compendium "${pack.collection}": ${err.message}`;
+                    console.error(err);
+                  }
                 }
                 break;
               case 'Scene':
@@ -69,8 +101,8 @@ export default class Migration {
                     if (foundry.utils.isEmpty(updateData)) {
                       continue;
                     }
+                    console.log(`Migrating Token document "${token.name}" in Scene "${doc.name}" in Compendium "${pack.collection}"`);
                     await doc.updateEmbeddedDocuments('Token', [foundry.utils.mergeObject({ _id: token.id }, updateData)]);
-                    console.log(`Migrated Token document "${token.name}" in Scene "${doc.name}" in Compendium "${pack.collection}"`);
                   }
                 }
                 break;
