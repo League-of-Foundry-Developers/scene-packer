@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.6.6
+
+- Migrate items as well for D&D5e system updates.
+- Allow the "Reset world Scene Packer prompts" macro to also reset the D&D5e migration process.
+
 ## v2.6.5
 
 - Migrate actor and token images where needed for D&D5e system updates.
