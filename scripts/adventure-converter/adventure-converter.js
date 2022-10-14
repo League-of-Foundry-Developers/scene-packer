@@ -23,7 +23,7 @@ export default class AdventureConverter extends FormApplication {
       id: 'sp-adventure-converter',
       classes: ['sheet', 'adventure', 'scene-packer', 'adventure-converter'],
       width: 890,
-      height: 700,
+      height: 730,
       tabs: [
         {
           navSelector: '.tabs',
@@ -263,11 +263,6 @@ export default class AdventureConverter extends FormApplication {
 
     AdventureConverter.RecommendModuleManifestUpdates(this.object?.adventureModule)
       .then((manifest) => {
-        // Create the blank adventure compendium database if it doesn't already exist
-        if (!FileExists(`modules/${this.object.adventureModule}/packs/adventure.db`)) {
-          UploadFile(new File([], 'adventure.db'), `modules/${this.object.adventureModule}/packs`, { notify: false });
-        }
-
         const modulePath = `modules/${this.object.adventureModule}/module.json`;
         let content = `<p>${game.i18n.format('SCENE-PACKER.adventure-converter.manifest-upgrade-detail-1', { module: modulePath })}</p>`;
         content += `<ul><li>${game.i18n.localize('SCENE-PACKER.adventure-converter.manifest-upgrade-detail-2')}</li>`;
@@ -275,7 +270,7 @@ export default class AdventureConverter extends FormApplication {
         content += `<li>${game.i18n.localize('SCENE-PACKER.adventure-converter.manifest-upgrade-detail-4')}</li>`;
         content += '</ul>';
         content += '<hr>';
-        content += `<p>${game.i18n.localize('SCENE-PACKER.adventure-converter.manifest-upgrade-next-steps')}</p>`;
+        content += `<p class="notification warning">${game.i18n.localize('SCENE-PACKER.adventure-converter.manifest-upgrade-next-steps')}</p>`;
         content += `<ol><li>${game.i18n.format('SCENE-PACKER.adventure-converter.manifest-upgrade-next-steps-1', { module: modulePath })}</li>`;
         content += `<li>${game.i18n.localize('SCENE-PACKER.adventure-converter.manifest-upgrade-next-steps-2')}</li>`;
         content += `<li>${game.i18n.localize('SCENE-PACKER.adventure-converter.manifest-upgrade-next-steps-3')}</li>`;
@@ -284,7 +279,7 @@ export default class AdventureConverter extends FormApplication {
         content += '</ol>';
         content += `<textarea rows="20">${JSON.stringify(manifest, null, 2)}</textarea>`;
         content += `<p>${game.i18n.localize('SCENE-PACKER.adventure-converter.manifest-upgrade-automated-steps')}</p>`;
-        content += `<ul><li><code>modules/${this.object.adventureModule}/packs/adventure.db</code></li>`;
+        content += `<ul><li><code>packs/adventure.db</code></li>`;
         content += '<hr>';
         new Dialog({
           title: modulePath,
@@ -717,12 +712,12 @@ export default class AdventureConverter extends FormApplication {
    * @returns {Promise<Module>} The updated module Manifest.
    */
   static async RecommendModuleManifestUpdates(moduleName) {
-    const module = game.modules.get(moduleName);
-    if (!module) {
+    if (!game.modules.get(moduleName)) {
       throw new Error(
         game.i18n.format('SCENE-PACKER.adventure-converter.manifest-upgrade-module-not-found', { name: moduleName }),
       );
     }
+    const module = game.modules.get(moduleName).clone();
 
     let label = module.title;
     if (module.packs?.size) {
@@ -749,15 +744,37 @@ export default class AdventureConverter extends FormApplication {
       rejectClose: false,
     });
 
-    const packs = Array.from(module.packs);
+    // Ensure that the paths remain relative to the module.
+    const esmodules = Array.from(module.esmodules).map(m => AdventureConverter.RelativePath(moduleName, m));
+    const scripts = Array.from(module.scripts).map(m => AdventureConverter.RelativePath(moduleName, m));
+    const languages = Array.from(module.languages).map(m => {
+      const path = AdventureConverter.RelativePath(moduleName, m.path);
+      return {
+        ...m,
+        path,
+      }
+    });
+    const packs = Array.from(module.packs).map(m => {
+      const path = AdventureConverter.RelativePath(moduleName, m.path);
+      return {
+        ...m,
+        path,
+      }
+    });
     packs.push({
       label,
       name: 'adventure',
-      path: './packs/adventure.db',
+      path: 'packs/adventure.db',
       type: 'Adventure',
       system: game.system.id,
     });
-    await module.update({packs})
+
+    await module.updateSource({
+      languages,
+      esmodules,
+      scripts,
+      packs,
+    });
 
     const manifest = Module.migrateData(module);
 
@@ -772,5 +789,9 @@ export default class AdventureConverter extends FormApplication {
     }
 
     return manifest;
+  }
+
+  static RelativePath(moduleName, path) {
+    return path.replace(new RegExp(`^/?modules/${moduleName}/`, 'i'), '');
   }
 }

@@ -587,7 +587,7 @@ export default class ScenePacker {
                 // Check if the actors had embedded Automated Evocations data
                 // @see https://github.com/theripper93/automated-evocations#store-companions-on-actor
                 for (let createdEntity of createdEntities) {
-                  let documentFlags = createdEntity.flags || createdEntity.data.flags || {};
+                  let documentFlags = (createdEntity.flags ?? createdEntity.data.flags) || {};
                   let automatedEvocationsCompanions = documentFlags['automated-evocations']?.companions || [];
                   let needsUpdate = false;
                   for (let companionData of automatedEvocationsCompanions) {
@@ -624,7 +624,7 @@ export default class ScenePacker {
       // RollTable results that reference compendiums should be converted to their local instance.
       for (const table of createdRollTables) {
         const updates = [];
-        for (const result of (table.results || table.data.results || [])) {
+        for (const result of ((table.results ?? table.data.results) || [])) {
           if ((result.type ?? result.data.type) !== CONST.TABLE_RESULT_TYPES.COMPENDIUM) {
             continue;
           }
@@ -699,17 +699,17 @@ export default class ScenePacker {
 
     const hasCFData = content.some(p => {
       const data = CONSTANTS.IsV10orNewer() ? p : p.data;
-      return data.flags?.cf?.path;
+      return data.flags?.cf?.path || data.name === CONSTANTS.CF_TEMP_ENTITY_NAME;
     });
     const allHaveCFData = content.every(p => {
       const data = CONSTANTS.IsV10orNewer() ? p : p.data;
-      return data.flags?.cf?.path;
+      return data.flags?.cf?.path || data.name === CONSTANTS.CF_TEMP_ENTITY_NAME;
     });
 
     if (!allHaveCFData && fallbackFolderName) {
       // Need the fallback folder to exist
       let folder = game.folders.find(
-        (folder) => folder.name === fallbackFolderName && folder.type === entityType && folder.parent === null,
+        (folder) => folder.name === fallbackFolderName && folder.type === entityType && folder.parent === null && !folder.folder,
       );
       if (!folder) {
         folder = await Folder.create({
@@ -731,8 +731,14 @@ export default class ScenePacker {
     content.sort((e1, e2) => {
       const e1Data = CONSTANTS.IsV10orNewer() ? e1 : e1.data;
       const e2Data = CONSTANTS.IsV10orNewer() ? e2 : e2.data;
-      const cfPath1 = e1Data?.flags?.cf?.path;
-      const cfPath2 = e2Data?.flags?.cf?.path;
+      let cfPath1 = e1Data?.flags?.cf?.path;
+      if (!cfPath1 && e1Data.name === CONSTANTS.CF_TEMP_ENTITY_NAME) {
+        cfPath1 = e1Data?.flags?.cf?.name;
+      }
+      let cfPath2 = e2Data?.flags?.cf?.path;
+      if (!cfPath2 && e2Data.name === CONSTANTS.CF_TEMP_ENTITY_NAME) {
+        cfPath2 = e2Data?.flags?.cf?.name;
+      }
       const e1Name = e1.name;
       const e2Name = e2.name;
       const e1Sort = e1Data.sort ?? 0;
@@ -777,7 +783,10 @@ export default class ScenePacker {
     for (let i = 0; i < content.length; i++) {
       const entity = content[i];
       const eData = CONSTANTS.IsV10orNewer() ? entity : entity.data;
-      const cfPath = eData?.flags?.cf?.path;
+      let cfPath = eData?.flags?.cf?.path;
+      if (!cfPath && eData.name === CONSTANTS.CF_TEMP_ENTITY_NAME) {
+        cfPath = eData?.flags?.cf?.name;
+      }
       const cfColor = eData?.flags?.cf?.color;
       if (!cfPath) {
         continue;
@@ -809,7 +818,8 @@ export default class ScenePacker {
         // See if a folder already exists
         let folder = game.folders.find((folder) => {
           const data = CONSTANTS.IsV10orNewer() ? folder : folder.data;
-          return folder.name === pathPart && folder.type === entityType && data.parent === (parent?.id || null)
+          const parentId = data.folder?.id ?? data.parent;
+          return folder.name === pathPart && folder.type === entityType && parentId === (parent?.id || null)
         });
         if (folder) {
           response.folderMap.set(pathPart, folder);
@@ -1655,7 +1665,7 @@ export default class ScenePacker {
      */
     const journalInfoResults = await Promise.allSettled(sceneNotes.map(async note => {
       note = note.toObject();
-      if (!note.icon && note.texture?.src) {
+      if (note.texture?.src) {
         note.icon = note.texture.src
       }
       const journalData = game.journal.get(note.entryId);
@@ -3273,7 +3283,7 @@ export default class ScenePacker {
 
     function getIconForNote(note) {
       // Replace icon with a Book if the image doesn't exist.
-      let icon = note.texture?.src | note.icon;
+      let icon = note.texture?.src ?? note.icon;
       if (!icon) {
         return 'icons/svg/book.svg';
       }
@@ -3284,7 +3294,6 @@ export default class ScenePacker {
 
     journalInfo.forEach((note) => {
       const update = {
-        icon: getIconForNote(note),
         entryId: findJournalIDForNote(note),
         name: note.journalName || note.name || note.text,
         '-=journalName': null,
@@ -3292,9 +3301,9 @@ export default class ScenePacker {
       };
       const icon = getIconForNote(note);
       if (CONSTANTS.IsV10orNewer()) {
-        update.icon = icon;
-      } else {
         update['texture.src'] = icon;
+      } else {
+        update.icon = icon;
       }
       updates.push(mergeObject(
         note,
