@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.6.7
+
+- Fixed the "Adventure Converter" to correctly handle compendium pack paths presented by Foundry Core during the suggested `module.json` file changes.
+- Updated the "Bulk Pack Scenes" macro to correctly handle differences in folder data structure for nested folders in V10.
+- Improved the folder creation process when utilising structures exported by the Compendium Folders module.
+- Improved the handling of scene note icons in v10.
+
 ## v2.6.6
 
 - Migrate items as well for D&D5e system updates.
