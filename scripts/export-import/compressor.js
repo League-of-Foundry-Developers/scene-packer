@@ -294,7 +294,7 @@ export class Compressor {
    * @return {Promise<Response>}
    */
   static async FetchWithTimeout(resource, options) {
-    let timeout = game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_ASSET_TIMEOUT) || 60;
+    let timeout = game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_ASSET_TIMEOUT) ?? 60;
     if (options?.timeout) {
       timeout = options.timeout;
     }

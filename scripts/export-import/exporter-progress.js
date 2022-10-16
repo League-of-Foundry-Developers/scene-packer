@@ -159,8 +159,16 @@ export default class ExporterProgress extends FormApplication {
             const folder = CONFIG.Folder.collection.instance.get(folderID);
             if (folder) {
               folderMap.set(folderID, folder.toJSON());
-              if (folder.data.parent) {
-                addFolderHierarchy(folder.data.parent);
+              if (CONSTANTS.IsV10orNewer()) {
+                if (folder.ancestors?.length) {
+                  for (const ancestor of folder.ancestors) {
+                    addFolderHierarchy(ancestor.id);
+                  }
+                }
+              } else {
+                if (folder.folder) {
+                  addFolderHierarchy(folder.folder);
+                }
               }
             }
           }
@@ -209,7 +217,7 @@ export default class ExporterProgress extends FormApplication {
           }
 
           for (const document of documents) {
-            const folderID = document.data?.folder;
+            const folderID = CONSTANTS.IsV10orNewer() ? document.folder?.id : document.data?.folder;
             if (folderID) {
               addFolderHierarchy(folderID);
             }
@@ -252,8 +260,9 @@ export default class ExporterProgress extends FormApplication {
                 this.unrelatedData.RemoveRelations(relatedData.GetRelatedData());
 
                 // Add thumbnails to dataZip
-                if (document.data.thumb?.startsWith('data:')) {
-                  const _thumbParts = document.data.thumb.split(';base64,');
+                const docData = CONSTANTS.IsV10orNewer() ? document : document.data;
+                if (docData.thumb?.startsWith('data:')) {
+                  const _thumbParts = document.thumb.split(';base64,');
                   const mime = _thumbParts[0].substring(5); // Strip off "data:"
                   const blob = new Blob([window.atob(_thumbParts[1])], {
                     type: mime,
@@ -263,9 +272,9 @@ export default class ExporterProgress extends FormApplication {
                     blob,
                     `data/scenes/thumbs/${document.id}.png`,
                   );
-                } else if (document.data.thumb) {
+                } else if (docData.thumb) {
                   const url = new URL(
-                    document.data.thumb,
+                    docData.thumb,
                     window.location.href,
                   );
                   await dataZip.AddFileURLToZip(
@@ -283,6 +292,7 @@ export default class ExporterProgress extends FormApplication {
 
           if (type === 'Scene') {
             const sceneInfo = documents.map((s) => {
+              const sData = CONSTANTS.IsV10orNewer() ? s : s.data;
               return {
                 id: s.id,
                 name: s.name,
@@ -292,18 +302,19 @@ export default class ExporterProgress extends FormApplication {
                 hasSounds: !!s.sounds?.size,
                 hasTokens: !!s.tokens?.size,
                 hasWalls: !!s.walls?.size,
-                thumb: s.data.thumb ? `scenes/thumbs/${s.id}.png` : null,
+                thumb: sData.thumb ? `scenes/thumbs/${s.id}.png` : null,
               };
             });
             dataZip.AddToZip(sceneInfo, `data/scenes/info.json`);
             updateTotalSize();
           } else if (type === 'Actor') {
             const actorInfo = documents.map((a) => {
+              const aData = CONSTANTS.IsV10orNewer() ? a : a.data;
               return {
                 id: a.id,
                 name: a.name,
                 img: a.img,
-                hasTokenAttacherData: !!getProperty(a.data, 'token.flags.token-attacher.prototypeAttached'),
+                hasTokenAttacherData: !!getProperty(aData, 'token.flags.token-attacher.prototypeAttached'),
               };
             });
             dataZip.AddToZip(actorInfo, `data/actors/info.json`);

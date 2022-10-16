@@ -144,7 +144,9 @@ export function ExtractRelatedEnhancedJournalData(journal) {
     return relatedData;
   }
 
-  const enhancedJournalData = getProperty(journal, 'data.flags.monks-enhanced-journal');
+  const path = 'flags.monks-enhanced-journal';
+  const journalData = CONSTANTS.IsV10orNewer() ? journal : journal.data;
+  const enhancedJournalData = getProperty(journalData, path);
   if (!enhancedJournalData) {
     return relatedData;
   }
