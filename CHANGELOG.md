@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.6.8
+
+- Fixed up several issues with the "Moulinette Exporter" in V10 while maintaining compatibility with V9.
+- Changed default asset timeout to unlimited (was 120 seconds).
+- Fixed journal icons when unpacking a V9 packed world in V10.
+  - Previously they would revert to the default book due to the image path changes.
+
 ## v2.6.7
 
 - Fixed the "Adventure Converter" to correctly handle compendium pack paths presented by Foundry Core during the suggested `module.json` file changes.

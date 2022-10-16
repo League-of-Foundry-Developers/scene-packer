@@ -84,13 +84,13 @@ export default class Exporter extends FormApplication {
       return {key: e, label: e};
     });
 
-    this.hasSquareGrids = game.scenes.some(s => s.data.gridType === CONST.GRID_TYPES.SQUARE)
-    this.hasHexGrids = game.scenes.some(s => [CONST.GRID_TYPES.HEXODDR, CONST.GRID_TYPES.HEXEVENR, CONST.GRID_TYPES.HEXODDQ, CONST.GRID_TYPES.HEXEVENQ].includes(s.data.gridType))
+    this.hasSquareGrids = game.scenes.some(s => (s.grid?.type ?? s.data.gridType) === CONST.GRID_TYPES.SQUARE)
+    this.hasHexGrids = game.scenes.some(s => [CONST.GRID_TYPES.HEXODDR, CONST.GRID_TYPES.HEXEVENR, CONST.GRID_TYPES.HEXODDQ, CONST.GRID_TYPES.HEXEVENQ].includes(s.grid?.type ?? s.data.gridType))
   }
 
   initialize(type) {
     const folders = game.folders.filter((f) => f.type === type);
-    const documents = game.collections.get(type)?.filter((e) => e.visible) || [];
+    const documents = game.collections.get(type) || [];
     return {
       folders,
       documents,
@@ -163,6 +163,7 @@ export default class Exporter extends FormApplication {
    * @return {Object|Promise}
    */
   getData(options = {}) {
+    const worldData = CONSTANTS.IsV10orNewer() ? game.world : game.world.data;
     return {
       scenes: this.Scene,
       actors: this.Actor,
@@ -175,21 +176,21 @@ export default class Exporter extends FormApplication {
       macros: this.Macro,
       summary: game.i18n.format('SCENE-PACKER.exporter.selected-count', {
         count:
-          this.Scene.documents.length +
-          this.Actor.documents.length +
-          this.Item.documents.length +
-          this.Cards.documents.length +
-          this.JournalEntry.documents.length +
-          this.RollTable.documents.length +
-          this.Playlist.documents.length +
-          this.Macro.documents.length,
+          this.Scene.documents.size +
+          this.Actor.documents.size +
+          this.Item.documents.size +
+          this.Cards.documents.size +
+          this.JournalEntry.documents.size +
+          this.RollTable.documents.size +
+          this.Playlist.documents.size +
+          this.Macro.documents.size,
       }),
       complete: this.complete,
-      packageName: game.world.data.title,
+      packageName: worldData.title,
       packageAuthor: game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_AUTHOR) || '',
-      packageVersion: game.world.data.version || '1.0.0',
-      packageCover: game.world.data.background,
-      packageDescription: game.world.data.description,
+      packageVersion: worldData.version || '1.0.0',
+      packageCover: worldData.background,
+      packageDescription: worldData.description,
       packageDiscord: game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_DISCORD) || '',
       packageEmail: game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_EMAIL) || '',
       adventureSystem: game.system.id,
@@ -198,6 +199,7 @@ export default class Exporter extends FormApplication {
       adventureTagSuggestions: this.adventureTagSuggestions,
       hasSquareGrids: this.hasSquareGrids,
       hasHexGrids: this.hasHexGrids,
+      isV9: !CONSTANTS.IsV10orNewer(),
     };
   }
 
@@ -492,8 +494,9 @@ export default class Exporter extends FormApplication {
       for (let d of this[html.dataset.entity].documents) {
         if (rgx.test(SearchFilter.cleanQuery(d.name))) {
           entityIds.add(d.id);
-          if (d.data.folder) {
-            folderIds.add(d.data.folder);
+          const folderId = CONSTANTS.IsV10orNewer() ? d.folder?.id : d.data.folder;
+          if (folderId) {
+            folderIds.add(folderId);
           }
         }
       }
@@ -503,9 +506,18 @@ export default class Exporter extends FormApplication {
         const folders = this[html.dataset.entity].folders.filter((f) =>
           fids.has(f.id)
         );
-        const pids = new Set(
-          folders.filter((f) => f.data.parent).map((f) => f.data.parent)
-        );
+        const pids = new Set();
+        if (CONSTANTS.IsV10orNewer()) {
+          const parentIDs = folders.filter((f) => f.ancestors?.length).map((f) => f.ancestors.map((a) => a.id)).flat();
+          if (parentIDs.length) {
+            pids.add(...parentIDs);
+          }
+        } else {
+          const parentIDs = folders.filter((f) => f.data.parent).map((f) => f.data.parent);
+          if (parentIDs.length) {
+            pids.add(...parentIDs);
+          }
+        }
         if (pids.size) {
           pids.forEach((p) => folderIds.add(p));
           includeFolders(pids);

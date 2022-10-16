@@ -31,6 +31,18 @@ export async function ExtractSceneAssets(scene) {
     });
   }
 
+  if (sceneData.background?.src) {
+    await data.AddAsset({
+      id: scene.id,
+      key: 'img',
+      parentID: scene.id,
+      parentType: scene.documentName,
+      documentType: scene.documentName,
+      location: AssetReport.Locations.SceneBackground,
+      asset: sceneData.background.src,
+    });
+  }
+
   if (sceneData.foreground) {
     await data.AddAsset({
       id: scene.id,
@@ -67,7 +79,20 @@ export async function ExtractSceneAssets(scene) {
 
   for (const note of notes) {
     const noteData = CONSTANTS.IsV10orNewer() ? note : note?.data;
-    const icon = noteData?.icon || note?.icon;
+    if (noteData.texture?.src) {
+      await data.AddAsset({
+        id: note.id,
+        key: 'texture.src',
+        parentID: scene.id,
+        parentType: scene.documentName,
+        documentType: note.documentName || 'Note',
+        location: AssetReport.Locations.SceneNoteIcon,
+        asset: noteData.texture.src,
+      });
+      continue;
+    }
+
+    const icon = noteData?.icon ?? note?.icon;
     if (icon) {
       await data.AddAsset({
         id: note.id,
@@ -93,6 +118,17 @@ export async function ExtractSceneAssets(scene) {
         documentType: tile.documentName || 'Tile',
         location: AssetReport.Locations.SceneTileImage,
         asset: img,
+      });
+    }
+    if (tileData.texture?.src) {
+      await data.AddAsset({
+        id: tile.id,
+        key: 'texture.src',
+        parentID: scene.id,
+        parentType: scene.documentName,
+        documentType: tile.documentName || 'Tile',
+        location: AssetReport.Locations.SceneTileImage,
+        asset: tileData.texture.src,
       });
     }
   }
@@ -125,6 +161,17 @@ export async function ExtractSceneAssets(scene) {
         documentType: token.documentName || 'Token',
         location: AssetReport.Locations.SceneTokenImage,
         asset: img,
+      });
+    }
+    if (tokenData.texture?.src) {
+      await data.AddAsset({
+        id: token.id,
+        key: 'texture.src',
+        parentID: scene.id,
+        parentType: scene.documentName,
+        documentType: token.documentName || 'Token',
+        location: AssetReport.Locations.SceneTokenImage,
+        asset: tokenData.texture.src,
       });
     }
   }

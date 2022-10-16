@@ -5536,42 +5536,42 @@ Hooks.once('setup', () => {
     scope: 'client',
     config: true,
     type: Number,
-    default: 120,
+    default: 0,
   });
 
   game.settings.register(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_AUTHOR, {
     scope: 'client',
     config: false,
     type: String,
-    default: false,
+    default: '',
   });
 
   game.settings.register(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_DISCORD, {
     scope: 'client',
     config: false,
     type: String,
-    default: false,
+    default: '',
   });
 
   game.settings.register(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_EMAIL, {
     scope: 'client',
     config: false,
     type: String,
-    default: false,
+    default: '',
   });
 
   game.settings.register(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_TAGS, {
     scope: 'client',
     config: false,
     type: Array,
-    default: false,
+    default: [],
   });
 
   game.settings.register(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_THEMES, {
     scope: 'client',
     config: false,
     type: Array,
-    default: false,
+    default: [],
   });
 });
 

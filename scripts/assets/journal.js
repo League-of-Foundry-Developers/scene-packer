@@ -53,6 +53,43 @@ export async function ExtractJournalEntryAssets(journal) {
     }
   }
 
+  if (journalData.pages) {
+    for (const page of journalData.pages) {
+      if (page.type === 'image' && page.src) {
+        await data.AddAsset({
+          id: page.id,
+          key: 'pages',
+          parentID: journal.id,
+          parentType: journal.documentName,
+          documentType: journal.documentName,
+          location: AssetReport.Locations.JournalImage,
+          asset: page.src,
+        });
+      }
+
+      if (page.type === 'text' && page.text?.content) {
+        const doc = new DOMParser().parseFromString(
+          page.text.content,
+          'text/html'
+        );
+        const images = doc.getElementsByTagName('img');
+        for (const image of images) {
+          if (image?.src && !image.src.startsWith('data:')) {
+            await data.AddAsset({
+              id: page.id,
+              key: 'content',
+              parentID: journal.id,
+              parentType: journal.documentName,
+              documentType: journal.documentName,
+              location: AssetReport.Locations.JournalEmbeddedImage,
+              asset: image.src,
+            });
+          }
+        }
+      }
+    }
+  }
+
   data.AddAssetData(await ExtractQuickEncounterAssets(journal));
   data.AddAssetData(await ExtractMonksEnhancedJournalAssets(journal));
 

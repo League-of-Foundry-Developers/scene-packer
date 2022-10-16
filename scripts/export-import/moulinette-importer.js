@@ -285,6 +285,18 @@ export default class MoulinetteImporter extends FormApplication {
         if (folderIDs.length) {
           await this.createFolders(folderIDs);
         }
+        if (CONSTANTS.IsV10orNewer()) {
+          // Loop through the scenes to fix up note icons from v9 to v10 (the paths changed)
+          for (const document of documents) {
+            for (const note of document.notes) {
+              const hasNonDefaultIcon = note.icon && note.icon !== 'icons/svg/book.svg';
+              const hasDefaultTexture = note.texture?.src && note.texture.src === 'icons/svg/book.svg';
+              if (hasDefaultTexture && hasNonDefaultIcon) {
+                note.texture = { src: note.icon };
+              }
+            }
+          }
+        }
         const created = await Scene.createDocuments(documents, {keepId: true});
         for (const id of created.map(s => s.id)) {
           const scene = game.scenes.get(id);

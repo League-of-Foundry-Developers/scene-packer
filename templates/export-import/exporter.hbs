@@ -1,20 +1,31 @@
 {{#*inline "folderPartial"}}
-  <li class="directory-item folder flexcol {{#unless folder.expanded}}collapsed{{/unless}}"
-      data-folder-id="{{folder.id}}" data-folder-depth="{{folder.depth}}">
+  {{#if isV9}}
+    <li class="directory-item folder flexcol {{#unless folder.expanded}}collapsed{{/unless}}"
+        data-folder-id="{{folder.id}}" data-folder-depth="{{folder.depth}}">
+  {{else}}
+    <li class="directory-item folder flexcol {{#unless folder.folder.expanded}}collapsed{{/unless}}"
+        data-folder-id="{{folder.folder.id}}" data-folder-depth="{{folder.folder.depth}}">
+  {{/if}}
     <header class="folder-header flexrow" style="background-color: {{folder.data.color}}">
       <h3>
-        <input type="checkbox" data-type="Folder" data-folder-type="{{folder.type}}" value="{{folder.id}}" checked>
-        <i class="fas fa-folder-open fa-fw"></i>{{folder.name}}
+        <input type="checkbox" data-type="Folder" data-folder-type="{{#if isV9}}{{folder.type}}{{else}}{{folder.folder.type}}{{/if}}" value="{{#if isV9}}{{folder.id}}{{else}}{{folder.folder.id}}{{/if}}" checked>
+    <i class="fas fa-folder-open fa-fw"></i>{{#if isV9}}{{folder.name}}{{else}}{{folder.folder.name}}{{/if}}
       </h3>
     </header>
 
     <ol class="subdirectory">
       {{~#each folder.children as |child i|}}
-        {{> folderPartial folder=child user=../user}}
+        {{> folderPartial folder=child user=../user isV9=../isV9}}
       {{/each}}
-      {{#each folder.content}}
-        {{> entityPartial}}
-      {{/each~}}
+      {{#if isV9}}
+        {{#each folder.content}}
+          {{> entityPartial}}
+        {{/each~}}
+      {{else}}
+        {{#each folder.documents}}
+          {{> entityPartial}}
+        {{/each~}}
+      {{/if}}
     </ol>
   </li>
 {{/inline}}
@@ -57,11 +68,17 @@
 
       <ol class="directory-list" data-entity="Scene">
         {{~#each scenes.tree.children as |f fi|}}
-          {{> folderPartial folder=f user=../user}}
+          {{> folderPartial folder=f user=../user isV9=../isV9}}
         {{/each}}
-        {{#each scenes.tree.content}}
-          {{> entityPartial}}
-        {{/each~}}
+        {{#if isV9}}
+          {{#each scenes.tree.content}}
+            {{> entityPartial}}
+          {{/each~}}
+        {{else}}
+          {{#each scenes.tree.documents}}
+            {{> entityPartial}}
+          {{/each~}}
+        {{/if}}
       </ol>
     </div>
 
@@ -77,11 +94,17 @@
 
       <ol class="directory-list" data-entity="Actor">
         {{~#each actors.tree.children as |f fi|}}
-          {{> folderPartial folder=f user=../user}}
+          {{> folderPartial folder=f user=../user isV9=../isV9}}
         {{/each}}
-        {{#each actors.tree.content}}
-          {{> entityPartial}}
-        {{/each~}}
+        {{#if isV9}}
+          {{#each actors.tree.content}}
+            {{> entityPartial}}
+          {{/each~}}
+        {{else}}
+          {{#each actors.tree.documents}}
+            {{> entityPartial}}
+          {{/each~}}
+        {{/if}}
       </ol>
     </div>
 
@@ -97,11 +120,17 @@
 
       <ol class="directory-list" data-entity="Item">
         {{~#each items.tree.children as |f fi|}}
-          {{> folderPartial folder=f user=../user}}
+          {{> folderPartial folder=f user=../user isV9=../isV9}}
         {{/each}}
-        {{#each items.tree.content}}
-          {{> entityPartial}}
-        {{/each~}}
+        {{#if isV9}}
+          {{#each items.tree.content}}
+            {{> entityPartial}}
+          {{/each~}}
+        {{else}}
+          {{#each items.tree.documents}}
+            {{> entityPartial}}
+          {{/each~}}
+        {{/if}}
       </ol>
     </div>
 
@@ -117,11 +146,17 @@
 
       <ol class="directory-list" data-entity="JournalEntry">
         {{~#each journals.tree.children as |f fi|}}
-          {{> folderPartial folder=f user=../user}}
+          {{> folderPartial folder=f user=../user isV9=../isV9}}
         {{/each}}
-        {{#each journals.tree.content}}
-          {{> entityPartial}}
-        {{/each~}}
+        {{#if isV9}}
+          {{#each journals.tree.content}}
+            {{> entityPartial}}
+          {{/each~}}
+        {{else}}
+          {{#each journals.tree.documents}}
+            {{> entityPartial}}
+          {{/each~}}
+        {{/if}}
       </ol>
     </div>
 
@@ -137,11 +172,17 @@
 
       <ol class="directory-list" data-entity="RollTable">
         {{~#each tables.tree.children as |f fi|}}
-          {{> folderPartial folder=f user=../user}}
+          {{> folderPartial folder=f user=../user isV9=../isV9}}
         {{/each}}
-        {{#each tables.tree.content}}
-          {{> entityPartial}}
-        {{/each~}}
+        {{#if isV9}}
+          {{#each tables.tree.content}}
+            {{> entityPartial}}
+          {{/each~}}
+        {{else}}
+          {{#each tables.tree.documents}}
+            {{> entityPartial}}
+          {{/each~}}
+        {{/if}}
       </ol>
     </div>
 
@@ -157,11 +198,17 @@
 
       <ol class="directory-list" data-entity="Playlist">
         {{~#each playlists.tree.children as |f fi|}}
-          {{> folderPartial folder=f user=../user}}
+          {{> folderPartial folder=f user=../user isV9=../isV9}}
         {{/each}}
-        {{#each playlists.tree.content}}
-          {{> entityPartial}}
-        {{/each~}}
+        {{#if isV9}}
+          {{#each playlists.tree.content}}
+            {{> entityPartial}}
+          {{/each~}}
+        {{else}}
+          {{#each playlists.tree.documents}}
+            {{> entityPartial}}
+          {{/each~}}
+        {{/if}}
       </ol>
     </div>
 
@@ -177,11 +224,17 @@
 
       <ol class="directory-list" data-entity="Cards">
         {{~#each cards.tree.children as |f fi|}}
-          {{> folderPartial folder=f user=../user}}
+          {{> folderPartial folder=f user=../user isV9=../isV9}}
         {{/each}}
-        {{#each cards.tree.content}}
-          {{> entityPartial}}
-        {{/each~}}
+        {{#if isV9}}
+          {{#each cards.tree.content}}
+            {{> entityPartial}}
+          {{/each~}}
+        {{else}}
+          {{#each cards.tree.documents}}
+            {{> entityPartial}}
+          {{/each~}}
+        {{/if}}
       </ol>
     </div>
 
@@ -197,11 +250,17 @@
 
       <ol class="directory-list" data-entity="Macro">
         {{~#each macros.tree.children as |f fi|}}
-          {{> folderPartial folder=f user=../user}}
+          {{> folderPartial folder=f user=../user isV9=../isV9}}
         {{/each}}
-        {{#each macros.tree.content}}
-          {{> entityPartial}}
-        {{/each~}}
+        {{#if isV9}}
+          {{#each macros.tree.content}}
+            {{> entityPartial}}
+          {{/each~}}
+        {{else}}
+          {{#each macros.tree.documents}}
+            {{> entityPartial}}
+          {{/each~}}
+        {{/if}}
       </ol>
     </div>
 
@@ -235,7 +294,11 @@
           <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.package-description-help'}}"></i>
         </label>
         <div class="package-description">
-          {{editor content=packageDescription target="packageDescription" button=false editable=true owner=true}}
+          {{#unless isV9}}
+            {{editor packageDescription target="packageDescription" button=false editable=true owner=true}}
+          {{else}}
+            {{editor content=packageDescription target="packageDescription" button=false editable=true owner=true}}
+          {{/unless}}
         </div>
       </div>
       <div class="form-group file-picker">
