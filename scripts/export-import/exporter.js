@@ -390,7 +390,15 @@ export default class Exporter extends FormApplication {
       return;
     }
 
-    if (data?.type !== 'JournalEntry' || !data?.id) {
+    if (data?.type !== 'JournalEntry') {
+      return;
+    }
+
+    if (!data?.id && data?.uuid) {
+      data.id = data.uuid.split('.').pop();
+    }
+
+    if (!data?.id) {
       return;
     }
 
