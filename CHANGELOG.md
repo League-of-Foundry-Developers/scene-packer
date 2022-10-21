@@ -1,6 +1,6 @@
 # Changelog
 
-## v2.6.8
+## v2.6.9
 
 - Fixed up several issues with the "Moulinette Exporter" in V10 while maintaining compatibility with V9.
 - Changed default asset timeout to unlimited (was 120 seconds).
