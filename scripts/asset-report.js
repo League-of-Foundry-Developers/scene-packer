@@ -656,9 +656,8 @@ export default class AssetReport extends FormApplication {
   async getPackContents(type) {
     const entities = [];
     const modules = this.moduleToCheck.packs.filter(p => (p.type || p.entity) === type);
-    for (let i = 0; i < modules.length; i++) {
-      const module = modules[i];
-      const pack = game.packs.get(`${module.package}.${module.name}`);
+    for (const module of modules) {
+      const pack = game.packs.get(`${this.moduleToCheck.id}.${module.name}`);
       if (!pack) {
         continue;
       }

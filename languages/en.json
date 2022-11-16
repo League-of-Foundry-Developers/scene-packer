@@ -249,7 +249,7 @@
         "invalid-too-many": "Found a journal reference but found more than one compendium version by name. Check debug logs for details.",
         "invalid-too-many-console": "Found more than one reference in compendium data. Skipping updating reference...",
         "updating-references": "Changing {count} {type} references in: \"{name}\"",
-        "updating-reference-console": "Changing {pack}[{journalEntryId}] {type} reference {oldRef} -> {newRefPack}.{newRef}",
+        "updating-reference-console": "Changing {pack}[{journalEntryId}] {type} reference {oldRef} -> {newRef}",
         "updating-reference": "Updating {count} references in \"{name}\". See console for full details.",
         "completed-checks": "Completed {type} \"{name}\" {entryId}.",
         "no-references": "There were no references that needed updating in {type} \"{name}\" {entryId}.",
