@@ -4612,12 +4612,41 @@ export default class ScenePacker {
       // Check each of the entries in the pack
       const packValues = pack.index.values();
       for (const entry of packValues) {
-        const references = new Set();
         const document = await pack.getDocument(entry._id);
         let content;
         switch (type) {
           case 'JournalEntryPacks':
             if (CONSTANTS.IsV10orNewer()) {
+              const pages = document.pages?.filter(p => p.type === 'text' && p.text?.content) || [];
+              if (pages.length) {
+                const pageUpdates = [];
+                for (const page of pages) {
+                  let {
+                    newContent,
+                    references,
+                    hyperlinksChanged,
+                  } = await this.relinkContent(page.text.content, entry, page, {domParser, rex, moduleName, packs, pack, typeName});
+
+                  if (newContent !== page.text.content) {
+                    ui.notifications.info(
+                      game.i18n.format(
+                        'SCENE-PACKER.world-conversion.compendiums.updating-reference',
+                        {
+                          count: new Intl.NumberFormat().format(references.size + hyperlinksChanged),
+                          name: page.name,
+                        },
+                      ),
+                    );
+                    pageUpdates.push({
+                      _id: page._id,
+                      'text.content': newContent,
+                    })
+                  }
+                }
+                if (!dryRun && pageUpdates.length) {
+                  await document.updateEmbeddedDocuments('JournalEntryPage', pageUpdates);
+                }
+              }
               content = document?.content;
             } else {
               content = document?.data?.content;
@@ -4699,124 +4728,17 @@ export default class ScenePacker {
           ),
         );
 
-        // Replace hyperlink style links first
-        let hyperlinksChanged = 0;
-        const doc = domParser.parseFromString(content, 'text/html');
-        for (const link of doc.getElementsByTagName('a')) {
-          if (!link.classList.contains('entity-link') || !link.dataset.entity || !link.dataset.id) {
-            continue;
-          }
-
-          // Build the links to the new references that exist within the compendium/s
-          let newRef = await this.findNewReferences(link.dataset.entity, link.dataset.id, link.text, entry, document.name, moduleName, packs);
-
-          if (newRef.length !== 1) {
-            // Skip any reference update that isn't a one to one replacement
-            continue;
-          }
-          ScenePacker.logType(
-            moduleName,
-            'info',
-            true,
-            game.i18n.format(
-              'SCENE-PACKER.world-conversion.compendiums.updating-reference-console',
-              {
-                pack: pack.collection,
-                journalEntryId: entry._id,
-                type: link.dataset.entity,
-                oldRef: link.dataset.id,
-                newRefPack: newRef[0].pack,
-                newRef: newRef[0].ref,
-              },
-            ),
-          );
-
-          if (!dryRun) {
-            link.setAttribute('data-pack', newRef[0].pack);
-            link.setAttribute('data-id', newRef[0].ref);
-            hyperlinksChanged++;
-          }
-        }
-        if (!dryRun) {
-          content = doc.body.innerHTML;
-        }
-
-        const links = [...content.matchAll(rex)];
-        for (let k = 0; k < links.length; k++) {
-          const link = links[k];
-          const type = link[1];
-          const oldRef = link[2];
-          const anchor = link[3];
-          const oldName = link[4];
-
-          // Build the links to the new references that exist within the compendium/s
-          let newRef = await this.findNewReferences(type, oldRef, oldName, entry, document.name, moduleName, packs);
-
-          if (!newRef.length) {
-            continue;
-          }
-
-          references.add({
-            type: type,
-            oldRef: oldRef,
-            newRef: newRef,
-            pack: pack.collection,
-            journalEntryId: entry._id,
-            journalAnchorLink: anchor ? anchor : '',
-          });
-        }
+        let {
+          newContent,
+          references,
+          hyperlinksChanged,
+        } = await this.relinkContent(content, entry, document, {domParser, rex, moduleName, packs, pack, typeName});
 
         if (type === 'JournalEntryPacks') {
           await ScenePacker.RelinkQuickEncounterData(document, moduleName, dryRun);
         }
 
-        if (references.size || content !== originalContent) {
-          ScenePacker.logType(
-            moduleName,
-            'info',
-            true,
-            game.i18n.format(
-              'SCENE-PACKER.world-conversion.compendiums.updating-references',
-              {
-                count: new Intl.NumberFormat().format(references.size + hyperlinksChanged),
-                name: document.name,
-                type: typeName,
-              },
-            ),
-          );
-
-          // Build the new document content, progressively replacing each reference
-          let newContent = content;
-          for (const change of references) {
-            if (change.newRef.length !== 1) {
-              // Skip any reference update that isn't a one to one replacement
-              continue;
-            }
-            ScenePacker.logType(
-              moduleName,
-              'info',
-              true,
-              game.i18n.format(
-                'SCENE-PACKER.world-conversion.compendiums.updating-reference-console',
-                {
-                  pack: change.pack,
-                  journalEntryId: change.journalEntryId,
-                  type: change.type,
-                  oldRef: change.oldRef + change.journalAnchorLink,
-                  newRefPack: change.newRef[0].pack,
-                  newRef: change.newRef[0].ref,
-                },
-              ),
-            );
-            let regex = new RegExp(
-              `@${change.type}\\[${change.oldRef}${change.journalAnchorLink}\\]\\{`,
-              'g',
-            );
-            newContent = newContent.replace(
-              regex,
-              `@Compendium[${change.newRef[0].pack}.${change.newRef[0].ref}${change.journalAnchorLink}]{`,
-            );
-          }
+        if (newContent !== originalContent) {
           ui.notifications.info(
             game.i18n.format(
               'SCENE-PACKER.world-conversion.compendiums.updating-reference',
@@ -4843,20 +4765,6 @@ export default class ScenePacker {
                 break;
             }
           }
-        } else {
-          ScenePacker.logType(
-            moduleName,
-            'info',
-            true,
-            game.i18n.format(
-              'SCENE-PACKER.world-conversion.compendiums.no-references',
-              {
-                name: document.name,
-                entryId: entry._id,
-                type: typeName,
-              },
-            ),
-          );
         }
         ScenePacker.logType(
           moduleName,
@@ -4873,6 +4781,152 @@ export default class ScenePacker {
         );
       }
     }
+  }
+
+  async relinkContent(content, entry, document, options) {
+    const {domParser, rex, moduleName, packs, pack, typeName} = options;
+    const references = new Set();
+    let newContent = content;
+
+    // Replace hyperlink style links first
+    let hyperlinksChanged = 0;
+    const doc = domParser.parseFromString(newContent, 'text/html');
+    for (const link of doc.getElementsByTagName('a')) {
+      if (!link.classList.contains('entity-link') || !link.dataset.entity || !link.dataset.id) {
+        continue;
+      }
+
+      // Build the links to the new references that exist within the compendium/s
+      let newRef = await this.findNewReferences(link.dataset.entity, link.dataset.id, link.text, document, document.name, moduleName, packs);
+
+      if (newRef.length !== 1) {
+        // Skip any reference update that isn't a one to one replacement
+        continue;
+      }
+      ScenePacker.logType(
+        moduleName,
+        'info',
+        true,
+        game.i18n.format(
+          'SCENE-PACKER.world-conversion.compendiums.updating-reference-console',
+          {
+            pack: pack.collection,
+            journalEntryId: entry._id,
+            type: link.dataset.entity,
+            oldRef: link.dataset.id,
+            newRefPack: newRef[0].pack,
+            newRef: newRef[0].ref,
+          },
+        ),
+      );
+
+      link.setAttribute('data-pack', newRef[0].pack);
+      link.setAttribute('data-id', newRef[0].ref);
+      hyperlinksChanged++;
+    }
+
+    newContent = doc.body.innerHTML;
+
+    const links = [...newContent.matchAll(rex)];
+    for (let k = 0; k < links.length; k++) {
+      const link = links[k];
+      const type = link[1];
+      const oldRef = link[2];
+      const anchor = link[3];
+      const oldName = link[4];
+
+      // Build the links to the new references that exist within the compendium/s
+      let newRef = await this.findNewReferences(type, oldRef, oldName, document, document.name, moduleName, packs);
+
+      if (!newRef.length) {
+        continue;
+      }
+
+      references.add({
+        type: type,
+        oldRef: oldRef,
+        newRef: newRef,
+        pack: pack.collection,
+        journalEntryId: entry._id,
+        journalAnchorLink: anchor ? anchor : '',
+      });
+    }
+
+    if (references.size || newContent !== content) {
+      ScenePacker.logType(
+        moduleName,
+        'info',
+        true,
+        game.i18n.format(
+          'SCENE-PACKER.world-conversion.compendiums.updating-references',
+          {
+            count: new Intl.NumberFormat().format(references.size + hyperlinksChanged),
+            name: document.name,
+            type: typeName,
+          },
+        ),
+      );
+
+      // Build the new document content, progressively replacing each reference
+      for (const change of references) {
+        if (change.newRef.length !== 1) {
+          // Skip any reference update that isn't a one to one replacement
+          continue;
+        }
+        const prefix = CONSTANTS.IsV10orNewer() ? '@UUID[' : '@Compendium[';
+        const newReference = change.newRef[0];
+        if (!newReference.uuid) {
+          newReference.uuid = `${newReference.pack}.${newReference.ref}${change.journalAnchorLink}`;
+        }
+        if (!CONSTANTS.IsV10orNewer() && newReference.uuid.startsWith('Compendium.')) {
+          newReference.uuid = newReference.uuid.replace('Compendium.', '');
+        }
+        ScenePacker.logType(
+          moduleName,
+          'info',
+          true,
+          game.i18n.format(
+            'SCENE-PACKER.world-conversion.compendiums.updating-reference-console',
+            {
+              pack: change.pack,
+              journalEntryId: change.journalEntryId,
+              type: change.type,
+              oldRef: change.oldRef + change.journalAnchorLink,
+              newRefPack: newReference.pack,
+              newRef: newReference.uuid,
+            },
+          ),
+        );
+        let regex = new RegExp(
+          `@${change.type}\\[${change.oldRef}${change.journalAnchorLink}\\]\\{`,
+          'g',
+        );
+        newContent = newContent.replace(
+          regex,
+          `${prefix}${newReference.uuid}]{`,
+        );
+      }
+
+    } else {
+      ScenePacker.logType(
+        moduleName,
+        'info',
+        true,
+        game.i18n.format(
+          'SCENE-PACKER.world-conversion.compendiums.no-references',
+          {
+            name: document.name,
+            entryId: entry._id,
+            type: typeName,
+          },
+        ),
+      );
+    }
+    return {
+      newContent,
+      references,
+      hyperlinksChanged,
+    };
   }
 
   /**
@@ -4895,6 +4949,16 @@ export default class ScenePacker {
    * @return {Promise<[{ref, pack}]>}
    */
   async findNewReferences(type, oldRef, oldName, entry, containerName, moduleName, packs) {
+    if (type === 'UUID') {
+      // UUID style references store their full reference within the oldRef
+      if (oldRef.startsWith('.') && entry.uuid) {
+        // UUID style references may be in a "relative" format though, so adjust to a full reference
+        oldRef = entry.uuid;
+      }
+      const splitRef = oldRef.split('.');
+      type = splitRef.shift();
+      oldRef = splitRef.join('.');
+    }
     if (type === 'Compendium') {
       // Compendium references are already "correct" and don't need a new reference found.
       return [];
@@ -4927,7 +4991,32 @@ export default class ScenePacker {
       );
       return [];
     }
-    let entity = collection.get(oldRef);
+
+    let entity;
+    let pageName;
+    if (CONSTANTS.IsV10orNewer() && type === 'JournalEntry' && oldRef.includes('.')) {
+      let pageType;
+      let pageId;
+      // Refers to a Journal Page, so we need to find the Journal Entry first
+      let journalId;
+      [journalId, pageType, pageId] = oldRef.split('.');
+      entity = collection.get(journalId);
+      if (entity && pageId) {
+        let page = entity.getEmbeddedDocument(pageType, pageId);
+        if (page?.name) {
+          pageName = page.name;
+        } else {
+          // Try looking up by name
+          page = entity.pages?.find(p => p.name === entry.name);
+          if (page?.name) {
+            pageName = page.name;
+          }
+        }
+      }
+    } else {
+      entity = collection.get(oldRef);
+    }
+
     if (!entity) {
       // Try looking up by name
       entity = collection.getName(oldName);
@@ -4971,9 +5060,17 @@ export default class ScenePacker {
           const possibleMatch = possibleMatches[m];
           const entity = await p.getDocument(possibleMatch._id);
           if (entity) {
+            let uuid = entity.uuid || undefined;
+            if (CONSTANTS.IsV10orNewer() && pageName) {
+              // Original reference was to a page, so we need to find the page in the compendium entry
+              let page = entity.pages?.find(p => p.name === pageName);
+              if (page?.uuid) {
+                uuid = page.uuid;
+              }
+            }
             if (sourceId && entity.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === sourceId) {
               // Direct match
-              return [{pack: p.collection, ref: possibleMatch._id}];
+              return [{pack: p.collection, ref: possibleMatch._id, uuid}];
             }
           }
           matches.push({pack: p.collection, ref: possibleMatch._id});

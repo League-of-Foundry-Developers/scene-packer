@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.6.10
+
+- Updated the "Relink compendium Entries" macro to better handle v10.
+  - Better handling of Journal Pages.
+  - Handle `UUID` style references.
+
 ## v2.6.9
 
 - Fixed up several issues with the "Moulinette Exporter" in V10 while maintaining compatibility with V9.
