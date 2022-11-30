@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.6.11
+
+- Updated the "Relink compedium Entries" macro to better handle v10.
+  - Now handles Actor.Item and associated "embedded" documents within entities.
+- Updated packing/unpacking of Monk's Active Tile's data to handle the new way it stores cross-scene teleport information.
+
 ## v2.6.10
 
 - Updated the "Relink compendium Entries" macro to better handle v10.

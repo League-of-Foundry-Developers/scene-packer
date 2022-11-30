@@ -3696,6 +3696,7 @@ export default class ScenePacker {
                 a?.data?.item?.id ||
                 a?.data?.location?.id ||
                 a?.data?.location?.sceneId ||
+                a?.data?.location?.scene ||
                 a?.data?.rolltableid,
             )
             .map(async (d) => {
@@ -3713,6 +3714,8 @@ export default class ScenePacker {
                 ref = data.macroid.startsWith('Macro.') ? data.macroid : `Macro.${data.macroid}`;
               } else if (data?.location?.sceneId) {
                 ref = data.location.sceneId.startsWith('Scene.') ? data.location.sceneId : `Scene.${data.location.sceneId}`;
+              } else if (data?.location?.scene) {
+                ref = data.location.scene.startsWith('Scene.') ? data.location.scene : `Scene.${data.location.scene}`;
               } else if (data?.location?.id) {
                 ref = data.location.id;
               } else if (data?.rolltableid) {
@@ -3885,6 +3888,23 @@ export default class ScenePacker {
               );
               if (newValue !== actionData.location.sceneId) {
                 actionData.location.sceneId = newValue;
+                changed = true;
+                actionsCount++;
+              }
+            }
+          }
+        }
+        if (actionData?.location?.scene) {
+          originalValue = actionData.location.scene.startsWith('Scene.') ? actionData.location.scene : `Scene.${actionData.location.scene}`;
+          if (extractEntityID(originalValue)) {
+            newEntity = await findNewEntityValue(originalValue, action, tile, compendiumSourceId);
+            if (newEntity) {
+              newValue = actionData.location.scene.replace(
+                extractEntityID(originalValue),
+                newEntity.id
+              );
+              if (newValue !== actionData.location.scene) {
+                actionData.location.scene = newValue;
                 changed = true;
                 actionsCount++;
               }
@@ -4994,6 +5014,8 @@ export default class ScenePacker {
 
     let entity;
     let pageName;
+    let embeddedType;
+    let embeddedName;
     if (CONSTANTS.IsV10orNewer() && type === 'JournalEntry' && oldRef.includes('.')) {
       let pageType;
       let pageId;
@@ -5010,6 +5032,24 @@ export default class ScenePacker {
           page = entity.pages?.find(p => p.name === entry.name);
           if (page?.name) {
             pageName = page.name;
+          }
+        }
+      }
+    } else if (CONSTANTS.IsV10orNewer() && oldRef.includes('.')) {
+      // Refers to an embedded document
+      let embeddedId;
+      let parentId;
+      [parentId, embeddedType, embeddedId] = oldRef.split('.');
+      entity = collection.get(parentId);
+      if (entity && embeddedId) {
+        let embedded = entity.getEmbeddedDocument(embeddedType, embeddedId);
+        if (embedded?.name) {
+          embeddedName = embedded.name;
+        } else {
+          // Try looking up by name
+          embedded = entity.getEmbeddedCollection(embeddedType)?.find(e => e.name === entry.name);
+          if (embedded?.name) {
+            embeddedName = embedded.name;
           }
         }
       }
@@ -5066,6 +5106,13 @@ export default class ScenePacker {
               let page = entity.pages?.find(p => p.name === pageName);
               if (page?.uuid) {
                 uuid = page.uuid;
+              }
+            }
+            if (CONSTANTS.IsV10orNewer() && embeddedType && embeddedName) {
+              // Original reference was to an embedded document, so we need to find the embedded document in the compendium entry
+              let embedded = entity.getEmbeddedCollection(embeddedType)?.find(e => e.name === embeddedName);
+              if (embedded?.uuid) {
+                uuid = embedded.uuid;
               }
             }
             if (sourceId && entity.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === sourceId) {
