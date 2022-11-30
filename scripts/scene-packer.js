@@ -3696,6 +3696,7 @@ export default class ScenePacker {
                 a?.data?.item?.id ||
                 a?.data?.location?.id ||
                 a?.data?.location?.sceneId ||
+                a?.data?.location?.scene ||
                 a?.data?.rolltableid,
             )
             .map(async (d) => {
@@ -3713,6 +3714,8 @@ export default class ScenePacker {
                 ref = data.macroid.startsWith('Macro.') ? data.macroid : `Macro.${data.macroid}`;
               } else if (data?.location?.sceneId) {
                 ref = data.location.sceneId.startsWith('Scene.') ? data.location.sceneId : `Scene.${data.location.sceneId}`;
+              } else if (data?.location?.scene) {
+                ref = data.location.scene.startsWith('Scene.') ? data.location.scene : `Scene.${data.location.scene}`;
               } else if (data?.location?.id) {
                 ref = data.location.id;
               } else if (data?.rolltableid) {
@@ -3885,6 +3888,23 @@ export default class ScenePacker {
               );
               if (newValue !== actionData.location.sceneId) {
                 actionData.location.sceneId = newValue;
+                changed = true;
+                actionsCount++;
+              }
+            }
+          }
+        }
+        if (actionData?.location?.scene) {
+          originalValue = actionData.location.scene.startsWith('Scene.') ? actionData.location.scene : `Scene.${actionData.location.scene}`;
+          if (extractEntityID(originalValue)) {
+            newEntity = await findNewEntityValue(originalValue, action, tile, compendiumSourceId);
+            if (newEntity) {
+              newValue = actionData.location.scene.replace(
+                extractEntityID(originalValue),
+                newEntity.id
+              );
+              if (newValue !== actionData.location.scene) {
+                actionData.location.scene = newValue;
                 changed = true;
                 actionsCount++;
               }
