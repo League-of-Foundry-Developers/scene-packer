@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.6.11
+
+- Updated the "Relink compedium Entries" macro to better handle v10.
+  - Now handles Actor.Item and associated "embedded" documents within entities.
 ## v2.6.10
 
 - Updated the "Relink compendium Entries" macro to better handle v10.

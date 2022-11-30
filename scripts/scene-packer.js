@@ -4994,6 +4994,8 @@ export default class ScenePacker {
 
     let entity;
     let pageName;
+    let embeddedType;
+    let embeddedName;
     if (CONSTANTS.IsV10orNewer() && type === 'JournalEntry' && oldRef.includes('.')) {
       let pageType;
       let pageId;
@@ -5010,6 +5012,24 @@ export default class ScenePacker {
           page = entity.pages?.find(p => p.name === entry.name);
           if (page?.name) {
             pageName = page.name;
+          }
+        }
+      }
+    } else if (CONSTANTS.IsV10orNewer() && oldRef.includes('.')) {
+      // Refers to an embedded document
+      let embeddedId;
+      let parentId;
+      [parentId, embeddedType, embeddedId] = oldRef.split('.');
+      entity = collection.get(parentId);
+      if (entity && embeddedId) {
+        let embedded = entity.getEmbeddedDocument(embeddedType, embeddedId);
+        if (embedded?.name) {
+          embeddedName = embedded.name;
+        } else {
+          // Try looking up by name
+          embedded = entity.getEmbeddedCollection(embeddedType)?.find(e => e.name === entry.name);
+          if (embedded?.name) {
+            embeddedName = embedded.name;
           }
         }
       }
@@ -5066,6 +5086,13 @@ export default class ScenePacker {
               let page = entity.pages?.find(p => p.name === pageName);
               if (page?.uuid) {
                 uuid = page.uuid;
+              }
+            }
+            if (CONSTANTS.IsV10orNewer() && embeddedType && embeddedName) {
+              // Original reference was to an embedded document, so we need to find the embedded document in the compendium entry
+              let embedded = entity.getEmbeddedCollection(embeddedType)?.find(e => e.name === embeddedName);
+              if (embedded?.uuid) {
+                uuid = embedded.uuid;
               }
             }
             if (sourceId && entity.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === sourceId) {
