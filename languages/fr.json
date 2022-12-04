@@ -1,1 +1,160 @@
-{}
+{
+  "SCENE-PACKER": {
+    "ok": "Ok",
+    "dontShow": "Ne plus jamais afficher",
+    "settings": {
+      "context-menu": {
+        "name": "Activer le menu contextuel de Scene Packer",
+        "hint": "Ajoute des éléments de menu contextuel pour faciliter l'assemblage d'une scène. Vous ne devriez avoir besoin d'activer cette option que si vous développez activement et assemblez un module avec des scènes."
+      }
+    },
+    "welcome": {
+      "title": "Démarrage rapide",
+      "intro": "<h2>Bienvenue dans <strong>{aventure}</strong>.</h2>",
+      "brand-new": "<p>Souhaitez-vous importer et décompresser le contenu de ce module ?</p>",
+      "update-available": "<p>Une mise à jour est disponible. Vous avez installé <strong>{existing}</strong> et la version <strong>{version}</strong> est disponible. Voulez-vous importer le contenu de ce module ?</p>",
+      "update-cancelled": "La mise à jour de {module} de {from} -> vers {to} a été annulée.",
+      "update-warning-title": "ATTENTION ! Opération destructive droit devant !",
+      "update-warning-list-to-delete": "Les entrées existantes qui seront supprimées et remplacées ou renommées :",
+      "yes-all": "Oui, importez <strong>la totalité des {count} entités.</strong>",
+      "yes-all-fallback": "Oui importez <strong>toutes les entités</strong>",
+      "let-me-choose": "Laissez-moi choisir les <strong>Scènes</strong> individuelles",
+      "close": "Fermer",
+      "migration-wait": "Veuillez patienter pendant la migration des compendiums de \"{module}\"...",
+      "migration-complete": "La migration des compendiums de \"{module}\" est terminée.",
+      "import-all": {
+        "title": "Veuillez patienter...",
+        "wait-title": "Veuillez patienter pendant l'importation de tout le contenu de {name}.",
+        "wait": "Veuillez patienter pendant le chargement de {type}...",
+        "creating-data": "Création {count} {type} à partir de {label}...",
+        "complete": "L'importation de l'importation de tout le contenu de {name}."
+      },
+      "update-warning-content": "<h2><i class='fas fa-exclamation-triangle'></i> Avertissement</h2> Il y a des entrées existantes dans ce monde qui appartiennent à <strong>{module}</strong> . Selon votre choix, vous allez <em>effacer</em> ces entrées existantes, puis importer les nouvelles entrées. </p><p>Il est <strong>fortement recommandé</strong> de sauvegarder votre monde avant d'effectuer cette opération. Si vous ne l'avez pas encore fait, sélectionnez \"Annuler\" et <em>faites une sauvegarde</em> maintenant en sortant de votre monde et en faisant une <a href='https://foundryvtt.com/article/configuration/#backup' target='_blank'>sauvegarde du dossier du monde</a> qui correspond au(x) monde(s) {world}.</p><p><strong> Si vous avez apporté des modifications</strong> (comme l'édition d'une entrée de journal ou l'ajout de jetons de personnage à une scène) à une entrée provenant de <em>{module}</em> et que vous souhaitez conserver ces modifications, vous devez prendre une copie de ce que vous avez modifié quelque part en dehors de ce monde (comme des captures d'écran ou un clic droit sur l'entrée et choisir \"Exporter les données\" dans le menu contextuel) avant de choisir <em>Remplacer</em> , car ces entrées et modifications <em>seront supprimées</em>.</p> {listeToDelete}<p> Comment voulez-vous procéder ?</p><ul><li><em>Remplacer</em> les entrées existantes.</li><li><em>Renommer</em> les anciennes entrées mais ne pas toucher aux entrées existantes.</li><li><em>Annuler</em> ce processus, par exemple pour <strong>faire une sauvegarde</strong>.</li></ul>"
+    },
+    "worth-packing": {
+      "title": "Scènes méritant d'être empaquetées",
+      "intro": "{count} de {total} Scènes suivantes méritent d'être empaquetées si vous ne l'avez pas déjà fait :",
+      "verify": "Vérifier les paquets du compendium",
+      "verify-select": "Sélectionnez le module contenant les packs de compendium que vous souhaitez vérifier :",
+      "verify-slow": "<strong>Veuillez noter :</strong> Ce processus peut prendre un certain temps en fonction du nombre de scènes que vous avez.",
+      "verify-wait": "Veuillez patienter...",
+      "verify-missing": "Le {count} suivant de {total} Scène(s) dans les compendiums appartenant à \"{module}\" peuvent présenter des problèmes :",
+      "verify-ok": "Toutes les scènes ont été trouvées dans les compendiums appartenant à \"{module}\".",
+      "verify-not-found": "manquant",
+      "verify-not-packed": "pas de données empaquetées",
+      "none": "Il n'y a pas de scènes qui contiennent des données qui valent la peine d'être empaquetées.",
+      "verify-intro": "<p>Vérifiez que les scènes présentes dans votre monde sont également présentes dans votre module de compendiums de modules et contiennent les données empaquetées.</p><p><strong>Veuillez noter :</strong> ce processus ne vérifiera pas que les données empaquetées sont les mêmes, il assure simplement que les données empaquetées sont présentes dans les compendiums.</p>"
+    },
+    "asset-report": {
+      "name": "Rapport sur les assets",
+      "selector": "Choisissez si vous voulez exécuter le rapport des assets par rapport au World local ou par rapport aux compendiums d'un module.",
+      "copy": "Copier le JSON dans le presse-papiers",
+      "copied-to-clipboard": "Rapport sur les assets copié dans le presse-papiers !",
+      "scenes": "Scènes",
+      "cards": "Cartes",
+      "actors": "Acteurs",
+      "journals": "Journaux",
+      "items": "Objets",
+      "playlists": "Listes de lecture",
+      "macros": "Macros",
+      "tables": "Tables aléatoires",
+      "show": "Afficher les dépendances",
+      "hide": "Cacher les dépendances",
+      "hide-ok": "Afficher uniquement les entrées qui ont des dépendances :",
+      "wait": "Veuillez patienter pendant le chargement de {type}...",
+      "module-select": {
+        "title": "Sélection des modules",
+        "none": "Aucun Module n'est disponible dans ce monde.",
+        "search": "Filtrer les Modules",
+        "web-external": "Traiter les URL web comme \"externes\" pendant la détermination des dépendances.",
+        "mini": "Sélectionnez le module dans lequel vous souhaitez exécuter le rapport sur les assets. Seuls les modules avec des Packs sont disponibles.",
+        "instructions": "Le rapport sur les assets répertorie tous les assets dans le {mode} qui ont des dépendances en dehors de votre module. Utilisez ce rapport pour vous aider à déterminer quelles images seront cassées lorsque vous distribuerez votre module à d'autres personnes. Utilisez ce formulaire pour sélectionner les modules que vous souhaitez traiter comme une source de données. Dans la plupart des cas, il s'agit juste de votre module et de ses dépendances."
+      },
+      "no-assets": "Aucun asset",
+      "no-assets-details": "Il n'y a pas d'asset dans ce monde.",
+      "processing-assets": "Traitement des assets",
+      "processing-assets-count": "Validation de {count} de {total} biens...",
+      "run": "Exécuter le rapport sur les assets",
+      "notes": "Le rapport sur les assets ci-dessous montre quelles entités de votre {mode} ont des assets qui dépendent d'emplacements externes. Ce rapport ne prend pas en charge les jetons génériques."
+    },
+    "notifications": {
+      "first-launch": "Premier lancement de cette scène ! Déballage de la scène...",
+      "done": "C'est fait !",
+      "pack-scene": {
+        "no-journal-pins": "Aucune épingle de journal n'a été détectée sur la scène.",
+        "writing-tokens": "Écriture de {number} jetons sur la scène : {nom}",
+        "no-tokens": "Aucun jeton détecté sur la scène.",
+        "already-shown-welcome": "Le journal de bienvenue \"{journal}\" a déjà été affiché pour cette version \"{version}\".",
+        "writing-journals": "Écriture de {number} journaux dans la scène : {name}",
+        "writing-tile-actions": "Écriture de {countActions} actions sur {countTiles} tuiles sur la scène : {name}"
+      },
+      "import-entities": {
+        "creating-data": "Importation de {count} nouveau(x) {type}.",
+        "missing-name": "A essayé de trouver un acteur pour un jeton sans nom.",
+        "could-not-import": "Erreur d'importation d'une entité",
+        "invalid-packs": {
+          "short": "ImportEntities a été appelé sans que des searchPacks n'aient été définis.",
+          "missing-pack": "Configuration du pack invalide. Impossible de trouver le compendium {packName}. Vérifiez la console (F12) pour plus de détails.",
+          "missing-pack-details": "ImportEntities a été appelé pour rechercher le pack \"{packName}\" qui n'a pas été trouvé. Vérifiez les fautes de frappe dans la configuration de votre module.",
+          "error": "Configuration du pack invalide. Impossible d'importer {type}. Vérifiez la console (F12) pour plus de détails.",
+          "details": "ImportEntities a été appelé sans que des searchPacks valides n'aient été définis. Vérifiez les fautes de frappe entre votre manifest.json et les fichiers d'initialisation des modules. Nous avons reçu les détails d'appel suivants :",
+          "reference": "ImportEntities a été appelé avec une référence qui n'est pas enregistrée dans Foundry. Vérifiez l'absence de fautes de frappe entre votre manifest.json et les fichiers d'initialisation du module. Si vous n'êtes *pas* le créateur de ce module, il est probable qu'un pack de compendiums d'un autre système de jeu soit référencé. Dans ce cas, vous pouvez ignorer cet avertissement. Nous avons reçu les détails de l'appel suivant :"
+        },
+        "invalid-collection": "Impossible de trouver une \"collection de jeux\" de type \"{type}\".",
+        "active-tiles-macro-missing": "La tuile \"{tile}\" | Monk's Active Tile Triggers | ne parvient pas à trouver une macro nommée \"{macro}\" dans votre monde. Cette tuile active ne sera pas liée et vous devrez lier la macro manuellement à nouveau.",
+        "active-tiles-unpacked": "Déballage de {tiles} tuiles et de {actions} actions sur la scène \"{scène}\".",
+        "cf-clean-up-title": "Nettoyer les entités {name} ?",
+        "active-tiles-entity-reference-missing": "La tuile \"{tile}\" | Monk's Active Tile Triggers | ne parvient pas à trouver une entité de remplacement pour \"{ref}\" dans votre monde. Cette tuile active restera non liée et vous devrez lier l'entité manuellement à nouveau.",
+        "cf-clean-up": "<p>Vous venez d'importer {count} entités avec le nom <code style=\"display:inline-block;\">{name}</code> qui appartiennent au module <a href=\"https://foundryvtt.com/packages/compendium-folders\" target=\"_blank\">Dossiers compendium</a> que vous n'avez pas activé.</p><p>Voulez-vous exécuter la macro <a class=\"entity-link\" draggable=\"true\" data-pack=\"scene-packer.macros\" data-id=\"D0GsPqV3zglJ9w7V\"><i class=\"fas fa-terminal\"></i> Nettoyer les entrées {name}</a>?</p>"
+      },
+      "find-journal-compendium": {
+        "no-match": "Impossible de trouver une entrée de journal nommée \"{journal}\" dans les compendiums.",
+        "invalid-index": "Erreur de chargement du contenu du journal depuis le compendium. Vérifiez le rapport des anomalies pour plus de détails.",
+        "missing-pack": "Configuration du pack invalide. Impossible de trouver le compendium {packName}. Vérifiez la console (F12) pour plus de détails.",
+        "missing-pack-details": "FindJournalInCompendiums a été appelé pour rechercher le pack \"{packname}\" qui n'est pas trouvé. Vérifiez les fautes de frappe dans la configuration de votre module.",
+        "no-packs": "Configuration du pack invalide. Les épingles du journal de la scène empaquetées ne fonctionnent pas. Vérifiez la console (F12) pour plus de détails.",
+        "no-packs-in-module": "Attention : aucun pack JournalEntry n'est défini dans votre module.json",
+        "no-packs-details": "FindJournalInCompendiums a été appelé mais il n'y a pas de \"journalPacks\" défini dans le script d'initialisation du module. Voir la JournalEntry \"Exemple de module javascript\" pour plus de détails sur la définition de la constante. Les valeurs possibles sont : {packOptions}"
+      },
+      "find-actor-compendium": {
+        "no-match": "Impossible de trouver une entrée d'acteur nommée \"{actor}\" dans les compendiums.",
+        "invalid-index": "Erreur lors du chargement du contenu de l'acteur depuis le compendium. Vérifiez les journaux d'anomalie pour plus de détails.",
+        "missing-pack": "Configuration du pack invalide. Impossible de trouver le compendium {packName}. Vérifiez la console (F12) pour plus de détails.",
+        "no-packs": "La configuration du pack est invalide. L'empaquetage des jetons d'acteur de scène ne fonctionnera pas. Vérifiez la console (F12) pour plus de détails.",
+        "no-packs-in-module": "Attention : il n'y a pas de packs d'acteurs définis dans votre module.json",
+        "missing-pack-details": "FindJournalInCompendiums a été appelé pour rechercher le pack \"{packname}\" qui n'est pas trouvé. Vérifiez les fautes de frappe dans la configuration de votre module.",
+        "no-packs-details": "FindActorInCompendiums a été appelé mais il n'y a pas de \"creaturePacks\" défini dans le script d'initialisation du module. Voir le JournalEntry \"Exemple de module javascript\" pour plus de détails sur la définition de la constante. Les valeurs possibles sont : {packOptions}"
+      },
+      "find-playlist-compendium": {
+        "no-match": "Impossible de trouver une entrée de liste de lecture nommée \"{playlist}\" dans les compendiums.",
+        "missing-pack": "Configuration du pack invalide. Impossible de trouver le compendium {packName}. Vérifiez la console (F12) pour plus de détails.",
+        "invalid-index": "Erreur de chargement du contenu de la liste de lecture depuis le compendium. Vérifiez les journaux d'anomalies pour plus de détails.",
+        "missing-pack-details": "FindJournalInCompendiums a été appelé pour rechercher le pack \"{packname}\" qui n'a pas été trouvé. Vérifiez les fautes de frappe dans la configuration de votre module."
+      },
+      "find-macro-compendium": {
+        "no-match": "Impossible de trouver une entrée de macro nommée \"{macro}\" dans les compendiums.",
+        "invalid-index": "Erreur de chargement du contenu de la macro depuis le compendium. Vérifiez les journaux d'anomalie pour plus de détails.",
+        "missing-pack-details": "FindMacroInCompendiums a été appelé pour rechercher le pack \"{packName}\" qui n'a pas été trouvé. Vérifiez les fautes de frappe dans la configuration de votre module.",
+        "missing-pack": "Configuration du pack invalide. Impossible de trouver le compendium {packName}. Vérifiez la console (F12) pour plus de détails."
+      },
+      "find-entity-compendium": {
+        "no-match": "Impossible de trouver une entrée {type} nommée \"{name}\" dans les compendiums.",
+        "invalid-index": "Erreur de chargement du contenu {type} à partir du compendium. Vérifiez les journaux d'anomalie pour plus de détails.",
+        "missing-pack-details": "findCompendiumEntity a été appelé pour rechercher le pack \"{packName}\" qui n'a pas été trouvé. Vérifiez les fautes de frappe dans la configuration de votre module.",
+        "missing-pack": "Configuration du pack invalide. Impossible de trouver le compendium {packName}. Vérifiez la console (F12) pour plus de détails."
+      },
+      "find-actor": {
+        "missing-name": "Impossible de trouver un jeton qui n'a pas de nom. Vérifiez les journaux de débogage pour plus de détails.",
+        "missing-name-details": "Essayer de trouver un jeton qui n'a pas de nom ne va pas bien se terminer. Veuillez vous assurer que le jeton et l'acteur ont un nom avant de les empaqueter."
+      },
+      "link-tokens": {
+        "missing": "Impossible de trouver {count} acteurs à lier, qui resteront non liés. Vérifiez les journaux de débogage pour plus de détails.",
+        "linking": "Relie {count} jetons liés aux acteurs.",
+        "missing-details": "Impossible de trouver {count} acteurs à lier sur {scene}. Les jetons d'acteur suivants n'ont pas été trouvés dans le dossier \"{adventureName}\"."
+      },
+      "spawn-notes": {
+        "missing": "Impossible de trouver {count} journaux à lier. Vérifiez les journaux d'anomalies pour plus de détails."
+      }
+    }
+  }
+}
