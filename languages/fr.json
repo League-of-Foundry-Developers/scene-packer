@@ -153,8 +153,83 @@
         "missing-details": "Impossible de trouver {count} acteurs à lier sur {scene}. Les jetons d'acteur suivants n'ont pas été trouvés dans le dossier \"{adventureName}\"."
       },
       "spawn-notes": {
-        "missing": "Impossible de trouver {count} journaux à lier. Vérifiez les journaux d'anomalies pour plus de détails."
+        "missing": "Impossible de trouver {count} journaux à lier. Vérifiez les journaux d'anomalies pour plus de détails.",
+        "missing-details": "Impossible de trouver {count} notes à lier dans {scene}. Les journaux suivants n'ont pas été trouvés.",
+        "spawning": "Lier {count} notes du journal."
+      },
+      "clear-data": {
+        "done": "Fin de la revue des données empaquetées."
+      },
+      "deprecated": "Attention, {method} est obsolète et sera supprimé dans l'avenir."
+    },
+    "errors": {
+      "moduleName": {
+        "ui": "Appel invalide à SetModuleName(). Voir la console pour plus de détails.",
+        "details": "Nom de module non valide transmis à \"SetModuleName()\". Il doit s'agir du nom du module tel que défini dans le module.json dans le champ \"name\"."
+      },
+      "adventureName": {
+        "ui": "Appel invalide à SetAdventureName(). Voir la console pour plus de détails.",
+        "details": "Nom d'aventure non valide transmis à \"SetAdventureName()\". Il doit s'agir du nom de l'aventure tel que défini dans le module.json dans le champ \"title\"."
+      },
+      "instance": {
+        "ui": "Appel invalide à ScenePacker. Voir la console pour plus de détails.",
+        "details": "Nom de module ou méthode non valide transmis à \"ScenePacker\". Le nom du module doit être tel que défini dans le module.json dans le champ \"name\". Assurez-vous que les noms sont corrects et que votre module a initialisé ScenePacker correctement - consultez les entrées du journal dans le compendium pour obtenir de l'aide."
+      },
+      "welcomeJournal": {
+        "ui": "Appel invalide à SetWelcomeJournal(). Voir la console pour plus de détails.",
+        "details": "Nom de journal non valide transmis à \"SetWelcomeJournal()\". Il doit s'agir du nom d'un journal dans le compendium du module.",
+        "missing": "SetWelcomeJournal() appelé sans valeur. Ceci désactive l'importation du journal de bienvenue. Aucun journal ne sera automatiquement ouvert."
+      },
+      "additionalJournals": {
+        "ui": "Appel invalide à SetAdditionalJournalsToImport(). Voir la console pour plus de détails.",
+        "details": "Vous devez passer un tableau de chaînes de caractères à \"SetAdditionalJournalsToImport()\". Il doit s'agir des noms des journaux. Reçu : {journal}",
+        "missing": "SetAdditionalJournalsToImport() appelé sans valeur. Cela désactive l'importation de journaux supplémentaires. Seuls les journaux liés à la scène par une épingle sur la carte seront importés."
+      },
+      "additionalMacros": {
+        "ui": "Appel invalide à SetAdditionalMacrosToImport(). Voir la console pour plus de détails.",
+        "details": "Vous devez passer un tableau de chaînes de caractères à \"SetAdditionalMacrosToImport()\". Il doit s'agir des noms des macros. Reçu : {macro}",
+        "missing": "SetAdditionalMacrosToImport() appelé sans valeur. Cela désactive l'importation de macros supplémentaires."
+      },
+      "creaturePacks": {
+        "ui": "Appel invalide à SetCreaturePacks(). Voir la console pour plus de détails.",
+        "missing": "SetCreatePacks() appelé sans valeur. Cela désactive l'importation des Acteurs.",
+        "details": "Vous devez passer un tableau de chaînes de caractères à \"SetCreaturePacks()\". Il doit s'agir des noms des packs d'acteurs. Reçu : {pack}"
+      },
+      "journalPacks": {
+        "ui": "Appel invalide à SetJournalPacks(). Voir la console pour plus de détails.",
+        "details": "Vous devez passer un tableau de chaînes de caractères à \"SetJournalPacks()\". Il doit s'agir des noms des packs de journaux. Reçu : {pack}",
+        "missing": "SetJournalPacks() appelé sans valeur. Cela désactive l'importation des journaux."
+      },
+      "macroPacks": {
+        "details": "Vous devez passer un tableau de chaînes de caractères à \"SetMacroPacks()\". Il doit s'agir des noms des packs de macros. Reçu : {pack}",
+        "ui": "Appel invalide à SetMacroPacks(). Voir la console pour plus de détails.",
+        "missing": "SetMacroPacks() appelé sans valeur. Cela désactive l'importation des macros."
+      },
+      "playlistPacks": {
+        "ui": "Appel invalide à SetPlaylistPacks(). Voir la console pour plus de détails.",
+        "details": "Vous devez passer un tableau de chaînes de caractères à \"SetPlaylistPacks()\". Il doit s'agir des noms des packs de Playlists. Reçu : {pack}",
+        "missing": "SetPlaylistPacks() appelé sans valeur. Cela désactive l'importation des Playlists."
+      },
+      "modulePacks": {
+        "ui": "Appel invalide à SetAdditionalModulePacks(). Voir la console pour plus de détails."
+      },
+      "version": {
+        "packed-low": "La scène \"{scene}\" (du module \"{sourceModule}\") a été empaquetée avec la version de Scene Packer \"{version}\" qui est plus ancienne que la version minimale compatible de \"{supportedVersion}\". Veuillez contacter l'auteur et lui demander de ré-empaqueter la scène avec une version actuelle."
       }
+    },
+    "scene-context": {
+      "pack": {
+        "title": "Empaqueter les données de la scène"
+      },
+      "unpack": {
+        "title": "Déballer les Données de la Scène"
+      },
+      "clear": {
+        "title": "Apurer les données de la Scène empaquetée"
+      }
+    },
+    "log": {
+      "invalidForce": "{moduleName} | Utilisation invalide du journal. \"log(force, ...args)\" était attendu comme un booléen mais n'a eu que {force}"
     }
   }
 }
