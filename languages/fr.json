@@ -211,7 +211,9 @@
         "missing": "SetPlaylistPacks() appelé sans valeur. Cela désactive l'importation des Playlists."
       },
       "modulePacks": {
-        "ui": "Appel invalide à SetAdditionalModulePacks(). Voir la console pour plus de détails."
+        "ui": "Appel invalide à SetAdditionalModulePacks(). Voir la console pour plus de détails.",
+        "details": "Vous devez passer un tableau de chaînes de caractères à \"SetAdditionalMacrosToImport()\". Il doit s'agir des noms des macros. Reçu : {macro}",
+        "missing": "SetAdditionalModulePacks() appelé sans valeur."
       },
       "version": {
         "packed-low": "La scène \"{scene}\" (du module \"{sourceModule}\") a été empaquetée avec la version de Scene Packer \"{version}\" qui est plus ancienne que la version minimale compatible de \"{supportedVersion}\". Veuillez contacter l'auteur et lui demander de ré-empaqueter la scène avec une version actuelle."
@@ -230,6 +232,21 @@
     },
     "log": {
       "invalidForce": "{moduleName} | Utilisation invalide du journal. \"log(force, ...args)\" était attendu comme un booléen mais n'a eu que {force}"
+    },
+    "world-conversion": {
+      "compendiums": {
+        "unlock": "Déverrouillage des compendiums : {liste}",
+        "lock": "Déverrouillage des compendiums : {liste}",
+        "lock-prompt": "Voulez-vous verrouiller les compendiums qui appartiennent au module \"{moduleName}\" ?",
+        "lock-prompt-button": "Vérouillé les compendiums",
+        "lock-prompt-title": "Vérouillé les compendiums ?",
+        "checking-and-updating": "Vérification et mise à jour des références des revues {count}, des liens mondiaux aux liens du compendium.",
+        "invalid-ref-type": "J'ai trouvé une référence de journal qui n'est pas traitée : {type}. Ignorer la référence...",
+        "invalid-no-name": "A trouvé une référence de journal mais n'a pas pu trouver son nom original. Vérifiez les journaux de débogage pour plus de détails.",
+        "invalid-no-matching-name": "Impossible de trouver la référence {type} dans les données du monde : {nom}",
+        "invalid-not-found-console": "Impossible de trouver la référence dans les données du compendium. Ignorer la mise à jour de la référence...",
+        "invalid-not-found": "A trouvé une référence de journal mais n'a pas pu trouver sa version du compendium par son nom. Vérifiez les journaux de débogage pour plus de détails."
+      }
     }
   }
 }
