@@ -212,7 +212,7 @@
       },
       "modulePacks": {
         "ui": "Appel invalide à SetAdditionalModulePacks(). Voir la console pour plus de détails.",
-        "details": "Vous devez passer un tableau de chaînes de caractères à \"SetAdditionalMacrosToImport()\". Il doit s'agir des noms des macros. Reçu : {macro}",
+        "details": "Vous devez passer un tableau de chaînes de caractères à \"SetAdditionalMacrosToImport()\". Il doit s'agir des noms des Modules. Reçu : {pack}",
         "missing": "SetAdditionalModulePacks() appelé sans valeur."
       },
       "version": {
@@ -236,17 +236,79 @@
     "world-conversion": {
       "compendiums": {
         "unlock": "Déverrouillage des compendiums : {liste}",
-        "lock": "Déverrouillage des compendiums : {liste}",
+        "lock": "Verrouillage des compendiums : {liste}",
         "lock-prompt": "Voulez-vous verrouiller les compendiums qui appartiennent au module \"{moduleName}\" ?",
-        "lock-prompt-button": "Vérouillé les compendiums",
+        "lock-prompt-button": "Compendiums verrouillés",
         "lock-prompt-title": "Vérouillé les compendiums ?",
-        "checking-and-updating": "Vérification et mise à jour des références des revues {count}, des liens mondiaux aux liens du compendium.",
-        "invalid-ref-type": "J'ai trouvé une référence de journal qui n'est pas traitée : {type}. Ignorer la référence...",
-        "invalid-no-name": "A trouvé une référence de journal mais n'a pas pu trouver son nom original. Vérifiez les journaux de débogage pour plus de détails.",
-        "invalid-no-matching-name": "Impossible de trouver la référence {type} dans les données du monde : {nom}",
-        "invalid-not-found-console": "Impossible de trouver la référence dans les données du compendium. Ignorer la mise à jour de la référence...",
-        "invalid-not-found": "A trouvé une référence de journal mais n'a pas pu trouver sa version du compendium par son nom. Vérifiez les journaux de débogage pour plus de détails."
+        "checking-and-updating": "Vérification et mise à jour de {count} références de journaux des liens du monde aux liens du compendium.",
+        "invalid-ref-type": "Trouvé une référence de journal qui n'est pas traitée : {type}. La référence est ignorée...",
+        "invalid-no-name": "A trouvé une référence de journal mais n'a pas pu trouver son nom original. Vérifiez les journaux d'anomalies pour plus de détails.",
+        "invalid-no-matching-name": "Impossible de trouver la référence {type} dans les données du monde : {name}",
+        "invalid-not-found-console": "Impossible de trouver la référence dans les données du compendium. La mise à jour de la référence est ignorée...",
+        "invalid-not-found": "Trouvé une référence de journal mais n'a pas pu trouver sa version dans le compendium par son nom. Vérifiez les journaux d'anomalies pour plus de détails.",
+        "updating-references": "Modification de {count} {type} références dans : \"{name}\"",
+        "invalid-too-many": "Trouvé une référence dans un journal mais a trouvé plus d'une version dans le compendium par le nom. Voir les journaux d'anomalie pour plus de détails.",
+        "invalid-too-many-console": "Trouvé plus d'une référence dans les données du monde. La mise à jour de la référence est ignorée...",
+        "updating-reference-console": "Modification de références du {pack}[{journalEntryId}] de {type} {oldRef} -> {newRef}",
+        "updating-reference": "Mise à jour de {count} références dans \"{name}\". Voir la console pour plus de détails.",
+        "completed-checks": "{type} \"{name}\" {entryId} terminés.",
+        "no-references": "Il n'y avait aucune référence à mettre à jour dans {type} \"{name}\" {entryId}.",
+        "checking-contents": "Vérification du contenu de {type} \"{name}\" {entryId}.",
+        "completed": "Terminé !",
+        "quick-encounters": {
+          "could-not-parse": "Impossible d'analyser les données de rencontre rapide pour le journal \"{journal}\". Erreur : {error}",
+          "updating-references": "Change les références de {count} références des rencontres rapides dans : \"{journal}\"",
+          "updating-references-console": "Change les références {type} {nom} {oldRef} -> {newRef}",
+          "missing-actor-reference": "Un acteur \"{actor}\" a été référencé dans un \"{journal}\" de rencontre rapide mais n'a pas pu être trouvé dans votre monde (soit il est absent, soit il y a plusieurs correspondances par le nom). Cette rencontre rapide ne fonctionnera pas correctement dans un autre monde. Veuillez reconstruire cette rencontre rapide, la réexporter (ainsi que le ou les acteurs) puis relancer la macro \"Relier les entrées du journal\".",
+          "missing-journal-reference": "Le journal \"{journal}\" n'a pas pu être trouvé dans votre monde (soit il est manquant, soit il y a plusieurs correspondances par le nom). Cette rencontre rapide ne fonctionnera pas correctement dans un autre monde. Veuillez reconstruire cette rencontre rapide, la réexporter (ainsi que le ou les acteurs) et relancer la macro \"Relier les entrées du journal\"."
+        },
+        "monks-enhanced-journal-encounter": {
+          "updating-references-console": "Changement de la référence de la rencontre du Monk's enhanced Journal encounter dans \"{journal}\" {oldRef} -> {newRef}"
+        },
+        "monks-enhanced-journal-actor": {
+          "updating-references-console": "Changement de la référence dans Monk's Enhanced Journal de l'acteur dans \"{journal}\" {oldRef} -> {newRef}"
+        },
+        "monks-enhanced-journal-relationships": {
+          "updating-references-console": "Modification de la référence dans Monk's Enhanced Journal de la relation dans \"{journal}\" en ajoutant \"{newRelation}\""
+        }
       }
+    },
+    "importer": {
+      "be-patient": "Veuillez patienter pendant que le pack est importé. Cela peut prendre un certain temps. Si vous pensez que cela prend trop de temps, vérifiez les erreurs dans la console (F12) en notant que vous devrez peut-être développer les groupes de journaux.",
+      "loading": "Chargement des données...",
+      "name": "Scene Packer : Importateur",
+      "unsupported": "Scene Packer : l'importateur n'est pris en charge que dans les versions >= 0.8.0",
+      "invalid-url": "Une valeur d'URL invalide a été transmise à l'importateur de Scene Packer. Reçu : \"{url}\". {err}",
+      "invalid-url-empty": "Une valeur URL vide a été transmise à l'importateur de Scene Packer.",
+      "processing": "Traitement en cours...",
+      "process-fetch-data": "Récupération des données...",
+      "process-creating-data": "Création de {count} {type} et d'assets...",
+      "invalid-pack-data": "Données de pack invalides. Veuillez réessayer et si l'erreur persiste, demandez de l'aide sur le serveur Discord de Scene Packer ou de Moulinette.",
+      "creating-documents": "Création de {count} {type}..."
+    },
+    "instance-prompt": {
+      "title": "Choisir l'instance",
+      "intro": "Choisissez le module que vous souhaitez utiliser :",
+      "none-found": "Il n'y a pas de module installé qui soit enregistré auprès de Scene Packer. Consultez les entrées du journal dans le compendium pour savoir comment enregistrer votre module avec Scene Packer.",
+      "cancel": "Annuler",
+      "select": "Choisir"
+    },
+    "relink-prompt": {
+      "title": "Refaire les liens des entrées de journal",
+      "intro": "Choisissez le module avec lequel vous utilisez Scene Packer :",
+      "make-changes": "Sauvegarder les changements ?",
+      "relink": "Refaire les liens",
+      "cancel": "Annuler",
+      "make-changes-info": "Si vous ne cochez pas cette case, l'application fonctionnera en \"mode sec\" où les changements ne seront affichés que sur la console.",
+      "none": "Il n'y a pas de module installé qui soit enregistré auprès de Scene Packer. Consultez les entrées du journal dans le compendium pour savoir comment enregistrer votre module avec Scene Packer."
+    },
+    "performance-report": {
+      "title": "Rapport de performance",
+      "copy": "Copier dans le presse-papiers",
+      "close": "Fermer"
+    },
+    "deprecated": {
+      "method": "La méthode \"{method}\" a été dépréciée et sera supprimée dans une prochaine version. Veuillez consulter les entrées du Journal dans le compendium Scene Packer pour savoir comment appeler correctement Scene Packer."
     }
   }
 }
