@@ -284,7 +284,23 @@
       "process-fetch-data": "Récupération des données...",
       "process-creating-data": "Création de {count} {type} et d'assets...",
       "invalid-pack-data": "Données de pack invalides. Veuillez réessayer et si l'erreur persiste, demandez de l'aide sur le serveur Discord de Scene Packer ou de Moulinette.",
-      "creating-documents": "Création de {count} {type}..."
+      "creating-documents": "Création de {count} {type}...",
+      "ensure-assets": "S'assure que les assets existent pour {count} entités.",
+      "converting-references": "Vérifie {count} {type} pour les références de style des compendiums.",
+      "converting-reference": "Convertit la référence {type} dans \"{name}\" {oldRef} -> {newRef} dans l'emplacement : {path}",
+      "no-existing-value": "Impossible de trouver une valeur existante dans le chemin \"{path}\". Passe la mise à jour de la référence...",
+      "complete": "Terminé !",
+      "import-all": "Importer toutes les {count} entités dans ce pack",
+      "import-one": "Importe la sélection",
+      "selected-entity": "Sélectionné {type} :",
+      "unrelated-title": "Entités sans lien",
+      "author": "Auteur :",
+      "discord": "Discord :",
+      "email": "Courriel :",
+      "version": "Version :",
+      "more-info": "Plus d'infos :",
+      "missing-asset": "Asset manquant dans les données du paquet : {asset}",
+      "unrelated-intro": "Les entités suivantes ne sont pas directement liées à une Scène de ce pack et ont été automatiquement importées pour éviter de briser des liens."
     },
     "instance-prompt": {
       "title": "Choisir l'instance",
@@ -309,6 +325,60 @@
     },
     "deprecated": {
       "method": "La méthode \"{method}\" a été dépréciée et sera supprimée dans une prochaine version. Veuillez consulter les entrées du Journal dans le compendium Scene Packer pour savoir comment appeler correctement Scene Packer."
+    },
+    "exporter": {
+      "name": "Exporter vers Moulinette",
+      "label": "Ouvrir l'assistant d'exportation",
+      "hint": "L'assistant d'exportation vous permettra d'empaqueter une aventure pour la distribuer par Moulinette Cloud.",
+      "timeout": "Délai d'attente pour les assets",
+      "unsupported": "L'exportation vers Moulinette n'est supportée que dans les versions >= 0.8.0",
+      "selected-count": "{count} entités sélectionnées pour l'export.",
+      "toggle-checkboxes": "Activer toutes les cases à cocher",
+      "tabs": {
+        "actors": "Acteurs",
+        "items": "Objets",
+        "journals": "Journaux",
+        "macros": "Macros",
+        "options": "Options",
+        "playlists": "Listes de lecture",
+        "cards": "Cartes",
+        "scenes": "Scènes",
+        "tables": "Tables aléatoires"
+      },
+      "search": {
+        "macros": "Recherche dans les Macros",
+        "journals": "Recherche dans les Journaux",
+        "actors": "Recherche dans les Acteurs",
+        "items": "Recherche dans les Objets",
+        "cards": "Recherche dans les Cartes",
+        "scenes": "Recherche dans les Scènes",
+        "tables": "Recherche dans les Tables aléatoires",
+        "playlists": "Recherche dans les Listes de lecture"
+      },
+      "options": {
+        "package-name": "Nom de votre pack d'aventure",
+        "package-name-help": "Doit être unique sous votre nom d'auteur.",
+        "version": "Numéro de version de l'aventure",
+        "version-help": "Augmentez la version si vous mettez à jour une aventure.",
+        "author": "Nom de l'auteur",
+        "author-help": "Votre nom public ou pseudonyme. Affiché au public à côté de votre nom d'aventure.",
+        "package-description": "Description du pack d'aventure",
+        "package-cover": "Image de couverture du pack aventure",
+        "package-cover-help": "L'image à montrer à l'utilisateur final lorsqu'il consulte les détails de l'aventure.",
+        "discord-id": "Votre identifiant Discord",
+        "discord-id-help": "Au cas où vous auriez besoin d'être contacté pour des informations supplémentaires. Ne sera pas montré au public.",
+        "email": "Votre adresse électronique",
+        "external-link": "URL pour des informations supplémentaires",
+        "external-link-help": "Une URL absolue où un utilisateur final peut trouver plus d'informations sur le pack aventure.",
+        "welcome-journal": "Journal à afficher après l'importation",
+        "welcome-journal-drop-text": "Glissez et déposez votre journal ici",
+        "allow-complete-import": "Autoriser l'importation de toutes les entités ?",
+        "intro": "Vous êtes sur le point de construire un pack d'aventure à partager via Moulinette. Vous devez être un <a href=\"https://www.patreon.com/moulinette\" target=\"_blank\">Patreon de Moulinette</a> pour pouvoir télécharger et partager votre aventure.",
+        "package-description-help": "Décrivez le type d'aventure dont il s'agit, les niveaux auxquels elle est destinée, ce qui est inclus, etc.",
+        "email-help": "Au cas où vous auriez besoin d'être contacté pour des informations supplémentaires. Ne sera pas montré au public.",
+        "welcome-journal-help": "Afficher automatiquement l'entrée de journal sélectionnée lorsque l'utilisateur final importe le pack aventure. Laissez l'option vide si vous ne souhaitez pas afficher automatiquement une entrée de journal."
+      },
+      "timeout-help": "Le temps d'attente en secondes pour le téléchargement d'un asset. Définissez-le à 0 pour désactiver les délais d'attente."
     }
   }
 }
