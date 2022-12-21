@@ -447,7 +447,7 @@
         "allow-complete-import-help": "Choisissez \"non\" si vous ne voulez pas que l'utilisateur final puisse importer l'ensemble du paquet d'aventures en une seule fois. Vous devriez choisir \"non\" si vous avez beaucoup d'entités dans votre pack pour éviter les décalages.",
         "adventure-players-min-help": "Le nombre minimum de joueurs pour lequel cette aventure est conçue.",
         "adventure-player-level-help": "Les niveaux minimum, maximum et recommandés des joueurs pour lesquels cette aventure est conçue. Vous pouvez indiquer des tranches de niveaux.",
-        "adventure-token-style-token": "Jeton pog traditionnel",
+        "adventure-token-style-token": "Jeton Pog traditionnel",
         "adventure-tags-help": "Quelles autres caractéristiques décrivent cette aventure ? Ceci sera utilisé pour catégoriser votre pack sur Moulinette Cloud.",
         "adventure-system-help": "Le système pour lequel cette aventure est conçue. Laissez un blanc pour ne pas spécifier de système requis. Notez que l'inclusion d'acteurs et d'éléments rend généralement votre aventure spécifique à un système.",
         "next": "Lorsque vous cliquez sur Suivant, Scene Packer va lier toutes vos entités entre elles, les vérifier puis créer un fichier <code>data.zip</code> contenant toute votre aventure, y compris les assets. Ce fichier doit ensuite être téléchargé sur le site de Moulinette dans la section des assets standards. Une fois qu'il aura été traité et que vous l'aurez publié, les utilisateurs finaux pourront l'importer dans leur partie à partir de la section Scènes de Moulinette.",
