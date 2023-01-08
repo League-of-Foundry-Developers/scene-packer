@@ -1,0 +1,531 @@
+{
+  "SCENE-PACKER": {
+    "ok": "Ok",
+    "dontShow": "Ne plus jamais afficher",
+    "settings": {
+      "context-menu": {
+        "name": "Activer le menu contextuel de Scene Packer",
+        "hint": "Ajoute des éléments de menu contextuel pour faciliter l'assemblage d'une scène. Vous ne devriez avoir besoin d'activer cette option que si vous développez activement et assemblez un module avec des scènes."
+      }
+    },
+    "welcome": {
+      "title": "Démarrage rapide",
+      "intro": "<h2>Bienvenue dans <strong>{aventure}</strong>.</h2>",
+      "brand-new": "<p>Souhaitez-vous importer et décompresser le contenu de ce module ?</p>",
+      "update-available": "<p>Une mise à jour est disponible. Vous avez installé <strong>{existing}</strong> et la version <strong>{version}</strong> est disponible. Voulez-vous importer le contenu de ce module ?</p>",
+      "update-cancelled": "La mise à jour de {module} de {from} -> vers {to} a été annulée.",
+      "update-warning-title": "ATTENTION ! Opération destructive droit devant !",
+      "update-warning-list-to-delete": "Les entrées existantes qui seront supprimées et remplacées ou renommées :",
+      "yes-all": "Oui, importez <strong>la totalité des {count} entités.</strong>",
+      "yes-all-fallback": "Oui importez <strong>toutes les entités</strong>",
+      "let-me-choose": "Laissez-moi choisir les <strong>Scènes</strong> individuelles",
+      "close": "Fermer",
+      "migration-wait": "Veuillez patienter pendant la migration des compendiums de \"{module}\"...",
+      "migration-complete": "La migration des compendiums de \"{module}\" est terminée.",
+      "import-all": {
+        "title": "Veuillez patienter...",
+        "wait-title": "Veuillez patienter pendant l'importation de tout le contenu de {name}.",
+        "wait": "Veuillez patienter pendant le chargement de {type}...",
+        "creating-data": "Création {count} {type} à partir de {label}...",
+        "complete": "L'importation de l'importation de tout le contenu de {name}."
+      },
+      "update-warning-content": "<h2><i class='fas fa-exclamation-triangle'></i> Avertissement</h2><p>Il y a des entrées existantes dans ce monde qui appartiennent à <strong>{module}</strong> . Selon votre choix, vous allez <em>effacer</em> ces entrées existantes, puis importer les nouvelles entrées. </p><p>Il est <strong>fortement recommandé</strong> de sauvegarder votre monde avant d'effectuer cette opération. Si vous ne l'avez pas encore fait, sélectionnez \"Annuler\" et <em>faites une sauvegarde</em> maintenant en sortant de votre monde et en faisant une <a href='https://foundryvtt.com/article/configuration/#backup' target='_blank'>sauvegarde du dossier du monde</a> qui correspond au(x) monde(s) {world}.</p><p><strong> Si vous avez apporté des modifications</strong> (comme l'édition d'une entrée de journal ou l'ajout de jetons de personnage à une scène) à une entrée provenant de <em>{module}</em> et que vous souhaitez conserver ces modifications, vous devez prendre une copie de ce que vous avez modifié quelque part en dehors de ce monde (comme des captures d'écran ou un clic droit sur l'entrée et choisir \"Exporter les données\" dans le menu contextuel) avant de choisir <em>Remplacer</em> , car ces entrées et modifications <em>seront supprimées</em>.</p> {listeToDelete}<p> Comment voulez-vous procéder ?</p><ul><li><em>Remplacer</em> les entrées existantes.</li><li><em>Renommer</em> les anciennes entrées mais ne pas toucher aux entrées existantes.</li><li><em>Annuler</em> ce processus, par exemple pour <strong>faire une sauvegarde</strong>.</li></ul>"
+    },
+    "worth-packing": {
+      "title": "Scènes méritant d'être empaquetées",
+      "intro": "{count} de {total} Scènes suivantes méritent d'être empaquetées si vous ne l'avez pas déjà fait :",
+      "verify": "Vérifier les paquets du compendium",
+      "verify-select": "Sélectionnez le module contenant les packs de compendium que vous souhaitez vérifier :",
+      "verify-slow": "<strong>Veuillez noter :</strong> Ce processus peut prendre un certain temps en fonction du nombre de scènes que vous avez.",
+      "verify-wait": "Veuillez patienter...",
+      "verify-missing": "Le {count} suivant de {total} Scène(s) dans les compendiums appartenant à \"{module}\" peuvent présenter des problèmes :",
+      "verify-ok": "Toutes les scènes ont été trouvées dans les compendiums appartenant à \"{module}\".",
+      "verify-not-found": "manquant",
+      "verify-not-packed": "pas de données empaquetées",
+      "none": "Il n'y a pas de scènes qui contiennent des données qui valent la peine d'être empaquetées.",
+      "verify-intro": "<p>Vérifiez que les scènes présentes dans votre monde sont également présentes dans votre module de compendiums de modules et contiennent les données empaquetées.</p><p><strong>Veuillez noter :</strong> ce processus ne vérifiera pas que les données empaquetées sont les mêmes, il assure simplement que les données empaquetées sont présentes dans les compendiums.</p>"
+    },
+    "asset-report": {
+      "name": "Rapport sur les assets",
+      "selector": "Choisissez si vous voulez exécuter le rapport des assets par rapport au World local ou par rapport aux compendiums d'un module.",
+      "copy": "Copier le JSON dans le presse-papiers",
+      "copied-to-clipboard": "Rapport sur les assets copié dans le presse-papiers !",
+      "scenes": "Scènes",
+      "cards": "Cartes",
+      "actors": "Acteurs",
+      "journals": "Journaux",
+      "items": "Objets",
+      "playlists": "Listes de lecture",
+      "macros": "Macros",
+      "tables": "Tables aléatoires",
+      "show": "Afficher les dépendances",
+      "hide": "Cacher les dépendances",
+      "hide-ok": "Afficher uniquement les entrées qui ont des dépendances :",
+      "wait": "Veuillez patienter pendant le chargement de {type}...",
+      "module-select": {
+        "title": "Sélection des modules",
+        "none": "Aucun Module n'est disponible dans ce monde.",
+        "search": "Filtrer les Modules",
+        "web-external": "Traiter les URL web comme \"externes\" pendant la détermination des dépendances.",
+        "mini": "Sélectionnez le module dans lequel vous souhaitez exécuter le rapport sur les assets. Seuls les modules avec des Packs sont disponibles.",
+        "instructions": "Le rapport sur les assets répertorie tous les assets dans le {mode} qui ont des dépendances en dehors de votre module. Utilisez ce rapport pour vous aider à déterminer quelles images seront cassées lorsque vous distribuerez votre module à d'autres personnes. Utilisez ce formulaire pour sélectionner les modules que vous souhaitez traiter comme une source de données. Dans la plupart des cas, il s'agit juste de votre module et de ses dépendances."
+      },
+      "no-assets": "Aucun asset",
+      "no-assets-details": "Il n'y a pas d'asset dans ce monde.",
+      "processing-assets": "Traitement des assets",
+      "processing-assets-count": "Validation de {count} de {total} biens...",
+      "run": "Exécuter le rapport sur les assets",
+      "notes": "Le rapport sur les assets ci-dessous montre quelles entités de votre {mode} ont des assets qui dépendent d'emplacements externes. Ce rapport ne prend pas en charge les jetons génériques."
+    },
+    "notifications": {
+      "first-launch": "Premier lancement de cette scène ! Déballage de la scène...",
+      "done": "C'est fait !",
+      "pack-scene": {
+        "no-journal-pins": "Aucune épingle de journal n'a été détectée sur la scène.",
+        "writing-tokens": "Écriture de {number} jetons sur la scène : {nom}",
+        "no-tokens": "Aucun jeton détecté sur la scène.",
+        "already-shown-welcome": "Le journal de bienvenue \"{journal}\" a déjà été affiché pour cette version \"{version}\".",
+        "writing-journals": "Écriture de {number} journaux dans la scène : {name}",
+        "writing-tile-actions": "Écriture de {countActions} actions sur {countTiles} tuiles sur la scène : {name}"
+      },
+      "import-entities": {
+        "creating-data": "Importation de {count} nouveau(x) {type}.",
+        "missing-name": "A essayé de trouver un acteur pour un jeton sans nom.",
+        "could-not-import": "Erreur d'importation d'une entité",
+        "invalid-packs": {
+          "short": "ImportEntities a été appelé sans que des searchPacks n'aient été définis.",
+          "missing-pack": "Configuration du pack invalide. Impossible de trouver le compendium {packName}. Vérifiez la console (F12) pour plus de détails.",
+          "missing-pack-details": "ImportEntities a été appelé pour rechercher le pack \"{packName}\" qui n'a pas été trouvé. Vérifiez les fautes de frappe dans la configuration de votre module.",
+          "error": "Configuration du pack invalide. Impossible d'importer {type}. Vérifiez la console (F12) pour plus de détails.",
+          "details": "ImportEntities a été appelé sans que des searchPacks valides n'aient été définis. Vérifiez les fautes de frappe entre votre manifest.json et les fichiers d'initialisation des modules. Nous avons reçu les détails d'appel suivants :",
+          "reference": "ImportEntities a été appelé avec une référence qui n'est pas enregistrée dans Foundry. Vérifiez l'absence de fautes de frappe entre votre manifest.json et les fichiers d'initialisation du module. Si vous n'êtes *pas* le créateur de ce module, il est probable qu'un pack de compendiums d'un autre système de jeu soit référencé. Dans ce cas, vous pouvez ignorer cet avertissement. Nous avons reçu les détails de l'appel suivant :"
+        },
+        "invalid-collection": "Impossible de trouver une \"collection de jeux\" de type \"{type}\".",
+        "active-tiles-macro-missing": "La tuile \"{tile}\" | Monk's Active Tile Triggers | ne parvient pas à trouver une macro nommée \"{macro}\" dans votre monde. Cette tuile active ne sera pas liée et vous devrez lier la macro manuellement à nouveau.",
+        "active-tiles-unpacked": "Déballage de {tiles} tuiles et de {actions} actions sur la scène \"{scène}\".",
+        "cf-clean-up-title": "Nettoyer les entités {name} ?",
+        "active-tiles-entity-reference-missing": "La tuile \"{tile}\" | Monk's Active Tile Triggers | ne parvient pas à trouver une entité de remplacement pour \"{ref}\" dans votre monde. Cette tuile active restera non liée et vous devrez lier l'entité manuellement à nouveau.",
+        "cf-clean-up": "<p>Vous venez d'importer {count} entités avec le nom <code style=\"display:inline-block;\">{name}</code> qui appartiennent au module <a href=\"https://foundryvtt.com/packages/compendium-folders\" target=\"_blank\">Dossiers compendium</a> que vous n'avez pas activé.</p><p>Voulez-vous exécuter la macro <a class=\"entity-link\" draggable=\"true\" data-pack=\"scene-packer.macros\" data-id=\"D0GsPqV3zglJ9w7V\"><i class=\"fas fa-terminal\"></i> Nettoyer les entrées {name}</a>?</p>"
+      },
+      "find-journal-compendium": {
+        "no-match": "Impossible de trouver une entrée de journal nommée \"{journal}\" dans les compendiums.",
+        "invalid-index": "Erreur de chargement du contenu du journal depuis le compendium. Vérifiez le rapport des anomalies pour plus de détails.",
+        "missing-pack": "Configuration du pack invalide. Impossible de trouver le compendium {packName}. Vérifiez la console (F12) pour plus de détails.",
+        "missing-pack-details": "FindJournalInCompendiums a été appelé pour rechercher le pack \"{packname}\" qui n'est pas trouvé. Vérifiez les fautes de frappe dans la configuration de votre module.",
+        "no-packs": "Configuration du pack invalide. Les épingles du journal de la scène empaquetées ne fonctionnent pas. Vérifiez la console (F12) pour plus de détails.",
+        "no-packs-in-module": "Attention : aucun pack JournalEntry n'est défini dans votre module.json",
+        "no-packs-details": "FindJournalInCompendiums a été appelé mais il n'y a pas de \"journalPacks\" défini dans le script d'initialisation du module. Voir la JournalEntry \"Exemple de module javascript\" pour plus de détails sur la définition de la constante. Les valeurs possibles sont : {packOptions}"
+      },
+      "find-actor-compendium": {
+        "no-match": "Impossible de trouver une entrée d'acteur nommée \"{actor}\" dans les compendiums.",
+        "invalid-index": "Erreur lors du chargement du contenu de l'acteur depuis le compendium. Vérifiez les journaux d'anomalie pour plus de détails.",
+        "missing-pack": "Configuration du pack invalide. Impossible de trouver le compendium {packName}. Vérifiez la console (F12) pour plus de détails.",
+        "no-packs": "La configuration du pack est invalide. L'empaquetage des jetons d'acteur de scène ne fonctionnera pas. Vérifiez la console (F12) pour plus de détails.",
+        "no-packs-in-module": "Attention : il n'y a pas de packs d'acteurs définis dans votre module.json",
+        "missing-pack-details": "FindJournalInCompendiums a été appelé pour rechercher le pack \"{packname}\" qui n'est pas trouvé. Vérifiez les fautes de frappe dans la configuration de votre module.",
+        "no-packs-details": "FindActorInCompendiums a été appelé mais il n'y a pas de \"creaturePacks\" défini dans le script d'initialisation du module. Voir le JournalEntry \"Exemple de module javascript\" pour plus de détails sur la définition de la constante. Les valeurs possibles sont : {packOptions}"
+      },
+      "find-playlist-compendium": {
+        "no-match": "Impossible de trouver une entrée de liste de lecture nommée \"{playlist}\" dans les compendiums.",
+        "missing-pack": "Configuration du pack invalide. Impossible de trouver le compendium {packName}. Vérifiez la console (F12) pour plus de détails.",
+        "invalid-index": "Erreur de chargement du contenu de la liste de lecture depuis le compendium. Vérifiez les journaux d'anomalies pour plus de détails.",
+        "missing-pack-details": "FindJournalInCompendiums a été appelé pour rechercher le pack \"{packname}\" qui n'a pas été trouvé. Vérifiez les fautes de frappe dans la configuration de votre module."
+      },
+      "find-macro-compendium": {
+        "no-match": "Impossible de trouver une entrée de macro nommée \"{macro}\" dans les compendiums.",
+        "invalid-index": "Erreur de chargement du contenu de la macro depuis le compendium. Vérifiez les journaux d'anomalie pour plus de détails.",
+        "missing-pack-details": "FindMacroInCompendiums a été appelé pour rechercher le pack \"{packName}\" qui n'a pas été trouvé. Vérifiez les fautes de frappe dans la configuration de votre module.",
+        "missing-pack": "Configuration du pack invalide. Impossible de trouver le compendium {packName}. Vérifiez la console (F12) pour plus de détails."
+      },
+      "find-entity-compendium": {
+        "no-match": "Impossible de trouver une entrée {type} nommée \"{name}\" dans les compendiums.",
+        "invalid-index": "Erreur de chargement du contenu {type} à partir du compendium. Vérifiez les journaux d'anomalie pour plus de détails.",
+        "missing-pack-details": "findCompendiumEntity a été appelé pour rechercher le pack \"{packName}\" qui n'a pas été trouvé. Vérifiez les fautes de frappe dans la configuration de votre module.",
+        "missing-pack": "Configuration du pack invalide. Impossible de trouver le compendium {packName}. Vérifiez la console (F12) pour plus de détails."
+      },
+      "find-actor": {
+        "missing-name": "Impossible de trouver un jeton qui n'a pas de nom. Vérifiez les journaux de débogage pour plus de détails.",
+        "missing-name-details": "Essayer de trouver un jeton qui n'a pas de nom ne va pas bien se terminer. Veuillez vous assurer que le jeton et l'acteur ont un nom avant de les empaqueter."
+      },
+      "link-tokens": {
+        "missing": "Impossible de trouver {count} acteurs à lier, qui resteront non liés. Vérifiez les journaux de débogage pour plus de détails.",
+        "linking": "Relie {count} jetons liés aux acteurs.",
+        "missing-details": "Impossible de trouver {count} acteurs à lier sur {scene}. Les jetons d'acteur suivants n'ont pas été trouvés dans le dossier \"{adventureName}\"."
+      },
+      "spawn-notes": {
+        "missing": "Impossible de trouver {count} journaux à lier. Vérifiez les journaux d'anomalies pour plus de détails.",
+        "missing-details": "Impossible de trouver {count} notes à lier dans {scene}. Les journaux suivants n'ont pas été trouvés.",
+        "spawning": "Lier {count} notes du journal."
+      },
+      "clear-data": {
+        "done": "Fin de la revue des données empaquetées."
+      },
+      "deprecated": "Attention, {method} est obsolète et sera supprimé dans l'avenir."
+    },
+    "errors": {
+      "moduleName": {
+        "ui": "Appel invalide à SetModuleName(). Voir la console pour plus de détails.",
+        "details": "Nom de module non valide transmis à \"SetModuleName()\". Il doit s'agir du nom du module tel que défini dans le module.json dans le champ \"name\"."
+      },
+      "adventureName": {
+        "ui": "Appel invalide à SetAdventureName(). Voir la console pour plus de détails.",
+        "details": "Nom d'aventure non valide transmis à \"SetAdventureName()\". Il doit s'agir du nom de l'aventure tel que défini dans le module.json dans le champ \"title\"."
+      },
+      "instance": {
+        "ui": "Appel invalide à ScenePacker. Voir la console pour plus de détails.",
+        "details": "Nom de module ou méthode non valide transmis à \"ScenePacker\". Le nom du module doit être tel que défini dans le module.json dans le champ \"name\". Assurez-vous que les noms sont corrects et que votre module a initialisé ScenePacker correctement - consultez les entrées du journal dans le compendium pour obtenir de l'aide."
+      },
+      "welcomeJournal": {
+        "ui": "Appel invalide à SetWelcomeJournal(). Voir la console pour plus de détails.",
+        "details": "Nom de journal non valide transmis à \"SetWelcomeJournal()\". Il doit s'agir du nom d'un journal dans le compendium du module.",
+        "missing": "SetWelcomeJournal() appelé sans valeur. Ceci désactive l'importation du journal de bienvenue. Aucun journal ne sera automatiquement ouvert."
+      },
+      "additionalJournals": {
+        "ui": "Appel invalide à SetAdditionalJournalsToImport(). Voir la console pour plus de détails.",
+        "details": "Vous devez passer un tableau de chaînes de caractères à \"SetAdditionalJournalsToImport()\". Il doit s'agir des noms des journaux. Reçu : {journal}",
+        "missing": "SetAdditionalJournalsToImport() appelé sans valeur. Cela désactive l'importation de journaux supplémentaires. Seuls les journaux liés à la scène par une épingle sur la carte seront importés."
+      },
+      "additionalMacros": {
+        "ui": "Appel invalide à SetAdditionalMacrosToImport(). Voir la console pour plus de détails.",
+        "details": "Vous devez passer un tableau de chaînes de caractères à \"SetAdditionalMacrosToImport()\". Il doit s'agir des noms des macros. Reçu : {macro}",
+        "missing": "SetAdditionalMacrosToImport() appelé sans valeur. Cela désactive l'importation de macros supplémentaires."
+      },
+      "creaturePacks": {
+        "ui": "Appel invalide à SetCreaturePacks(). Voir la console pour plus de détails.",
+        "missing": "SetCreatePacks() appelé sans valeur. Cela désactive l'importation des Acteurs.",
+        "details": "Vous devez passer un tableau de chaînes de caractères à \"SetCreaturePacks()\". Il doit s'agir des noms des packs d'acteurs. Reçu : {pack}"
+      },
+      "journalPacks": {
+        "ui": "Appel invalide à SetJournalPacks(). Voir la console pour plus de détails.",
+        "details": "Vous devez passer un tableau de chaînes de caractères à \"SetJournalPacks()\". Il doit s'agir des noms des packs de journaux. Reçu : {pack}",
+        "missing": "SetJournalPacks() appelé sans valeur. Cela désactive l'importation des journaux."
+      },
+      "macroPacks": {
+        "details": "Vous devez passer un tableau de chaînes de caractères à \"SetMacroPacks()\". Il doit s'agir des noms des packs de macros. Reçu : {pack}",
+        "ui": "Appel invalide à SetMacroPacks(). Voir la console pour plus de détails.",
+        "missing": "SetMacroPacks() appelé sans valeur. Cela désactive l'importation des macros."
+      },
+      "playlistPacks": {
+        "ui": "Appel invalide à SetPlaylistPacks(). Voir la console pour plus de détails.",
+        "details": "Vous devez passer un tableau de chaînes de caractères à \"SetPlaylistPacks()\". Il doit s'agir des noms des packs de Playlists. Reçu : {pack}",
+        "missing": "SetPlaylistPacks() appelé sans valeur. Cela désactive l'importation des Playlists."
+      },
+      "modulePacks": {
+        "ui": "Appel invalide à SetAdditionalModulePacks(). Voir la console pour plus de détails.",
+        "details": "Vous devez passer un tableau de chaînes de caractères à \"SetAdditionalMacrosToImport()\". Il doit s'agir des noms des Modules. Reçu : {pack}",
+        "missing": "SetAdditionalModulePacks() appelé sans valeur."
+      },
+      "version": {
+        "packed-low": "La scène \"{scene}\" (du module \"{sourceModule}\") a été empaquetée avec la version de Scene Packer \"{version}\" qui est plus ancienne que la version minimale compatible de \"{supportedVersion}\". Veuillez contacter l'auteur et lui demander de ré-empaqueter la scène avec une version actuelle."
+      }
+    },
+    "scene-context": {
+      "pack": {
+        "title": "Empaqueter les données de la scène"
+      },
+      "unpack": {
+        "title": "Déballer les Données de la Scène"
+      },
+      "clear": {
+        "title": "Apurer les données de la Scène empaquetée"
+      }
+    },
+    "log": {
+      "invalidForce": "{moduleName} | Utilisation invalide du journal. \"log(force, ...args)\" était attendu comme un booléen mais n'a eu que {force}"
+    },
+    "world-conversion": {
+      "compendiums": {
+        "unlock": "Déverrouillage des compendiums : {liste}",
+        "lock": "Verrouillage des compendiums : {liste}",
+        "lock-prompt": "Voulez-vous verrouiller les compendiums qui appartiennent au module \"{moduleName}\" ?",
+        "lock-prompt-button": "Compendiums verrouillés",
+        "lock-prompt-title": "Vérouillé les compendiums ?",
+        "checking-and-updating": "Vérification et mise à jour de {count} références de journaux des liens du monde aux liens du compendium.",
+        "invalid-ref-type": "Trouvé une référence de journal qui n'est pas traitée : {type}. La référence est ignorée...",
+        "invalid-no-name": "A trouvé une référence de journal mais n'a pas pu trouver son nom original. Vérifiez les journaux d'anomalies pour plus de détails.",
+        "invalid-no-matching-name": "Impossible de trouver la référence {type} dans les données du monde : {name}",
+        "invalid-not-found-console": "Impossible de trouver la référence dans les données du compendium. La mise à jour de la référence est ignorée...",
+        "invalid-not-found": "Trouvé une référence de journal mais n'a pas pu trouver sa version dans le compendium par son nom. Vérifiez les journaux d'anomalies pour plus de détails.",
+        "updating-references": "Modification de {count} {type} références dans : \"{name}\"",
+        "invalid-too-many": "Trouvé une référence dans un journal mais a trouvé plus d'une version dans le compendium par le nom. Voir les journaux d'anomalie pour plus de détails.",
+        "invalid-too-many-console": "Trouvé plus d'une référence dans les données du monde. La mise à jour de la référence est ignorée...",
+        "updating-reference-console": "Modification de références du {pack}[{journalEntryId}] de {type} {oldRef} -> {newRef}",
+        "updating-reference": "Mise à jour de {count} références dans \"{name}\". Voir la console pour plus de détails.",
+        "completed-checks": "{type} \"{name}\" {entryId} terminés.",
+        "no-references": "Il n'y avait aucune référence à mettre à jour dans {type} \"{name}\" {entryId}.",
+        "checking-contents": "Vérification du contenu de {type} \"{name}\" {entryId}.",
+        "completed": "Terminé !",
+        "quick-encounters": {
+          "could-not-parse": "Impossible d'analyser les données de rencontre rapide pour le journal \"{journal}\". Erreur : {error}",
+          "updating-references": "Change les références de {count} références des rencontres rapides dans : \"{journal}\"",
+          "updating-references-console": "Change les références {type} {nom} {oldRef} -> {newRef}",
+          "missing-actor-reference": "Un acteur \"{actor}\" a été référencé dans un \"{journal}\" de rencontre rapide mais n'a pas pu être trouvé dans votre monde (soit il est absent, soit il y a plusieurs correspondances par le nom). Cette rencontre rapide ne fonctionnera pas correctement dans un autre monde. Veuillez reconstruire cette rencontre rapide, la réexporter (ainsi que le ou les acteurs) puis relancer la macro \"Relier les entrées du journal\".",
+          "missing-journal-reference": "Le journal \"{journal}\" n'a pas pu être trouvé dans votre monde (soit il est manquant, soit il y a plusieurs correspondances par le nom). Cette rencontre rapide ne fonctionnera pas correctement dans un autre monde. Veuillez reconstruire cette rencontre rapide, la réexporter (ainsi que le ou les acteurs) et relancer la macro \"Relier les entrées du journal\"."
+        },
+        "monks-enhanced-journal-encounter": {
+          "updating-references-console": "Changement de la référence de la rencontre du Monk's enhanced Journal encounter dans \"{journal}\" {oldRef} -> {newRef}"
+        },
+        "monks-enhanced-journal-actor": {
+          "updating-references-console": "Changement de la référence dans Monk's Enhanced Journal de l'acteur dans \"{journal}\" {oldRef} -> {newRef}"
+        },
+        "monks-enhanced-journal-relationships": {
+          "updating-references-console": "Modification de la référence dans Monk's Enhanced Journal de la relation dans \"{journal}\" en ajoutant \"{newRelation}\""
+        }
+      }
+    },
+    "importer": {
+      "be-patient": "Veuillez patienter pendant que le pack est importé. Cela peut prendre un certain temps. Si vous pensez que cela prend trop de temps, vérifiez les erreurs dans la console (F12) en notant que vous devrez peut-être développer les groupes de journaux.",
+      "loading": "Chargement des données...",
+      "name": "Scene Packer : Importateur",
+      "unsupported": "Scene Packer : l'importateur n'est pris en charge que dans les versions >= 0.8.0",
+      "invalid-url": "Une valeur d'URL invalide a été transmise à l'importateur de Scene Packer. Reçu : \"{url}\". {err}",
+      "invalid-url-empty": "Une valeur URL vide a été transmise à l'importateur de Scene Packer.",
+      "processing": "Traitement en cours...",
+      "process-fetch-data": "Récupération des données...",
+      "process-creating-data": "Création de {count} {type} et d'assets...",
+      "invalid-pack-data": "Données de pack invalides. Veuillez réessayer et si l'erreur persiste, demandez de l'aide sur le serveur Discord de Scene Packer ou de Moulinette.",
+      "creating-documents": "Création de {count} {type}...",
+      "ensure-assets": "S'assure que les assets existent pour {count} entités.",
+      "converting-references": "Vérifie {count} {type} pour les références de style des compendiums.",
+      "converting-reference": "Convertit la référence {type} dans \"{name}\" {oldRef} -> {newRef} dans l'emplacement : {path}",
+      "no-existing-value": "Impossible de trouver une valeur existante dans le chemin \"{path}\". Passe la mise à jour de la référence...",
+      "complete": "Terminé !",
+      "import-all": "Importer toutes les {count} entités dans ce pack",
+      "import-one": "Importe la sélection",
+      "selected-entity": "Sélectionné {type} :",
+      "unrelated-title": "Entités sans lien",
+      "author": "Auteur :",
+      "discord": "Discord :",
+      "email": "Courriel :",
+      "version": "Version :",
+      "more-info": "Plus d'infos :",
+      "missing-asset": "Asset manquant dans les données du paquet : {asset}",
+      "unrelated-intro": "Les entités suivantes ne sont pas directement liées à une Scène de ce pack et ont été automatiquement importées pour éviter de briser des liens."
+    },
+    "instance-prompt": {
+      "title": "Choisir l'instance",
+      "intro": "Choisissez le module que vous souhaitez utiliser :",
+      "none-found": "Il n'y a pas de module installé qui soit enregistré auprès de Scene Packer. Consultez les entrées du journal dans le compendium pour savoir comment enregistrer votre module avec Scene Packer.",
+      "cancel": "Annuler",
+      "select": "Choisir"
+    },
+    "relink-prompt": {
+      "title": "Refaire les liens des entrées de journal",
+      "intro": "Choisissez le module avec lequel vous utilisez Scene Packer :",
+      "make-changes": "Sauvegarder les changements ?",
+      "relink": "Refaire les liens",
+      "cancel": "Annuler",
+      "make-changes-info": "Si vous ne cochez pas cette case, l'application fonctionnera en \"mode sec\" où les changements ne seront affichés que sur la console.",
+      "none": "Il n'y a pas de module installé qui soit enregistré auprès de Scene Packer. Consultez les entrées du journal dans le compendium pour savoir comment enregistrer votre module avec Scene Packer."
+    },
+    "performance-report": {
+      "title": "Rapport de performance",
+      "copy": "Copier dans le presse-papiers",
+      "close": "Fermer"
+    },
+    "deprecated": {
+      "method": "La méthode \"{method}\" a été dépréciée et sera supprimée dans une prochaine version. Veuillez consulter les entrées du Journal dans le compendium Scene Packer pour savoir comment appeler correctement Scene Packer."
+    },
+    "exporter": {
+      "name": "Exporter vers Moulinette",
+      "label": "Ouvrir l'assistant d'exportation",
+      "hint": "L'assistant d'exportation vous permettra d'empaqueter une aventure pour la distribuer par Moulinette Cloud.",
+      "timeout": "Délai d'attente pour les assets",
+      "unsupported": "L'exportation vers Moulinette n'est supportée que dans les versions >= 0.8.0",
+      "selected-count": "{count} entités sélectionnées pour l'export.",
+      "toggle-checkboxes": "Activer toutes les cases à cocher",
+      "tabs": {
+        "actors": "Acteurs",
+        "items": "Objets",
+        "journals": "Journaux",
+        "macros": "Macros",
+        "options": "Options",
+        "playlists": "Listes de lecture",
+        "cards": "Cartes",
+        "scenes": "Scènes",
+        "tables": "Tables aléatoires"
+      },
+      "search": {
+        "macros": "Recherche dans les Macros",
+        "journals": "Recherche dans les Journaux",
+        "actors": "Recherche dans les Acteurs",
+        "items": "Recherche dans les Objets",
+        "cards": "Recherche dans les Cartes",
+        "scenes": "Recherche dans les Scènes",
+        "tables": "Recherche dans les Tables aléatoires",
+        "playlists": "Recherche dans les Listes de lecture"
+      },
+      "options": {
+        "package-name": "Nom de votre pack d'aventure",
+        "package-name-help": "Doit être unique sous votre nom d'auteur.",
+        "version": "Numéro de version de l'aventure",
+        "version-help": "Augmentez la version si vous mettez à jour une aventure.",
+        "author": "Nom de l'auteur",
+        "author-help": "Votre nom public ou pseudonyme. Affiché au public à côté de votre nom d'aventure.",
+        "package-description": "Description du pack d'aventure",
+        "package-cover": "Image de couverture du pack aventure",
+        "package-cover-help": "L'image à montrer à l'utilisateur final lorsqu'il consulte les détails de l'aventure.",
+        "discord-id": "Votre identifiant Discord",
+        "discord-id-help": "Au cas où vous auriez besoin d'être contacté pour des informations supplémentaires. Ne sera pas montré au public.",
+        "email": "Votre adresse électronique",
+        "external-link": "URL pour des informations supplémentaires",
+        "external-link-help": "Une URL absolue où un utilisateur final peut trouver plus d'informations sur le pack aventure.",
+        "welcome-journal": "Journal à afficher après l'importation",
+        "welcome-journal-drop-text": "Glissez et déposez votre journal ici",
+        "allow-complete-import": "Autoriser l'importation de toutes les entités ?",
+        "intro": "Vous êtes sur le point de construire un pack d'aventure à partager via Moulinette. Vous devez être un <a href=\"https://www.patreon.com/moulinette\" target=\"_blank\">Patreon de Moulinette</a> pour pouvoir télécharger et partager votre aventure.",
+        "package-description-help": "Décrivez le type d'aventure dont il s'agit, les niveaux auxquels elle est destinée, ce qui est inclus, etc.",
+        "email-help": "Au cas où vous auriez besoin d'être contacté pour des informations supplémentaires. Ne sera pas montré au public.",
+        "welcome-journal-help": "Afficher automatiquement l'entrée de journal sélectionnée lorsque l'utilisateur final importe le pack aventure. Laissez l'option vide si vous ne souhaitez pas afficher automatiquement une entrée de journal.",
+        "adventure-categorisation": "Catégorisation",
+        "adventure-category": "Catégorie d'aventure",
+        "adventure-category-help": "De quel type d'aventure s'agit-il ? Cette information sera utilisée pour catégoriser votre aventure sur Moulinette Cloud.",
+        "adventure-category-one-shot": "Aventure courte",
+        "adventure-category-short-campaign": "Courte campagne",
+        "adventure-category-long-campaign": "Longue campagne",
+        "adventure-category-prefab": "Acteurs prégénérés",
+        "adventure-category-supplement": "Supplément",
+        "adventure-duration": "Durée de l'aventure (heures)",
+        "adventure-duration-help": "Combien de temps environ faut-il pour terminer l'aventure ?",
+        "adventure-duration-placeholder": "Durée de jeu approximative en heures",
+        "adventure-players-max": "Nombre maximum de joueurs",
+        "adventure-players-min": "Nombre minimum de joueurs",
+        "adventure-players-max-help": "Le nombre maximum de joueurs pour laquelle cette aventure est conçue.",
+        "adventure-players-recommended": "Niveau recommandé des joueurs",
+        "adventure-players-recommended-help": "Le nombre de joueurs recommandé pour cette aventure.",
+        "adventure-player-level": "Niveaux des joueurs",
+        "adventure-player-level-add": "Ajouter une tranche de niveaux",
+        "adventure-player-level-min-placeholder": "Min",
+        "adventure-player-level-max-placeholder": "Max",
+        "adventure-player-level-recommended-placeholder": "Recommandé",
+        "adventure-theme": "Thèmes d'aventure",
+        "adventure-theme-help": "Quels sont les principaux thèmes de cette aventure ? Cela servira à catégoriser votre aventure sur Moulinette Cloud.",
+        "adventure-theme-placeholder": "thèmes, séparés par des virgules",
+        "adventure-token-style": "Styles de jetons",
+        "adventure-token-style-help": "Choisissez le ou les styles de jetons inclus dans cette aventure.",
+        "adventure-token-style-top-down": "De haut en bas",
+        "adventure-token-style-iso": "Isométrique",
+        "adventure-token-style-other": "Autre",
+        "adventure-grid-type": "Type de grille",
+        "adventure-grid-type-help": "Choisissez le ou les styles de grilles inclus dans cette aventure.",
+        "adventure-grid-type-square": "Carrée",
+        "adventure-grid-type-hex": "Hexagonale",
+        "adventure-pregen-characters": "Comprend des personnages joueurs pré-générés",
+        "adventure-pregen-characters-help": "Cette aventure comprend-elle des personnages joueurs pré-générés ?",
+        "adventure-tags": "Caractéristiques supplémentaires",
+        "adventure-tags-placeholder": "caractéristiques, séparées par des virgules",
+        "adventure-system": "Système de l'aventure",
+        "adventure-tag-suggestions": "Options courantes",
+        "adventure-themes": {
+          "dungeon": "Donjon",
+          "wilderness": "Étendues sauvages",
+          "town": "Ville/Village",
+          "city": "Cité/Urbain",
+          "forest": "Forêt",
+          "stronghold": "Forteresse (Château/Fort/Tour)",
+          "cave": "Grotte/Cavernes",
+          "mountain": "Montagne",
+          "ruins": "Ruines/Tombeau/Cimetière",
+          "temple": "Temple/Sanctuaire",
+          "mansion": "Maison/Demeure",
+          "swamp": "Marais/Tourbière",
+          "ship": "Navire",
+          "island": "Île",
+          "desert": "Désert/Pyramide",
+          "underdark": "Ombreterre/Souterrain",
+          "sewer": "Égouts",
+          "feywild": "Environnement féérique",
+          "abyss": "Abysses/Enfers",
+          "horror": "Horreur",
+          "mystery": "Mystère",
+          "snow": "Arctique/Neige",
+          "mega-dungeon": "Méga-donjon",
+          "shadowfell": "Shadowfell",
+          "air": "Navire aérien/Dirigeable",
+          "heist": "Cambriolage/Infiltration"
+        },
+        "allow-complete-import-help": "Choisissez \"non\" si vous ne voulez pas que l'utilisateur final puisse importer l'ensemble du paquet d'aventures en une seule fois. Vous devriez choisir \"non\" si vous avez beaucoup d'entités dans votre pack pour éviter les décalages.",
+        "adventure-players-min-help": "Le nombre minimum de joueurs pour lequel cette aventure est conçue.",
+        "adventure-player-level-help": "Les niveaux minimum, maximum et recommandés des joueurs pour lesquels cette aventure est conçue. Vous pouvez indiquer des tranches de niveaux.",
+        "adventure-token-style-token": "Jeton Pog traditionnel",
+        "adventure-tags-help": "Quelles autres caractéristiques décrivent cette aventure ? Ceci sera utilisé pour catégoriser votre pack sur Moulinette Cloud.",
+        "adventure-system-help": "Le système pour lequel cette aventure est conçue. Laissez un blanc pour ne pas spécifier de système requis. Notez que l'inclusion d'acteurs et d'éléments rend généralement votre aventure spécifique à un système.",
+        "next": "Lorsque vous cliquez sur Suivant, Scene Packer va lier toutes vos entités entre elles, les vérifier puis créer un fichier <code>data.zip</code> contenant toute votre aventure, y compris les assets. Ce fichier doit ensuite être téléchargé sur le site de Moulinette dans la section des assets standards. Une fois qu'il aura été traité et que vous l'aurez publié, les utilisateurs finaux pourront l'importer dans leur partie à partir de la section Scènes de Moulinette.",
+        "help": "Si vous avez besoin d'aide pour préparer votre aventure, passez sur le <img src=\"https://github.com/League-of-Foundry-Developers/scene-packer/raw/main/assets/icons/hand-truck.png\" alt=\"icon\" height=\"24\" valign=\"middle\" style=\"max-width:100%;border:0 ;\"> <a href=\"https://discord.com/invite/HY3xhBEf2A\" target=\"_blank\">serveur discord Scene Packer</a> et échangez avec <code>blair#9056</code>.",
+        "support": "Beaucoup de travail a été consacré à la réalisation de cet outil. Si vous le trouvez utile, pensez à soutenir le projet en <em>en faisant part à blair de vos aventures</em>, <a href=\"https://www.patreon.com/blairm\" target=\"_blank\">en devenant un de ses mécènes sur patreon</a> ou <a href=\"https://ko-fi.com/blairm\" target=\"_blank\">en lui offrant un café</a>. Le module vous est fourni gratuitement, quel que soit votre choix."
+      },
+      "timeout-help": "Le temps d'attente en secondes pour le téléchargement d'un asset. Définissez-le à 0 pour désactiver les délais d'attente.",
+      "progress": {
+        "title": "Exportation de {name}",
+        "please-wait": "Veuillez patienter...",
+        "status": "Veuillez patienter pendant que {total} entités sont validées et compressées...",
+        "speed": "La vitesse de téléchargement actuelle des assets.",
+        "size": "La taille non comprimée de l'aventure.",
+        "complete": "Terminé",
+        "downloading": "Téléchargement des fichiers...",
+        "next-step": "Veuillez téléverser le(s) fichier(s) suivant(s) dans la section des assets standard dans Moulinette admin : <ul><li>{files}</li></ul>",
+        "extract-data": "Extraction des données JSON...",
+        "compressing-data": "Compression de {count} {type}...",
+        "download-error": "Erreur de téléchargement d'un asset : {error}",
+        "compressing-assets": "Cartographie de {count} assets..."
+      },
+      "invalid": {
+        "title": "forme de donné non valide",
+        "fields": "<p>Les champs suivants de l'onglet <strong>Options</strong> nécessitent une valeur :</p><ul>{fields}</ul>"
+      }
+    },
+    "adventure-converter": {
+      "name": "Convertisseur d'aventure",
+      "sitting-label": "Ouvrir le Convertisseur d'aventure",
+      "summary": "Utilisez cet outil pour convertir votre aventure Scene Packer existante au format de document d'aventure V10. Vous pourriez souhaiter faire des {links} avant d'utiliser cet outil.",
+      "view-tutorial": "Voir la vidéo du tutoriel",
+      "summary-help": "Si vous avez besoin d'aide pour convertir votre pack, veuillez vous arrêter au {img} {link} et parlez avec <code>blair#9056</code>.",
+      "discord-name": "Serveur Discord de Scene Packer",
+      "missing-adventure-pack": "Le module que vous avez sélectionné ne prend pas actuellement en charge le format Adventure Pack.",
+      "select-adventure": "Sélectionnez le module compatible à convertir",
+      "select-adventure-hint": "Sélectionnez le module Scene Packer que vous souhaitez convertir. Il doit être activé dans ce monde.",
+      "select-adventure-details": "Sélectionnez un module dans la liste ci-dessus pour commencer.",
+      "welcome-journal": "Journal de bienvenue",
+      "welcome-journal-hint": "Le journal de bienvenue (s'il est défini) s'affichera automatiquement après l'importation de l'aventure. Vous pouvez faire glisser un journal dans la case pour définir cette valeur.",
+      "error-journal-wrong-pack": "Vous devez sélectionner un journal qui fait partie du module que vous convertissez.",
+      "error-journal-not-found": "Impossible de trouver le journal \"{name}\" dans le module existant. Essayez de déposer le journal directement depuis le compendium du module.",
+      "submit": "Convertir l'aventure",
+      "manifest-upgrade-prompt-title": "Options de l'aventure",
+      "manifest-upgrade-prompt-label": "Étiquette de l'aventure",
+      "manifest-upgrade-prompt-button": "Afficher les modifications du module.json",
+      "manifest-upgrade-detail-2": "Ajout d'un pack <code>Aventure</code>.",
+      "manifest-upgrade-next-steps": "Vous devrez effectuer les étapes suivantes manuellement avant de pouvoir convertir votre module d'aventure (prenez note ou faites une capture d'écran de ces étapes car vous fermerez cette boîte de dialogue avant d'avoir terminé toutes les étapes) :",
+      "manifest-upgrade-next-steps-1": "Ouvrez le fichier <code>{module}</code> dans votre éditeur de texte.",
+      "manifest-upgrade-next-steps-3": "Enregistrez le fichier.",
+      "manifest-upgrade-next-steps-4": "Quittez ce monde, en retournant à l'écran de configuration (cela recharge les détails du module).",
+      "manifest-upgrade-next-steps-5": "Chargez à nouveau le monde et revenez au convertisseur d'aventure. Sélectionnez le module que vous venez de mettre à jour et procédez à la conversion.",
+      "manifest-upgrade-ok": "J'ai suivi les étapes ci-dessus.",
+      "manifest-upgrade-error": "Erreur lors de la génération des changements recommandés du module.json. Veuillez consulter la console (F12) pour plus d'informations.",
+      "manifest-upgrade-module-not-found": "Le module \"{name}\" n'existe pas dans le monde.",
+      "process-error-no-module": "Le nom du module doit être fourni.",
+      "process-error-no-target": "Vous devez fournir un pack cible.",
+      "process-error-no-source": "Vous devez fournir au moins un pack source à convertir.",
+      "process-error-no-instance": "Aucune instance de Scene Packer n'a été trouvée pour le module \"{moduleName}\"",
+      "process-error-no-module-found": "Module non trouvé dans le monde avec le nom \"{moduleName}\"",
+      "process-error-no-pack-found": "Un pack de compendiums du nom de \"{packName}\" portant le nom de \"{moduleName}\" n'a pas été trouvé",
+      "setting-hint": "Convertissez votre aventure Scene Packer existante au format de document d'aventure V10. (Uniquement utile aux créateurs, il ne sert à rien aux utilisateurs finaux)",
+      "missing-adventure-pack-link": "Voir les changements recommandés dans le <code>module.json</code>.",
+      "no-adventures": "Aucun module autorisé par Scene Packer n'a été sélectionné. Vous ne pouvez utiliser ce convertisseur qu'avec des aventures Scene Packer existantes qui sont activées dans ce monde.",
+      "welcome-journal-description": "Si l'importation de cette aventure est réussie, le journal {link} sera automatiquement afficher pour l'utilisateur final.",
+      "backup-warning": "Il est très fortement recommandé de sauvegarder votre module et votre monde avant d'exécuter le Convertisseur d'Aventure. Cela vous assurera d'avoir une version de votre module compatible avec la v9 de Foundry VTT.",
+      "backup-warning-link": "Affichez les étapes de sauvegarde recommandées.",
+      "manifest-upgrade-prompt-message": "Saisissez un nom pour votre document d'aventure. Il s'agit de l'étiquette du pack qui s'affichera dans la barre latérale du compendium.",
+      "manifest-upgrade-detail-3": "Changement de la <code>compatibilité</code> pour qu'elle soit au minimum de V10.",
+      "manifest-upgrade-detail-4": "Le processus de conversion effectué par la plate-forme Core Foundry VTT entraînera des avertissements dans la console (F12). Pensez à examiner ces avertissements pour obtenir des éléments de contexte supplémentaire sur les changements autres que les deux ci-dessus.",
+      "manifest-upgrade-next-steps-2": "Remplacez le fichier par le contenu ci-dessous et revoyez les changements. Apportez toute autre modification supplémentaire que vous jugerez appropriée. Si vous avez des questions, veuillez rejoindre le serveur Discord pour obtenir de l'aide.",
+      "manifest-upgrade-automated-steps": "Le chemin de fichier suivant a été choisi automatiquement pour stocker la base de données du recueil d'aventures. Si vous avez choisi d'utiliser un format différent de celui suggéré par les modifications ci-dessus de <code>module.json</code>, vous devrez peut-être ajuster manuellement les chemins du pack.",
+      "manifest-upgrade-detail-1": "Les modifications suivantes doivent être apportées à votre fichier <code>{module}</code> et ont été suggérées ci-dessous :"
+    },
+    "welcome-journal": {
+      "import-all": "Importer toutes les {totalCount} entités du module",
+      "import-replace": "Remplacer le contenu existant",
+      "import-rename": "Renommer le contenu existant",
+      "import-close": "Ne plus montrer par la suite"
+    }
+  }
+}

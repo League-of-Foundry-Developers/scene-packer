@@ -492,7 +492,7 @@
       "welcome-journal-hint": "The Welcome Journal (if set) will automatically be displayed after the adventure is imported. You can drag a journal into the box to set this value.",
       "welcome-journal-description": "On successful import of this adventure, the {link} Journal will automatically be displayed to the end user.",
       "error-journal-wrong-pack": "You must select a Journal that is part of the module you are converting.",
-      "error-journal-not-found": "Could not find the Journal \"{name}\" within the exising module. Try dropping the journal directly from the module's compendium.",
+      "error-journal-not-found": "Could not find the Journal \"{name}\" within the existing module. Try dropping the journal directly from the module's compendium.",
       "backup-warning": "It is very strongly recommended to backup your module and world before running the Adventure Converter. This will ensure that you have a version of your module that is compatible with v9 of Foundry VTT.",
       "backup-warning-link": "View recommended backup steps.",
       "submit": "Convert Adventure",
