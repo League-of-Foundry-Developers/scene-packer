@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.6.12
+
+- Added French translation. Co-authored-by: 
+  - rectulo
+  - Marc Feuillen
+
 ## v2.6.11
 
 - Updated the "Relink compedium Entries" macro to better handle v10.
