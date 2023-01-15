@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.6.13
+
+- Updated "Asset Report" macro functionality:
+  - Better handles checking of assets within v10 Journal Pages.
+  - Entities with asset dependencies are once again clickable in the report.
+
 ## v2.6.12
 
 - Added French translation. Co-authored-by: 
