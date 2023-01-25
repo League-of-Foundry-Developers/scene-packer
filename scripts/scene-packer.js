@@ -5102,8 +5102,8 @@ export default class ScenePacker {
         for (let m = 0; m < possibleMatches.length; m++) {
           const possibleMatch = possibleMatches[m];
           const entity = await p.getDocument(possibleMatch._id);
+          let uuid = entity.uuid || undefined;
           if (entity) {
-            let uuid = entity.uuid || undefined;
             if (CONSTANTS.IsV10orNewer() && pageName) {
               // Original reference was to a page, so we need to find the page in the compendium entry
               let page = entity.pages?.find(p => p.name === pageName);
@@ -5123,7 +5123,11 @@ export default class ScenePacker {
               return [{pack: p.collection, ref: possibleMatch._id, uuid}];
             }
           }
-          matches.push({pack: p.collection, ref: possibleMatch._id});
+          const item = {pack: p.collection, ref: possibleMatch._id};
+          if (uuid) {
+            item.uuid = uuid;
+          }
+          matches.push(item);
         }
       }
     }

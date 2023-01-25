@@ -1,5 +1,14 @@
 # Changelog
 
+## v2.6.14
+
+- "Asset Report" will now check assets embedded within Adventures.
+- Updated the "Relink compendium Entries" macro:
+  - Include UUID style references for all document types where available.
+- Documents linked within RollTables now have an additional fallback method for linking.
+- Automated migration of D&D 5e documents will now only occur on a D&D 5e world.
+  - Previously it would attempt to apply if any of the loaded packs were configured for D&D 5e.
+
 ## v2.6.13
 
 - Updated "Asset Report" macro functionality:
