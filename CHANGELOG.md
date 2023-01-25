@@ -8,6 +8,8 @@
 - Documents linked within RollTables now have an additional fallback method for linking.
 - Automated migration of D&D 5e documents will now only occur on a D&D 5e world.
   - Previously it would attempt to apply if any of the loaded packs were configured for D&D 5e.
+- Allow unpacking to continue if the system doesn't match.
+  - An example of this is loading a D&D 5e module into a PF2e world. Actors and Items won't load, but scenes and journals will still work.
 
 ## v2.6.13
 

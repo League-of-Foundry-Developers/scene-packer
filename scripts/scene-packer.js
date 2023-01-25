@@ -3479,12 +3479,16 @@ export default class ScenePacker {
 
     if (tokenInfo?.length) {
       // Import tokens that don't yet exist in the world
-      await this.ImportEntities(
-        this.getSearchPacksForType('Actor'),
-        this.findMissingActors(tokenInfo),
-        'actors',
-        showUI,
-      );
+      try {
+        await this.ImportEntities(
+          this.getSearchPacksForType('Actor'),
+          this.findMissingActors(tokenInfo),
+          'actors',
+          showUI,
+        );
+      } catch (err) {
+        console.error(err);
+      }
     }
 
     if (journalInfo?.length) {
@@ -3606,7 +3610,11 @@ export default class ScenePacker {
 
     // Relink the tokens and spawn the pins
     if (tokenInfo?.length) {
-      await this.relinkTokens(scene, tokenInfo, showUI);
+      try {
+        await this.relinkTokens(scene, tokenInfo, showUI);
+      } catch (e) {
+        console.error(e);
+      }
     }
     if (journalInfo?.length) {
       await this.spawnNotes(scene, journalInfo, showUI);
