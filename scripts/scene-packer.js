@@ -4694,7 +4694,10 @@ export default class ScenePacker {
                 continue;
               }
               let existingName = CONSTANTS.IsV10orNewer() ? result?.text : result?.data?.text;
-              const existingEntry = game.collections.get(collection)?.get(resultId);
+              let existingEntry = game.collections.get(collection)?.get(resultId);
+              if (!existingEntry && existingName) {
+                existingEntry = game.collections.get(collection)?.getName(existingName);
+              }
               if (existingEntry?.name) {
                 existingName = existingEntry.name;
               }
