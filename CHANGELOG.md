@@ -3,6 +3,8 @@
 ## v2.6.14
 
 - "Asset Report" will now check assets embedded within Adventures.
+- Adventures imported via Moulinette will attempt to migrate the data prior to creating the entries in the world.
+  - In a lot of cases, this will allow packs created in old versions of Foundry VTT to still be imported in newer versions, rather than just throwing errors.
 - Updated the "Relink compendium Entries" macro:
   - Include UUID style references for all document types where available.
 - Documents linked within RollTables now have an additional fallback method for linking.
