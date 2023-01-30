@@ -666,6 +666,19 @@ export default class AssetReport extends FormApplication {
       entities.push(...contents.filter(s => s.name !== CONSTANTS.CF_TEMP_ENTITY_NAME));
     }
 
+    // Check for entities in an adventure
+    for (const module of this.moduleToCheck.packs.filter(p => p.type === 'Adventure')) {
+      const pack = game.packs.get(`${this.moduleToCheck.id}.${module.name}`);
+      if (!pack) {
+        continue;
+      }
+      for (const adventure of await pack.getDocuments()) {
+        if (adventure[AssetReport.Sources[type]]?.size) {
+          entities.push(...adventure[AssetReport.Sources[type]].filter(s => s.name !== CONSTANTS.CF_TEMP_ENTITY_NAME));
+        }
+      }
+    }
+
     return entities;
   }
 

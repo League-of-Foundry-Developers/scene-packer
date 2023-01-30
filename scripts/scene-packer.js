@@ -3479,12 +3479,16 @@ export default class ScenePacker {
 
     if (tokenInfo?.length) {
       // Import tokens that don't yet exist in the world
-      await this.ImportEntities(
-        this.getSearchPacksForType('Actor'),
-        this.findMissingActors(tokenInfo),
-        'actors',
-        showUI,
-      );
+      try {
+        await this.ImportEntities(
+          this.getSearchPacksForType('Actor'),
+          this.findMissingActors(tokenInfo),
+          'actors',
+          showUI,
+        );
+      } catch (err) {
+        console.error(err);
+      }
     }
 
     if (journalInfo?.length) {
@@ -3606,7 +3610,11 @@ export default class ScenePacker {
 
     // Relink the tokens and spawn the pins
     if (tokenInfo?.length) {
-      await this.relinkTokens(scene, tokenInfo, showUI);
+      try {
+        await this.relinkTokens(scene, tokenInfo, showUI);
+      } catch (e) {
+        console.error(e);
+      }
     }
     if (journalInfo?.length) {
       await this.spawnNotes(scene, journalInfo, showUI);
@@ -4694,7 +4702,10 @@ export default class ScenePacker {
                 continue;
               }
               let existingName = CONSTANTS.IsV10orNewer() ? result?.text : result?.data?.text;
-              const existingEntry = game.collections.get(collection)?.get(resultId);
+              let existingEntry = game.collections.get(collection)?.get(resultId);
+              if (!existingEntry && existingName) {
+                existingEntry = game.collections.get(collection)?.getName(existingName);
+              }
               if (existingEntry?.name) {
                 existingName = existingEntry.name;
               }
@@ -5099,8 +5110,8 @@ export default class ScenePacker {
         for (let m = 0; m < possibleMatches.length; m++) {
           const possibleMatch = possibleMatches[m];
           const entity = await p.getDocument(possibleMatch._id);
+          let uuid = entity.uuid || undefined;
           if (entity) {
-            let uuid = entity.uuid || undefined;
             if (CONSTANTS.IsV10orNewer() && pageName) {
               // Original reference was to a page, so we need to find the page in the compendium entry
               let page = entity.pages?.find(p => p.name === pageName);
@@ -5120,7 +5131,11 @@ export default class ScenePacker {
               return [{pack: p.collection, ref: possibleMatch._id, uuid}];
             }
           }
-          matches.push({pack: p.collection, ref: possibleMatch._id});
+          const item = {pack: p.collection, ref: possibleMatch._id};
+          if (uuid) {
+            item.uuid = uuid;
+          }
+          matches.push(item);
         }
       }
     }
