@@ -1,5 +1,6 @@
 import {CONSTANTS} from './constants.js';
 import ModuleSelect from './asset-report/module-select.js';
+import { ExtractJournalEntryAssets } from './assets/journal.js';
 
 /**
  * Report on assets
@@ -665,6 +666,19 @@ export default class AssetReport extends FormApplication {
       entities.push(...contents.filter(s => s.name !== CONSTANTS.CF_TEMP_ENTITY_NAME));
     }
 
+    // Check for entities in an adventure
+    for (const module of this.moduleToCheck.packs.filter(p => p.type === 'Adventure')) {
+      const pack = game.packs.get(`${this.moduleToCheck.id}.${module.name}`);
+      if (!pack) {
+        continue;
+      }
+      for (const adventure of await pack.getDocuments()) {
+        if (adventure[AssetReport.Sources[type]]?.size) {
+          entities.push(...adventure[AssetReport.Sources[type]].filter(s => s.name !== CONSTANTS.CF_TEMP_ENTITY_NAME));
+        }
+      }
+    }
+
     return entities;
   }
 
@@ -692,6 +706,7 @@ export default class AssetReport extends FormApplication {
        */
       const entityData = {
         id: scene.id,
+        uuid: scene.uuid,
         name: scene.name,
         type: AssetReport.Sources.Scene,
         css: 'fa-map',
@@ -811,6 +826,7 @@ export default class AssetReport extends FormApplication {
        */
       const entityData = {
         id: actor.id,
+        uuid: actor.uuid,
         name: actor.name,
         type: AssetReport.Sources.Actor,
         css: 'fa-user',
@@ -880,6 +896,7 @@ export default class AssetReport extends FormApplication {
        */
       const entityData = {
         id: journal.id,
+        uuid: journal.uuid,
         name: journal.name,
         type: AssetReport.Sources.JournalEntry,
         css: 'fa-book-open',
@@ -900,6 +917,13 @@ export default class AssetReport extends FormApplication {
           if (image?.src) {
             this.CheckAsset(journal.id, AssetReport.Sources.JournalEntry, image.src, AssetReport.Locations.JournalEmbeddedImage);
           }
+        }
+      }
+
+      if (CONSTANTS.IsV10orNewer()) {
+        const assetData = await ExtractJournalEntryAssets(journal);
+        for (const asset of assetData.assets) {
+          this.CheckAsset(journal.id, AssetReport.Sources.JournalEntry, asset.raw, asset.location);
         }
       }
 
@@ -930,6 +954,7 @@ export default class AssetReport extends FormApplication {
        */
       const entityData = {
         id: item.id,
+        uuid: item.uuid,
         name: item.name,
         type: AssetReport.Sources.Item,
         css: 'fa-suitcase',
@@ -995,6 +1020,7 @@ export default class AssetReport extends FormApplication {
        */
       const entityData = {
         id: playlist.id,
+        uuid: playlist.uuid,
         name: playlist.name,
         type: AssetReport.Sources.Playlist,
         css: 'fa-music',
@@ -1049,6 +1075,7 @@ export default class AssetReport extends FormApplication {
        */
       const entityData = {
         id: macro.id,
+        uuid: macro.uuid,
         name: macro.name,
         type: AssetReport.Sources.Macro,
         css: 'fa-terminal',
@@ -1089,6 +1116,7 @@ export default class AssetReport extends FormApplication {
        */
       const entityData = {
         id: table.id,
+        uuid: table.uuid,
         name: table.name,
         type: AssetReport.Sources.RollTable,
         css: 'fa-th-list',

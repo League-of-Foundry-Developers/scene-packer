@@ -1,5 +1,30 @@
 # Changelog
 
+## v2.6.14
+
+- "Asset Report" will now check assets embedded within Adventures.
+- Adventures imported via Moulinette will attempt to migrate the data prior to creating the entries in the world.
+  - In a lot of cases, this will allow packs created in old versions of Foundry VTT to still be imported in newer versions, rather than just throwing errors.
+- Updated the "Relink compendium Entries" macro:
+  - Include UUID style references for all document types where available.
+- Documents linked within RollTables now have an additional fallback method for linking.
+- Automated migration of D&D 5e documents will now only occur on a D&D 5e world.
+  - Previously it would attempt to apply if any of the loaded packs were configured for D&D 5e.
+- Allow unpacking to continue if the system doesn't match.
+  - An example of this is loading a D&D 5e module into a PF2e world. Actors and Items won't load, but scenes and journals will still work.
+
+## v2.6.13
+
+- Updated "Asset Report" macro functionality:
+  - Better handles checking of assets within v10 Journal Pages.
+  - Entities with asset dependencies are once again clickable in the report.
+
+## v2.6.12
+
+- Added French translation. Co-authored-by: 
+  - rectulo
+  - Marc Feuillen
+
 ## v2.6.11
 
 - Updated the "Relink compedium Entries" macro to better handle v10.

@@ -297,7 +297,9 @@ export default class MoulinetteImporter extends FormApplication {
             }
           }
         }
-        const created = await Scene.createDocuments(documents, {keepId: true});
+        // Run via the .fromSource method as that operates in a non-strict validation format, allowing
+        // for older formats to still be parsed in most cases.
+        const created = await Scene.createDocuments(documents.map(d => Scene.fromSource(d).toObject()), { keepId: true });
         for (const id of created.map(s => s.id)) {
           const scene = game.scenes.get(id);
           if (!scene) {
@@ -342,7 +344,9 @@ export default class MoulinetteImporter extends FormApplication {
         if (folderIDs.length) {
           await this.createFolders(folderIDs);
         }
-        const created = await Actor.createDocuments(documents, {keepId: true});
+        // Run via the .fromSource method as that operates in a non-strict validation format, allowing
+        // for older formats to still be parsed in most cases.
+        const created = await Actor.createDocuments(documents.map(d => Actor.fromSource(d).toObject()), { keepId: true });
 
         // Check for compendium references within the actors and update them to local world references
         console.groupCollapsed(game.i18n.format('SCENE-PACKER.importer.converting-references', {
@@ -407,7 +411,9 @@ export default class MoulinetteImporter extends FormApplication {
         if (folderIDs.length) {
           await this.createFolders(folderIDs);
         }
-        const created = await JournalEntry.createDocuments(documents, {keepId: true});
+        // Run via the .fromSource method as that operates in a non-strict validation format, allowing
+        // for older formats to still be parsed in most cases.
+        const created = await JournalEntry.createDocuments(documents.map(d => JournalEntry.fromSource(d).toObject()), { keepId: true });
         if (this.scenePackerInfo?.welcome_journal) {
           if (created.find(j => j.id === this.scenePackerInfo.welcome_journal)) {
             didCreateWelcomeJournal = true;
@@ -450,7 +456,9 @@ export default class MoulinetteImporter extends FormApplication {
         if (folderIDs.length) {
           await this.createFolders(folderIDs);
         }
-        const created = await Item.createDocuments(documents, {keepId: true});
+        // Run via the .fromSource method as that operates in a non-strict validation format, allowing
+        // for older formats to still be parsed in most cases.
+        const created = await Item.createDocuments(documents.map(d => Item.fromSource(d).toObject()), { keepId: true });
 
         // Check for compendium references within the items and update them to local world references
         console.groupCollapsed(game.i18n.format('SCENE-PACKER.importer.converting-references', {
@@ -488,7 +496,9 @@ export default class MoulinetteImporter extends FormApplication {
         if (folderIDs.length) {
           await this.createFolders(folderIDs);
         }
-        await Macro.createDocuments(documents, {keepId: true});
+        // Run via the .fromSource method as that operates in a non-strict validation format, allowing
+        // for older formats to still be parsed in most cases.
+        await Macro.createDocuments(documents.map(d => Macro.fromSource(d).toObject()), { keepId: true });
       }
     }
 
@@ -515,7 +525,9 @@ export default class MoulinetteImporter extends FormApplication {
         if (folderIDs.length) {
           await this.createFolders(folderIDs);
         }
-        await Playlist.createDocuments(documents, {keepId: true});
+        // Run via the .fromSource method as that operates in a non-strict validation format, allowing
+        // for older formats to still be parsed in most cases.
+        await Playlist.createDocuments(documents.map(d => Playlist.fromSource(d).toObject()), { keepId: true });
       }
     }
 
@@ -542,7 +554,9 @@ export default class MoulinetteImporter extends FormApplication {
         if (folderIDs.length) {
           await this.createFolders(folderIDs);
         }
-        await Cards.createDocuments(documents, {keepId: true});
+        // Run via the .fromSource method as that operates in a non-strict validation format, allowing
+        // for older formats to still be parsed in most cases.
+        await Cards.createDocuments(documents.map(d => Cards.fromSource(d).toObject()), { keepId: true });
       }
     }
 
@@ -569,7 +583,9 @@ export default class MoulinetteImporter extends FormApplication {
         if (folderIDs.length) {
           await this.createFolders(folderIDs);
         }
-        const created = await RollTable.createDocuments(documents, {keepId: true});
+        // Run via the .fromSource method as that operates in a non-strict validation format, allowing
+        // for older formats to still be parsed in most cases.
+        const created = await RollTable.createDocuments(documents.map(d => RollTable.fromSource(d).toObject()), { keepId: true });
 
         // Check for compendium references within the roll tables and update them to local world references
         console.groupCollapsed(game.i18n.format('SCENE-PACKER.importer.converting-references', {
@@ -669,7 +685,9 @@ export default class MoulinetteImporter extends FormApplication {
           if (folderIDs.length) {
             await this.createFolders(folderIDs);
           }
-          await CONFIG[type].documentClass.createDocuments(documents, {keepId: true});
+          // Run via the .fromSource method as that operates in a non-strict validation format, allowing
+          // for older formats to still be parsed in most cases.
+          await CONFIG[type].createDocuments(documents.map(d => CONFIG[type].fromSource(d).toObject()), { keepId: true });
         }
       }
 
@@ -971,7 +989,9 @@ export default class MoulinetteImporter extends FormApplication {
     }
 
     if (createData.length) {
-      await Folder.createDocuments(createData, {keepId: true});
+      // Run via the .fromSource method as that operates in a non-strict validation format, allowing
+      // for older formats to still be parsed in most cases.
+      await Folder.createDocuments(createData.map(d => Folder.fromSource(d).toObject()), { keepId: true });
     }
   }
 
