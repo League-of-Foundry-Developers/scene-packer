@@ -16,7 +16,7 @@ export default class Migration {
         return;
       }
 
-      if (module.system === 'dnd5e' && module.packs.some(p => p.system === 'dnd5e')) {
+      if (game.system?.id === 'dnd5e' && (module.system === 'dnd5e' || module.packs.some(p => p.system === 'dnd5e'))) {
         // Turn off compatibility warnings while migrating content
         const existingCompatibilityLogMode = CONFIG.compatibility.mode;
         CONFIG.compatibility.mode = CONST.COMPATIBILITY_MODES.SILENT;
