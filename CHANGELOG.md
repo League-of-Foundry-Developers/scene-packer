@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.6.15
+
+- Automated migration of D&D 5e documents will now apply if the module only specifies the system for individual packs, rather than the overall module.
+
 ## v2.6.14
 
 - "Asset Report" will now check assets embedded within Adventures.
