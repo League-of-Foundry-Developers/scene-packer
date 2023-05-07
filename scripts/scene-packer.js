@@ -1,7 +1,7 @@
 import AdventureConverter from './adventure-converter/adventure-converter.js';
 import AssetReport from './asset-report.js';
-import {Compressor} from './export-import/compressor.js';
-import {CONSTANTS} from './constants.js';
+import { Compressor } from './export-import/compressor.js';
+import { CONSTANTS } from './constants.js';
 import Exporter from './export-import/exporter.js';
 import Hash from './hash.js';
 import Migration from './migration.js';
