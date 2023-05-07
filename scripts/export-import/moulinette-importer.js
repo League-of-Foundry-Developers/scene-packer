@@ -687,7 +687,7 @@ export default class MoulinetteImporter extends FormApplication {
           }
           // Run via the .fromSource method as that operates in a non-strict validation format, allowing
           // for older formats to still be parsed in most cases.
-          await CONFIG[type].createDocuments(documents.map(d => CONFIG[type].fromSource(d).toObject()), { keepId: true });
+          await CONFIG[type].documentClass.createDocuments(documents.map(d => CONFIG[type].documentClass.fromSource(d).toObject()), { keepId: true });
         }
       }
 

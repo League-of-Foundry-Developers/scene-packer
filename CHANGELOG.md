@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.6.16
+
+- Mark Scene Packer as compatible with v11 of Foundry.
+- Fixed Moulinette importer failing when importing a Single Scene from a pack.
+- Maintain "Sort" value of documents being exported to a compendium via the Compendium Folders module.
+
 ## v2.6.15
 
 - Automated migration of D&D 5e documents will now apply if the module only specifies the system for individual packs, rather than the overall module.
