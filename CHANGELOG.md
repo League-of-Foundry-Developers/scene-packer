@@ -4,6 +4,7 @@
 
 - Mark Scene Packer as compatible with v11 of Foundry.
 - Fixed Moulinette importer failing when importing a Single Scene from a pack.
+- Maintain "Sort" value of documents being exported to a compendium via the Compendium Folders module.
 
 ## v2.6.15
 

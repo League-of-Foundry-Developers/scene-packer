@@ -12,7 +12,23 @@ Hooks.once('setup', function () {
       'scene-packer',
       `${item}.prototype.toCompendium`,
       function (wrapped, ...args) {
-        // const [ pack ] = args;
+        // const [ pack, options={} ] = args;
+
+        // Keep sort orders when exporting to compendium via Compendium Folders
+        if (typeof args === 'undefined') {
+          args = [];
+        }
+        // args[0] has a pack value when dragging a document to a compendium, and also when
+        // exporting via the default export process, so we can skip these cases.
+        if (typeof args[0] === 'undefined') {
+          if (typeof args[1] === 'undefined') {
+            args[1] = {};
+          }
+          if (typeof args[1].clearSort === 'undefined') {
+            args[1].clearSort = false;
+          }
+        }
+
         let data = wrapped.bind(this)(...args);
 
         const newFlags = {};
