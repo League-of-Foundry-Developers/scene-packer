@@ -3,6 +3,7 @@
 ## v2.6.16
 
 - Mark Scene Packer as compatible with v11 of Foundry.
+- Fixed Moulinette importer failing when importing a Single Scene from a pack.
 
 ## v2.6.15
 
