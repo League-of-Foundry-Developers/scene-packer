@@ -8,6 +8,7 @@ import Migration from './migration.js';
 import MoulinetteImporter from './export-import/moulinette-importer.js';
 import Report from './report.js';
 import WelcomeJournal from './welcome-journal.js';
+import ZipImporter from './export-import/zip-importer.js';
 
 /**
  * Tracks the initialised instances of Scene Packer and also exposes some methods to globalThis.
@@ -5675,6 +5676,15 @@ Hooks.once('setup', () => {
     hint: game.i18n.localize('SCENE-PACKER.exporter.hint'),
     icon: "fas fa-cloud-upload-alt",
     type: Exporter,
+    restricted: true,
+  })
+
+  game.settings.registerMenu(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_IMPORT_FROM_ZIP, {
+    name: game.i18n.localize('SCENE-PACKER.zip-importer.name'),
+    label: game.i18n.localize('SCENE-PACKER.zip-importer.label'),
+    hint: game.i18n.localize('SCENE-PACKER.zip-importer.hint'),
+    icon: "fas fa-cloud-download-alt",
+    type: ZipImporter,
     restricted: true,
   })
 

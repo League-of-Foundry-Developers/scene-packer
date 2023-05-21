@@ -129,7 +129,7 @@ export async function ExpandWildcard(path) {
 /**
  * Check if a file exists.
  * @param {string} path - The path to check if it exists
- * @returns {boolean}
+ * @returns Promise<boolean>
  */
 export async function FileExists(path) {
   try {
@@ -145,6 +145,30 @@ export async function FileExists(path) {
     ScenePacker.logType(CONSTANTS.MODULE_NAME, 'error', true, `Could not load ${path}`, e);
     return false;
   }
+}
+
+/**
+ * Get the base URL for the current game
+ * @returns {Promise<string|string>}
+ */
+export async function GetBaseURL() {
+  try {
+    const bucket = game.settings.get('moulinette-core', 's3Bucket');
+
+    if(bucket && bucket.length > 0 && bucket !== "null") {
+      const e = game.data.files.s3.endpoint;
+      return `${e.protocol}//${bucket}.${e.host}/`
+    }
+  } catch (e) {
+    // NOOP
+  }
+
+  if (IsUsingTheForge()) {
+    const theForgeAssetsLibraryUserPath = ForgeVTT.ASSETS_LIBRARY_URL_PREFIX + (await ForgeAPI.getUserId() || "user");
+    return theForgeAssetsLibraryUserPath ? theForgeAssetsLibraryUserPath + "/" : "";
+  }
+
+  return "";
 }
 
 /**
@@ -172,22 +196,34 @@ export async function CreateFolderRecursive(path) {
 }
 
 /**
- * Upload a File to the server, creating the folder structure if required.
+ * Upload a File to the server, creating the folder structure if required. Overwrites an existing file by default.
  * @param {File} file - The File object to upload
  * @param {string} folderPath - The destination path
  * @param {object} [options={}]  Additional file upload options passed as form data
  * @returns Promise<Object> - The response object
  */
 export async function UploadFile(file, folderPath, options = {}) {
+  if (typeof options.overwrite === 'undefined') {
+    options.overwrite = true;
+  }
+
   const source = GetFilePickerSource(folderPath);
   options = Object.assign(GetFilePickerOptions(folderPath), options);
   await CreateFolderRecursive(folderPath);
 
+  if (!options.overwrite && (await FileExists(`${folderPath}/${file.name}`))) {
+    const baseURL = await GetBaseURL();
+    ScenePacker.logType(CONSTANTS.MODULE_NAME, 'info', true, `File ${folderPath} already exists, skipping.`);
+    return {
+      path: `${baseURL}${folderPath}/${file.name}`,
+    };
+  }
+
   try {
-    if (typeof ForgeVTT != "undefined" && ForgeVTT.usingTheForge) {
-      return await ForgeVTT_FilePicker.upload(source, folderPath, file, options);
+    if (IsUsingTheForge()) {
+      return await ForgeVTT_FilePicker.upload(source, folderPath, file, {}, options);
     } else {
-      return await FilePicker.upload(source, folderPath, file, options);
+      return await FilePicker.upload(source, folderPath, file, {}, options);
     }
   } catch (e) {
     ScenePacker.logType(CONSTANTS.MODULE_NAME, 'error', true, `Unable to upload ${folderPath}`, e);
