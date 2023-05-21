@@ -21,16 +21,6 @@ export default class MoulinetteImporter extends FormApplication {
     options = Object.assign({sceneID: '', actorID: '', packInfo: {}}, options);
     const {sceneID, actorID, packInfo} = options;
 
-    if (CONSTANTS.IsV7()) {
-      Dialog.prompt({
-        title: game.i18n.localize('Unsupported'),
-        content: game.i18n.localize('SCENE-PACKER.importer.unsupported'),
-        callback: () => {
-        },
-      });
-      return;
-    }
-
     this.folderData = {};
     this.packInfo = packInfo;
     this.sceneID = sceneID;
@@ -283,7 +273,7 @@ export default class MoulinetteImporter extends FormApplication {
         const documents = await this.ensureAssets(filteredData, assetMap, assetData);
         const folderIDs = documents.map(d => d.folder);
         if (folderIDs.length) {
-          await this.createFolders(folderIDs);
+          await MoulinetteImporter.CreateFolders(folderIDs, this.folderData);
         }
         if (CONSTANTS.IsV10orNewer()) {
           // Loop through the scenes to fix up note icons from v9 to v10 (the paths changed)
@@ -342,7 +332,7 @@ export default class MoulinetteImporter extends FormApplication {
         const documents = await this.ensureAssets(filteredData, assetMap, assetData);
         const folderIDs = documents.map(d => d.folder);
         if (folderIDs.length) {
-          await this.createFolders(folderIDs);
+          await MoulinetteImporter.CreateFolders(folderIDs, this.folderData);
         }
         // Run via the .fromSource method as that operates in a non-strict validation format, allowing
         // for older formats to still be parsed in most cases.
@@ -409,7 +399,7 @@ export default class MoulinetteImporter extends FormApplication {
         const documents = await this.ensureAssets(filteredData, assetMap, assetData);
         const folderIDs = documents.map(d => d.folder);
         if (folderIDs.length) {
-          await this.createFolders(folderIDs);
+          await MoulinetteImporter.CreateFolders(folderIDs, this.folderData);
         }
         // Run via the .fromSource method as that operates in a non-strict validation format, allowing
         // for older formats to still be parsed in most cases.
@@ -454,7 +444,7 @@ export default class MoulinetteImporter extends FormApplication {
         const documents = await this.ensureAssets(filteredData, assetMap, assetData);
         const folderIDs = documents.map(d => d.folder);
         if (folderIDs.length) {
-          await this.createFolders(folderIDs);
+          await MoulinetteImporter.CreateFolders(folderIDs, this.folderData);
         }
         // Run via the .fromSource method as that operates in a non-strict validation format, allowing
         // for older formats to still be parsed in most cases.
@@ -494,7 +484,7 @@ export default class MoulinetteImporter extends FormApplication {
         const documents = await this.ensureAssets(filteredData, assetMap, assetData);
         const folderIDs = documents.map(d => d.folder);
         if (folderIDs.length) {
-          await this.createFolders(folderIDs);
+          await MoulinetteImporter.CreateFolders(folderIDs, this.folderData);
         }
         // Run via the .fromSource method as that operates in a non-strict validation format, allowing
         // for older formats to still be parsed in most cases.
@@ -523,7 +513,7 @@ export default class MoulinetteImporter extends FormApplication {
         const documents = await this.ensureAssets(filteredData, assetMap, assetData);
         const folderIDs = documents.map(d => d.folder);
         if (folderIDs.length) {
-          await this.createFolders(folderIDs);
+          await MoulinetteImporter.CreateFolders(folderIDs, this.folderData);
         }
         // Run via the .fromSource method as that operates in a non-strict validation format, allowing
         // for older formats to still be parsed in most cases.
@@ -552,7 +542,7 @@ export default class MoulinetteImporter extends FormApplication {
         const documents = await this.ensureAssets(filteredData, assetMap, assetData);
         const folderIDs = documents.map(d => d.folder);
         if (folderIDs.length) {
-          await this.createFolders(folderIDs);
+          await MoulinetteImporter.CreateFolders(folderIDs, this.folderData);
         }
         // Run via the .fromSource method as that operates in a non-strict validation format, allowing
         // for older formats to still be parsed in most cases.
@@ -581,7 +571,7 @@ export default class MoulinetteImporter extends FormApplication {
         const documents = await this.ensureAssets(filteredData, assetMap, assetData);
         const folderIDs = documents.map(d => d.folder);
         if (folderIDs.length) {
-          await this.createFolders(folderIDs);
+          await MoulinetteImporter.CreateFolders(folderIDs, this.folderData);
         }
         // Run via the .fromSource method as that operates in a non-strict validation format, allowing
         // for older formats to still be parsed in most cases.
@@ -683,7 +673,7 @@ export default class MoulinetteImporter extends FormApplication {
           const documents = await this.ensureAssets(dataToImport, assetMap, assetData);
           const folderIDs = documents.map(d => d.folder);
           if (folderIDs.length) {
-            await this.createFolders(folderIDs);
+            await MoulinetteImporter.CreateFolders(folderIDs, this.folderData);
           }
           // Run via the .fromSource method as that operates in a non-strict validation format, allowing
           // for older formats to still be parsed in most cases.
@@ -924,12 +914,26 @@ export default class MoulinetteImporter extends FormApplication {
   /**
    * Creates the folders within the world.
    * @param {string[]} folderIDs - Optional. Only import folders that are parents of the given IDs.
+   * @param {Object.<string, Folder>} folderData - The data for the folders to import.
    */
-  async createFolders(folderIDs = []) {
+  static async CreateFolders(folderIDs = [], folderData) {
     let toImport = {};
 
+    // Proxy access to the folderData parent property
+    for (const folderID in folderData) {
+      folderData[folderID] = new Proxy(folderData[folderID], {
+        get: (target, prop) => {
+          if (prop === 'parent' && typeof target.folder === 'string') {
+            return target.folder;
+          }
+
+          return target[prop];
+        }
+      })
+    }
+
     const addValueAndParents = (id) => {
-      const value = this.folderData[id];
+      const value = folderData[id];
       if (!value) {
         return;
       }
@@ -944,7 +948,7 @@ export default class MoulinetteImporter extends FormApplication {
         addValueAndParents(folderID);
       }
     } else {
-      toImport = this.folderData;
+      toImport = folderData;
     }
 
     /**
@@ -962,7 +966,7 @@ export default class MoulinetteImporter extends FormApplication {
       // See if there are any entries waiting to be added for this entry
       if (buffer[id]) {
         for (const entry of buffer[id]) {
-          createData.push(entry);
+          createData.push({ ...entry });
           processBuffer(entry._id);
         }
         delete buffer[id];
@@ -976,7 +980,7 @@ export default class MoulinetteImporter extends FormApplication {
       }
       if (!entry.parent || createData.some((e) => e._id === entry.parent) || (entry.parent && game.folders.has(entry.parent))) {
         // Entry has no parent, or the parent is already added, or the parent already exists in the world
-        createData.push(entry);
+        createData.push({ ...entry });
 
         processBuffer(entry._id);
       } else {

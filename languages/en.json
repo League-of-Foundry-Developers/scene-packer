@@ -326,6 +326,18 @@
       "more-info": "More info:",
       "missing-asset": "Missing asset from package data: {asset}"
     },
+    "zip-importer": {
+      "name": "Import from Moulinette ZIP",
+      "label": "Open Importer wizard",
+      "hint": "The importer wizard will allow you to import a Moulinette ZIP file into your world.",
+      "title": "Import from Moulinette ZIP file",
+      "file": "Select the ZIP file you want to import:",
+      "description": "This importer allows you to import a ZIP file that was prepared for export to Moulinette.",
+      "description2": "The importer will import the entire pack from the ZIP. If you are wanting just a single scene, use Moulinette instead.",
+      "error-unzip": "There was an error unzipping the file \"{name}\". Please ask for assistance on the Scene Packer Discord server.",
+      "ensure-assets": "Ensuring {count} assets exist.",
+      "ensure-asset-error": "Error creating asset: {error}"
+    },
     "exporter": {
       "name": "Export to Moulinette",
       "label": "Open Exporter wizard",

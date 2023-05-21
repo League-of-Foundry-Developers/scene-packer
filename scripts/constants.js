@@ -170,6 +170,11 @@ export const CONSTANTS = Object.freeze({
   SETTING_EXPORT_TO_MOULINETTE_THEMES: 'exportToMoulinetteThemes',
 
   /**
+   * The setting key for triggering the Importer class.
+   */
+  SETTING_IMPORT_FROM_ZIP: 'importFromZip',
+
+  /**
    * The setting key for what version has been imported already. Used for tracking which dialogs to display.
    */
   SETTING_IMPORTED_VERSION: 'imported',

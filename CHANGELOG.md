@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.7.0
+
+- Added support for importing Moulinette Zip files from the Settings window.
+  - This is for any creators who choose to make the Zip files directly available.
+- Fixed folder structure not being created correctly when importing from Moulinette.
+- Removed a couple of v7 code references that are no longer needed.
+
 ## v2.6.16
 
 - Mark Scene Packer as compatible with v11 of Foundry.

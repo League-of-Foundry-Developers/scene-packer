@@ -7,15 +7,6 @@ export default class Exporter extends FormApplication {
 
     // TODO Support updating an "existing" export in a nice way
 
-    if (CONSTANTS.IsV7()) {
-      Dialog.prompt({
-        title: game.i18n.localize('Unsupported'),
-        content: game.i18n.localize('SCENE-PACKER.exporter.unsupported'),
-        callback: () => {},
-      });
-      return;
-    }
-
     this.supportsCards = !!CONFIG.Cards;
 
     this.Scene = this.initialize('Scene');
