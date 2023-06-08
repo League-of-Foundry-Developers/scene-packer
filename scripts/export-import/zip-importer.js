@@ -4,7 +4,7 @@ import { CONSTANTS } from '../constants.js';
 import MoulinetteImporter from './moulinette-importer.js';
 import { ReplaceCompendiumReferences } from './converter.js';
 import { UnrelatedData } from './related/unrelated-data.js';
-import { UploadFile } from '../assets/file.js';
+import { GetBaseURL, UploadFile } from '../assets/file.js';
 
 export default class ZipImporter extends FormApplication {
   constructor(object, options) {
@@ -67,6 +67,7 @@ export default class ZipImporter extends FormApplication {
 
     const file = filesData[0];
     this.filename = file.name;
+    ScenePacker.logType(CONSTANTS.MODULE_NAME, 'info', true, `Loading ${this.filename} (${Math.ceil((file.size / 1024 / 1024) * 100) / 100}MB)`);
 
     await this.updateProcessStatus({
       message: `<p>${game.i18n.localize('SCENE-PACKER.importer.processing')}</p>`,
@@ -81,7 +82,51 @@ export default class ZipImporter extends FormApplication {
     await this.updateProcessStatus({
       message: `<p>${game.i18n.localize('SCENE-PACKER.importer.process-fetch-data')}</p>`,
     });
-    const fileData = await ZipImporter.readBlobFromFile(file);
+
+    // Try to allocate an array buffer of the correct size. This will throw an error if the file is
+    // too large, seemingly > ~2GB on chrome.
+    try {
+      new Uint8Array(file.size)
+    } catch (err) {
+      ScenePacker.logType(
+        CONSTANTS.MODULE_NAME,
+        'error',
+        true,
+        game.i18n.format('SCENE-PACKER.zip-importer.zip-too-large', { name: file.name }),
+        err,
+      );
+      ui.notifications.error(
+        game.i18n.format('SCENE-PACKER.zip-importer.zip-too-large', { name: file.name }),
+        { permanent: true },
+      );
+      this.updateProcessStatus({
+        message: `<p class="error">${game.i18n.format('SCENE-PACKER.zip-importer.zip-too-large', { name: file.name })}</p>`,
+      });
+
+      return false;
+    }
+
+    const fileData = await ZipImporter.readBlobFromFile(file).catch(err => {
+      ScenePacker.logType(
+        CONSTANTS.MODULE_NAME,
+        'error',
+        true,
+        game.i18n.format('SCENE-PACKER.zip-importer.error-read', { name: file.name }),
+        err,
+      );
+      ui.notifications.error(
+        game.i18n.format('SCENE-PACKER.zip-importer.error-read', { name: file.name }),
+        { permanent: true },
+      );
+      this.updateProcessStatus({
+        message: `<p class="error">${game.i18n.format('SCENE-PACKER.zip-importer.error-read', { name: file.name })}</p>`,
+      });
+
+      return false;
+    });
+    if (!fileData) {
+      return false;
+    }
     this.decompressed = await new Promise((resolve, reject) => fflate.unzip(
       new Uint8Array(fileData),
       (err, unzipped) => err ? reject(err) : resolve(unzipped),
@@ -599,7 +644,7 @@ export default class ZipImporter extends FormApplication {
       return entities;
     }
 
-    const baseURL = await game.moulinette.applications.MoulinetteFileUtil.getBaseURL() || '';
+    const baseURL = await GetBaseURL() || '';
     const adventureFolder = `${this.scenePackerInfo.author}-${this.scenePackerInfo.name}`.slugify({ strict: true }) || 'scene-packer-fallback';
     const returnEntities = [];
     console.groupCollapsed(

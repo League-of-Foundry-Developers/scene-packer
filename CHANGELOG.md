@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.7.1
+
+- Fix issue where the Moulinette module was incorrectly required for handling a direct Zip upload.
+- Added check to see whether the Zip file is too large to process by the browser.
+  - This value is approximately 2GB on Chrome and approximately 4GB on Firefox. 
+
 ## v2.7.0
 
 - Added support for importing Moulinette Zip files from the Settings window.
