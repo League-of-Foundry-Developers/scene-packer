@@ -526,6 +526,20 @@
       "import-replace": "Remplacer le contenu existant",
       "import-rename": "Renommer le contenu existant",
       "import-close": "Ne plus montrer par la suite"
+    },
+    "zip-importer": {
+      "hint": "L'assistant d'importation vous permettra d'importer un fichier ZIP de Moulinette dans votre monde.",
+      "title": "Importation du fichier ZIP Moulinette",
+      "description": "Cet import vous permet d'importer un fichier ZIP qui a été préparé pour l'exportation vers Moulinette.",
+      "error-unzip": "Une erreur s'est produite lors de la décompression du fichier \"{name}\". Veuillez demander de l'aide sur le serveur Discord de Scene Packer.",
+      "ensure-assets": "S'assurer de l'existence de {count} ressources.",
+      "ensure-asset-error": "Erreur lors de la création de la ressource : {erreur}",
+      "name": "Importer un ZIP de Moulinette",
+      "label": "Ouvrir l'assistant d'importation",
+      "file": "Sélectionnez le fichier ZIP que vous souhaitez importer :",
+      "description2": "L'import importera l'ensemble du pack à partir du ZIP. Si vous ne voulez qu'une seule scène, utilisez plutôt Moulinette.",
+      "error-read": "Une erreur s'est produite lors de la lecture du fichier \"{name}\". Veuillez demander de l'aide sur le serveur Discord de Scene Packer.",
+      "zip-too-large": "Le fichier ZIP est trop volumineux pour être importé. Pour une compatibilité maximale, les fichiers ZIP doivent être inférieurs à 2 Go. Demandez de l'aide sur le serveur Discord de Scene Packer."
     }
   }
 }
