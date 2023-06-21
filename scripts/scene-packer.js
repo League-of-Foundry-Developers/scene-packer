@@ -497,7 +497,37 @@ export default class ScenePacker {
             continue;
           }
 
-          let folderData = await this.buildFolderStructureForPackContent(packContent, packType, this.adventureName);
+          // Create missing folders belonging to core data (support added in v11)
+          if (pack.folders) {
+            // Create a parent folder for this pack if it has more than one child
+            const requiresParentFolder = pack.folders.reduce((acc, f) => {
+              const data = f.toObject();
+              return acc + (data.folder ? 0 : 1);
+            }, 0) > 1;
+
+            let parentFolder;
+            if (requiresParentFolder) {
+              parentFolder = game.folders.find(f => f.name === this.adventureName && f.type === packType);
+              if (!parentFolder) {
+                parentFolder = await Folder.create({
+                  name: this.adventureName,
+                  type: packType,
+                  parent: null
+                });
+              }
+            }
+            const folderCreateData = pack.folders.map(f => {
+              if ( game.folders.has(f.id) ) return null;
+              const data = f.toObject();
+
+              // If this folder has no parent folder, assign it to the new folder
+              if (!data.folder && parentFolder?.id) data.folder = parentFolder.id;
+              return data;
+            }).filter(f => f);
+            await Folder.createDocuments(folderCreateData, {keepId: true});
+          }
+
+          const folderData = await this.buildFolderStructureForPackContent(packContent, packType, this.adventureName);
 
           // Append the entities found in this pack to the growing list to import
           createData = createData.concat(
@@ -516,7 +546,7 @@ export default class ScenePacker {
               }
               cData.flags[CONSTANTS.MODULE_NAME].hash = Hash.SHA1(cData);
 
-              if ((CONST.FOLDER_DOCUMENT_TYPES || CONST.FOLDER_ENTITY_TYPES).includes(packType)) {
+              if (!cData.folder && (CONST.FOLDER_DOCUMENT_TYPES ?? CONST.FOLDER_ENTITY_TYPES).includes(packType)) {
                 // Utilise the folder structure as defined by the Compendium Folder if it exists, otherwise
                 // fall back to the default folder.
                 const cfPath = cData.flags?.cf?.path;
@@ -693,7 +723,7 @@ export default class ScenePacker {
     if (!content.length) {
       return response;
     }
-    if (!(CONST.FOLDER_DOCUMENT_TYPES || CONST.FOLDER_ENTITY_TYPES).includes(entityType)) {
+    if (!(CONST.FOLDER_DOCUMENT_TYPES ?? CONST.FOLDER_ENTITY_TYPES).includes(entityType)) {
       // Entity type does not support folders
       return response;
     }
@@ -3473,7 +3503,7 @@ export default class ScenePacker {
     const sceneData = CONSTANTS.IsV10orNewer() ? scene : scene.data;
     if (scenePlaylist) {
       const playlist = await this.ImportByUuid(scenePlaylist);
-      if (playlist?.id !== sceneData.playlist) {
+      if (playlist && playlist?.id !== sceneData.playlist) {
         await scene.update({playlist: playlist.id});
       }
     }

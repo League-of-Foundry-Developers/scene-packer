@@ -10,7 +10,7 @@
     },
     "welcome": {
       "title": "Démarrage rapide",
-      "intro": "<h2>Bienvenue dans <strong>{aventure}</strong>.</h2>",
+      "intro": "<h2>Bienvenue dans <strong>{adventure}</strong>.</h2>",
       "brand-new": "<p>Souhaitez-vous importer et décompresser le contenu de ce module ?</p>",
       "update-available": "<p>Une mise à jour est disponible. Vous avez installé <strong>{existing}</strong> et la version <strong>{version}</strong> est disponible. Voulez-vous importer le contenu de ce module ?</p>",
       "update-cancelled": "La mise à jour de {module} de {from} -> vers {to} a été annulée.",
