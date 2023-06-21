@@ -56,13 +56,14 @@ There are several `Journal entries` bundled with Scene Packer. In them, you can 
 To use the Scene Packer as part of your module you will need to add it as a dependency in your `module.json` file as well as add/update your module javascript (see [Module code requirements](#module-code-requirements) below).
 
 ```json
-"dependencies": [
-  {
-    "name": "scene-packer",
-    "manifest": "https://github.com/League-of-Foundry-Developers/scene-packer/releases/latest/download/module.json",
-    "type": "module"
-  }
-]
+"relationships": {
+  "requires": [
+    {
+      "id": "scene-packer",
+      "type": "module"
+    }
+  ]
+}
 ```
 
 If you would like some help packing your module, feel free to stop by my [<img src="https://github.com/League-of-Foundry-Developers/scene-packer/raw/main/assets/icons/hand-truck.png" alt="icon" height="24" valign="middle">
@@ -193,9 +194,9 @@ When you build an adventure module, it's a painful process updating all of your 
 await ScenePacker.RelinkJournalEntries('module-name', {dryRun: false});
 ```
 
-Alternatively, you can run the macro `Relink compendium journal entries` that is included in the Scene Packer compendium, which will prompt you for your module name and whether you want to run in "dry run" mode (not saving changes).
+Alternatively, you can run the macro `Relink compendium entries` that is included in the Scene Packer compendium, which will prompt you for your module name and whether you want to run in "dry run" mode (not saving changes).
 
-This will automatically go through the Journal compendiums that belong to your module, and change the reference links to the compendium versions. For example, if you had a link to `@Actor[alvhCr52HIrWmoez]{Commoner}` it would change it to `@Compendium[your-module.actors.lOBiqShvkT83eGzY]{Commoner}` using your module and compendium names and ID references.
+This will automatically go through the compendiums that belong to your module, and change the reference links to the compendium versions. For example, if you had a link to `@Actor[alvhCr52HIrWmoez]{Commoner}` it would change it to `@Compendium[your-module.actors.lOBiqShvkT83eGzY]{Commoner}` using your module and compendium names and ID references.
 
 ## Macros
 

@@ -85,8 +85,131 @@ export default class Exporter extends FormApplication {
     return {
       folders,
       documents,
-      tree: SidebarDirectory.setupFolders(folders, documents),
+      tree: this.constructor.setupFolders(folders, documents),
     };
+  }
+
+  /**
+   * Populate a single folder with child folders and content
+   * This method is called recursively when building the folder tree
+   * @param {Folder|null} folder          A parent folder being populated or null for the root node
+   * @param {Folder[]} folders            Remaining unassigned folders which may be children of this one
+   * @param {ClientDocument[]} documents  Remaining unassigned documents which may be children of this one
+   * @param {object} [options={}]         Options which configure population
+   * @param {boolean} [options.allowChildren=true]  Allow additional child folders
+   * @private
+   */
+  static _classifyFolderContent(folder, folders, documents, {allowChildren=true}={}) {
+    const sort = folder?.sorting === "a" ? this._sortAlphabetical : this._sortStandard;
+
+    // Partition folders into children and unassigned folders
+    const [unassignedFolders, subfolders] = folders.partition(f => allowChildren && (f.folder === folder));
+    subfolders.sort(sort);
+
+    // Partition documents into folder contents and unassigned documents
+    const [unassignedDocuments, contents] = documents.partition(e => e.folder === folder);
+    contents.sort(sort);
+
+    // Return the classified content
+    return {folders: subfolders, documents: contents, unassignedFolders, unassignedDocuments};
+  }
+
+  /**
+   * Sort two Documents using their numeric sort fields.
+   * @param {Document} a    Some Document
+   * @param {Document} b    Some other Document
+   * @returns {number}      The sort order between documents a and b
+   * @private
+   */
+  static _sortStandard(a, b) {
+    return a.sort - b.sort;
+  }
+
+  /**
+   * Sort two Documents by name, alphabetically.
+   * @param {Document} a    Some Document
+   * @param {Document} b    Some other Document
+   * @returns {number}      The sort order between documents a and b
+   * @private
+   */
+  static _sortAlphabetical(a, b) {
+    return a.name.localeCompare(b.name);
+  }
+
+  /**
+   * Given a Document type and a list of Document instances, set up the Folder tree
+   * @param {Folder[]} folders        The Array of Folder objects to organize
+   * @param {ClientDocument[]} documents  The Array of Document objects to organize
+   * @returns {object}                A tree structure containing the folders and documents
+   */
+  static setupFolders(folders, documents) {
+    documents = documents.filter(d => d.visible);
+    const handled = new Set();
+    const createNode = (root, folder, depth) => {
+      return {root, folder, depth, visible: false, children: [], documents: []};
+    };
+
+    // Create the tree structure
+    const tree = createNode(true, null, 0);
+    const depths = [[tree]];
+
+    // Iterate by folder depth, populating content
+    for ( let depth=1; depth<=CONST.FOLDER_MAX_DEPTH+1; depth++ ) {
+      const allowChildren = depth <= CONST.FOLDER_MAX_DEPTH;
+      depths[depth] = [];
+      const nodes = depths[depth-1];
+      if ( !nodes.length ) break;
+      for ( const node of nodes ) {
+        const folder = node.folder;
+        if ( !node.root ) { // Ensure we don't encounter any infinite loop
+          if ( handled.has(folder.id) ) continue;
+          handled.add(folder.id);
+        }
+
+        // Classify content for this folder
+        const classified = this._classifyFolderContent(folder, folders, documents, {allowChildren});
+        node.documents = classified.documents;
+        node.children = classified.folders.map(folder => createNode(false, folder, depth));
+        depths[depth].push(...node.children);
+
+        // Update unassigned content
+        folders = classified.unassignedFolders;
+        documents = classified.unassignedDocuments;
+      }
+    }
+
+    // Populate left-over folders at the root level of the tree
+    for ( const folder of folders ) {
+      const node = createNode(false, folder, 1);
+      const classified = this._classifyFolderContent(folder, folders, documents, {allowChildren: false});
+      node.documents = classified.documents;
+      documents = classified.unassignedDocuments;
+      depths[1].push(node);
+    }
+
+    // Populate left-over documents at the root level of the tree
+    if ( documents.length ) {
+      tree.documents.push(...documents);
+      tree.documents.sort(this._sortStandard);
+    }
+
+    // Recursively filter visibility of the tree
+    const filterChildren = node => {
+      node.children = node.children.filter(child => {
+        filterChildren(child);
+        return child.visible;
+      });
+      node.visible = node.root || game.user.isGM || ((node.children.length + node.documents.length) > 0);
+
+      // Populate some attributes of the Folder document
+      if ( node.folder ) {
+        node.folder.displayed = node.visible;
+        node.folder.depth = node.depth;
+        node.folder.children = node.children;
+      }
+    };
+    filterChildren(tree);
+    return tree;
   }
 
   /** @inheritdoc */

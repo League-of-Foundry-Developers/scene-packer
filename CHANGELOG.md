@@ -1,5 +1,14 @@
 # Changelog
 
+## v2.7.2
+
+- Fixed Moulinette exporter not working on v11.
+- Fixed folders managed by core not importing correctly.
+  - A parent folder will be created automatically if there is more than document in the root of the compendium. Or to put it a different way, importing from a compendium will always import into a single parent directory.
+- Updated french translation. Co-authored-by: 
+  - rectulo
+  - Marc Feuillen
+
 ## v2.7.1
 
 - Fix issue where the Moulinette module was incorrectly required for handling a direct Zip upload.
