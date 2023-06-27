@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.7.3
+
+- Maintain the sort order when importing all documents from the welcome dialog.
+  - Right-clicking on a compendium and choosing "Import All" will still use the default Foundry VTT functionality, which removes the sort order. 
+
 ## v2.7.2
 
 - Fixed Moulinette exporter not working on v11.
