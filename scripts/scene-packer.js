@@ -532,7 +532,7 @@ export default class ScenePacker {
           // Append the entities found in this pack to the growing list to import
           createData = createData.concat(
             packContent.map(c => {
-              let cData = collection.fromCompendium(c);
+              let cData = collection.fromCompendium(c, {clearSort: false, keepId: true});
               cData._id = c.id; // Preserve the original ID
 
               const newFlags = {};
@@ -2673,7 +2673,7 @@ export default class ScenePacker {
         // Append the entities found in this pack to the growing list to import
         createData = createData.concat(
           content.map((c) => {
-            const cData = collection.fromCompendium(c);
+            const cData = collection.fromCompendium(c, {clearSort: false, keepId: true});
             // Utilise the folder structure as defined by the Compendium Folder if it exists, otherwise
             // fall back to the default folder.
             const cfPath = cData.flags?.cf?.path;
@@ -3476,7 +3476,7 @@ export default class ScenePacker {
       update.sort = entityData.flags.cf.sort;
     }
 
-    return await collection.importFromCompendium(game.packs.get(entity.compendium.collection), entity.id, update, {keepId: true});
+    return await collection.importFromCompendium(game.packs.get(entity.compendium.collection), entity.id, update, {clearSort: false, keepId: true});
   }
 
   /**
