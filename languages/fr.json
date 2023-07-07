@@ -235,6 +235,7 @@
     },
     "world-conversion": {
       "compendiums": {
+        "wait": "Veuillez patienter... Consulter la console (F12) pour plus d'informations.",
         "unlock": "Déverrouillage des compendiums : {liste}",
         "lock": "Verrouillage des compendiums : {liste}",
         "lock-prompt": "Voulez-vous verrouiller les compendiums qui appartiennent au module \"{moduleName}\" ?",

@@ -4601,6 +4601,12 @@ export default class ScenePacker {
       await ScenePacker.SetModuleCompendiumLockState(false, moduleName);
     }
 
+    ui.notifications.info(
+      game.i18n.localize('SCENE-PACKER.world-conversion.compendiums.wait'),
+      {
+        permanent: true,
+      },
+    );
     await instance.RelinkEntries(moduleName, 'JournalEntryPacks', {dryRun, packs});
     await instance.RelinkEntries(moduleName, 'ItemPacks', {dryRun, packs});
     await instance.RelinkEntries(moduleName, 'RollTablePacks', {dryRun, packs});
@@ -4619,6 +4625,9 @@ export default class ScenePacker {
 
     ui.notifications.info(
       game.i18n.localize('SCENE-PACKER.world-conversion.compendiums.completed'),
+      {
+        permanent: true,
+      },
     );
   }
 
@@ -4660,7 +4669,10 @@ export default class ScenePacker {
         break;
     }
     for (const pack of entryPacks.filter(p => (p.metadata.packageName || p.metadata.package) === moduleName)) {
-      ui.notifications.info(
+      ScenePacker.logType(
+        moduleName,
+        'info',
+        true,
         game.i18n.format(
           'SCENE-PACKER.world-conversion.compendiums.checking-and-updating',
           {
@@ -4687,7 +4699,10 @@ export default class ScenePacker {
                   } = await this.relinkContent(page.text.content, entry, page, {domParser, rex, moduleName, packs, pack, typeName});
 
                   if (newContent !== page.text.content) {
-                    ui.notifications.info(
+                    ScenePacker.logType(
+                      moduleName,
+                      'info',
+                      true,
                       game.i18n.format(
                         'SCENE-PACKER.world-conversion.compendiums.updating-reference',
                         {
@@ -4801,7 +4816,10 @@ export default class ScenePacker {
         }
 
         if (newContent !== originalContent) {
-          ui.notifications.info(
+          ScenePacker.logType(
+            moduleName,
+            'info',
+            true,
             game.i18n.format(
               'SCENE-PACKER.world-conversion.compendiums.updating-reference',
               {
