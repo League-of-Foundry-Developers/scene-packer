@@ -4601,6 +4601,12 @@ export default class ScenePacker {
       await ScenePacker.SetModuleCompendiumLockState(false, moduleName);
     }
 
+    ui.notifications.info(
+      game.i18n.localize('SCENE-PACKER.world-conversion.compendiums.wait'),
+      {
+        permanent: true,
+      },
+    );
     await instance.RelinkEntries(moduleName, 'JournalEntryPacks', {dryRun, packs});
     await instance.RelinkEntries(moduleName, 'ItemPacks', {dryRun, packs});
     await instance.RelinkEntries(moduleName, 'RollTablePacks', {dryRun, packs});
@@ -4619,6 +4625,9 @@ export default class ScenePacker {
 
     ui.notifications.info(
       game.i18n.localize('SCENE-PACKER.world-conversion.compendiums.completed'),
+      {
+        permanent: true,
+      },
     );
   }
 
@@ -4660,7 +4669,10 @@ export default class ScenePacker {
         break;
     }
     for (const pack of entryPacks.filter(p => (p.metadata.packageName || p.metadata.package) === moduleName)) {
-      ui.notifications.info(
+      ScenePacker.logType(
+        moduleName,
+        'info',
+        true,
         game.i18n.format(
           'SCENE-PACKER.world-conversion.compendiums.checking-and-updating',
           {
@@ -4687,7 +4699,10 @@ export default class ScenePacker {
                   } = await this.relinkContent(page.text.content, entry, page, {domParser, rex, moduleName, packs, pack, typeName});
 
                   if (newContent !== page.text.content) {
-                    ui.notifications.info(
+                    ScenePacker.logType(
+                      moduleName,
+                      'info',
+                      true,
                       game.i18n.format(
                         'SCENE-PACKER.world-conversion.compendiums.updating-reference',
                         {
@@ -4714,6 +4729,85 @@ export default class ScenePacker {
           case 'ItemPacks':
             if (CONSTANTS.IsV10orNewer()) {
               content = document?.system?.description?.value;
+              if (document.advancement) {
+                // D&D5e items have an advancement property that may contain links to other items
+                for (const item of Object.values(document.advancement.byId || {})) {
+                  let itemGrantsChanged = false;
+                  let itemGrants = foundry.utils.deepClone(item.configuration?.items || []);
+                  for (let i = 0; i < itemGrants.length; i++) {
+                    const itemGrant = itemGrants[i];
+                    if (itemGrant.startsWith('Compendium.')) {
+                      continue;
+                    }
+                    const itemToGrant = ScenePacker.FindEntity(itemGrant);
+                    if (!itemToGrant) {
+                      ScenePacker.logType(
+                        moduleName,
+                        'error',
+                        true,
+                        document.name,
+                        item.title,
+                        game.i18n.format(
+                          'SCENE-PACKER.world-conversion.compendiums.invalid-no-matching-name',
+                          {
+                            name: itemGrant,
+                            type: `${item.type}Advancement`,
+                          }
+                        ),
+                      );
+                      continue;
+                    }
+
+                    const compendiumEntity = await this.findCompendiumEntity(
+                      itemGrant,
+                      itemToGrant.name,
+                      itemToGrant.type,
+                      this.getSearchPacksForType(itemToGrant.type)
+                    );
+                    if (!compendiumEntity) {
+                      ScenePacker.logType(
+                        moduleName,
+                        'warning',
+                        true,
+                        game.i18n.localize(
+                          'SCENE-PACKER.world-conversion.compendiums.invalid-not-found-console',
+                        ),
+                        document.name,
+                        item.title,
+                        `${item.type}Advancement`,
+                        itemToGrant,
+                      );
+                      continue;
+                    }
+                    ScenePacker.logType(
+                      moduleName,
+                      'info',
+                      true,
+                      game.i18n.format(
+                        'SCENE-PACKER.world-conversion.compendiums.updating-reference-console',
+                        {
+                          pack: pack.collection,
+                          journalEntryId: entry._id,
+                          type: `${item.type}Advancement`,
+                          oldRef: itemGrant,
+                          newRefPack: compendiumEntity.pack,
+                          newRef: compendiumEntity.uuid,
+                        },
+                      ),
+                    );
+
+                    // Replace the reference
+                    itemGrants[i] = compendiumEntity.uuid;
+                    itemGrantsChanged = true;
+                  }
+
+                  if (itemGrantsChanged && !dryRun) {
+                    await document.updateAdvancement(item.id, {
+                      "configuration.items": itemGrants,
+                    });
+                  }
+                }
+              }
             } else {
               content = document?.data?.data?.description?.value;
             }
@@ -4801,7 +4895,10 @@ export default class ScenePacker {
         }
 
         if (newContent !== originalContent) {
-          ui.notifications.info(
+          ScenePacker.logType(
+            moduleName,
+            'info',
+            true,
             game.i18n.format(
               'SCENE-PACKER.world-conversion.compendiums.updating-reference',
               {
