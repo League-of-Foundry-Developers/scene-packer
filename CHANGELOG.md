@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.7.4
+
+- Updated the "Relink compendium Entries" macro:
+  - Added support for `Advancement` style Items.  
+- Reduced the number of UI notifications that occur when Relinking Compendium Entities.
+  - Full details remain in the console (F12).
+
 ## v2.7.3
 
 - Maintain the sort order when importing all documents from the welcome dialog.
@@ -10,7 +17,7 @@
 - Fixed Moulinette exporter not working on v11.
 - Fixed folders managed by core not importing correctly.
   - A parent folder will be created automatically if there is more than document in the root of the compendium. Or to put it a different way, importing from a compendium will always import into a single parent directory.
-- Updated french translation. Co-authored-by: 
+- Updated French translation. Co-authored-by: 
   - rectulo
   - Marc Feuillen
 
