@@ -118,6 +118,9 @@ export async function ExpandWildcard(path) {
         wildcard: true,
       })
     );
+    if (!base.files.length) {
+      ScenePacker.logType(CONSTANTS.MODULE_NAME, 'warning', true, `The following path could not be found by Foundry VTT "${path}". The most common case for this is using a case insensitive file system (such as Windows) and referring to a path with the wrong capitalisation. For further help, join the Discord (link in the readme).`);
+    }
     return base.files;
   } catch (e) {
     ScenePacker.logType(CONSTANTS.MODULE_NAME, 'error', true, `Could not load ${path}`, e);
