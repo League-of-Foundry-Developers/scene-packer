@@ -1,5 +1,18 @@
 # Changelog
 
+## v2.7.5
+
+- Fixed the "Bulk Pack Scenes" macro not working correctly on v11.
+- Removed deprecated use of `isObjectEmpty` from "Bulk replace asset references" macro.
+- Improved the "Asset Report" to better link to Adventure documents when they are the source of asset dependencies.
+- Added a Console Warning when the Asset tools notice an asset reference that has the wrong case sensitivity.
+  - This occurs most commonly on a Windows machine where the file system is case insensitive. Everything will look correct to the Windows user, but the asset will likely fail for anyone on mac/linux.
+- Added a Console only command to bulk convert all assets in the world to lower-case.
+  - It can be run via the Console (F12) with the command `ScenePacker.ConvertAssetsToLowercase();`.
+  - This tool was requested by a Patreon supporter and likely has minimal use for most people.
+- Updated [fflate](https://github.com/101arrowz/fflate) library to v0.8.0
+  - This library is used for ZIP operations, primarily in support of the Moulinette integration.
+
 ## v2.7.4
 
 - Updated the "Relink compendium Entries" macro:

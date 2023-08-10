@@ -541,6 +541,17 @@
       "import-replace": "Replace existing content",
       "import-rename": "Rename existing content",
       "import-close": "Don't show again"
+    },
+    "assets-to-lowercase": {
+      "title": "Check Assets Exist and Convert to Lowercase",
+      "description": "This tool will check that all assets in your world exist and convert their references to lowercase. It will first list out all of the asset references that it will convert and then prompt you to confirm.",
+      "find-assets": "Find assets",
+      "convert": "Convert assets",
+      "wait": "Please wait…",
+      "nothing": "There were no assets found in your world.",
+      "all-lowercase": "All assets are already lowercase.",
+      "list-assets": "The following assets will be converted to lowercase:",
+      "confirm": "Are you sure you want to convert these assets to lowercase?"
     }
   }
 }

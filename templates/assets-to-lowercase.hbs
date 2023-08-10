@@ -1,0 +1,64 @@
+<div>
+    <section class="content">
+        <div>{{localize 'SCENE-PACKER.assets-to-lowercase.description'}}</div>
+        <hr>
+
+        {{#if readyToConvert}}
+            {{#unless totalAssets}}
+                <div><p>{{localize 'SCENE-PACKER.assets-to-lowercase.nothing'}}</p></div>
+            {{else}}
+                {{#unless assetsMap.data.size}}
+                    <div><p>{{localize 'SCENE-PACKER.assets-to-lowercase.all-lowercase'}}</p></div>
+                {{else}}
+                    <div>
+                        <p>{{localize 'SCENE-PACKER.assets-to-lowercase.list-assets'}}</p>
+                        <ul>
+                            {{#each assetsMap.data as |asset|}}
+                                <li>
+                                    {{{boldCapitals asset.[0]}}}
+                                    <ul>
+                                        {{#each asset.[1] as |details|}}
+                                            <li>
+                                                <a class="content-link" draggable="true" data-uuid="{{details.parentType}}.{{details.parentID}}" data-id="{{details.parentID}}" data-type="{{details.parentType}}"><i class="fas fa-file-archive"></i>{{details.parentType}} {{lookupDocumentName type=details.parentType documentId=details.parentID}}</a>
+                                                {{details.location}}
+                                                {{#unless (eq details.id details.parentID)}}
+                                                    ({{details.documentType}} {{details.id}})
+                                                {{/unless}}
+                                            </li>
+                                        {{/each}}
+                                    </ul>
+                                </li>
+                            {{/each}}
+                        </ul>
+                        <hr>
+                        <p>{{localize 'SCENE-PACKER.assets-to-lowercase.confirm'}}</p>
+                    </div>
+                {{/unless}}
+            {{/unless}}
+        {{/if}}
+    </section>
+
+
+    <footer class="flexrow">
+        {{#unless processing}}
+            <button type="button" name="process">
+                <i class="fas fa-magnifying-glass"></i> {{localize 'SCENE-PACKER.assets-to-lowercase.find-assets'}}
+            </button>
+        {{else}}
+            {{#unless readyToConvert}}
+                <button type="button" name="wait" disabled>
+                    <i class="fas fa-hourglass-half"></i> {{localize 'SCENE-PACKER.assets-to-lowercase.wait'}}
+                </button>
+            {{else}}
+                {{#if assetsMap.data.size}}
+                    <button type="button" name="convert">
+                        <i class="fas fa-check"></i> {{localize 'SCENE-PACKER.assets-to-lowercase.convert'}}
+                    </button>
+                {{/if}}
+            {{/unless}}
+        {{/unless}}
+        <button type="button" name="close">
+            <i class="fas fa-times"></i> {{localize 'Cancel'}}
+        </button>
+    </footer>
+</div>

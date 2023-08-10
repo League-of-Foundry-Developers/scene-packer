@@ -62,6 +62,21 @@ export class AssetMap {
     }
   }
 
+  /**
+   * Removes asset details from the asset data map.
+   * @param {string} asset
+   */
+  RemoveAsset(asset) {
+    // Remove the asset from the mapping.
+    const assetDetails = this.data.get(asset);
+    for (const assetDetail of assetDetails) {
+      const assets = this.mapping.get(assetDetail.parentID);
+      assets.delete(asset);
+    }
+
+    this.data.delete(asset);
+  }
+
   toJSON() {
     // Convert the mapping set into an array so that it can be JSON encoded.
     const response = new Map();
