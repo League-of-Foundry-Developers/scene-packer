@@ -4,6 +4,7 @@
 
 - Fixed the "Bulk Pack Scenes" macro not working correctly on v11.
 - Removed deprecated use of `isObjectEmpty` from "Bulk replace asset references" macro.
+- Improved the "Asset Report" to better link to Adventure documents when they are the source of asset dependencies.
 - Added a Console Warning when the Asset tools notice an asset reference that has the wrong case sensitivity.
   - This occurs most commonly on a Windows machine where the file system is case insensitive. Everything will look correct to the Windows user, but the asset will likely fail for anyone on mac/linux.
 - Added a Console only command to bulk convert all assets in the world to lower-case.

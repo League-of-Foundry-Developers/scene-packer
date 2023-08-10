@@ -197,7 +197,7 @@ export default class AssetReport extends FormApplication {
        */
       const assetResponses = [];
 
-      // Resolve all of the assets to see if they exist on the server.
+      // Resolve the assets to see if they exist on the server.
       const totalToResolve = this.assetResolver.size;
       if (!totalToResolve) {
         return Dialog.prompt({
@@ -700,13 +700,18 @@ export default class AssetReport extends FormApplication {
     }
     for (let i = 0; i < entities.length; i++) {
       const scene = entities[i];
+      let uuid = scene.uuid;
+      if (scene.parent?.documentName === 'Adventure' && scene.parent?.uuid) {
+        // Utilise the Adventure UUID to support opening the Adventure sheet from the Asset Report
+        uuid = scene.parent.uuid;
+      }
 
       /**
        * @type {EntityData}
        */
       const entityData = {
         id: scene.id,
-        uuid: scene.uuid,
+        uuid: uuid,
         name: scene.name,
         type: AssetReport.Sources.Scene,
         css: 'fa-map',
@@ -820,13 +825,18 @@ export default class AssetReport extends FormApplication {
     }
     for (let i = 0; i < entities.length; i++) {
       const actor = entities[i];
+      let uuid = actor.uuid;
+      if (actor.parent?.documentName === 'Adventure' && actor.parent?.uuid) {
+        // Utilise the Adventure UUID to support opening the Adventure sheet from the Asset Report
+        uuid = actor.parent.uuid;
+      }
 
       /**
        * @type {EntityData}
        */
       const entityData = {
         id: actor.id,
-        uuid: actor.uuid,
+        uuid: uuid,
         name: actor.name,
         type: AssetReport.Sources.Actor,
         css: 'fa-user',
@@ -890,13 +900,18 @@ export default class AssetReport extends FormApplication {
     }
     for (let i = 0; i < entities.length; i++) {
       const journal = entities[i];
+      let uuid = journal.uuid;
+      if (journal.parent?.documentName === 'Adventure' && journal.parent?.uuid) {
+        // Utilise the Adventure UUID to support opening the Adventure sheet from the Asset Report
+        uuid = journal.parent.uuid;
+      }
 
       /**
        * @type {EntityData}
        */
       const entityData = {
         id: journal.id,
-        uuid: journal.uuid,
+        uuid: uuid,
         name: journal.name,
         type: AssetReport.Sources.JournalEntry,
         css: 'fa-book-open',
@@ -948,13 +963,18 @@ export default class AssetReport extends FormApplication {
     }
     for (let i = 0; i < entities.length; i++) {
       const item = entities[i];
+      let uuid = item.uuid;
+      if (item.parent?.documentName === 'Adventure' && item.parent?.uuid) {
+        // Utilise the Adventure UUID to support opening the Adventure sheet from the Asset Report
+        uuid = item.parent.uuid;
+      }
 
       /**
        * @type {EntityData}
        */
       const entityData = {
         id: item.id,
-        uuid: item.uuid,
+        uuid: uuid,
         name: item.name,
         type: AssetReport.Sources.Item,
         css: 'fa-suitcase',
@@ -1014,13 +1034,18 @@ export default class AssetReport extends FormApplication {
     }
     for (let i = 0; i < entities.length; i++) {
       const playlist = entities[i];
+      let uuid = playlist.uuid;
+      if (playlist.parent?.documentName === 'Adventure' && playlist.parent?.uuid) {
+        // Utilise the Adventure UUID to support opening the Adventure sheet from the Asset Report
+        uuid = playlist.parent.uuid;
+      }
 
       /**
        * @type {EntityData}
        */
       const entityData = {
         id: playlist.id,
-        uuid: playlist.uuid,
+        uuid: uuid,
         name: playlist.name,
         type: AssetReport.Sources.Playlist,
         css: 'fa-music',
@@ -1069,13 +1094,18 @@ export default class AssetReport extends FormApplication {
     }
     for (let i = 0; i < entities.length; i++) {
       const macro = entities[i];
+      let uuid = macro.uuid;
+      if (macro.parent?.documentName === 'Adventure' && macro.parent?.uuid) {
+        // Utilise the Adventure UUID to support opening the Adventure sheet from the Asset Report
+        uuid = macro.parent.uuid;
+      }
 
       /**
        * @type {EntityData}
        */
       const entityData = {
         id: macro.id,
-        uuid: macro.uuid,
+        uuid: uuid,
         name: macro.name,
         type: AssetReport.Sources.Macro,
         css: 'fa-terminal',
@@ -1110,13 +1140,18 @@ export default class AssetReport extends FormApplication {
     }
     for (let i = 0; i < entities.length; i++) {
       const table = entities[i];
+      let uuid = table.uuid;
+      if (table.parent?.documentName === 'Adventure' && table.parent?.uuid) {
+        // Utilise the Adventure UUID to support opening the Adventure sheet from the Asset Report
+        uuid = table.parent.uuid;
+      }
 
       /**
        * @type {EntityData}
        */
       const entityData = {
         id: table.id,
-        uuid: table.uuid,
+        uuid: uuid,
         name: table.name,
         type: AssetReport.Sources.RollTable,
         css: 'fa-th-list',
