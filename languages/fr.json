@@ -25,7 +25,7 @@
       "import-all": {
         "title": "Veuillez patienter…",
         "wait-title": "Veuillez patienter pendant l'importation de tout le contenu de {name}.",
-        "wait": "Veuillez patienter pendant le chargement de {type}…",
+        "wait": "Veuillez patienter... chargement de {type}…",
         "creating-data": "Création {count} {type} à partir de {label}…",
         "complete": "L'importation de l'importation de tout le contenu de {name}."
       },
@@ -57,7 +57,7 @@
       "items": "Objets",
       "playlists": "Listes de lecture",
       "macros": "Macros",
-      "tables": "Tables aléatoires",
+      "tables": "Tablesaléatoires",
       "show": "Afficher les dépendances",
       "hide": "Cacher les dépendances",
       "hide-ok": "Afficher uniquement les entrées qui ont des dépendances :",
@@ -122,7 +122,7 @@
         "missing-pack": "Configuration du pack invalide. Impossible de trouver le compendium {packName}. Vérifiez la console (F12) pour plus de détails.",
         "no-packs": "La configuration du pack est invalide. L'empaquetage des jetons d'acteur de scène ne fonctionnera pas. Vérifiez la console (F12) pour plus de détails.",
         "no-packs-in-module": "Attention : il n'y a pas de packs d'acteurs définis dans votre module.json",
-        "missing-pack-details": "FindJournalInCompendiums a été appelé pour rechercher le pack \"{packname}\" qui n'est pas trouvé. Vérifiez les fautes de frappe dans la configuration de votre module.",
+        "missing-pack-details": "FindActorInCompendiums a été appelé pour rechercher le pack \"{packname}\" qui n'est pas trouvé. Vérifiez les fautes de frappe dans la configuration de votre module.",
         "no-packs-details": "FindActorInCompendiums a été appelé mais il n'y a pas de \"creaturePacks\" défini dans le script d'initialisation du module. Voir le JournalEntry \"Exemple de module javascript\" pour plus de détails sur la définition de la constante. Les valeurs possibles sont : {packOptions}"
       },
       "find-playlist-compendium": {
@@ -290,7 +290,7 @@
       "converting-references": "Vérifie {count} {type} pour les références de style des compendiums.",
       "converting-reference": "Convertit la référence {type} dans \"{name}\" {oldRef} -> {newRef} dans l'emplacement : {path}",
       "no-existing-value": "Impossible de trouver une valeur existante dans le chemin \"{path}\". Passe la mise à jour de la référence…",
-      "complete": "Terminé !",
+      "complete": "Achevé !",
       "import-all": "Importer toutes les {count} entités dans ce pack",
       "import-one": "Importe la sélection",
       "selected-entity": "Sélectionné {type} :",
@@ -541,6 +541,17 @@
       "description2": "L'import importera l'ensemble du pack à partir du ZIP. Si vous ne voulez qu'une seule scène, utilisez plutôt Moulinette.",
       "error-read": "Une erreur s'est produite lors de la lecture du fichier \"{name}\". Veuillez demander de l'aide sur le serveur Discord de Scene Packer.",
       "zip-too-large": "Le fichier ZIP est trop volumineux pour être importé. Pour une compatibilité maximale, les fichiers ZIP doivent être inférieurs à 2 Go. Demandez de l'aide sur le serveur Discord de Scene Packer."
+    },
+    "assets-to-lowercase": {
+      "find-assets": "Trouver des assets",
+      "convert": "Convertir les assets",
+      "wait": "Veuillez patienter…",
+      "all-lowercase": "Tous les assets sont déjà en minuscules.",
+      "list-assets": "Les assets suivants seront convertis en minuscules :",
+      "confirm": "Êtes-vous sûr de vouloir convertir ces assets en minuscules ?",
+      "title": "Vérifier que des assets existent et les convertir en minuscules",
+      "description": "Cet outil vérifiera que tous les assets de votre monde existent et convertira leurs références en minuscules. Il énumérera d'abord toutes les références des assets qu'il convertira, puis vous demandera de confirmer.",
+      "nothing": "Aucun asset n'a été trouvé dans votre monde."
     }
   }
 }
