@@ -4468,22 +4468,19 @@ export default class ScenePacker {
 
     locked = !!locked;
     const compendiums = game.packs.filter(p => (p.metadata.packageName || p.metadata.package) === moduleName);
-    const settings = {};
-    compendiums.forEach((p) => {
-      settings[`${(p.metadata.packageName || p.metadata.package)}.${p.metadata.name}`] = {locked};
-    });
-    if (Object.keys(settings).length) {
+    for (const pack of compendiums) {
+      await pack.configure({ locked });
+    }
+    if (compendiums.length) {
       let key = locked ?
                 'SCENE-PACKER.world-conversion.compendiums.lock' :
                 'SCENE-PACKER.world-conversion.compendiums.unlock';
       ui.notifications.info(
         game.i18n.format(key, {
-          list: Object.keys(settings).join(', '),
+          list: compendiums.map(p => `${(p.metadata.packageName || p.metadata.package)}.${p.metadata.name}`).join(', '),
           locked: locked,
         }),
       );
-      let configSetting = Compendium?.CONFIG_SETTING || CompendiumCollection?.CONFIG_SETTING || 'compendiumConfiguration';
-      await game.settings.set('core', configSetting, settings);
     }
   }
 
