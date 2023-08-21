@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.7.6
+
+- "Relink compendium entries" macro will no longer remove compendiums from their folders.
+- "Bulk pack scenes" macro now correctly packs Scenes that are in child folders in v11.
+- Updated French translation. Co-authored-by: 
+  - rectulo
+
 ## v2.7.5
 
 - Fixed the "Bulk Pack Scenes" macro not working correctly on v11.
