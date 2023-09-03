@@ -288,17 +288,7 @@ export default class Exporter extends FormApplication {
       supportsCards: this.supportsCards,
       cards: this.Cards,
       macros: this.Macro,
-      summary: game.i18n.format('SCENE-PACKER.exporter.selected-count', {
-        count:
-          this.Scene.documents.size +
-          this.Actor.documents.size +
-          this.Item.documents.size +
-          this.Cards.documents.size +
-          this.JournalEntry.documents.size +
-          this.RollTable.documents.size +
-          this.Playlist.documents.size +
-          this.Macro.documents.size,
-      }),
+      summary: game.i18n.format('SCENE-PACKER.exporter.selected-count', {count: 0}),
       complete: this.complete,
       packageName: worldData.title,
       packageAuthor: game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_AUTHOR) || '',
@@ -307,6 +297,8 @@ export default class Exporter extends FormApplication {
       packageDescription: worldData.description,
       packageDiscord: game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_DISCORD) || '',
       packageEmail: game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_EMAIL) || '',
+      packageUrl: game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_URL) || '',
+      packageWelcomeJournal: game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_WELCOME_JOURNAL) || '',
       adventureSystem: game.system.id,
       adventureCategoryOptions: this.adventureCategoryOptions,
       adventureThemeSuggestions: Array.from(this.adventureThemeSuggestions),
@@ -527,8 +519,12 @@ export default class Exporter extends FormApplication {
   _onClickCheckbox(event) {
     event.stopPropagation();
     const element = event.currentTarget;
+    const isBeingTicked = $(element).prop('checked');
     let $input = $(element).closest('li').find('input[type="checkbox"]');
-    $input.prop('checked', $(element).prop('checked'));
+    $input.prop('checked', isBeingTicked);
+    if (isBeingTicked) {
+      $input.parents('.directory-item.folder').children('header').find('input[type="checkbox"]').prop('checked', isBeingTicked);
+    }
     this._updateCounts();
   }
 
@@ -543,8 +539,13 @@ export default class Exporter extends FormApplication {
       return;
     }
     event.preventDefault();
-    const $input = $(event.currentTarget).find('input[type="checkbox"]');
-    $input.prop('checked', !$input.prop('checked'));
+    const element = event.currentTarget;
+    const $input = $(element).find('input[type="checkbox"]');
+    const isBeingTicked = !$input.prop('checked');
+    $input.prop('checked', isBeingTicked);
+    if (isBeingTicked) {
+      $input.parents('.directory-item.folder').children('header').find('input[type="checkbox"]').prop('checked', isBeingTicked);
+    }
     this._updateCounts();
   }
 
@@ -553,9 +554,7 @@ export default class Exporter extends FormApplication {
    */
   _updateCounts() {
     let scenePackerExporter = $('#scene-packer-exporter');
-    this.selected = scenePackerExporter
-      .find('input[type="checkbox"]:checked')
-      .filter((i, e) => e.dataset.type !== 'Folder');
+    this.selected = scenePackerExporter.find('div.tab:not([data-tab=options]) input[type="checkbox"]:checked');
     scenePackerExporter
       .find('footer p.summary')
       .text(

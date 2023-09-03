@@ -170,6 +170,16 @@ export const CONSTANTS = Object.freeze({
   SETTING_EXPORT_TO_MOULINETTE_THEMES: 'exportToMoulinetteThemes',
 
   /**
+   * The setting key for tracking previously used URL in the Moulinette Exporter.
+   */
+  SETTING_EXPORT_TO_MOULINETTE_URL: 'exportToMoulinetteURL',
+
+  /**
+   * The setting key for tracking previously used Welcome Journal in the Moulinette Exporter.
+   */
+  SETTING_EXPORT_TO_MOULINETTE_WELCOME_JOURNAL: 'exportToMoulinetteWelcomeJournal',
+
+  /**
    * The setting key for triggering the Importer class.
    */
   SETTING_IMPORT_FROM_ZIP: 'importFromZip',
