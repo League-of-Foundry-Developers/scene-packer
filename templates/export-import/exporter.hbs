@@ -8,7 +8,7 @@
   {{/if}}
     <header class="folder-header flexrow" style="background-color: {{folder.data.color}}">
       <h3>
-        <input type="checkbox" data-type="Folder" data-folder-type="{{#if isV9}}{{folder.type}}{{else}}{{folder.folder.type}}{{/if}}" value="{{#if isV9}}{{folder.id}}{{else}}{{folder.folder.id}}{{/if}}" checked>
+        <input type="checkbox" data-type="Folder" data-folder-type="{{#if isV9}}{{folder.type}}{{else}}{{folder.folder.type}}{{/if}}" value="{{#if isV9}}{{folder.id}}{{else}}{{folder.folder.id}}{{/if}}">
     <i class="fas fa-folder-open fa-fw"></i>{{#if isV9}}{{folder.name}}{{else}}{{folder.folder.name}}{{/if}}
       </h3>
     </header>
@@ -33,7 +33,7 @@
 {{#*inline "entityPartial"}}
   <li class="directory-item entity" data-entity-id="{{this.id}}">
     <label class="flexrow">
-      <input type="checkbox" data-type="{{this.documentName}}" name="entity.{{this.documentName}}.{{this.id}}" value="{{this.id}}" checked>
+      <input type="checkbox" data-type="{{this.documentName}}" name="entity.{{this.documentName}}.{{this.id}}" value="{{this.id}}">
       {{#if this.thumbnail}}<img class="profile actor-profile" title="{{this.name}}" data-src="{{this.thumbnail}}" style="margin-right: 5px;">
       {{else if this.img}}<img class="profile actor-profile" title="{{this.name}}" data-src="{{this.img}}" style="margin-right: 5px;">{{/if}}
       <h4 class="entity-name"><a class="entity-link content-link" data-type="{{this.documentName}}" data-entity="{{this.documentName}}" data-id="{{this.id}}">{{this.name}}</a></h4>
@@ -61,7 +61,7 @@
         <div class="header-search flexrow">
           <i class="fas fa-search"></i>
           <input type="text" name="search" value="" placeholder="{{localize 'SCENE-PACKER.exporter.search.scenes'}}" autocomplete="off"/>
-          <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="1"><i class="fas fa-check-square"></i></a>
+          <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="0"><i class="fas fa-check-square"></i></a>
           <a class="header-control collapse-all" title="{{localize 'FOLDER.Collapse'}}"><i class="fas fa-sort-amount-up"></i></a>
         </div>
       </header>
@@ -87,7 +87,7 @@
         <div class="header-search flexrow">
           <i class="fas fa-search"></i>
           <input type="text" name="search" value="" placeholder="{{localize 'SCENE-PACKER.exporter.search.actors'}}" autocomplete="off"/>
-          <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="1"><i class="fas fa-check-square"></i></a>
+          <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="0"><i class="fas fa-check-square"></i></a>
           <a class="header-control collapse-all" title="{{localize 'FOLDER.Collapse'}}"><i class="fas fa-sort-amount-up"></i></a>
         </div>
       </header>
@@ -113,7 +113,7 @@
         <div class="header-search flexrow">
           <i class="fas fa-search"></i>
           <input type="text" name="search" value="" placeholder="{{localize 'SCENE-PACKER.exporter.search.items'}}" autocomplete="off"/>
-          <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="1"><i class="fas fa-check-square"></i></a>
+          <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="0"><i class="fas fa-check-square"></i></a>
           <a class="header-control collapse-all" title="{{localize 'FOLDER.Collapse'}}"><i class="fas fa-sort-amount-up"></i></a>
         </div>
       </header>
@@ -139,7 +139,7 @@
         <div class="header-search flexrow">
           <i class="fas fa-search"></i>
           <input type="text" name="search" value="" placeholder="{{localize 'SCENE-PACKER.exporter.search.journals'}}" autocomplete="off"/>
-          <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="1"><i class="fas fa-check-square"></i></a>
+          <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="0"><i class="fas fa-check-square"></i></a>
           <a class="header-control collapse-all" title="{{localize 'FOLDER.Collapse'}}"><i class="fas fa-sort-amount-up"></i></a>
         </div>
       </header>
@@ -165,7 +165,7 @@
         <div class="header-search flexrow">
           <i class="fas fa-search"></i>
           <input type="text" name="search" value="" placeholder="{{localize 'SCENE-PACKER.exporter.search.tables'}}" autocomplete="off"/>
-          <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="1"><i class="fas fa-check-square"></i></a>
+          <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="0"><i class="fas fa-check-square"></i></a>
           <a class="header-control collapse-all" title="{{localize 'FOLDER.Collapse'}}"><i class="fas fa-sort-amount-up"></i></a>
         </div>
       </header>
@@ -191,7 +191,7 @@
         <div class="header-search flexrow">
           <i class="fas fa-search"></i>
           <input type="text" name="search" value="" placeholder="{{localize 'SCENE-PACKER.exporter.search.playlists'}}" autocomplete="off"/>
-          <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="1"><i class="fas fa-check-square"></i></a>
+          <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="0"><i class="fas fa-check-square"></i></a>
           <a class="header-control collapse-all" title="{{localize 'FOLDER.Collapse'}}"><i class="fas fa-sort-amount-up"></i></a>
         </div>
       </header>
@@ -217,7 +217,7 @@
         <div class="header-search flexrow">
           <i class="fas fa-search"></i>
           <input type="text" name="search" value="" placeholder="{{localize 'SCENE-PACKER.exporter.search.cards'}}" autocomplete="off"/>
-          <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="1"><i class="fas fa-check-square"></i></a>
+          <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="0"><i class="fas fa-check-square"></i></a>
           <a class="header-control collapse-all" title="{{localize 'FOLDER.Collapse'}}"><i class="fas fa-sort-amount-up"></i></a>
         </div>
       </header>
@@ -243,7 +243,7 @@
         <div class="header-search flexrow">
           <i class="fas fa-search"></i>
           <input type="text" name="search" value="" placeholder="{{localize 'SCENE-PACKER.exporter.search.macros'}}" autocomplete="off"/>
-          <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="1"><i class="fas fa-check-square"></i></a>
+          <a class="header-control toggle-all" title="{{localize 'SCENE-PACKER.exporter.toggle-checkboxes'}}" data-state="0"><i class="fas fa-check-square"></i></a>
           <a class="header-control collapse-all" title="{{localize 'FOLDER.Collapse'}}"><i class="fas fa-sort-amount-up fa-fw"></i></a>
         </div>
       </header>
@@ -330,14 +330,14 @@
           <b>{{localize 'SCENE-PACKER.exporter.options.external-link'}}</b>
           <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.external-link-help'}}"></i>
         </label>
-        <input type="text" id="SP-export-externalLink" name="externalLink" value="" placeholder="https://patreon.com">
+        <input type="text" id="SP-export-externalLink" name="externalLink" value="{{packageUrl}}" placeholder="https://patreon.com">
       </div>
       <div class="form-group">
         <label for="SP-export-welcomeJournal">
           <b>{{localize 'SCENE-PACKER.exporter.options.welcome-journal'}}</b>
           <i class="fas fa-question-circle" title="{{localize 'SCENE-PACKER.exporter.options.welcome-journal-help'}}"></i>
         </label>
-        <input type="text" id="SP-export-welcomeJournal" name="welcomeJournal" value="" placeholder="{{localize 'SCENE-PACKER.exporter.options.welcome-journal-drop-text'}}" autocomplete="off">
+        <input type="text" id="SP-export-welcomeJournal" name="welcomeJournal" value="{{packageWelcomeJournal}}" placeholder="{{localize 'SCENE-PACKER.exporter.options.welcome-journal-drop-text'}}" autocomplete="off">
       </div>
       <div class="form-group">
         <div>

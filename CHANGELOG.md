@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.7.7
+
+- Moulinette Exporter changes:
+  - now defaults to nothing selected, rather than everything in the world selected for export.
+  - now remembers the previously entered URL and Journal.
+  - selecting a single entity will now automatically select any parent folders.
+
 ## v2.7.6
 
 - "Relink compendium entries" macro will no longer remove compendiums from their folders.

@@ -5870,6 +5870,20 @@ Hooks.once('setup', () => {
     type: Array,
     default: [],
   });
+
+  game.settings.register(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_URL, {
+    scope: 'client',
+    config: false,
+    type: String,
+    default: '',
+  });
+
+  game.settings.register(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_WELCOME_JOURNAL, {
+    scope: 'client',
+    config: false,
+    type: String,
+    default: '',
+  });
 });
 
 /**
