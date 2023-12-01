@@ -3971,22 +3971,39 @@ export default class ScenePacker {
             }
           }
         }
-        if (actionData?.rolltableid) {
-          originalValue = actionData.rolltableid.startsWith('RollTable.') ? actionData.rolltableid : `RollTable.${actionData.rolltableid}`;
+
+        if (actionData?.rolltableid?.id) {
+          originalValue = actionData.rolltableid.id.startsWith('RollTable.') ? actionData.rolltableid.id : `RollTable.${actionData.rolltableid.id}`;
           if (extractEntityID(originalValue)) {
-          newEntity = await findNewEntityValue(originalValue, action, tile, compendiumSourceId);
-          if (newEntity) {
-            newValue = actionData.rolltableid.replace(
-              extractEntityID(originalValue),
-              newEntity.id
-            );
-            if (newValue !== actionData.rolltableid) {
-              actionData.rolltableid = newValue;
-              changed = true;
-              actionsCount++;
+            newEntity = await findNewEntityValue(originalValue, action, tile, compendiumSourceId);
+            if (newEntity) {
+              newValue = actionData.rolltableid.id.replace(
+                extractEntityID(originalValue),
+                newEntity.id
+              );
+              if (newValue !== actionData.rolltableid.id) {
+                actionData.rolltableid.id = newValue;
+                changed = true;
+                actionsCount++;
+              }
             }
           }
-        }
+        } else if (actionData?.rolltableid) {
+          originalValue = actionData.rolltableid.startsWith('RollTable.') ? actionData.rolltableid : `RollTable.${actionData.rolltableid}`;
+          if (extractEntityID(originalValue)) {
+            newEntity = await findNewEntityValue(originalValue, action, tile, compendiumSourceId);
+            if (newEntity) {
+              newValue = actionData.rolltableid.replace(
+                extractEntityID(originalValue),
+                newEntity.id
+              );
+              if (newValue !== actionData.rolltableid) {
+                actionData.rolltableid = newValue;
+                changed = true;
+                actionsCount++;
+              }
+            }
+          }
         }
       }
 
