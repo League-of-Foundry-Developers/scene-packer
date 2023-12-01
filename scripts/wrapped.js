@@ -33,7 +33,7 @@ Hooks.once('setup', function () {
 
         const newFlags = {};
         newFlags[CONSTANTS.MODULE_NAME] = {sourceId: this.uuid};
-        const defaultPermission = this?.ownership?.default || this?.data?.permission?.default;
+        const defaultPermission = this?.ownership?.default ?? this?.data?.permission?.default;
         if (defaultPermission) {
           newFlags[CONSTANTS.MODULE_NAME][ScenePacker.FLAGS_DEFAULT_PERMISSION] = defaultPermission;
         }

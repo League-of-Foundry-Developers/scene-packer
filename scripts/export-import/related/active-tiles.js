@@ -33,7 +33,7 @@ export function ExtractRelatedActiveTileData(tiles, parentUUID) {
     for (const action of actions) {
       const actionData = CONSTANTS.IsV10orNewer() ? action : action.data;
       const entityReference = extractActiveTileReference(actionData?.entity?.id);
-      if (entityReference && entityReference !== `Scene.${scene.id}`) {
+      if (entityReference && entityReference !== parentUUID) {
         // We have a reference to an entity that isn't this current scene.
         relatedData.AddRelation(parentUUID, {uuid: entityReference, path});
       }
@@ -41,6 +41,12 @@ export function ExtractRelatedActiveTileData(tiles, parentUUID) {
       const itemReference = extractActiveTileReference(actionData?.item?.id);
       if (itemReference) {
         relatedData.AddRelation(parentUUID, {uuid: itemReference, path});
+      }
+
+      if (actionData?.sceneid?.id) {
+        relatedData.AddRelation(parentUUID, {uuid: `Scene.${actionData.sceneid.id}`, path});
+      } else if (actionData?.sceneid) {
+        relatedData.AddRelation(parentUUID, {uuid: `Scene.${actionData.sceneid}`, path});
       }
 
       if (actionData?.location?.sceneId) {
@@ -51,7 +57,9 @@ export function ExtractRelatedActiveTileData(tiles, parentUUID) {
         relatedData.AddRelation(parentUUID, {uuid: `Macro.${actionData.macroid}`, path});
       }
 
-      if (actionData?.rolltableid) {
+      if (actionData?.rolltableid?.id) {
+        relatedData.AddRelation(parentUUID, {uuid: `RollTable.${actionData.rolltableid.id}`, path});
+      } else if (actionData?.rolltableid) {
         relatedData.AddRelation(parentUUID, {uuid: `RollTable.${actionData.rolltableid}`, path});
       }
     }

@@ -3710,8 +3710,11 @@ export default class ScenePacker {
             a?.data?.macroid ||
             a?.data?.entity?.id ||
             a?.data?.item?.id ||
+            a?.data?.sceneid ||
+            a?.data?.sceneid?.id ||
             a?.data?.location?.id ||
             a?.data?.location?.sceneId ||
+            a?.data?.rolltableid?.id ||
             a?.data?.rolltableid,
         ).length;
       });
@@ -3737,9 +3740,12 @@ export default class ScenePacker {
                 a?.data?.macroid ||
                 a?.data?.entity?.id ||
                 a?.data?.item?.id ||
+                a?.data?.sceneid ||
+                a?.data?.sceneid?.id ||
                 a?.data?.location?.id ||
                 a?.data?.location?.sceneId ||
                 a?.data?.location?.scene ||
+                a?.data?.rolltableid?.id ||
                 a?.data?.rolltableid,
             )
             .map(async (d) => {
@@ -3755,12 +3761,18 @@ export default class ScenePacker {
               const data = d.data;
               if (data?.macroid) {
                 ref = data.macroid.startsWith('Macro.') ? data.macroid : `Macro.${data.macroid}`;
+              } else if (data?.sceneid) {
+                ref = data.sceneid.startsWith('Scene.') ? data.sceneid : `Scene.${data.sceneid}`;
+              } else if (data?.sceneid?.id) {
+                ref = data.sceneid.id.startsWith('Scene.') ? data.sceneid.id : `Scene.${data.sceneid.id}`;
               } else if (data?.location?.sceneId) {
                 ref = data.location.sceneId.startsWith('Scene.') ? data.location.sceneId : `Scene.${data.location.sceneId}`;
               } else if (data?.location?.scene) {
                 ref = data.location.scene.startsWith('Scene.') ? data.location.scene : `Scene.${data.location.scene}`;
               } else if (data?.location?.id) {
                 ref = data.location.id;
+              } else if (data?.rolltableid?.id) {
+                ref = data.rolltableid.id.startsWith('RollTable.') ? data.rolltableid.id : `RollTable.${data.rolltableid.id}`;
               } else if (data?.rolltableid) {
                 ref = data.rolltableid.startsWith('RollTable.') ? data.rolltableid : `RollTable.${data.rolltableid}`;
               } else if (data?.item?.id) {
@@ -3921,6 +3933,10 @@ export default class ScenePacker {
           }
         }
         if (actionData?.location?.sceneId) {
+          if (actionData.location.sceneId.startsWith('Compendium.') || ['active', '_active', 'previous', '_previous', 'token', '_token'].includes(actionData.location.sceneId)) {
+            // No need to adjust value
+            continue;
+          }
           originalValue = actionData.location.sceneId.startsWith('Scene.') ? actionData.location.sceneId : `Scene.${actionData.location.sceneId}`;
           if (extractEntityID(originalValue)) {
             newEntity = await findNewEntityValue(originalValue, action, tile, compendiumSourceId);
@@ -3938,6 +3954,10 @@ export default class ScenePacker {
           }
         }
         if (actionData?.location?.scene) {
+          if (actionData.location.scene.startsWith('Compendium.') || ['active', '_active', 'previous', '_previous', 'token', '_token'].includes(actionData.location.scene)) {
+            // No need to adjust value
+            continue;
+          }
           originalValue = actionData.location.scene.startsWith('Scene.') ? actionData.location.scene : `Scene.${actionData.location.scene}`;
           if (extractEntityID(originalValue)) {
             newEntity = await findNewEntityValue(originalValue, action, tile, compendiumSourceId);
@@ -3955,6 +3975,10 @@ export default class ScenePacker {
           }
         }
         if (actionData?.macroid) {
+          if (actionData.macroid.startsWith('Compendium.')) {
+            // No need to adjust value
+            continue;
+          }
           originalValue = actionData.macroid.startsWith('Macro.') ? actionData.macroid : `Macro.${actionData.macroid}`;
           if (extractEntityID(originalValue)) {
             newEntity = await findNewEntityValue(originalValue, action, tile, compendiumSourceId);
@@ -3972,21 +3996,68 @@ export default class ScenePacker {
           }
         }
         if (actionData?.rolltableid) {
-          originalValue = actionData.rolltableid.startsWith('RollTable.') ? actionData.rolltableid : `RollTable.${actionData.rolltableid}`;
+          if (actionData.rolltableid instanceof Array) {
+            actionData.rolltableid = actionData.length ? actionData.rolltableid[0] : null;
+            changed = true;
+            actionsCount++;
+          }
+          if (typeof actionData.rolltableid === 'string') {
+            actionData.rolltableid = { id: actionData.rolltableid.startsWith('RollTable') ? actionData.rolltableid : `RollTable.${actionData.rolltableid}` };
+            changed = true;
+            actionsCount++;
+          }
+          if (actionData.rolltableid.id?.startsWith('Compendium.')) {
+            // No need to adjust value
+            continue;
+          }
+
+          originalValue = actionData.rolltableid.id;
           if (extractEntityID(originalValue)) {
-          newEntity = await findNewEntityValue(originalValue, action, tile, compendiumSourceId);
-          if (newEntity) {
-            newValue = actionData.rolltableid.replace(
-              extractEntityID(originalValue),
-              newEntity.id
-            );
-            if (newValue !== actionData.rolltableid) {
-              actionData.rolltableid = newValue;
-              changed = true;
-              actionsCount++;
+            newEntity = await findNewEntityValue(originalValue, action, tile, compendiumSourceId);
+            if (newEntity) {
+              newValue = actionData.rolltableid.id.replace(
+                extractEntityID(originalValue),
+                newEntity.id
+              );
+              if (newValue !== actionData.rolltableid.id) {
+                actionData.rolltableid.id = newValue;
+                changed = true;
+                actionsCount++;
+              }
             }
           }
         }
+        if (actionData?.sceneid) {
+          if (actionData.sceneid instanceof Array) {
+            actionData.sceneid = actionData.length ? actionData.sceneid[0] : null;
+            changed = true;
+            actionsCount++;
+          }
+          if (typeof actionData.sceneid === 'string') {
+            actionData.sceneid = { id: actionData.sceneid.startsWith('Scene') ? actionData.sceneid : `Scene.${actionData.sceneid}` };
+            changed = true;
+            actionsCount++;
+          }
+          if (actionData.sceneid.id?.startsWith('Compendium.')) {
+            // No need to adjust value
+            continue;
+          }
+
+          originalValue = actionData.sceneid.id;
+          if (extractEntityID(originalValue)) {
+            newEntity = await findNewEntityValue(originalValue, action, tile, compendiumSourceId);
+            if (newEntity) {
+              newValue = actionData.sceneid.id.replace(
+                extractEntityID(originalValue),
+                newEntity.id
+              );
+              if (newValue !== actionData.sceneid.id) {
+                actionData.sceneid.id = newValue;
+                changed = true;
+                actionsCount++;
+              }
+            }
+          }
         }
       }
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.7.8
+
+- Adjustments to handle new data structures expected by [Monk's Active Tile Triggers](https://foundryvtt.com/packages/monks-active-tiles).
+  - Thank you NeilWhite for the report.
+  - Fixes issue [#136](https://github.com/League-of-Foundry-Developers/scene-packer/issues/136).
+- Fix ownership permission deprecation warning in `toCompendium` method.
+- Updated SVG icons to specify their width/height values to fix compatibility issues with Firefox. Thanks James on Discord for the report.
+
 ## v2.7.7
 
 - Moulinette Exporter changes:
