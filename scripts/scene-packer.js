@@ -3761,10 +3761,10 @@ export default class ScenePacker {
               const data = d.data;
               if (data?.macroid) {
                 ref = data.macroid.startsWith('Macro.') ? data.macroid : `Macro.${data.macroid}`;
-              } else if (data?.sceneid) {
-                ref = data.sceneid.startsWith('Scene.') ? data.sceneid : `Scene.${data.sceneid}`;
               } else if (data?.sceneid?.id) {
                 ref = data.sceneid.id.startsWith('Scene.') ? data.sceneid.id : `Scene.${data.sceneid.id}`;
+              } else if (data?.sceneid) {
+                ref = data.sceneid.startsWith('Scene.') ? data.sceneid : `Scene.${data.sceneid}`;
               } else if (data?.location?.sceneId) {
                 ref = data.location.sceneId.startsWith('Scene.') ? data.location.sceneId : `Scene.${data.location.sceneId}`;
               } else if (data?.location?.scene) {

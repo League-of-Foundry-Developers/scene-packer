@@ -140,6 +140,8 @@ export function ExtractRelatedTokenAttacherData(actor) {
             return actionData?.macroid ||
               actionData?.entity?.id ||
               actionData?.item?.id ||
+              actionData?.sceneid?.id ||
+              actionData?.sceneid ||
               actionData?.location?.sceneId ||
               actionData?.rolltableid?.id ||
               actionData?.rolltableid;
