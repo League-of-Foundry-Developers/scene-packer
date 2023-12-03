@@ -140,15 +140,24 @@ export function ExtractRelatedTokenAttacherData(actor) {
             return actionData?.macroid ||
               actionData?.entity?.id ||
               actionData?.item?.id ||
+              actionData?.sceneid?.id ||
+              actionData?.sceneid ||
               actionData?.location?.sceneId ||
+              actionData?.rolltableid?.id ||
               actionData?.rolltableid;
           },
         ).forEach(action => {
         const ActionData = CONSTANTS.IsV10orNewer() ? action : action.data;
         if (ActionData?.macroid) {
           relatedData.AddRelation(uuid, {uuid: `Macro.${ActionData.macroid}`, path});
+        } else if (ActionData?.sceneid?.id) {
+          relatedData.AddRelation(uuid, {uuid: `Scene.${ActionData.sceneid.id}`, path});
+        } else if (ActionData?.sceneid) {
+          relatedData.AddRelation(uuid, {uuid: `Scene.${ActionData.sceneid}`, path});
         } else if (ActionData?.location?.sceneId) {
           relatedData.AddRelation(uuid, {uuid: `Scene.${ActionData.location.sceneId}`, path});
+        } else if (ActionData?.rolltableid?.id) {
+          relatedData.AddRelation(uuid, {uuid: `RollTable.${ActionData.rolltableid.id}`, path});
         } else if (ActionData?.rolltableid) {
           relatedData.AddRelation(uuid, {uuid: `RollTable.${ActionData.rolltableid}`, path});
         } else if (ActionData?.entity?.id) {
