@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.7.9
+
+- Updated the "Relink compendium Entries" macro:
+  - Fixed issue where links that included anchors would be skipped. Thanks JonnyGabble on Discord for the report.
+
 ## v2.7.8
 
 - Adjustments to handle new data structures expected by [Monk's Active Tile Triggers](https://foundryvtt.com/packages/monks-active-tiles).
