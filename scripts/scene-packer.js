@@ -5079,7 +5079,7 @@ export default class ScenePacker {
         newRef: newRef,
         pack: pack.collection,
         journalEntryId: entry._id,
-        journalAnchorLink: anchor ? anchor : '',
+        journalAnchorLink: anchor ? `#${anchor}` : '',
       });
     }
 
@@ -5107,7 +5107,7 @@ export default class ScenePacker {
         const prefix = CONSTANTS.IsV10orNewer() ? '@UUID[' : '@Compendium[';
         const newReference = change.newRef[0];
         if (!newReference.uuid) {
-          newReference.uuid = `${newReference.pack}.${newReference.ref}${change.journalAnchorLink}`;
+          newReference.uuid = `${newReference.pack}.${newReference.ref}`;
         }
         if (!CONSTANTS.IsV10orNewer() && newReference.uuid.startsWith('Compendium.')) {
           newReference.uuid = newReference.uuid.replace('Compendium.', '');
@@ -5132,9 +5132,10 @@ export default class ScenePacker {
           `@${change.type}\\[${change.oldRef}${change.journalAnchorLink}\\]\\{`,
           'g',
         );
+        const replacement = change.journalAnchorLink ? `${prefix}${newReference.uuid}${change.journalAnchorLink}]{` : `${prefix}${newReference.uuid}]{`;
         newContent = newContent.replace(
           regex,
-          `${prefix}${newReference.uuid}]{`,
+          replacement,
         );
       }
 
