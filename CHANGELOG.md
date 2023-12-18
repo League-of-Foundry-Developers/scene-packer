@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.7.10
+
+- Migrate "mime" package to a local source to avoid issues with the CDN being offline/having a build error.
+
 ## v2.7.9
 
 - Updated the "Relink compendium Entries" macro:

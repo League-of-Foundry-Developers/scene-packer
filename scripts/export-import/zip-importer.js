@@ -1,4 +1,4 @@
-import mime from 'https://cdn.skypack.dev/mime/lite';
+import mime from '../lib/mime/dist/src/index.js';
 import * as fflate from '../lib/fflate/fflate.js';
 import { CONSTANTS } from '../constants.js';
 import MoulinetteImporter from './moulinette-importer.js';
