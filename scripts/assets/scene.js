@@ -108,7 +108,7 @@ export async function ExtractSceneAssets(scene) {
 
   for (const tile of tiles) {
     const tileData = CONSTANTS.IsV10orNewer() ? tile : tile?.data;
-    const img = tileData?.img || tile?.img;
+    const img = tileData?.img || tileData?.img;
     if (img) {
       await data.AddAsset({
         id: tile.id,
@@ -130,6 +130,38 @@ export async function ExtractSceneAssets(scene) {
         location: AssetReport.Locations.SceneTileImage,
         asset: tileData.texture.src,
       });
+    }
+
+    const activeTileActions = getProperty(tileData, 'flags.monks-active-tiles.actions') || [];
+    for (const action of activeTileActions) {
+      const audioFile = action.data?.audiofile;
+      if (audioFile) {
+        await data.AddAsset({
+          id: tile.id,
+          key: 'monks-active-tile.audiofile',
+          parentID: scene.id,
+          parentType: scene.documentName,
+          documentType: tile.documentName || 'Tile',
+          location: AssetReport.Locations.SceneTileActiveSound,
+          asset: audioFile,
+        });
+      }
+    }
+
+    const activeTileImages = getProperty(tileData, 'flags.monks-active-tiles.files') || [];
+    for (const image of activeTileImages) {
+      const imagePath = image.name;
+      if (imagePath) {
+        await data.AddAsset({
+          id: tile.id,
+          key: 'monks-active-tile.image',
+          parentID: scene.id,
+          parentType: scene.documentName,
+          documentType: tile.documentName || 'Tile',
+          location: AssetReport.Locations.SceneTileActiveImage,
+          asset: imagePath,
+        });
+      }
     }
   }
 

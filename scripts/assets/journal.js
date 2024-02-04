@@ -164,17 +164,30 @@ export async function ExtractQuickEncounterAssets(journal) {
         data.AddAssetData(await ExtractActorAssets(actor));
 
         for (const token of extractedActor.savedTokensData || []) {
-          const tokenImage = token?.img;
-          if (tokenImage) {
+          const tokenTexture = token.texture?.src;
+          if (tokenTexture) {
             await data.AddAsset({
               id: actor.id,
-              key: 'token.img',
+              key: 'texture.src',
               parentID: actor.id,
               parentType: actor.documentName,
               documentType: actor.documentName,
               location: AssetReport.Locations.ActorTokenImage,
-              asset: tokenImage,
+              asset: tokenTexture,
             });
+          } else {
+            const tokenImage = token?.img;
+            if (tokenImage) {
+              await data.AddAsset({
+                id: actor.id,
+                key: 'token.img',
+                parentID: actor.id,
+                parentType: actor.documentName,
+                documentType: actor.documentName,
+                location: AssetReport.Locations.ActorTokenImage,
+                asset: tokenImage,
+              });
+            }
           }
         }
       }

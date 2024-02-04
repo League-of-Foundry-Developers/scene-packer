@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.7.11
+
+- Fixed actor prototypeToken image not being referenced.
+- Fixed audioFiles and tile images in [Monk's Active Tile Triggers](https://foundryvtt.com/packages/monks-active-tiles) not being referenced.
+  - Thanks Beneos of https://beneos-battlemaps.com/ for the above reports.
+
 ## v2.7.10
 
 - Migrate "mime" package to a local source to avoid issues with the CDN being offline/having a build error.
