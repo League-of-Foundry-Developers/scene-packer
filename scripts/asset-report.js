@@ -511,6 +511,8 @@ export default class AssetReport extends FormApplication {
     SceneForeground: 'scene-foreground',
     SceneNoteIcon: 'scene-note-icon',
     SceneTileImage: 'scene-tile-image',
+    SceneTileActiveImage: 'scene-tile-monks-active-tile-image',
+    SceneTileActiveSound: 'scene-tile-monks-active-tile-sound',
     SceneDrawingImage: 'scene-drawing-texture',
     SceneTokenImage: 'scene-token-image',
     SceneTokenEffectIcon: 'scene-token-effect-icon',
@@ -763,6 +765,22 @@ export default class AssetReport extends FormApplication {
         if (img) {
           this.CheckAsset(scene.id, AssetReport.Sources.Scene, img, AssetReport.Locations.SceneTileImage);
         }
+
+        const activeTileActions = getProperty(tile, 'flags.monks-active-tiles.actions') || [];
+        for (const action of activeTileActions) {
+          const audioFile = action.data?.audiofile;
+          if (audioFile) {
+            this.CheckAsset(scene.id, AssetReport.Sources.Scene, audioFile, AssetReport.Locations.SceneTileActiveSound);
+          }
+        }
+
+        const activeTileImages = getProperty(tile, 'flags.monks-active-tiles.files') || [];
+        for (const image of activeTileImages) {
+          const imagePath = image.name;
+          if (imagePath) {
+            this.CheckAsset(scene.id, AssetReport.Sources.Scene, imagePath, AssetReport.Locations.SceneTileActiveImage);
+          }
+        }
       });
 
       drawings.forEach(drawing => {
@@ -850,7 +868,7 @@ export default class AssetReport extends FormApplication {
         this.CheckAsset(actor.id, AssetReport.Sources.Actor, actorData.img, AssetReport.Locations.ActorImage);
       }
 
-      const tokenImage = CONSTANTS.IsV10orNewer() ? actor.token?.img : actor.token?.img || actorData?.token?.img;
+      const tokenImage = CONSTANTS.IsV10orNewer() ? (actor.prototypeToken?.texture?.src ?? actor.token?.img) : (actor.token?.img ?? actorData?.token?.img);
       if (tokenImage) {
         this.CheckAsset(actor.id, AssetReport.Sources.Actor, tokenImage, AssetReport.Locations.ActorTokenImage);
       }

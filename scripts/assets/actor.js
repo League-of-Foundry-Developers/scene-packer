@@ -31,17 +31,30 @@ export async function ExtractActorAssets(actor) {
     });
   }
 
-  const tokenImage = actor.token?.img || actorData?.token?.img;
-  if (tokenImage) {
+  const prototypeTokenImage = actor.prototypeToken?.texture?.src;
+  if (prototypeTokenImage) {
     await data.AddAsset({
       id: actor.id,
-      key: 'token.img',
+      key: 'prototypeToken.texture.src',
       parentID: actor.id,
       parentType: actor.documentName,
       documentType: actor.documentName,
       location: AssetReport.Locations.ActorTokenImage,
-      asset: tokenImage,
+      asset: prototypeTokenImage,
     });
+  } else {
+    const tokenImage = actor.token?.img ?? actorData?.token?.img;
+    if (tokenImage) {
+      await data.AddAsset({
+        id: actor.id,
+        key: 'token.img',
+        parentID: actor.id,
+        parentType: actor.documentName,
+        documentType: actor.documentName,
+        location: AssetReport.Locations.ActorTokenImage,
+        asset: tokenImage,
+      });
+    }
   }
 
   const items = [];
