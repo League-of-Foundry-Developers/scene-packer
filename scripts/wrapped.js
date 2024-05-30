@@ -40,7 +40,7 @@ Hooks.once('setup', function () {
         if (!data.flags) {
           data.flags = {};
         }
-        mergeObject(data.flags, newFlags);
+        foundry.utils.mergeObject(data.flags, newFlags);
 
         return data;
       },

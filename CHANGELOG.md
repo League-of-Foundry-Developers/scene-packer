@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.7.12
+- Marked compatibility with Foundry VTT version 12.
+  - The only changes were relating to deprecated methods that are currently in compatibility mode.
+  - There will continue to be a few deprecation warnings in the console due to supporting old versions of Foundry VTT.
+- Moulinette Exporter changes:
+  - Fixes the functionality added in v2.7.7 to actually remember the previously entered URL and Journal.
+
 ## v2.7.11
 
 - Fixed actor prototypeToken image not being referenced.

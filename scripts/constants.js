@@ -237,7 +237,7 @@ export const CONSTANTS = Object.freeze({
    * @return {boolean}
    */
   IsV7orNewer(version = this.Version()) {
-    return version === '0.7.0' || isNewerVersion(version, '0.7.0');
+    return version === '0.7.0' || foundry.utils.isNewerVersion(version, '0.7.0');
   },
 
   /**
@@ -246,7 +246,7 @@ export const CONSTANTS = Object.freeze({
    * @return {boolean}
    */
   IsV7(version = this.Version()) {
-    return this.IsV7orNewer(version) && isNewerVersion('0.8.0', version);
+    return this.IsV7orNewer(version) && foundry.utils.isNewerVersion('0.8.0', version);
   },
 
   /**
@@ -255,7 +255,7 @@ export const CONSTANTS = Object.freeze({
    * @return {boolean}
    */
   IsV8orNewer(version = this.Version()) {
-    return version === '0.8.0' || isNewerVersion(version, '0.8.0');
+    return version === '0.8.0' || foundry.utils.isNewerVersion(version, '0.8.0');
   },
 
   /**
@@ -264,7 +264,7 @@ export const CONSTANTS = Object.freeze({
    * @return {boolean}
    */
   IsV8(version = this.Version()) {
-    return this.IsV8orNewer(version) && isNewerVersion('9', version);
+    return this.IsV8orNewer(version) && foundry.utils.isNewerVersion('9', version);
   },
 
   /**
@@ -273,7 +273,7 @@ export const CONSTANTS = Object.freeze({
    * @return {boolean}
    */
   IsV9orNewer(version = this.Version()) {
-    return version === '9.0' || isNewerVersion(version, '9');
+    return version === '9.0' || foundry.utils.isNewerVersion(version, '9');
   },
 
   /**
@@ -282,7 +282,7 @@ export const CONSTANTS = Object.freeze({
    * @return {boolean}
    */
   IsV9(version = this.Version()) {
-    return this.IsV9orNewer(version) && isNewerVersion('10', version);
+    return this.IsV9orNewer(version) && foundry.utils.isNewerVersion('10', version);
   },
 
   /**
@@ -291,7 +291,7 @@ export const CONSTANTS = Object.freeze({
    * @return {boolean}
    */
   IsV10orNewer(version = this.Version()) {
-    return version === '10.0' || isNewerVersion(version, '10');
+    return version === '10.0' || foundry.utils.isNewerVersion(version, '10');
   },
 
   /**
@@ -300,7 +300,7 @@ export const CONSTANTS = Object.freeze({
    * @return {boolean}
    */
   IsV10(version = this.Version()) {
-    return this.IsV10orNewer(version) && isNewerVersion('11', version);
+    return this.IsV10orNewer(version) && foundry.utils.isNewerVersion('11', version);
   },
 
   /**
@@ -309,7 +309,7 @@ export const CONSTANTS = Object.freeze({
    * @return {boolean}
    */
   IsV11orNewer(version = this.Version()) {
-    return version === '11.0' || isNewerVersion(version, '11');
+    return version === '11.0' || foundry.utils.isNewerVersion(version, '11');
   },
 
   /**
@@ -318,7 +318,16 @@ export const CONSTANTS = Object.freeze({
    * @return {boolean}
    */
   IsV11(version = this.Version()) {
-    return this.IsV11orNewer(version) && isNewerVersion('11', version);
+    return this.IsV11orNewer(version) && foundry.utils.isNewerVersion('11', version);
+  },
+
+  /**
+   * Returns whether the version is at least V12
+   * @param {string} version - The version to test. Defaults to the current game instance version.
+   * @return {boolean}
+   */
+  IsV12orNewer(version = this.Version()) {
+    return version === '12.0' || foundry.utils.isNewerVersion(version, '12');
   },
 });
 

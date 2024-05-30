@@ -10,7 +10,7 @@ export default class AdventureConverter extends FormApplication {
     super(document, options);
 
     const gameVersion = game.version || game.data.version;
-    if (gameVersion !== '10.0' && !isNewerVersion(gameVersion, '10')) {
+    if (gameVersion !== '10.0' && !foundry.utils.isNewerVersion(gameVersion, '10')) {
       throw new Error('Adventure Converter for Scene Packer only works with Foundry VTT v10 or newer.');
     }
   }
@@ -54,7 +54,7 @@ export default class AdventureConverter extends FormApplication {
       `@UUID[${this.object.welcomeJournal.uuid}]{${this.object.welcomeJournal.name}}` :
       '';
 
-    return mergeObject(super.getData(options),
+    return foundry.utils.mergeObject(super.getData(options),
       {
         instances,
         hasInstances,
@@ -116,7 +116,7 @@ export default class AdventureConverter extends FormApplication {
       data.description = game.modules.get(data.adventureModule)?.description;
     }
 
-    mergeObject(this.object, data);
+    foundry.utils.mergeObject(this.object, data);
 
     if (event.type === 'submit') {
       const sourcePacks = Array.from(game.modules.get(this.object.adventureModule)
@@ -580,19 +580,23 @@ export default class AdventureConverter extends FormApplication {
         continue;
       }
 
-      let content = ResolvePath(path, documentData);
-      const rsp = await replaceContent(content, needsUpdate);
-      if (rsp.replaced) {
-        content = rsp.content;
-        replaced = true;
-        needsUpdate = true;
-      }
+      try {
+        let content = ResolvePath(path, documentData);
+        const rsp = await replaceContent(content, needsUpdate);
+        if (rsp.replaced) {
+          content = rsp.content;
+          replaced = true;
+          needsUpdate = true;
+        }
 
-      if (needsUpdate) {
-        console.log(`Updating ${document.collection.documentName} "${document.name}" ${path}`);
-        document.updateSource({
-          [path]: content,
-        });
+        if (needsUpdate) {
+          console.log(`Updating ${document.collection.documentName} "${document.name}" ${path}`);
+          document.updateSource({
+            [path]: content,
+          });
+        }
+      } catch (e) {
+        // Ignore errors, just continue to the next path.
       }
     }
 
@@ -778,13 +782,13 @@ export default class AdventureConverter extends FormApplication {
 
     const manifest = Module.migrateData(module);
 
-    if (manifest.compatibility?.minimum && !isNewerVersion(manifest.compatibility.minimum, 10)) {
+    if (manifest.compatibility?.minimum && !foundry.utils.isNewerVersion(manifest.compatibility.minimum, 10)) {
       manifest.updateSource({ 'compatibility.minimum': 10 });
     }
-    if (manifest.compatibility?.verified && !isNewerVersion(manifest.compatibility.verified, 10)) {
+    if (manifest.compatibility?.verified && !foundry.utils.isNewerVersion(manifest.compatibility.verified, 10)) {
       manifest.updateSource({ 'compatibility.verified': 10 });
     }
-    if (manifest.compatibility?.maximum && !isNewerVersion(manifest.compatibility.maximum, 10)) {
+    if (manifest.compatibility?.maximum && !foundry.utils.isNewerVersion(manifest.compatibility.maximum, 10)) {
       manifest.updateSource({ 'compatibility.maximum': 10 });
     }
 

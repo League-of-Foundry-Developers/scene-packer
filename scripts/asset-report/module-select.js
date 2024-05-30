@@ -40,7 +40,7 @@ export default class ModuleSelect extends FormApplication {
 
   /** @inheritdoc */
   static get defaultOptions() {
-    return mergeObject(super.defaultOptions, {
+    return foundry.utils.mergeObject(super.defaultOptions, {
       title: `${game.i18n.localize('SCENE-PACKER.asset-report.name')} - ${game.i18n.localize('SCENE-PACKER.asset-report.module-select.title')}`,
       id: 'asset-report-module-select',
       template: 'modules/scene-packer/templates/asset-report/module-select.html',
@@ -184,7 +184,7 @@ export default class ModuleSelect extends FormApplication {
 
   /** @inheritdoc */
   _onSearchFilter(event, query, rgx, html) {
-    if (isNewerVersion('0.8.1', CONSTANTS.Version())) {
+    if (foundry.utils.isNewerVersion('0.8.1', CONSTANTS.Version())) {
       // rgx and SearchFilter were added in 0.8.1, previously the arguments were
       // event, query, html
       html = rgx;
@@ -199,7 +199,7 @@ export default class ModuleSelect extends FormApplication {
       const title = (li.querySelector('.package-title')?.textContent || '').trim();
       const author = (li.querySelector('.author')?.textContent || '').trim();
       let match = false;
-      if (!isNewerVersion('0.8.1', CONSTANTS.Version())) {
+      if (!foundry.utils.isNewerVersion('0.8.1', CONSTANTS.Version())) {
         match = rgx.test(SearchFilter.cleanQuery(name)) ||
           rgx.test(SearchFilter.cleanQuery(title)) ||
           rgx.test(SearchFilter.cleanQuery(author));

@@ -72,7 +72,7 @@ export default class MoulinetteImporter extends FormApplication {
 
   /** @inheritdoc */
   static get defaultOptions() {
-    return mergeObject(super.defaultOptions, {
+    return foundry.utils.mergeObject(super.defaultOptions, {
       title: game.i18n.localize('SCENE-PACKER.importer.name'),
       id: 'scene-packer-importer',
       template:

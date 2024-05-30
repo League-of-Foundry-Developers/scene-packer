@@ -115,7 +115,7 @@ export async function ExtractQuickEncounterAssets(journal) {
   let quickEncounter = {};
   const path = 'flags.quick-encounters.quickEncounter';
   const journalData = CONSTANTS.IsV10orNewer() ? journal : journal.data;
-  const quickEncounterData = getProperty(journalData, path);
+  const quickEncounterData = foundry.utils.getProperty(journalData, path);
   if (!quickEncounterData) {
     return data;
   }
@@ -155,7 +155,7 @@ export async function ExtractQuickEncounterAssets(journal) {
       const actor = game.actors.find((a) => {
         return (
           (a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === extractedActor.actorID ||
-            a.getFlag('core', 'sourceId') === extractedActor.actorID ||
+            (a._stats?.compendiumSource ?? a.getFlag('core', 'sourceId')) === extractedActor.actorID ||
             a.id === extractedActor.actorID) &&
           !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated')
         );
@@ -214,7 +214,7 @@ export async function ExtractMonksEnhancedJournalAssets(journal) {
   }
 
   const journalData = CONSTANTS.IsV10orNewer() ? journal : journal.data;
-  const enhancedJournalData = getProperty(journalData, 'flags.monks-enhanced-journal');
+  const enhancedJournalData = foundry.utils.getProperty(journalData, 'flags.monks-enhanced-journal');
   if (!enhancedJournalData) {
     return data;
   }

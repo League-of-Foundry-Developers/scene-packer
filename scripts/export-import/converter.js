@@ -176,7 +176,7 @@ export function ReplaceCompendiumReferences(context, documents, availableDocumen
         let foundEntity;
         for (const sourceType of sources) {
           for (const source of sourceType.data) {
-            foundEntity = source.find(e => (getProperty(e, 'data.flags.core.sourceId') || getProperty(e, 'flags.core.sourceId')) === relation.uuid);
+            foundEntity = source.find(e => (foundry.utils.getProperty(e, '_stats.compendiumSource') || foundry.utils.getProperty(e, 'data.flags.core.sourceId') || foundry.utils.getProperty(e, 'flags.core.sourceId')) === relation.uuid);
             if (foundEntity) {
               if (!foundEntity.uuid || !foundEntity.documentName || !foundEntity.id) {
                 foundEntity.documentName = sourceType.type.documentName;
@@ -203,7 +203,7 @@ export function ReplaceCompendiumReferences(context, documents, availableDocumen
         if (existingUpdate[path]) {
           oldValue = existingUpdate[path];
         } else {
-          oldValue = getProperty(datum, relation.path);
+          oldValue = foundry.utils.getProperty(datum, relation.path);
           if (relation.embeddedId && oldValue) {
             oldValue = oldValue.get(relation.embeddedId);
           }
