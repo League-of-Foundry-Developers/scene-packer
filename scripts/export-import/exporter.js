@@ -252,7 +252,7 @@ export default class Exporter extends FormApplication {
       });
     }
 
-    return mergeObject(super.defaultOptions, {
+    return foundry.utils.mergeObject(super.defaultOptions, {
       title: game.i18n.localize('SCENE-PACKER.exporter.name'),
       id: 'scene-packer-exporter',
       template: 'modules/scene-packer/templates/export-import/exporter.hbs',
@@ -353,6 +353,8 @@ export default class Exporter extends FormApplication {
     game.settings.set(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_AUTHOR, formData.author);
     game.settings.set(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_DISCORD, formData.discordId || '');
     game.settings.set(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_EMAIL, formData.email || '');
+    game.settings.set(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_URL, formData.externalLink || '');
+    game.settings.set(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_EXPORT_TO_MOULINETTE_WELCOME_JOURNAL, formData.welcomeJournal || '');
 
     const playerLevels = [];
     if (typeof formData.playerLevelRecommended === 'number') {

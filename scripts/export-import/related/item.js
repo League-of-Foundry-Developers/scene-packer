@@ -43,14 +43,18 @@ export function ExtractRelatedItemData(item) {
   const uuid = item.uuid || `${Item.documentName}.${id}`;
 
   for (const path of ItemDataLocations) {
-    const content = ResolvePath(path, item);
-    if (typeof content !== 'string') {
-      continue;
-    }
+    try {
+      const content = ResolvePath(path, item);
+      if (typeof content !== 'string') {
+        continue;
+      }
 
-    const relations = ExtractUUIDsFromContent(content, path);
-    if (relations.length) {
-      relatedData.AddRelations(uuid, relations);
+      const relations = ExtractUUIDsFromContent(content, path);
+      if (relations.length) {
+        relatedData.AddRelations(uuid, relations);
+      }
+    } catch (err) {
+      // Ignore errors, just continue to the next path.
     }
   }
 

@@ -30,7 +30,7 @@ export default class ZipImporter extends FormApplication {
 
   /** @inheritDoc */
   static get defaultOptions() {
-    return mergeObject(super.defaultOptions, {
+    return foundry.utils.mergeObject(super.defaultOptions, {
       title: game.i18n.localize('SCENE-PACKER.zip-importer.name'),
       id: 'scene-packer-zip-importer',
       template: 'modules/scene-packer/templates/export-import/zip-importer.hbs',

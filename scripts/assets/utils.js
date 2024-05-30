@@ -41,7 +41,7 @@ export class ConvertAssetsToLowercase extends Application {
 
   /** @inheritdoc */
   static get defaultOptions() {
-    return mergeObject(super.defaultOptions, {
+    return foundry.utils.mergeObject(super.defaultOptions, {
       title: game.i18n.localize('SCENE-PACKER.assets-to-lowercase.title'),
       id: 'scene-packer-assets-to-lowercase',
       template: 'modules/scene-packer/templates/assets-to-lowercase.hbs',

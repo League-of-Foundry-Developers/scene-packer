@@ -132,7 +132,7 @@ export async function ExtractSceneAssets(scene) {
       });
     }
 
-    const activeTileActions = getProperty(tileData, 'flags.monks-active-tiles.actions') || [];
+    const activeTileActions = foundry.utils.getProperty(tileData, 'flags.monks-active-tiles.actions') || [];
     for (const action of activeTileActions) {
       const audioFile = action.data?.audiofile;
       if (audioFile) {
@@ -148,7 +148,7 @@ export async function ExtractSceneAssets(scene) {
       }
     }
 
-    const activeTileImages = getProperty(tileData, 'flags.monks-active-tiles.files') || [];
+    const activeTileImages = foundry.utils.getProperty(tileData, 'flags.monks-active-tiles.files') || [];
     for (const image of activeTileImages) {
       const imagePath = image.name;
       if (imagePath) {

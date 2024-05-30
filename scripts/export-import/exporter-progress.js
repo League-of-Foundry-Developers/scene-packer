@@ -399,7 +399,7 @@ export default class ExporterProgress extends FormApplication {
 
   /** @inheritdoc */
   static get defaultOptions() {
-    return mergeObject(super.defaultOptions, {
+    return foundry.utils.mergeObject(super.defaultOptions, {
       title: game.i18n.localize('SCENE-PACKER.exporter.name'),
       id: 'scene-packer-exporter-progress',
       template:

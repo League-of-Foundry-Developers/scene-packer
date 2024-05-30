@@ -3,14 +3,14 @@
   "name": "scene-packer",
   "title": "Library: Scene Packer",
   "description": "A module to assist with Scene and Adventure packing and unpacking.",
-  "version": "2.7.11",
+  "version": "2.7.12",
   "library": "true",
   "manifestPlusVersion": "1.2.0",
   "minimumCoreVersion": "0.8.6",
-  "compatibleCoreVersion": "11",
+  "compatibleCoreVersion": "12",
   "compatibility": {
     "minimum": "0.8.6",
-    "verified": "11"
+    "verified": "12"
   },
   "author": "Blair McMillan",
   "authors": [
@@ -41,6 +41,11 @@
       "url": "https://www.youtube.com/watch?v=XZjuE1j_7GQ",
       "thumbnail": "https://img.youtube.com/vi/XZjuE1j_7GQ/0.jpg",
       "caption": "Scene Packer and Moulinette Integration"
+    },
+    {
+      "type": "setup",
+      "url": "modules/scene-packer/assets/cover.png",
+      "thumbnail": "modules/scene-packer/assets/cover.png"
     }
   ],
   "packs": [
@@ -49,16 +54,24 @@
       "label": "Library: Scene Packer",
       "path": "/packs/journals.db",
       "entity": "JournalEntry",
-      "type": "JournalEntry",
-      "private": false
+      "type": "JournalEntry"
     },
     {
       "name": "macros",
       "label": "Library: Scene Packer",
       "path": "/packs/macros.db",
       "entity": "Macro",
-      "type": "Macro",
-      "private": false
+      "type": "Macro"
+    }
+  ],
+  "packFolders": [
+    {
+      "name": "Scene Packer",
+      "sorting": "a",
+      "packs": [
+        "journals",
+        "macros"
+      ]
     }
   ],
   "esmodules": [

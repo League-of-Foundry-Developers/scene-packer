@@ -49,7 +49,7 @@ export class UnrelatedData extends FormApplication {
 
   /** @inheritdoc */
   static get defaultOptions() {
-    return mergeObject(super.defaultOptions, {
+    return foundry.utils.mergeObject(super.defaultOptions, {
       title: game.i18n.localize('SCENE-PACKER.importer.unrelated-title'),
       id: 'scene-packer-importer-unrelated-data',
       template:

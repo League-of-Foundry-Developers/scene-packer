@@ -32,26 +32,30 @@ export function ExtractRelatedJournalData(journal) {
   const uuid = journal.uuid || `${JournalEntry.documentName}.${id}`;
 
   for (const path of JournalDataLocations) {
-    const content = ResolvePath(path, journal);
-    if (!content) {
-      continue
-    }
-    if (path === 'pages') {
-      for (const text of content.filter(c => c.type === 'text')) {
-        const relations = ExtractUUIDsFromContent(text.content, path);
-        if (relations.length) {
-          relatedData.AddRelations(uuid, relations);
+    try {
+      const content = ResolvePath(path, journal);
+      if (!content) {
+        continue
+      }
+      if (path === 'pages') {
+        for (const text of content.filter(c => c.type === 'text')) {
+          const relations = ExtractUUIDsFromContent(text.content, path);
+          if (relations.length) {
+            relatedData.AddRelations(uuid, relations);
+          }
         }
       }
-    }
 
-    if (typeof content !== 'string') {
-      continue;
-    }
+      if (typeof content !== 'string') {
+        continue;
+      }
 
-    const relations = ExtractUUIDsFromContent(content, path);
-    if (relations.length) {
-      relatedData.AddRelations(uuid, relations);
+      const relations = ExtractUUIDsFromContent(content, path);
+      if (relations.length) {
+        relatedData.AddRelations(uuid, relations);
+      }
+    } catch (err) {
+      // Ignore errors, just continue to the next path.
     }
   }
 
@@ -75,7 +79,7 @@ export function ExtractRelatedQuickEncounterData(journal) {
   let quickEncounter = {};
   const path = 'flags.quick-encounters.quickEncounter';
   const journalData = CONSTANTS.IsV10orNewer() ? journal : journal.data;
-  const quickEncounterData = getProperty(journalData, path);
+  const quickEncounterData = foundry.utils.getProperty(journalData, path);
   if (!quickEncounterData) {
     return relatedData;
   }
@@ -100,7 +104,7 @@ export function ExtractRelatedQuickEncounterData(journal) {
     const journal = game.journal.find((a) => {
       return (
         (a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === quickEncounter.journalEntryId ||
-          a.getFlag('core', 'sourceId') === quickEncounter.journalEntryId ||
+          (a._stats?.compendiumSource ?? a.getFlag('core', 'sourceId')) === quickEncounter.journalEntryId ||
           a.id === quickEncounter.journalEntryId) &&
         !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated')
       );
@@ -117,7 +121,7 @@ export function ExtractRelatedQuickEncounterData(journal) {
       const actor = game.actors.find((a) => {
         return (
           (a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === extractedActor.actorID ||
-            a.getFlag('core', 'sourceId') === extractedActor.actorID ||
+            (a._stats?.compendiumSource ?? a.getFlag('core', 'sourceId')) === extractedActor.actorID ||
             a.id === extractedActor.actorID) &&
           !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated')
         );
@@ -146,7 +150,7 @@ export function ExtractRelatedEnhancedJournalData(journal) {
 
   const path = 'flags.monks-enhanced-journal';
   const journalData = CONSTANTS.IsV10orNewer() ? journal : journal.data;
-  const enhancedJournalData = getProperty(journalData, path);
+  const enhancedJournalData = foundry.utils.getProperty(journalData, path);
   if (!enhancedJournalData) {
     return relatedData;
   }

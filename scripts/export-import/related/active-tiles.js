@@ -29,7 +29,7 @@ export function ExtractRelatedActiveTileData(tiles, parentUUID) {
   let path = 'flags.monks-active-tiles.actions';
   for (const tile of activeTiles) {
     const tileData = CONSTANTS.IsV10orNewer() ? tile : tile.data || tile;
-    const actions = getProperty(tileData, path);
+    const actions = foundry.utils.getProperty(tileData, path);
     for (const action of actions) {
       const actionData = CONSTANTS.IsV10orNewer() ? action : action.data;
       const entityReference = extractActiveTileReference(actionData?.entity?.id);

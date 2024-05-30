@@ -128,7 +128,7 @@ export function ExtractRelatedTokenAttacherData(actor) {
   const uuid = actor.uuid || `${Actor.documentName}.${id}`;
 
   let path = 'token.flags.token-attacher.prototypeAttached';
-  let tokenAttacherData = getProperty(actorData, path);
+  let tokenAttacherData = foundry.utils.getProperty(actorData, path);
   if (tokenAttacherData?.Tile?.length) {
     // Extract Monk's Active Tile related actions
     ScenePacker.GetActiveTilesData(tokenAttacherData.Tile).forEach(tile => {
@@ -184,9 +184,16 @@ export function ExtractActorContent(actor) {
   }
 
   for (const path of ActorDataLocations) {
-    const content = ResolvePath(path, actor);
-    if (content) {
-      contentData.push({path, content});
+    try {
+      const content = ResolvePath(path, actor);
+      if (content) {
+        contentData.push({
+          path,
+          content
+        });
+      }
+    } catch (err) {
+      // Ignore errors, just continue to the next path.
     }
   }
 

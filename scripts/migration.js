@@ -12,7 +12,7 @@ export default class Migration {
       // D&D 5e had a breaking change in v2.0.1 where a *lot* of images were replaced. Try to fix these up automatically.
       // Would only have occurred if the module supports v9 or below.
       const minimumModuleCompatibility = module.compatibility?.minimum ?? game.version;
-      if (minimumModuleCompatibility === '10' || isNewerVersion(minimumModuleCompatibility, '10')) {
+      if (minimumModuleCompatibility === '10' || foundry.utils.isNewerVersion(minimumModuleCompatibility, '10')) {
         return;
       }
 
@@ -21,7 +21,7 @@ export default class Migration {
         const existingCompatibilityLogMode = CONFIG.compatibility.mode;
         CONFIG.compatibility.mode = CONST.COMPATIBILITY_MODES.SILENT;
 
-        if (isNewerVersion('2.0.0', game.settings.get(moduleName, CONSTANTS.SETTING_SYSTEM_MIGRATION_VERSION))) {
+        if (foundry.utils.isNewerVersion('2.0.0', game.settings.get(moduleName, CONSTANTS.SETTING_SYSTEM_MIGRATION_VERSION))) {
           let notificationShown = false;
           // Trigger a notification to display after a short delay (most modules will complete within this timeframe).
           let timeout = setTimeout(() => {

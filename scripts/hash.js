@@ -19,7 +19,7 @@ export default class Hash {
     } else if (typeof entity.toJSON === 'function') {
       entity = entity.toJSON();
     }
-    let data = mergeObject(entity, {}, {inplace: false});
+    let data = foundry.utils.mergeObject(entity, {}, {inplace: false});
     if (data.flags && data.flags['scene-packer']?.hash) {
       // Don't include an existing hash in the hash
       delete data.flags['scene-packer'].hash;

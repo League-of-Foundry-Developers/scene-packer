@@ -285,7 +285,7 @@ export default class AssetReport extends FormApplication {
 
   /** @inheritdoc */
   static get defaultOptions() {
-    return mergeObject(super.defaultOptions, {
+    return foundry.utils.mergeObject(super.defaultOptions, {
       title: game.i18n.localize('SCENE-PACKER.asset-report.name'),
       id: 'asset-report',
       template: 'modules/scene-packer/templates/asset-report/report.html',
@@ -766,7 +766,7 @@ export default class AssetReport extends FormApplication {
           this.CheckAsset(scene.id, AssetReport.Sources.Scene, img, AssetReport.Locations.SceneTileImage);
         }
 
-        const activeTileActions = getProperty(tile, 'flags.monks-active-tiles.actions') || [];
+        const activeTileActions = foundry.utils.getProperty(tile, 'flags.monks-active-tiles.actions') || [];
         for (const action of activeTileActions) {
           const audioFile = action.data?.audiofile;
           if (audioFile) {
@@ -774,7 +774,7 @@ export default class AssetReport extends FormApplication {
           }
         }
 
-        const activeTileImages = getProperty(tile, 'flags.monks-active-tiles.files') || [];
+        const activeTileImages = foundry.utils.getProperty(tile, 'flags.monks-active-tiles.files') || [];
         for (const image of activeTileImages) {
           const imagePath = image.name;
           if (imagePath) {
