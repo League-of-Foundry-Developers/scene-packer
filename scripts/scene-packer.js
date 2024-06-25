@@ -457,7 +457,7 @@ export default class ScenePacker {
             if (forceImport && !renameOriginals) {
               return true;
             }
-            let sourceId = entity._stats?.compendiumSource ?? e.getFlag(CONSTANTS.MODULE_NAME, 'sourceId');
+            let sourceId = e._stats?.compendiumSource ?? e.getFlag(CONSTANTS.MODULE_NAME, 'sourceId');
             let coreSourceId = e._stats?.compendiumSource ?? e.getFlag('core', 'sourceId');
             const hasExistingEntryWithID = collection.get(e.id);
             if (hasExistingEntryWithID || sourceId || coreSourceId) {
