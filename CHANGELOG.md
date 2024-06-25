@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.7.13
+- Fix bug introduced in v2.7.12 relating to v12 changes which would prevent certain imports from completing successfully.
+
 ## v2.7.12
 - Marked compatibility with Foundry VTT version 12.
   - The only changes were relating to deprecated methods that are currently in compatibility mode.
