@@ -1,4 +1,4 @@
-// fflate v0.8.0
+// fflate v0.8.2
 // https://cdn.skypack.dev/fflate@0.8.0
 var ch2 = {};
 var wk = function(c, id, msg, transfer, cb) {
@@ -119,9 +119,7 @@ var slc = function(v, s, e) {
     s = 0;
   if (e == null || e > v.length)
     e = v.length;
-  var n = new u8(e - s);
-  n.set(v.subarray(s, e));
-  return n;
+  return new u8(v.subarray(s, e));
 };
 var FlateErrorCode = {
   UnexpectedEOF: 0,
@@ -169,9 +167,10 @@ var inflt = function(dat, st, buf, dict) {
   var sl = dat.length, dl = dict ? dict.length : 0;
   if (!sl || st.f && !st.l)
     return buf || new u8(0);
-  var noBuf = !buf || st.i != 2;
+  var noBuf = !buf;
+  var resize = noBuf || st.i != 2;
   var noSt = st.i;
-  if (!buf)
+  if (noBuf)
     buf = new u8(sl * 3);
   var cbuf = function(l2) {
     var bl = buf.length;
@@ -195,7 +194,7 @@ var inflt = function(dat, st, buf, dict) {
             err(0);
           break;
         }
-        if (noBuf)
+        if (resize)
           cbuf(bt + l);
         buf.set(dat.subarray(s, t), bt);
         st.b = bt += l, st.p = pos = t * 8, st.f = final;
@@ -245,7 +244,7 @@ var inflt = function(dat, st, buf, dict) {
         break;
       }
     }
-    if (noBuf)
+    if (resize)
       cbuf(bt + 131072);
     var lms = (1 << lbt) - 1, dms = (1 << dbt) - 1;
     var lpos = pos;
@@ -285,7 +284,7 @@ var inflt = function(dat, st, buf, dict) {
             err(0);
           break;
         }
-        if (noBuf)
+        if (resize)
           cbuf(bt + 131072);
         var end = bt + add;
         if (bt < dt) {
@@ -295,20 +294,15 @@ var inflt = function(dat, st, buf, dict) {
           for (; bt < dend; ++bt)
             buf[bt] = dict[shift + bt];
         }
-        for (; bt < end; bt += 4) {
+        for (; bt < end; ++bt)
           buf[bt] = buf[bt - dt];
-          buf[bt + 1] = buf[bt + 1 - dt];
-          buf[bt + 2] = buf[bt + 2 - dt];
-          buf[bt + 3] = buf[bt + 3 - dt];
-        }
-        bt = end;
       }
     }
     st.l = lm, st.p = lpos, st.b = bt, st.f = final;
     if (lm)
       final = 1, st.m = lbt, st.d = dm, st.n = dbt;
   } while (!final);
-  return bt == buf.length ? buf : slc(buf, 0, bt);
+  return bt != buf.length && noBuf ? slc(buf, 0, bt) : buf.subarray(0, bt);
 };
 var wbits = function(d, p, v) {
   v <<= p & 7;
@@ -667,7 +661,7 @@ var dopt = function(dat, opt, pre, post, st) {
       st.w = dict.length;
     }
   }
-  return dflt(dat, opt.level == null ? 6 : opt.level, opt.mem == null ? Math.ceil(Math.max(8, Math.min(13, Math.log(dat.length))) * 1.5) : 12 + opt.mem, pre, post, st);
+  return dflt(dat, opt.level == null ? 6 : opt.level, opt.mem == null ? st.l ? Math.ceil(Math.max(8, Math.min(13, Math.log(dat.length))) * 1.5) : 20 : 12 + opt.mem, pre, post, st);
 };
 var mrg = function(a, b) {
   var o = {};
@@ -764,33 +758,48 @@ var astrm = function(strm) {
     return postMessage([dat, final], [dat.buffer]);
   };
   return function(ev) {
-    return strm.push(ev.data[0], ev.data[1]);
+    if (ev.data.length) {
+      strm.push(ev.data[0], ev.data[1]);
+      postMessage([ev.data[0].length]);
+    } else
+      strm.flush();
   };
 };
-var astrmify = function(fns, strm, opts, init, id, ext) {
+var astrmify = function(fns, strm, opts, init, id, flush, ext) {
   var t;
   var w = wrkr(fns, init, id, function(err2, dat) {
     if (err2)
       w.terminate(), strm.ondata.call(strm, err2);
     else if (!Array.isArray(dat))
       ext(dat);
-    else {
+    else if (dat.length == 1) {
+      strm.queuedSize -= dat[0];
+      if (strm.ondrain)
+        strm.ondrain(dat[0]);
+    } else {
       if (dat[1])
         w.terminate();
       strm.ondata.call(strm, err2, dat[0], dat[1]);
     }
   });
   w.postMessage(opts);
+  strm.queuedSize = 0;
   strm.push = function(d, f) {
     if (!strm.ondata)
       err(5);
     if (t)
       strm.ondata(err(4, 0, 1), null, !!f);
+    strm.queuedSize += d.length;
     w.postMessage([d, t = f], [d.buffer]);
   };
   strm.terminate = function() {
     w.terminate();
   };
+  if (flush) {
+    strm.flush = function() {
+      w.postMessage([]);
+    };
+  }
 };
 var b2 = function(d, b) {
   return d[b] | d[b + 1] << 8;
@@ -887,11 +896,9 @@ var Deflate = /* @__PURE__ */ function() {
         this.b = newBuf;
       }
       var split = this.b.length - this.s.z;
-      if (split) {
-        this.b.set(chunk.subarray(0, split), this.s.z);
-        this.s.z = this.b.length;
-        this.p(this.b, false);
-      }
+      this.b.set(chunk.subarray(0, split), this.s.z);
+      this.s.z = this.b.length;
+      this.p(this.b, false);
       this.b.set(this.b.subarray(-32768));
       this.b.set(chunk.subarray(split), 32768);
       this.s.z = chunk.length - split + 32768;
@@ -906,6 +913,14 @@ var Deflate = /* @__PURE__ */ function() {
       this.s.w = this.s.i, this.s.i -= 2;
     }
   };
+  Deflate2.prototype.flush = function() {
+    if (!this.ondata)
+      err(5);
+    if (this.s.l)
+      err(4);
+    this.p(this.b, false);
+    this.s.w = this.s.i, this.s.i -= 2;
+  };
   return Deflate2;
 }();
 var AsyncDeflate = /* @__PURE__ */ function() {
@@ -918,7 +933,7 @@ var AsyncDeflate = /* @__PURE__ */ function() {
     ], this, StrmOpt.call(this, opts, cb), function(ev) {
       var strm = new Deflate(ev.data);
       onmessage = astrm(strm);
-    }, 6);
+    }, 6, 1);
   }
   return AsyncDeflate2;
 }();
@@ -983,7 +998,7 @@ var AsyncInflate = /* @__PURE__ */ function() {
     ], this, StrmOpt.call(this, opts, cb), function(ev) {
       var strm = new Inflate(ev.data);
       onmessage = astrm(strm);
-    }, 7);
+    }, 7, 0);
   }
   return AsyncInflate2;
 }();
@@ -1021,6 +1036,9 @@ var Gzip = /* @__PURE__ */ function() {
       wbytes(raw, raw.length - 8, this.c.d()), wbytes(raw, raw.length - 4, this.l);
     this.ondata(raw, f);
   };
+  Gzip2.prototype.flush = function() {
+    Deflate.prototype.flush.call(this);
+  };
   return Gzip2;
 }();
 var AsyncGzip = /* @__PURE__ */ function() {
@@ -1034,7 +1052,7 @@ var AsyncGzip = /* @__PURE__ */ function() {
     ], this, StrmOpt.call(this, opts, cb), function(ev) {
       var strm = new Gzip(ev.data);
       onmessage = astrm(strm);
-    }, 8);
+    }, 8, 1);
   }
   return AsyncGzip2;
 }();
@@ -1082,19 +1100,18 @@ var Gunzip = /* @__PURE__ */ function() {
       this.p = p.subarray(s), this.v = 0;
     }
     Inflate.prototype.c.call(this, final);
-    if (this.s.f && !this.s.l) {
+    if (this.s.f && !this.s.l && !final) {
       this.v = shft(this.s.p) + 9;
       this.s = {i: 0};
       this.o = new u8(0);
-      if (this.p.length)
-        this.push(new u8(0), final);
+      this.push(new u8(0), final);
     }
   };
   return Gunzip2;
 }();
 var AsyncGunzip = /* @__PURE__ */ function() {
   function AsyncGunzip2(opts, cb) {
-    var _this_1 = this;
+    var _this = this;
     astrmify([
       bInflt,
       guze,
@@ -1107,8 +1124,8 @@ var AsyncGunzip = /* @__PURE__ */ function() {
         return postMessage(offset);
       };
       onmessage = astrm(strm);
-    }, 9, function(offset) {
-      return _this_1.onmember && _this_1.onmember(offset);
+    }, 9, 0, function(offset) {
+      return _this.onmember && _this.onmember(offset);
     });
   }
   return AsyncGunzip2;
@@ -1152,6 +1169,9 @@ var Zlib = /* @__PURE__ */ function() {
       wbytes(raw, raw.length - 4, this.c.d());
     this.ondata(raw, f);
   };
+  Zlib2.prototype.flush = function() {
+    Deflate.prototype.flush.call(this);
+  };
   return Zlib2;
 }();
 var AsyncZlib = /* @__PURE__ */ function() {
@@ -1165,7 +1185,7 @@ var AsyncZlib = /* @__PURE__ */ function() {
     ], this, StrmOpt.call(this, opts, cb), function(ev) {
       var strm = new Zlib(ev.data);
       onmessage = astrm(strm);
-    }, 10);
+    }, 10, 1);
   }
   return AsyncZlib2;
 }();
@@ -1224,7 +1244,7 @@ var AsyncUnzlib = /* @__PURE__ */ function() {
     ], this, StrmOpt.call(this, opts, cb), function(ev) {
       var strm = new Unzlib(ev.data);
       onmessage = astrm(strm);
-    }, 11);
+    }, 11, 0);
   }
   return AsyncUnzlib2;
 }();
@@ -1248,11 +1268,17 @@ function unzlibSync(data, opts) {
 }
 var Decompress = /* @__PURE__ */ function() {
   function Decompress2(opts, cb) {
+    this.o = StrmOpt.call(this, opts, cb) || {};
     this.G = Gunzip;
     this.I = Inflate;
     this.Z = Unzlib;
-    this.o = StrmOpt.call(this, opts, cb) || {};
   }
+  Decompress2.prototype.i = function() {
+    var _this = this;
+    this.s.ondata = function(dat, final) {
+      _this.ondata(dat, final);
+    };
+  };
   Decompress2.prototype.push = function(chunk, final) {
     if (!this.ondata)
       err(5);
@@ -1263,11 +1289,8 @@ var Decompress = /* @__PURE__ */ function() {
       } else
         this.p = chunk;
       if (this.p.length > 2) {
-        var _this_2 = this;
-        var cb = function() {
-          _this_2.ondata.apply(_this_2, arguments);
-        };
-        this.s = this.p[0] == 31 && this.p[1] == 139 && this.p[2] == 8 ? new this.G(this.o, cb) : (this.p[0] & 15) != 8 || this.p[0] >> 4 > 7 || (this.p[0] << 8 | this.p[1]) % 31 ? new this.I(this.o, cb) : new this.Z(this.o, cb);
+        this.s = this.p[0] == 31 && this.p[1] == 139 && this.p[2] == 8 ? new this.G(this.o) : (this.p[0] & 15) != 8 || this.p[0] >> 4 > 7 || (this.p[0] << 8 | this.p[1]) % 31 ? new this.I(this.o) : new this.Z(this.o);
+        this.i();
         this.s.push(this.p, final);
         this.p = null;
       }
@@ -1278,12 +1301,25 @@ var Decompress = /* @__PURE__ */ function() {
 }();
 var AsyncDecompress = /* @__PURE__ */ function() {
   function AsyncDecompress2(opts, cb) {
+    Decompress.call(this, opts, cb);
+    this.queuedSize = 0;
     this.G = AsyncGunzip;
     this.I = AsyncInflate;
     this.Z = AsyncUnzlib;
-    Decompress.call(this, opts, cb);
   }
+  AsyncDecompress2.prototype.i = function() {
+    var _this = this;
+    this.s.ondata = function(err2, dat, final) {
+      _this.ondata(err2, dat, final);
+    };
+    this.s.ondrain = function(size) {
+      _this.queuedSize -= size;
+      if (_this.ondrain)
+        _this.ondrain(size);
+    };
+  };
   AsyncDecompress2.prototype.push = function(chunk, final) {
+    this.queuedSize += chunk.length;
     Decompress.prototype.push.call(this, chunk, final);
   };
   return AsyncDecompress2;
@@ -1530,12 +1566,12 @@ var ZipPassThrough = /* @__PURE__ */ function() {
 }();
 var ZipDeflate = /* @__PURE__ */ function() {
   function ZipDeflate2(filename, opts) {
-    var _this_1 = this;
+    var _this = this;
     if (!opts)
       opts = {};
     ZipPassThrough.call(this, filename);
     this.d = new Deflate(opts, function(dat, final) {
-      _this_1.ondata(null, dat, final);
+      _this.ondata(null, dat, final);
     });
     this.compression = 8;
     this.flag = dbf(opts.level);
@@ -1554,12 +1590,12 @@ var ZipDeflate = /* @__PURE__ */ function() {
 }();
 var AsyncZipDeflate = /* @__PURE__ */ function() {
   function AsyncZipDeflate2(filename, opts) {
-    var _this_1 = this;
+    var _this = this;
     if (!opts)
       opts = {};
     ZipPassThrough.call(this, filename);
     this.d = new AsyncDeflate(opts, function(err2, dat, final) {
-      _this_1.ondata(err2, dat, final);
+      _this.ondata(err2, dat, final);
     });
     this.compression = 8;
     this.flag = dbf(opts.level);
@@ -1580,7 +1616,7 @@ var Zip = /* @__PURE__ */ function() {
     this.d = 1;
   }
   Zip2.prototype.add = function(file) {
-    var _this_1 = this;
+    var _this = this;
     if (!this.ondata)
       err(5);
     if (this.d & 2)
@@ -1598,7 +1634,7 @@ var Zip = /* @__PURE__ */ function() {
       var pAll_1 = function() {
         for (var _i = 0, chks_2 = chks_1; _i < chks_2.length; _i++) {
           var chk = chks_2[_i];
-          _this_1.ondata(null, chk, false);
+          _this.ondata(null, chk, false);
         }
         chks_1 = [];
       };
@@ -1616,11 +1652,11 @@ var Zip = /* @__PURE__ */ function() {
         r: function() {
           pAll_1();
           if (tr_1) {
-            var nxt = _this_1.u[ind_1 + 1];
+            var nxt = _this.u[ind_1 + 1];
             if (nxt)
               nxt.r();
             else
-              _this_1.d = 1;
+              _this.d = 1;
           }
           tr_1 = 1;
         }
@@ -1628,8 +1664,8 @@ var Zip = /* @__PURE__ */ function() {
       var cl_1 = 0;
       file.ondata = function(err2, dat, final) {
         if (err2) {
-          _this_1.ondata(err2, dat, final);
-          _this_1.terminate();
+          _this.ondata(err2, dat, final);
+          _this.terminate();
         } else {
           cl_1 += dat.length;
           chks_1.push(dat);
@@ -1652,7 +1688,7 @@ var Zip = /* @__PURE__ */ function() {
     }
   };
   Zip2.prototype.end = function() {
-    var _this_1 = this;
+    var _this = this;
     if (this.d & 2) {
       this.ondata(err(4 + (this.d & 1) * 8, 0, 1), null, true);
       return;
@@ -1662,10 +1698,10 @@ var Zip = /* @__PURE__ */ function() {
     else
       this.u.push({
         r: function() {
-          if (!(_this_1.d & 1))
+          if (!(_this.d & 1))
             return;
-          _this_1.u.splice(-1, 1);
-          _this_1.e();
+          _this.u.splice(-1, 1);
+          _this.e();
         },
         t: function() {
         }
@@ -1843,9 +1879,9 @@ var UnzipPassThrough = /* @__PURE__ */ function() {
 }();
 var UnzipInflate = /* @__PURE__ */ function() {
   function UnzipInflate2() {
-    var _this_1 = this;
+    var _this = this;
     this.i = new Inflate(function(dat, final) {
-      _this_1.ondata(null, dat, final);
+      _this.ondata(null, dat, final);
     });
   }
   UnzipInflate2.prototype.push = function(data, final) {
@@ -1860,14 +1896,14 @@ var UnzipInflate = /* @__PURE__ */ function() {
 }();
 var AsyncUnzipInflate = /* @__PURE__ */ function() {
   function AsyncUnzipInflate2(_, sz) {
-    var _this_1 = this;
+    var _this = this;
     if (sz < 32e4) {
       this.i = new Inflate(function(dat, final) {
-        _this_1.ondata(null, dat, final);
+        _this.ondata(null, dat, final);
       });
     } else {
       this.i = new AsyncInflate(function(err2, dat, final) {
-        _this_1.ondata(err2, dat, final);
+        _this.ondata(err2, dat, final);
       });
       this.terminate = this.i.terminate;
     }
@@ -1890,7 +1926,7 @@ var Unzip = /* @__PURE__ */ function() {
     this.p = et;
   }
   Unzip2.prototype.push = function(chunk, final) {
-    var _this_1 = this;
+    var _this = this;
     if (!this.onfile)
       err(5);
     if (!this.p)
@@ -1947,7 +1983,7 @@ var Unzip = /* @__PURE__ */ function() {
                 if (!sc_1)
                   file_1.ondata(null, et, true);
                 else {
-                  var ctr = _this_1.o[cmp_1];
+                  var ctr = _this.o[cmp_1];
                   if (!ctr)
                     file_1.ondata(err(14, "unknown compression type " + cmp_1, 1), null, false);
                   d_1 = sc_1 < 0 ? new ctr(fn_1) : new ctr(fn_1, sc_1, su_1);
@@ -1958,8 +1994,8 @@ var Unzip = /* @__PURE__ */ function() {
                     var dat2 = chks_4[_i];
                     d_1.push(dat2, false);
                   }
-                  if (_this_1.k[0] == chks_3 && _this_1.c)
-                    _this_1.d = d_1;
+                  if (_this.k[0] == chks_3 && _this.c)
+                    _this.d = d_1;
                   else
                     d_1.push(et, true);
                 }
@@ -2080,7 +2116,7 @@ function unzip(data, opts, cb) {
           cbl(null, slc(data, b, b + sc));
         else if (c_1 == 8) {
           var infl = data.subarray(b, b + sc);
-          if (sc < 32e4) {
+          if (su < 524288 || sc > 0.8 * su) {
             try {
               cbl(null, inflateSync(infl, {out: new u8(su)}));
             } catch (e2) {

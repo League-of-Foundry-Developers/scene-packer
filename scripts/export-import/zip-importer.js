@@ -698,7 +698,7 @@ export default class ZipImporter extends FormApplication {
         const newAssetLocation = `${baseURL}${folder}/${encodeURIComponent(filename)}`;
 
         if (needsDownloading) {
-          const assetData = this.decompressed['data/assets/' + asset];
+          const assetData = this.getRawDataFromZip('data/assets/' + asset);
           if (!assetData) {
             ScenePacker.logType(this.scenePackerInfo.name, 'warn', true,
               game.i18n.format('SCENE-PACKER.importer.missing-asset', {
@@ -782,16 +782,43 @@ export default class ZipImporter extends FormApplication {
   }
 
   /**
+   * Get the raw data from the decompressed Zip file
+   * Will automatically try to convert unix paths to windows paths if needed
+   * @param path
+   * @returns {undefined|any}
+   */
+  getRawDataFromZip(path) {
+    if (!this.decompressed) {
+      return undefined;
+    }
+    if (!this.decompressed[path]) {
+      // If the path contains folder paths, the zip might have Windows-style paths
+      if (!path.includes('/')) {
+        return undefined;
+      }
+
+      // Convert unix paths to windows paths and try again
+      path = path.replace(/\//g, "\\");
+      if (!this.decompressed[path]) {
+        return undefined;
+      }
+    }
+
+    return this.decompressed[path];
+  }
+
+  /**
    * Get data from the decompressed Zip file
    * @param {string} path
    * @returns {undefined|any}
    */
   getDataFromZip(path) {
-    if (!this.decompressed || !this.decompressed[path]) {
+    const data = this.getRawDataFromZip(path);
+    if (!data) {
       return undefined;
     }
 
-    const jsonString = new TextDecoder().decode(this.decompressed[path]);
+    const jsonString = new TextDecoder().decode(data);
     return JSON.parse(jsonString);
   }
 
