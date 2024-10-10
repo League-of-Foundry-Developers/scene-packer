@@ -1,0 +1,33 @@
+<form>
+  <section class="content">
+    <h3>{{localize 'SCENE-PACKER.reset-prompts.name'}}</h3>
+    <div><p>{{localize 'SCENE-PACKER.reset-prompts.hint'}}</p></div>
+    <hr>
+    {{#if instances.length}}
+      <div>
+        <label>
+          {{localize 'SCENE-PACKER.reset-prompts.select-module-label'}}
+          <select name="module-name">
+            {{#each instances as |instance|}}
+              <option value="{{instance.id}}">{{instance.id}} ({{instance.name}})</option>
+            {{/each}}
+          </select>
+        </label>
+      </div>
+      <div><p>{{localize 'SCENE-PACKER.reset-prompts.refresh-text'}}</p></div>
+    {{else}}
+      <div><p>{{localize 'SCENE-PACKER.reset-prompts.nothing'}}</p></div>
+    {{/if}}
+  </section>
+
+  <footer class="flexrow">
+    {{#if instances.length}}
+      <button type="submit" name="convert">
+        <i class="fas fa-arrows-rotate"></i> {{localize 'SCENE-PACKER.reset-prompts.name'}}
+      </button>
+    {{/if}}
+    <button type="button" name="close">
+      <i class="fas fa-times"></i> {{localize 'Cancel'}}
+    </button>
+  </footer>
+</form>

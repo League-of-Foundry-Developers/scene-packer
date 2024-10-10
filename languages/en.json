@@ -552,6 +552,14 @@
       "all-lowercase": "All assets are already lowercase.",
       "list-assets": "The following assets will be converted to lowercase:",
       "confirm": "Are you sure you want to convert these assets to lowercase?"
+    },
+    "reset-prompts": {
+      "name": "Reset import prompts",
+      "label": "Choose module",
+      "hint": "Use this to reset the prompt you received when you first installed a supported module. Handy if you accidentally closed it the first time.",
+      "nothing": "There are no modules installed that are registered with Scene Packer, so there are no welcome prompts that can be reset. Make sure the module is enabled.",
+      "refresh-text": "Resetting the prompt will automatically reload your world.",
+      "select-module-label": "Select module:"
     }
   }
 }

@@ -10,6 +10,7 @@ import MoulinetteImporter from './export-import/moulinette-importer.js';
 import Report from './report.js';
 import WelcomeJournal from './welcome-journal.js';
 import ZipImporter from './export-import/zip-importer.js';
+import ResetImportPrompts from './reset-import-prompts.js';
 
 /**
  * Tracks the initialised instances of Scene Packer and also exposes some methods to globalThis.
@@ -5860,6 +5861,15 @@ Hooks.once('setup', () => {
     }
     await instance.ProcessScene(readyCanvas.scene);
   });
+
+  game.settings.registerMenu(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_RESET_IMPORT_PROMPT, {
+    name: game.i18n.localize('SCENE-PACKER.reset-prompts.name'),
+    label: game.i18n.localize('SCENE-PACKER.reset-prompts.label'),
+    hint: game.i18n.localize('SCENE-PACKER.reset-prompts.hint'),
+    icon: "fas fa-arrows-rotate",
+    type: ResetImportPrompts,
+    restricted: true,
+  })
 
   game.settings.register(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_ENABLE_CONTEXT_MENU, {
     name: game.i18n.localize('SCENE-PACKER.settings.context-menu.name'),

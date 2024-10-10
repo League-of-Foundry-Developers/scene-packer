@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.7.15
+- Added a button in the settings to more easily re-prompt for a module's automatic importer.
+  - This functionality always existed via a macro. This button just makes it easier to find.
+
 ## v2.7.14
 - Allow the Moulinette importer tool to correctly handle zip files manually created on Windows.
 - Updated [fflate](https://101arrowz.github.io/fflate/) to v0.8.2.
