@@ -552,6 +552,14 @@
       "title": "Vérifier que des assets existent et les convertir en minuscules",
       "description": "Cet outil vérifiera que tous les assets de votre monde existent et convertira leurs références en minuscules. Il énumérera d'abord toutes les références des assets qu'il convertira, puis vous demandera de confirmer.",
       "nothing": "Aucun asset n'a été trouvé dans votre monde."
+    },
+    "reset-prompts": {
+      "name": "Réinitialiser les invites d'importation",
+      "label": "Choisir le module",
+      "hint": "Utilisez ceci pour réinitialiser l'invite que vous avez reçue lors de la première installation d'un module pris en charge. Pratique si vous l'avez accidentellement fermée la première fois.",
+      "nothing": "Il n'y a aucun module installé qui soit enregistré avec Scene Packer, donc il n'y a pas d'invites de bienvenue à réinitialiser. Assurez-vous que le module est activé.",
+      "refresh-text": "La réinitialisation de l'invite rechargera automatiquement votre monde.",
+      "select-module-label": "Sélectionner le module:"
     }
   }
 }
