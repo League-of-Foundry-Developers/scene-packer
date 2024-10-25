@@ -31,13 +31,25 @@
 {{/inline}}
 
 {{#*inline "entityPartial"}}
-  <li class="directory-item entity" data-entity-id="{{this.id}}">
+  <li class="directory-item entity flexcol" data-entity-id="{{this.id}}">
     <label class="flexrow">
       <input type="checkbox" data-type="{{this.documentName}}" name="entity.{{this.documentName}}.{{this.id}}" value="{{this.id}}">
       {{#if this.thumbnail}}<img class="profile actor-profile" title="{{this.name}}" data-src="{{this.thumbnail}}" style="margin-right: 5px;">
       {{else if this.img}}<img class="profile actor-profile" title="{{this.name}}" data-src="{{this.img}}" style="margin-right: 5px;">{{/if}}
       <h4 class="entity-name"><a class="entity-link content-link" data-type="{{this.documentName}}" data-entity="{{this.documentName}}" data-id="{{this.id}}">{{this.name}}</a></h4>
     </label>
+    {{#if (eq this.documentName "Playlist")}}
+      <ul class="playlist-sounds">
+      {{#each this.sounds}}
+        <li class="playlist-sound">
+          <label>
+            <input type="checkbox" data-type="{{this.documentName}}" name="entity.{{this.documentName}}.{{this.id}}" value="{{this.id}}">
+            {{this.name}}
+          </label>
+        </li>
+      {{/each}}
+      </ul>
+    {{/if}}
   </li>
 {{/inline}}
 

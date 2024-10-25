@@ -527,6 +527,24 @@ export default class Exporter extends FormApplication {
     if (isBeingTicked) {
       $input.parents('.directory-item.folder').children('header').find('input[type="checkbox"]').prop('checked', isBeingTicked);
     }
+
+    const playlistSounds = $(element).closest('ul.playlist-sounds');
+    if (playlistSounds.length) {
+      // Allow playlist sounds to be individually selected within a playlist
+      const checkboxes = playlistSounds.find('input[type="checkbox"]');
+      const numChecked = checkboxes.filter(':checked').length;
+      const allChecked = checkboxes.length === numChecked;
+      if (numChecked > 0 && !allChecked) {
+        // Indeterminate state
+        playlistSounds.siblings('label').find('input[type="checkbox"]').prop('checked', false).prop('indeterminate', true);
+      } else if (allChecked) {
+        // All checked
+        playlistSounds.siblings('label').find('input[type="checkbox"]').prop('checked', true).prop('indeterminate', false);
+      } else {
+        // None checked
+        playlistSounds.siblings('label').find('input[type="checkbox"]').prop('checked', false).prop('indeterminate', false);
+      }
+    }
     this._updateCounts();
   }
 
@@ -540,6 +558,13 @@ export default class Exporter extends FormApplication {
       // Clicked a direct link
       return;
     }
+
+    const playlistSounds = $(event.target).closest('ul.playlist-sounds');
+    if (playlistSounds.length) {
+      // Bubble the event up to the individual checkbox
+      return;
+    }
+
     event.preventDefault();
     const element = event.currentTarget;
     const $input = $(element).find('input[type="checkbox"]');

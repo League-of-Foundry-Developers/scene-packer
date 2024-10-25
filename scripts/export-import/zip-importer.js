@@ -437,15 +437,48 @@ export default class ZipImporter extends FormApplication {
           count: playlistData.length,
         })}</p>`,
       });
-      const documents = await this.ensureAssets(playlistData, assetMap, assetData);
+      let documents = await this.ensureAssets(playlistData, assetMap, assetData);
       const folderIDs = documents.map(d => d.folder);
       if (folderIDs.length) {
         await MoulinetteImporter.CreateFolders(folderIDs, this.folderData);
       }
-      // Run via the .fromSource method as that operates in a non-strict validation format, allowing
-      // for older formats to still be parsed in most cases.
-      await Playlist.createDocuments(documents.map(d => Playlist.fromSource(d)
-        .toObject()), { keepId: true });
+      // Playlists might need to have individual sounds merged
+      const existingDocuments = documents.filter(d => game[Playlist.collectionName].has(d._id));
+      for (const d of existingDocuments) {
+        const existingPlaylist = game[Playlist.collectionName].get(d._id);
+        if (!existingPlaylist) {
+          continue;
+        }
+        const playlistData = existingPlaylist.toJSON();
+        const sounds = playlistData.sounds || [];
+        const newPlaylistData = Playlist.fromSource(d).toObject();
+        const newSounds = [];
+        let hasUpdates = false;
+        for (const sound of (newPlaylistData.sounds || [])) {
+          const i = sounds.findIndex(s => s._id === sound._id);
+          if (i !== -1) {
+            sounds[i] = sound;
+            hasUpdates = true;
+            continue;
+          }
+          newSounds.push(sound);
+        }
+
+        if (hasUpdates) {
+          await existingPlaylist.updateEmbeddedDocuments('PlaylistSound', sounds);
+        }
+        if (newSounds.length) {
+          await existingPlaylist.createEmbeddedDocuments('PlaylistSound', newSounds);
+        }
+      }
+
+      documents = documents.filter(d => !existingDocuments.some(e => e._id === d._id));
+      if (documents.length) {
+        // Run via the .fromSource method as that operates in a non-strict validation format, allowing
+        // for older formats to still be parsed in most cases.
+        await Playlist.createDocuments(documents.map(d => Playlist.fromSource(d)
+          .toObject()), { keepId: true });
+      }
     }
 
     if (cardData.length) {
@@ -829,7 +862,28 @@ export default class ZipImporter extends FormApplication {
    * @returns {Document[]}
    */
   missingDataOnly(data, collection) {
-    return data.filter(a => collection && !collection.has(a._id));
+     try {
+      return data.filter(a => {
+        if (!collection.has(a._id)) {
+          return true;
+        }
+
+        if (collection.documentName === 'Playlist') {
+          const playlist = collection.get(a._id);
+          const sounds = playlist?.sounds;
+          if (sounds?.size) {
+            // Include the playlist if any of the sounds aren't in the collection's playlist sounds.
+            return a.sounds.map(s => s._id).some(id => !sounds.has(id));
+          }
+        }
+
+        return false;
+      });
+    } catch (err) {
+      console.error(err);
+      // Fallback to returning all data if there is an error
+      return data;
+    }
   }
 
   /**

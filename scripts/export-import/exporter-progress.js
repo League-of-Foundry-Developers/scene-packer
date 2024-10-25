@@ -174,6 +174,12 @@ export default class ExporterProgress extends FormApplication {
           }
         };
 
+        // Determine which PlaylistSounds should be included
+        const playlistSounds = new Set(
+          this.selected.filter((d) => d.dataset.type === "PlaylistSound")
+            .map((d) => d.value)
+        );
+
         // 'Playlist', 'Macro', 'Item', 'Actor', 'Cards', 'RollTable', 'JournalEntry', 'Scene'
         for (const type of CONSTANTS.PACK_IMPORT_ORDER) {
           if (!CONFIG[type]) {
@@ -184,9 +190,16 @@ export default class ExporterProgress extends FormApplication {
             .filter((d) => d.dataset.type === type)
             .map((d) => d.value);
           ScenePacker.logType(CONSTANTS.MODULE_NAME, 'info', true, `Exporter | Processing ${ids.length} ${CONSTANTS.TYPE_HUMANISE[type]}.`);
-          const documents = CONFIG[type].collection.instance.filter((s) =>
-            ids.includes(s.id),
-          );
+          const documents = CONFIG[type].collection.instance.filter((s) => {
+            if (ids.includes(s.id)) {
+              return true;
+            }
+
+            if (type === 'Playlist' && playlistSounds.size) {
+              const sounds = (s.sounds ?? s.data.sounds)?.keys() || [];
+              return sounds.some((id) => playlistSounds.has(id));
+            }
+          });
 
           if (type !== 'Scene') {
             // Add all documents by default as unrelated, later on remove those that have relations.
@@ -197,6 +210,14 @@ export default class ExporterProgress extends FormApplication {
 
           const out = documents.map((d) => (d.toJSON ? d.toJSON() : d)) || [];
           for (const document of out) {
+            if (type === 'Playlist') {
+              // Remove sounds that are not in the selected list
+              const sounds = document.sounds.filter((s) => playlistSounds.has(s._id));
+              if (sounds.length !== document.sounds.length) {
+                foundry.utils.setProperty(document, 'sounds', sounds);
+              }
+            }
+
             const hash = Hash.SHA1(document);
             setProperty(document, 'flags.scene-packer.hash', hash);
             setProperty(document, 'flags.scene-packer.moulinette-adventure-name', this.packageName);
@@ -212,7 +233,7 @@ export default class ExporterProgress extends FormApplication {
               },
             )}</p>`,
           });
-          if (!ids.length) {
+          if (!documents.length) {
             continue;
           }
 
@@ -242,7 +263,7 @@ export default class ExporterProgress extends FormApplication {
                 this.assetsMap.AddAssets(assetData.assets);
                 break;
               case 'Playlist':
-                assetData = await ExtractPlaylistAssets(document);
+                assetData = await ExtractPlaylistAssets(document, playlistSounds);
                 this.assetsMap.AddAssets(assetData.assets);
                 break;
               case 'JournalEntry':

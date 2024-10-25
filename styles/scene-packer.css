@@ -251,3 +251,12 @@
 .sp-welcome-journal .sp-footer hr {
   width: 100%;
 }
+#scene-packer-exporter li.folder > .folder-header {
+  text-shadow: none;
+}
+#scene-packer-exporter .directory .directory-item {
+  line-height: normal;
+}
+#scene-packer-exporter .directory .directory-list input[type="checkbox"] {
+  vertical-align: middle;
+}
