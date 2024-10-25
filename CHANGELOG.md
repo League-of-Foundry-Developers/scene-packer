@@ -4,6 +4,8 @@
 - Added support for importing partial playlists via the Moulinette importer (and associated zip importer).
   - Allows creators to export individual sounds from a playlist and have it be merged into an existing playlist on import.
   - This can be helpful for a creator who wants to release individual sounds, but have a single playlist across their module releases.
+- Fix the `Relink compendium entries` macro to correctly handle journal pages stored in markdown format.
+  - Fixes #147
 
 ## v2.7.15
 - Added a button in the settings to more easily re-prompt for a module's automatic importer.

@@ -40,6 +40,9 @@ export function ExtractRelatedJournalData(journal) {
       if (path === 'pages') {
         for (const text of content.filter(c => c.type === 'text')) {
           const relations = ExtractUUIDsFromContent(text.content, path);
+          if (text.markdown) {
+            relations.push(...ExtractUUIDsFromContent(text.markdown, path));
+          }
           if (relations.length) {
             relatedData.AddRelations(uuid, relations);
           }
