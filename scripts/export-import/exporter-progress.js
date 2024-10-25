@@ -219,9 +219,9 @@ export default class ExporterProgress extends FormApplication {
             }
 
             const hash = Hash.SHA1(document);
-            setProperty(document, 'flags.scene-packer.hash', hash);
-            setProperty(document, 'flags.scene-packer.moulinette-adventure-name', this.packageName);
-            setProperty(document, 'flags.scene-packer.moulinette-adventure-version', this.exporterData?.version || '1.0.0');
+            foundry.utils.setProperty(document, 'flags.scene-packer.hash', hash);
+            foundry.utils.setProperty(document, 'flags.scene-packer.moulinette-adventure-name', this.packageName);
+            foundry.utils.setProperty(document, 'flags.scene-packer.moulinette-adventure-version', this.exporterData?.version || '1.0.0');
           }
           dataZip.AddToZip(out, `data/${type}.json`);
           updateTotalSize({

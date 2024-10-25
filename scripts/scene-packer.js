@@ -4067,7 +4067,7 @@ export default class ScenePacker {
         const update = {
           _id: tile.id || tile._id,
         };
-        setProperty(update, 'flags.monks-active-tiles.actions', actions);
+        foundry.utils.setProperty(update, 'flags.monks-active-tiles.actions', actions);
         updates.push(update);
       }
     }
@@ -4491,7 +4491,7 @@ export default class ScenePacker {
         });
 
         let newFlags = {};
-        setProperty(newFlags, 'flags.quick-encounters.quickEncounter', JSON.stringify(quickEncounter));
+        foundry.utils.setProperty(newFlags, 'flags.quick-encounters.quickEncounter', JSON.stringify(quickEncounter));
         await journal.update(newFlags);
       }
     }
@@ -5535,8 +5535,8 @@ export default class ScenePacker {
             continue;
           }
 
-          setProperty(savedTileData, 'flags.scene-packer.SPTileData', [spTile]);
-          setProperty(savedTileData, 'flags.scene-packer.source-module', instance.GetModuleName());
+          foundry.utils.setProperty(savedTileData, 'flags.scene-packer.SPTileData', [spTile]);
+          foundry.utils.setProperty(savedTileData, 'flags.scene-packer.source-module', instance.GetModuleName());
         }
       }
       updates.push({
@@ -5571,7 +5571,7 @@ export default class ScenePacker {
 
       if (!dryRun) {
         let newFlags = {};
-        setProperty(newFlags, 'flags.quick-encounters.quickEncounter', JSON.stringify(quickEncounter));
+        foundry.utils.setProperty(newFlags, 'flags.quick-encounters.quickEncounter', JSON.stringify(quickEncounter));
         await journal.update(newFlags);
       }
     }
