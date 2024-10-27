@@ -4,6 +4,8 @@
 - Added support for importing partial playlists via the Moulinette importer (and associated zip importer).
   - Allows creators to export individual sounds from a playlist and have it be merged into an existing playlist on import.
   - This can be helpful for a creator who wants to release individual sounds, but have a single playlist across their module releases.
+- Moulinette importer (and associated zip importer) will now prompt to reload the world after completing the import.
+  - This is handle some edge cases where Foundry VTT doesn't correctly display the imported data.
 - Fix the `Relink compendium entries` macro to correctly handle journal pages stored in markdown format.
   - Fixes #147
 

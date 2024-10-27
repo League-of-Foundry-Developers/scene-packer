@@ -225,16 +225,8 @@ export default class ZipImporter extends FormApplication {
       }
       // Run via the .fromSource method as that operates in a non-strict validation format, allowing
       // for older formats to still be parsed in most cases.
-      const created = await Scene.createDocuments(documents.map(d => Scene.fromSource(d)
+      const created = await Scene.createDocuments(documents.map(d => Scene.fromSource({...d, active: false})
         .toObject()), { keepId: true });
-      for (const id of created.map(s => s.id)) {
-        const scene = game.scenes.get(id);
-        if (!scene) {
-          continue;
-        }
-        const thumbData = await scene.createThumbnail();
-        await scene.update({ thumb: thumbData.thumb }, { diff: false });
-      }
 
       // Check for compendium references within the scenes and update them to local world references
       console.groupCollapsed(game.i18n.format('SCENE-PACKER.importer.converting-references', {
@@ -242,6 +234,17 @@ export default class ZipImporter extends FormApplication {
         type: Scene.collectionName,
       }));
       const sceneUpdates = ReplaceCompendiumReferences(Scene, created, availableDocuments, this.scenePackerInfo.name);
+
+      for (const scene of created) {
+        const thumb = await scene.createThumbnail();
+        const update = sceneUpdates.find(s => s._id === scene.id);
+        if (update) {
+          update.thumb = thumb.thumb;
+          continue;
+        }
+        sceneUpdates.push({ _id: scene.id, thumb: thumb.thumb });
+      }
+
       if (sceneUpdates.length) {
         await Scene.updateDocuments(sceneUpdates);
       }
@@ -658,6 +661,14 @@ export default class ZipImporter extends FormApplication {
     await this.updateProcessStatus({
       message: `<p>${game.i18n.localize('SCENE-PACKER.importer.complete')}</p>`,
     });
+
+    Dialog.prompt({
+      title: game.i18n.localize('SCENE-PACKER.importer.name'),
+      content: game.i18n.localize('SCENE-PACKER.importer.complete-content'),
+      callback: () => {
+        window.location.reload();
+      }
+    })
   }
 
   /** @inheritdoc */

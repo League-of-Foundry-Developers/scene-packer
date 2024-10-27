@@ -315,6 +315,7 @@
       "converting-reference": "Converting {type} reference in \"{name}\" {oldRef} -> {newRef} at location: {path}",
       "no-existing-value": "Could not find existing value at path \"{path}\". Skipping updating reference…",
       "complete": "Complete!",
+      "complete-content": "Import complete. It is strongly recommended to reload your world. Click the button below to refresh.",
       "import-all": "Import all {count} entities in this pack",
       "import-one": "Import selected",
       "selected-entity": "Selected {type}:",
