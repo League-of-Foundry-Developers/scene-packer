@@ -4067,7 +4067,7 @@ export default class ScenePacker {
         const update = {
           _id: tile.id || tile._id,
         };
-        setProperty(update, 'flags.monks-active-tiles.actions', actions);
+        foundry.utils.setProperty(update, 'flags.monks-active-tiles.actions', actions);
         updates.push(update);
       }
     }
@@ -4491,7 +4491,7 @@ export default class ScenePacker {
         });
 
         let newFlags = {};
-        setProperty(newFlags, 'flags.quick-encounters.quickEncounter', JSON.stringify(quickEncounter));
+        foundry.utils.setProperty(newFlags, 'flags.quick-encounters.quickEncounter', JSON.stringify(quickEncounter));
         await journal.update(newFlags);
       }
     }
@@ -4761,17 +4761,24 @@ export default class ScenePacker {
         switch (type) {
           case 'JournalEntryPacks':
             if (CONSTANTS.IsV10orNewer()) {
-              const pages = document.pages?.filter(p => p.type === 'text' && p.text?.content) || [];
+              const pages = document.pages?.filter(p => p.type === 'text' && (p.text?.content || p.text?.markdown)) || [];
               if (pages.length) {
                 const pageUpdates = [];
                 for (const page of pages) {
+                  let path = 'text.content';
+                  let originalContent = page.text.content;
+                  if (page.text.format === CONST.JOURNAL_ENTRY_PAGE_FORMATS.MARKDOWN) {
+                    path = 'text.markdown';
+                    originalContent = page.text.markdown;
+                  }
+
                   let {
                     newContent,
                     references,
                     hyperlinksChanged,
-                  } = await this.relinkContent(page.text.content, entry, page, {domParser, rex, moduleName, packs, pack, typeName});
+                  } = await this.relinkContent(originalContent, entry, page, {domParser, rex, moduleName, packs, pack, typeName});
 
-                  if (newContent !== page.text.content) {
+                  if (newContent !== originalContent) {
                     ScenePacker.logType(
                       moduleName,
                       'info',
@@ -4786,7 +4793,7 @@ export default class ScenePacker {
                     );
                     pageUpdates.push({
                       _id: page._id,
-                      'text.content': newContent,
+                      [path]: newContent,
                     })
                   }
                 }
@@ -5535,8 +5542,8 @@ export default class ScenePacker {
             continue;
           }
 
-          setProperty(savedTileData, 'flags.scene-packer.SPTileData', [spTile]);
-          setProperty(savedTileData, 'flags.scene-packer.source-module', instance.GetModuleName());
+          foundry.utils.setProperty(savedTileData, 'flags.scene-packer.SPTileData', [spTile]);
+          foundry.utils.setProperty(savedTileData, 'flags.scene-packer.source-module', instance.GetModuleName());
         }
       }
       updates.push({
@@ -5571,7 +5578,7 @@ export default class ScenePacker {
 
       if (!dryRun) {
         let newFlags = {};
-        setProperty(newFlags, 'flags.quick-encounters.quickEncounter', JSON.stringify(quickEncounter));
+        foundry.utils.setProperty(newFlags, 'flags.quick-encounters.quickEncounter', JSON.stringify(quickEncounter));
         await journal.update(newFlags);
       }
     }

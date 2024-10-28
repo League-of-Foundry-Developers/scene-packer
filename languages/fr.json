@@ -291,6 +291,7 @@
       "converting-reference": "Convertit la référence {type} dans \"{name}\" {oldRef} -> {newRef} dans l'emplacement : {path}",
       "no-existing-value": "Impossible de trouver une valeur existante dans le chemin \"{path}\". Passe la mise à jour de la référence…",
       "complete": "Achevé !",
+      "complete-content": "Importation terminée. Il est fortement recommandé de recharger votre monde. Cliquez sur le bouton ci-dessous pour actualiser.",
       "import-all": "Importer toutes les {count} entités dans ce pack",
       "import-one": "Importe la sélection",
       "selected-entity": "Sélectionné {type} :",
