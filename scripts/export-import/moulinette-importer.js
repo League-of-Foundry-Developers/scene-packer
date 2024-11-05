@@ -550,8 +550,8 @@ export default class MoulinetteImporter extends FormApplication {
 
         documents = documents.filter(d => !existingDocuments.some(e => e._id === d._id));
         if (documents.length) {
-          // Run via the .fromSource method as that operates in a non-strict validation format, allowing
-          // for older formats to still be parsed in most cases.
+        // Run via the .fromSource method as that operates in a non-strict validation format, allowing
+        // for older formats to still be parsed in most cases.
           await Playlist.createDocuments(documents.map(d => Playlist.fromSource(d)
             .toObject()), { keepId: true });
         }
@@ -789,7 +789,14 @@ export default class MoulinetteImporter extends FormApplication {
       return entities;
     }
 
-    const baseURL = await game.moulinette.applications.MoulinetteFileUtil.getBaseURL() || '';
+    // Moulinette 3.0 and newer
+    const moulinetteNew = await game.modules.get("moulinette")?.utils?.filemanager
+    let baseURL = '';
+    if(moulinetteNew) {
+      baseURL = await moulinetteNew.getBaseURL() || '';
+    } else {
+      baseURL = await game.moulinette.applications.MoulinetteFileUtil.getBaseURL() || '';
+    }
     const adventureFolder = `${this.scenePackerInfo.author}-${this.scenePackerInfo.name}`.slugify({strict: true}) || 'scene-packer-fallback';
     const returnEntities = [];
     console.groupCollapsed(
@@ -852,14 +859,39 @@ export default class MoulinetteImporter extends FormApplication {
             continue;
           }
           const srcURL = new URL(assetURL);
-          if (!await game.moulinette.applications.MoulinetteFileUtil.downloadFile(srcURL, folder, filename)) {
-            ScenePacker.logType(this.scenePackerInfo.name, 'error', true,
-              game.i18n.format('SCENE-PACKER.exporter.progress.download-error', {
-                error: asset,
-              }),
-            );
-            continue;
-          }
+          
+          if(moulinetteNew) {
+            // extract uri & pack_path from URL
+            // https://nyc3.digitaloceanspaces.com/moulinette-scenepacker/beneosbattlemaps/Crystal_Cave_-_01_HD/data/assets/beneos_assets/beneos_battlemaps/map_assets/icons/foundry_battlemap_text.webp?...
+            // => 1. https://nyc3.digitaloceanspaces.com/moulinette-scenepacker/beneosbattlemaps/Crystal_Cave_-_01_HD/data/assets
+            // => 2. beneosbattlemaps
+            // => 3. Crystal_Cave_-_01_HD
+            // => 4. beneos_assets/beneos_battlemaps/map_assets/icons/foundry_battlemap_text.webp?...
+            const regex = /^(.*scenepacker\/([^\/]+)\/([^\/]+)\/data\/assets)\/(.+)$/
+            const match = srcURL.href.match(regex);
+            if (match) {
+              const uri = match[4];
+              const packPath = match[1];
+              const folder = `${CONSTANTS.MOULINETTE_PATH}/${adventureFolder}`;
+              if (!await moulinetteNew.downloadFile(uri, packPath, folder)) {
+                ScenePacker.logType(this.scenePackerInfo.name, 'error', true,
+                  game.i18n.format('SCENE-PACKER.exporter.progress.download-error', {
+                    error: asset,
+                  }),
+                );
+                continue;
+              }  
+            }
+          } else {
+            if (!await game.moulinette.applications.MoulinetteFileUtil.downloadFile(srcURL, folder, filename)) {
+              ScenePacker.logType(this.scenePackerInfo.name, 'error', true,
+                game.i18n.format('SCENE-PACKER.exporter.progress.download-error', {
+                  error: asset,
+                }),
+              );
+              continue;
+            }
+          }  
         }
 
         if (needsRename) {
