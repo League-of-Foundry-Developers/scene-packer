@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.8.1
+
+- Support Moulinette v3 new FilePicker
+  - Thanks SvenWerlen
+- Removed deprecation warnings for v13.
+
 ## v2.8.0
 - Added support for importing partial playlists via the Moulinette importer (and associated zip importer).
   - Allows creators to export individual sounds from a playlist and have it be merged into an existing playlist on import.
