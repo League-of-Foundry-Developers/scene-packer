@@ -611,8 +611,9 @@ export default class ScenePacker {
                   // Note that the imported version gets set during ProcessScene, but JournalEntries are processed before Scenes,
                   // so the current version flag won't have been set yet.
                   if (foundry.utils.isNewerVersion(moduleVersion, importedVersion)) {
-                    let welcomeJournal = game.journal.find(j => j.name === this.welcomeJournal && j.getFlag('core', 'sourceId')
-                      .startsWith(`Compendium.${this.moduleName}.`));
+                    let welcomeJournal = game.journal.find(j => j.name === this.welcomeJournal &&
+                      (j._stats?.compendiumSource ?? j.getFlag('core', 'sourceId'))
+                        ?.startsWith(`Compendium.${this.moduleName}.`));
                     if (welcomeJournal) {
                       welcomeJournal.sheet.render(true, {sheetMode: 'text'});
                     }
@@ -1051,8 +1052,9 @@ export default class ScenePacker {
     const moduleVersion = (module?.version ?? module?.data?.version) || '0.0.0';
     if (this.welcomeJournal && foundry.utils.isNewerVersion(moduleVersion, importedVersion)) {
       // Display the welcome journal once per new module version
-      const j = game.journal.find(j => j.name === this.welcomeJournal && j.getFlag('core', 'sourceId')
-        ?.startsWith(`Compendium.${this.moduleName}.`));
+      const j = game.journal.find(j => j.name === this.welcomeJournal &&
+        (j._stats?.compendiumSource ?? j.getFlag('core', 'sourceId'))
+          ?.startsWith(`Compendium.${this.moduleName}.`));
       if (j) {
         j.sheet.render(true, {sheetMode: 'text'});
       }
@@ -2961,7 +2963,7 @@ export default class ScenePacker {
     if (actorId) {
       const tData = tokenWorldData.find(t => t.sourceId === `Actor.${actorId}` && t.compendiumSourceId);
       if (tData) {
-        const actor = game.actors.contents.find(a => (a.getFlag('core', 'sourceId') === tData.compendiumSourceId || a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === tData.sourceId) && !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated'));
+        const actor = game.actors.contents.find(a => (a._stats?.compendiumSource ?? a.getFlag("core", "sourceId") === tData.compendiumSourceId || a.getFlag(CONSTANTS.MODULE_NAME, "sourceId") === tData.sourceId) && !a.getFlag(CONSTANTS.MODULE_NAME, "deprecated"));
         if (actor) {
           return actor;
         }
@@ -3083,7 +3085,7 @@ export default class ScenePacker {
     return collection.contents.find((a) => {
       return (
         (a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === ref ||
-          a.getFlag('core', 'sourceId') === ref) &&
+          (a._stats?.compendiumSource ?? a.getFlag('core', 'sourceId')) === ref) &&
         !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated')
       );
     });
@@ -3298,7 +3300,7 @@ export default class ScenePacker {
       const hasUuid = !!note.compendiumSourceId;
       const hasSourceId = !!note.sourceId;
       const existingEntities = game.journal.filter(p => {
-        return (hasUuid && p.getFlag('core', 'sourceId') === note.compendiumSourceId) ||
+        return (hasUuid && (p._stats?.compendiumSource ?? p.getFlag('core', 'sourceId')) === note.compendiumSourceId) ||
           (hasSourceId && p.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === note.sourceId);
       });
       if (existingEntities.length) {
@@ -3662,7 +3664,11 @@ export default class ScenePacker {
     }
 
     if (showUI) {
-      ui.sidebar.activateTab('scenes');
+      if (typeof ui.sidebar.changeTab === 'function') {
+        ui.sidebar.changeTab('scenes', 'primary');
+      } else {
+        ui.sidebar.activateTab('scenes');
+      }
     }
 
     /**
@@ -4093,7 +4099,7 @@ export default class ScenePacker {
       return;
     }
 
-    if (!getProperty(journalData, 'flags.scene-packer')) {
+    if (!foundry.utils.getProperty(journalData, 'flags.scene-packer')) {
       return;
     }
 
@@ -4403,7 +4409,7 @@ export default class ScenePacker {
             // Only support unpacking Compendium references
             continue;
           }
-          const match = game.actors.contents.find(a => a.getFlag('core', 'sourceId') === actor.actorID);
+          const match = game.actors.contents.find(a => (a._stats?.compendiumSource ?? a.getFlag('core', 'sourceId')) === actor.actorID);
           if (match) {
             updates.push({
               type: 'Actor',
