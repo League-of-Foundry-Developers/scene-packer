@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.8.2
+
+- Fix bug that broke everything (sorry about that).
+
 ## v2.8.1
 
 - Support Moulinette v3 new FilePicker

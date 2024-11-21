@@ -2963,7 +2963,7 @@ export default class ScenePacker {
     if (actorId) {
       const tData = tokenWorldData.find(t => t.sourceId === `Actor.${actorId}` && t.compendiumSourceId);
       if (tData) {
-        const actor = game.actors.contents.find(a => (a._stats?.compendiumSource ?? a.getFlag("core", "sourceId") === tData.compendiumSourceId || a.getFlag(CONSTANTS.MODULE_NAME, "sourceId") === tData.sourceId) && !a.getFlag(CONSTANTS.MODULE_NAME, "deprecated"));
+        const actor = game.actors.contents.find(a => ((a._stats?.compendiumSource ?? a.getFlag("core", "sourceId")) === tData.compendiumSourceId || a.getFlag(CONSTANTS.MODULE_NAME, "sourceId") === tData.sourceId) && !a.getFlag(CONSTANTS.MODULE_NAME, "deprecated"));
         if (actor) {
           return actor;
         }
