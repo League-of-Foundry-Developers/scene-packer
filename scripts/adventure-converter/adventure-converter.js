@@ -653,6 +653,7 @@ export default class AdventureConverter extends FormApplication {
             name: pathPart,
             type: document.documentName,
             parent: parent?.id || null,
+            folder: parent?.id || null,
             color: cfColor || null,
             sorting: cfSorting,
             sort: cfSort,

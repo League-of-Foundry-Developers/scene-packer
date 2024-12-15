@@ -215,6 +215,12 @@
         "details": "Vous devez passer un tableau de chaînes de caractères à \"SetAdditionalMacrosToImport()\". Il doit s'agir des noms des Modules. Reçu : {pack}",
         "missing": "SetAdditionalModulePacks() appelé sans valeur."
       },
+      "ignoredPacks": {
+        "ui": "Appel invalide à SetIgnoredCompendiumPacks(). Voir la console pour plus de détails.",
+        "details": "Vous devez passer un tableau de chaînes de caractères à \"SetAdditionalMacrosToImport()\". Il doit s'agir des noms packs de Module. Reçu : {pack}. Les packs disponibles sont : {packs}",
+        "invalid": "Valeur invalide passée à “SetIgnoredCompendiumPacks()”. Reçu : {pack}. Les packs disponibles sont : {packs}.",
+        "missing": "SetIgnoredCompendiumPacks() appelé sans valeur."
+      },
       "version": {
         "packed-low": "La scène \"{scene}\" (du module \"{sourceModule}\") a été empaquetée avec la version de Scene Packer \"{version}\" qui est plus ancienne que la version minimale compatible de \"{supportedVersion}\". Veuillez contacter l'auteur et lui demander de ré-empaqueter la scène avec une version actuelle."
       }
