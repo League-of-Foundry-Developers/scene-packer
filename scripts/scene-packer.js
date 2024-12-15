@@ -57,6 +57,8 @@ export default class ScenePacker {
     playlists: [],
     modules: [],
   };
+  /** @type {Set<String>} */
+  ignoredCompendiumPacks = new Set();
   allowImportPrompts = true;
 
   /**
@@ -70,6 +72,7 @@ export default class ScenePacker {
    * @param {String} welcomeJournal Set the name of the journal to be imported and automatically opened after activation.
    * @param {String[]} additionalJournals Set which journals (by name) should be automatically imported.
    * @param {String[]} additionalMacros Set which macros (by name) should be automatically imported.
+   * @param {String[]} ignoredCompendiumPacks Set which compendium packs should be ignored when bulk importing entities.
    * @param {Boolean} allowImportPrompts Set whether import prompts should be allowed.
    */
   constructor(
@@ -84,6 +87,7 @@ export default class ScenePacker {
       welcomeJournal = '',
       additionalJournals = [],
       additionalMacros = [],
+      ignoredCompendiumPacks = [],
       allowImportPrompts = true,
     } = {},
   ) {
@@ -124,6 +128,9 @@ export default class ScenePacker {
     }
     if (additionalMacros?.length) {
       this.SetAdditionalMacrosToImport(additionalMacros);
+    }
+    if (ignoredCompendiumPacks?.length) {
+      this.SetIgnoredCompendiumPacks(ignoredCompendiumPacks);
     }
     this.allowImportPrompts = allowImportPrompts;
 
@@ -440,7 +447,7 @@ export default class ScenePacker {
         type: game.i18n.format(CONSTANTS.TYPE_HUMANISE[packType]),
       })}</p>`;
       di.render();
-      const packs = game.packs.filter((p) => (p.metadata.packageName || p.metadata.package) === this.moduleName && (p.documentName || p.entity) === packType);
+      const packs = game.packs.filter((p) => (p.metadata.packageName || p.metadata.package) === this.moduleName && (p.documentName || p.entity) === packType && !this.ignoredCompendiumPacks.has(p.metadata.id));
       for (let i = 0; i < packs.length; i++) {
         let createData = [];
         const pack = packs[i];
@@ -867,6 +874,7 @@ export default class ScenePacker {
           name: pathPart,
           type: entityType,
           parent: parent?.id || null,
+          folder: parent?.id || null,
           color: cfColor || null,
           sorting: cfSorting,
           sort: cfSort,
@@ -1447,6 +1455,48 @@ export default class ScenePacker {
     }
 
     this.packs.modules = packs;
+    return this;
+  }
+
+  /**
+   * Set which packs should be ignored when importing all entities.
+   * @param {String[]} packs
+   * @returns this to support chaining
+   */
+  SetIgnoredCompendiumPacks(packs) {
+    if (packs) {
+      const availablePacks = Array.from(game.modules.get(this.moduleName)?.packs?.map(p => p.name) ?? []);
+      packs = packs instanceof Array ? packs : [packs];
+      packs.forEach((j) => {
+        if (typeof j !== 'string') {
+          ui.notifications.error(
+            game.i18n.localize('SCENE-PACKER.errors.ignoredPacks.ui'),
+          );
+          throw game.i18n.format('SCENE-PACKER.errors.ignoredPacks.details', {
+            pack: j,
+            packs: availablePacks.join(', '),
+          });
+        } else {
+          if (!availablePacks.includes(j)) {
+            ui.notifications.error(
+              game.i18n.localize('SCENE-PACKER.errors.ignoredPacks.ui'),
+            );
+            throw game.i18n.format('SCENE-PACKER.errors.ignoredPacks.invalid', {
+              pack: j,
+              packs: availablePacks.join(', '),
+            });
+          } else {
+            this.ignoredCompendiumPacks.add(`${this.moduleName}.${j}`);
+          }
+        }
+      });
+    } else {
+      this.log(
+        false,
+        game.i18n.localize('SCENE-PACKER.errors.ignoredPacks.missing'),
+      );
+    }
+
     return this;
   }
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.8.3
+
+- Added the ability to ignore certain compendiums when importing all entities.
+  - This is useful if you have a compendium that you don't want to bulk import from, such as a "prefabs" compendium.
+  - This can be set via the "init" script - see `ignoredCompendiumPacks` in the [readme](https://github.com/League-of-Foundry-Developers/scene-packer#module-code-requirements).
+  - Updated French translation (Machine translated). 
+
 ## v2.8.2
 
 - Fix bug that broke everything (sorry about that).

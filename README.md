@@ -152,6 +152,17 @@ Include the following in your [module javascript](https://foundryvtt.com/article
    *   const additionalModulePacks = [];
    */
   const additionalModulePacks = [moduleName, 'dnd5e'];
+  /**
+   * ignoredCompendiumPacks is a list of compendium packs to ignore when "importing all" content.
+   * Content from this pack will still be imported if it is directly referenced by another entity.
+   *
+   * The value to use is the "name" of the pack as defined in the module.json file.
+   * Only packs from the active module can be ignored and the id of the module should not be provided.
+   * 
+   * For example, if you wanted to ignore the "mymoduleid.prefabs" pack:
+   *   const ignoredCompendiumPacks = ['prefabs'];
+   */
+  const ignoredCompendiumPacks = [];
 
   Hooks.once('scenePackerReady', ScenePacker => {
     // Initialise the Scene Packer with your adventure name and module name
@@ -166,6 +177,7 @@ Include the following in your [module javascript](https://foundryvtt.com/article
       welcomeJournal,
       additionalJournals,
       additionalMacros,
+      ignoredCompendiumPacks,
       allowImportPrompts: true, // Set to false if you don't want the popup
     });
   });
