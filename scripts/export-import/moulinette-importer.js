@@ -287,9 +287,15 @@ export default class MoulinetteImporter extends FormApplication {
             }
           }
         }
-        // Run via the .fromSource method as that operates in a non-strict validation format, allowing
-        // for older formats to still be parsed in most cases.
-        const created = await Scene.createDocuments(documents.map(d => Scene.fromSource({...d, active: false}).toObject()), { keepId: true });
+        let created = [];
+        if (CONSTANTS.IsV12orNewer()) {
+          // Run via the .fromImport method as that migrates data from old game versions since v12.
+          created = await Scene.createDocuments(await Promise.all(documents.map(async d => Scene.fromImport({...d, active: false}))), { keepId: true });
+        } else {
+          // Run via the .fromSource method as that operates in a non-strict validation format, allowing
+          // for older formats to still be parsed in most cases.
+          created = await Scene.createDocuments(documents.map(d => Scene.fromSource({...d, active: false}).toObject()), { keepId: true });
+        }
 
         // Check for compendium references within the scenes and update them to local world references
         console.groupCollapsed(game.i18n.format('SCENE-PACKER.importer.converting-references', {
@@ -337,9 +343,15 @@ export default class MoulinetteImporter extends FormApplication {
         if (folderIDs.length) {
           await MoulinetteImporter.CreateFolders(folderIDs, this.folderData);
         }
-        // Run via the .fromSource method as that operates in a non-strict validation format, allowing
-        // for older formats to still be parsed in most cases.
-        const created = await Actor.createDocuments(documents.map(d => Actor.fromSource(d).toObject()), { keepId: true });
+        let created = [];
+        if (CONSTANTS.IsV12orNewer()) {
+          // Run via the .fromImport method as that migrates data from old game versions since v12.
+          created = await Actor.createDocuments(await Promise.all(documents.map(async d => Actor.fromImport(d))), { keepId: true });
+        } else {
+          // Run via the .fromSource method as that operates in a non-strict validation format, allowing
+          // for older formats to still be parsed in most cases.
+          created = await Actor.createDocuments(documents.map(d => Actor.fromSource(d).toObject()), { keepId: true });
+        }
 
         // Check for compendium references within the actors and update them to local world references
         console.groupCollapsed(game.i18n.format('SCENE-PACKER.importer.converting-references', {
@@ -404,9 +416,15 @@ export default class MoulinetteImporter extends FormApplication {
         if (folderIDs.length) {
           await MoulinetteImporter.CreateFolders(folderIDs, this.folderData);
         }
-        // Run via the .fromSource method as that operates in a non-strict validation format, allowing
-        // for older formats to still be parsed in most cases.
-        const created = await JournalEntry.createDocuments(documents.map(d => JournalEntry.fromSource(d).toObject()), { keepId: true });
+        let created = [];
+        if (CONSTANTS.IsV12orNewer()) {
+          // Run via the .fromImport method as that migrates data from old game versions since v12.
+          created = await JournalEntry.createDocuments(await Promise.all(documents.map(async d => JournalEntry.fromImport(d))), { keepId: true });
+        } else {
+          // Run via the .fromSource method as that operates in a non-strict validation format, allowing
+          // for older formats to still be parsed in most cases.
+          created = await JournalEntry.createDocuments(documents.map(d => JournalEntry.fromSource(d).toObject()), { keepId: true });
+        }
         if (this.scenePackerInfo?.welcome_journal) {
           if (created.find(j => j.id === this.scenePackerInfo.welcome_journal)) {
             didCreateWelcomeJournal = true;
@@ -449,9 +467,15 @@ export default class MoulinetteImporter extends FormApplication {
         if (folderIDs.length) {
           await MoulinetteImporter.CreateFolders(folderIDs, this.folderData);
         }
-        // Run via the .fromSource method as that operates in a non-strict validation format, allowing
-        // for older formats to still be parsed in most cases.
-        const created = await Item.createDocuments(documents.map(d => Item.fromSource(d).toObject()), { keepId: true });
+        let created = [];
+        if (CONSTANTS.IsV12orNewer()) {
+          // Run via the .fromImport method as that migrates data from old game versions since v12.
+          created = await Item.createDocuments(await Promise.all(documents.map(async d => Item.fromImport(d))), { keepId: true });
+        } else {
+          // Run via the .fromSource method as that operates in a non-strict validation format, allowing
+          // for older formats to still be parsed in most cases.
+          created = await Item.createDocuments(documents.map(d => Item.fromSource(d).toObject()), { keepId: true });
+        }
 
         // Check for compendium references within the items and update them to local world references
         console.groupCollapsed(game.i18n.format('SCENE-PACKER.importer.converting-references', {
@@ -489,9 +513,14 @@ export default class MoulinetteImporter extends FormApplication {
         if (folderIDs.length) {
           await MoulinetteImporter.CreateFolders(folderIDs, this.folderData);
         }
-        // Run via the .fromSource method as that operates in a non-strict validation format, allowing
-        // for older formats to still be parsed in most cases.
-        await Macro.createDocuments(documents.map(d => Macro.fromSource(d).toObject()), { keepId: true });
+        if (CONSTANTS.IsV12orNewer()) {
+          // Run via the .fromImport method as that migrates data from old game versions since v12.
+          await Macro.createDocuments(await Promise.all(documents.map(async d => Macro.fromImport(d))), { keepId: true });
+        } else {
+          // Run via the .fromSource method as that operates in a non-strict validation format, allowing
+          // for older formats to still be parsed in most cases.
+          await Macro.createDocuments(documents.map(d => Macro.fromSource(d).toObject()), { keepId: true });
+        }
       }
     }
 
@@ -550,10 +579,14 @@ export default class MoulinetteImporter extends FormApplication {
 
         documents = documents.filter(d => !existingDocuments.some(e => e._id === d._id));
         if (documents.length) {
-          // Run via the .fromSource method as that operates in a non-strict validation format, allowing
-          // for older formats to still be parsed in most cases.
-          await Playlist.createDocuments(documents.map(d => Playlist.fromSource(d)
-            .toObject()), { keepId: true });
+          if (CONSTANTS.IsV12orNewer()) {
+            // Run via the .fromImport method as that migrates data from old game versions.
+            await Playlist.createDocuments(await Promise.all(documents.map(async d => Playlist.fromImport(d))), { keepId: true });
+          } else {
+            // Run via the .fromSource method as that operates in a non-strict validation format, allowing
+            // for older formats to still be parsed in most cases.
+            await Playlist.createDocuments(documents.map(d => Playlist.fromSource(d).toObject()), { keepId: true });
+          }
         }
       }
     }
@@ -581,9 +614,14 @@ export default class MoulinetteImporter extends FormApplication {
         if (folderIDs.length) {
           await MoulinetteImporter.CreateFolders(folderIDs, this.folderData);
         }
-        // Run via the .fromSource method as that operates in a non-strict validation format, allowing
-        // for older formats to still be parsed in most cases.
-        await Cards.createDocuments(documents.map(d => Cards.fromSource(d).toObject()), { keepId: true });
+        if (CONSTANTS.IsV12orNewer()) {
+          // Run via the .fromImport method as that migrates data from old game versions.
+          await Cards.createDocuments(await Promise.all(documents.map(async d => Cards.fromImport(d))), { keepId: true });
+        } else {
+          // Run via the .fromSource method as that operates in a non-strict validation format, allowing
+          // for older formats to still be parsed in most cases.
+          await Cards.createDocuments(documents.map(d => Cards.fromSource(d).toObject()), { keepId: true });
+        }
       }
     }
 
@@ -610,9 +648,15 @@ export default class MoulinetteImporter extends FormApplication {
         if (folderIDs.length) {
           await MoulinetteImporter.CreateFolders(folderIDs, this.folderData);
         }
-        // Run via the .fromSource method as that operates in a non-strict validation format, allowing
-        // for older formats to still be parsed in most cases.
-        const created = await RollTable.createDocuments(documents.map(d => RollTable.fromSource(d).toObject()), { keepId: true });
+        let created = [];
+        if (CONSTANTS.IsV12orNewer()) {
+          // Run via the .fromImport method as that migrates data from old game versions.
+          created = await RollTable.createDocuments(await Promise.all(documents.map(async d => RollTable.fromImport(d))), { keepId: true });
+        } else {
+          // Run via the .fromSource method as that operates in a non-strict validation format, allowing
+          // for older formats to still be parsed in most cases.
+          created = await RollTable.createDocuments(documents.map(d => RollTable.fromSource(d).toObject()), { keepId: true });
+        }
 
         // Check for compendium references within the roll tables and update them to local world references
         console.groupCollapsed(game.i18n.format('SCENE-PACKER.importer.converting-references', {
@@ -712,9 +756,14 @@ export default class MoulinetteImporter extends FormApplication {
           if (folderIDs.length) {
             await MoulinetteImporter.CreateFolders(folderIDs, this.folderData);
           }
-          // Run via the .fromSource method as that operates in a non-strict validation format, allowing
-          // for older formats to still be parsed in most cases.
-          await CONFIG[type].documentClass.createDocuments(documents.map(d => CONFIG[type].documentClass.fromSource(d).toObject()), { keepId: true });
+          if (CONSTANTS.IsV12orNewer()) {
+            // Run via the .fromImport method as that migrates data from old game versions.
+            await CONFIG[type].documentClass.createDocuments(await Promise.all(documents.map(async d => CONFIG[type].documentClass.fromImport(d))), { keepId: true });
+          } else {
+            // Run via the .fromSource method as that operates in a non-strict validation format, allowing
+            // for older formats to still be parsed in most cases.
+            await CONFIG[type].documentClass.createDocuments(documents.map(d => CONFIG[type].documentClass.fromSource(d).toObject()), { keepId: true });
+          }
         }
       }
 
@@ -1086,9 +1135,14 @@ export default class MoulinetteImporter extends FormApplication {
     }
 
     if (createData.length) {
-      // Run via the .fromSource method as that operates in a non-strict validation format, allowing
-      // for older formats to still be parsed in most cases.
-      await Folder.createDocuments(createData.map(d => Folder.fromSource(d).toObject()), { keepId: true });
+      if (CONSTANTS.IsV12orNewer()) {
+        // Run via the .fromImport method as that migrates data from old game versions.
+        await Folder.createDocuments(await Promise.all(createData.map(async d => Folder.fromImport(d))), { keepId: true });
+      } else {
+        // Run via the .fromSource method as that operates in a non-strict validation format, allowing
+        // for older formats to still be parsed in most cases.
+        await Folder.createDocuments(createData.map(d => Folder.fromSource(d).toObject()), { keepId: true });
+      }
     }
   }
 

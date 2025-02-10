@@ -334,6 +334,15 @@ export const CONSTANTS = Object.freeze({
   IsV12orNewer(version = this.Version()) {
     return version === '12.0' || foundry.utils.isNewerVersion(version, '12');
   },
+
+  /**
+   * Returns whether the version is at least V13
+   * @param {string} version - The version to test. Defaults to the current game instance version.
+   * @return {boolean}
+   */
+  IsV13orNewer(version = this.Version()) {
+    return version === '13.0' || foundry.utils.isNewerVersion(version, '13');
+  },
 });
 
 /**

@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.8.4
+
+- Improved the handling of the Moulinette Importer functionality to better support importing documents that were created/exported in older versions of Foundry VTT.
+  - From v12 onwards, this process makes use of the new `fromImport` method, which utilises the core migration functionalities of Foundry VTT.
+
 ## v2.8.3
 
 - Added the ability to ignore certain compendiums when importing all entities.
