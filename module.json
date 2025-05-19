@@ -3,14 +3,14 @@
   "name": "scene-packer",
   "title": "Library: Scene Packer",
   "description": "A module to assist with Scene and Adventure packing and unpacking.",
-  "version": "2.8.4",
+  "version": "2.8.5",
   "library": "true",
   "manifestPlusVersion": "1.2.0",
   "minimumCoreVersion": "0.8.6",
-  "compatibleCoreVersion": "12",
+  "compatibleCoreVersion": "13",
   "compatibility": {
     "minimum": "0.8.6",
-    "verified": "12"
+    "verified": "13"
   },
   "author": "Blair McMillan",
   "authors": [
@@ -99,6 +99,16 @@
   "bugs": "https://github.com/League-of-Foundry-Developers/scene-packer/issues",
   "changelog": "https://github.com/League-of-Foundry-Developers/scene-packer/blob/main/CHANGELOG.md",
   "flags": {
-    "allowBugReporter": true
+    "allowBugReporter": true,
+    "hotReload": {
+      "extensions": [
+        "css",
+        "hbs"
+      ],
+      "paths": [
+        "styles",
+        "templates"
+      ]
+    }
   }
 }

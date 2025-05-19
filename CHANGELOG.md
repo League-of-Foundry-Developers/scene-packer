@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.8.5
+
+- Allow the "Import from Moulinette ZIP" wizard to process zip files larger than 2GB in file size.
+- Styling fixes for the Moulinette Exporter on Foundry VTT v13.
+
 ## v2.8.4
 
 - Improved the handling of the Moulinette Importer functionality to better support importing documents that were created/exported in older versions of Foundry VTT.
