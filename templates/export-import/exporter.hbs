@@ -3,7 +3,7 @@
     <li class="directory-item folder flexcol {{#unless folder.expanded}}collapsed{{/unless}}"
         data-folder-id="{{folder.id}}" data-folder-depth="{{folder.depth}}">
   {{else}}
-    <li class="directory-item folder flexcol {{#unless folder.folder.expanded}}collapsed{{/unless}}"
+    <li class="directory-item folder flexcol {{#unless folder.folder.expanded}}collapsed{{else}}expanded{{/unless}}"
         data-folder-id="{{folder.folder.id}}" data-folder-depth="{{folder.folder.depth}}">
   {{/if}}
     <header class="folder-header flexrow" style="background-color: {{folder.data.color}}">
