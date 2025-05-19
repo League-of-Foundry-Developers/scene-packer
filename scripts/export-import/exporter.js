@@ -595,7 +595,7 @@ export default class Exporter extends FormApplication {
    * Collapse all subfolders
    */
   collapseAll() {
-    this.element.find('li.folder').addClass('collapsed');
+    this.element.find('li.folder').addClass('collapsed').removeClass('expanded');
   }
 
   /**
@@ -622,11 +622,11 @@ export default class Exporter extends FormApplication {
 
     // Expand
     if (collapsed) {
-      folder.removeClass('collapsed');
+      folder.removeClass('collapsed').addClass('expanded');
     } // Collapse
     else {
-      folder.addClass('collapsed');
-      folder.find('.folder').addClass('collapsed');
+      folder.addClass('collapsed').removeClass('expanded');
+      folder.find('.folder').addClass('collapsed').removeClass('expanded');
     }
   }
 
@@ -688,10 +688,15 @@ export default class Exporter extends FormApplication {
         el.style.display = !isSearch || match ? 'flex' : 'none';
         if (isSearch && match) {
           el.classList.remove('collapsed');
+          el.classList.add('expanded');
         } else {
           el.classList.toggle(
             'collapsed',
             !game.folders._expanded[el.dataset.folderId]
+          );
+          el.classList.toggle(
+            'expanded',
+            game.folders._expanded[el.dataset.folderId]
           );
         }
       }
