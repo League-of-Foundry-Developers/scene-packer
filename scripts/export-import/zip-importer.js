@@ -12,9 +12,9 @@ export default class ZipImporter extends FormApplication {
 
     /**
      * The decompressed Zip file.
-     * @type {Object|undefined}
+     * @type {Object}
      */
-    this.decompressed = undefined;
+    this.decompressed = {};
 
     /**
      * Summary data for the package.
@@ -26,6 +26,8 @@ export default class ZipImporter extends FormApplication {
     this.filename = '';
     this.processing = false;
     this.processingMessage = '';
+    this.progressPercent = 0;
+    this.showProgress = false;
   }
 
   /** @inheritDoc */
@@ -49,6 +51,8 @@ export default class ZipImporter extends FormApplication {
       filename: this.filename,
       processing: this.processing,
       processingMessage: this.processingMessage,
+      progressPercent: this.progressPercent,
+      showProgress: this.showProgress,
     };
   }
 
@@ -83,30 +87,67 @@ export default class ZipImporter extends FormApplication {
       message: `<p>${game.i18n.localize('SCENE-PACKER.importer.process-fetch-data')}</p>`,
     });
 
-    // Try to allocate an array buffer of the correct size. This will throw an error if the file is
-    // too large, seemingly > ~2GB on chrome.
-    try {
-      new Uint8Array(file.size)
-    } catch (err) {
-      ScenePacker.logType(
-        CONSTANTS.MODULE_NAME,
-        'error',
-        true,
-        game.i18n.format('SCENE-PACKER.zip-importer.zip-too-large', { name: file.name }),
-        err,
-      );
-      ui.notifications.error(
-        game.i18n.format('SCENE-PACKER.zip-importer.zip-too-large', { name: file.name }),
-        { permanent: true },
-      );
-      this.updateProcessStatus({
-        message: `<p class="error">${game.i18n.format('SCENE-PACKER.zip-importer.zip-too-large', { name: file.name })}</p>`,
-      });
+    this.decompressed = {};
+    let totalFiles = 0;
+    let processedFiles = 0;
+    const unzipper = new fflate.Unzip();
+    unzipper.register(fflate.AsyncUnzipInflate);
+    unzipper.onfile = file => {
+      totalFiles++;
+      let fileData = [];
+      file.ondata = async (err, dat, final) => {
+        if (err) {
+          ScenePacker.logType(
+            CONSTANTS.MODULE_NAME,
+            'error',
+            true,
+            game.i18n.format('SCENE-PACKER.zip-importer.error-unzip', { name: file.name }),
+            err,
+          );
+          ui.notifications.error(
+            game.i18n.format('SCENE-PACKER.zip-importer.error-unzip', { name: file.name }),
+            { permanent: true },
+          );
+          this.updateProcessStatus({
+            message: `<p class="error">${game.i18n.format('SCENE-PACKER.zip-importer.error-unzip', { name: file.name })}</p>`,
+          });
 
-      return false;
+          return;
+        }
+        fileData.push(dat);
+        if (final) {
+          const completeData = new Uint8Array(fileData.reduce((
+            acc,
+            chunk
+          ) => acc + chunk.length, 0));
+          let offset = 0;
+          fileData.forEach(chunk => {
+            completeData.set(chunk, offset);
+            offset += chunk.length;
+          });
+          this.decompressed[file.name] = completeData;
+
+          processedFiles++;
+        }
+      }
+      file.start();
     }
 
-    const fileData = await ZipImporter.readBlobFromFile(file).catch(err => {
+    try {
+      const fileStream = file.stream();
+      const reader = fileStream.getReader();
+      while (true) {
+        const {
+          value,
+          done
+        } = await reader.read();
+        if (done) {
+          unzipper.push(new Uint8Array(0), true);
+          break;
+        }
+        unzipper.push(value);
+      }
+    } catch (err) {
       ScenePacker.logType(
         CONSTANTS.MODULE_NAME,
         'error',
@@ -121,33 +162,7 @@ export default class ZipImporter extends FormApplication {
       this.updateProcessStatus({
         message: `<p class="error">${game.i18n.format('SCENE-PACKER.zip-importer.error-read', { name: file.name })}</p>`,
       });
-
-      return false;
-    });
-    if (!fileData) {
-      return false;
     }
-    this.decompressed = await new Promise((resolve, reject) => fflate.unzip(
-      new Uint8Array(fileData),
-      (err, unzipped) => err ? reject(err) : resolve(unzipped),
-    )).catch(err => {
-      ScenePacker.logType(
-        CONSTANTS.MODULE_NAME,
-        'error',
-        true,
-        game.i18n.format('SCENE-PACKER.zip-importer.error-unzip', { name: file.name }),
-        err,
-      );
-      ui.notifications.error(
-        game.i18n.format('SCENE-PACKER.zip-importer.error-unzip', { name: file.name }),
-        { permanent: true },
-      );
-      this.updateProcessStatus({
-        message: `<p class="error">${game.i18n.format('SCENE-PACKER.zip-importer.error-unzip', { name: file.name })}</p>`,
-      });
-
-      return false;
-    });
 
     console.log(this.decompressed);
     if (!this.decompressed) {

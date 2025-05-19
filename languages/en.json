@@ -345,8 +345,7 @@
       "error-unzip": "There was an error unzipping the file \"{name}\". Please ask for assistance on the Scene Packer Discord server.",
       "ensure-assets": "Ensuring {count} assets exist.",
       "ensure-asset-error": "Error creating asset: {error}",
-      "error-read": "There was an error reading the file \"{name}\". Please ask for assistance on the Scene Packer Discord server.",
-      "zip-too-large": "The ZIP file is too large to import. For maximum compatibility, ZIP files should be less than 2GB. Please ask for assistance on the Scene Packer Discord server."
+      "error-read": "There was an error reading the file \"{name}\". Please ask for assistance on the Scene Packer Discord server."
     },
     "exporter": {
       "name": "Export to Moulinette",

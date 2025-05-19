@@ -546,8 +546,7 @@
       "label": "Ouvrir l'assistant d'importation",
       "file": "Sélectionnez le fichier ZIP que vous souhaitez importer :",
       "description2": "L'import importera l'ensemble du pack à partir du ZIP. Si vous ne voulez qu'une seule scène, utilisez plutôt Moulinette.",
-      "error-read": "Une erreur s'est produite lors de la lecture du fichier \"{name}\". Veuillez demander de l'aide sur le serveur Discord de Scene Packer.",
-      "zip-too-large": "Le fichier ZIP est trop volumineux pour être importé. Pour une compatibilité maximale, les fichiers ZIP doivent être inférieurs à 2 Go. Demandez de l'aide sur le serveur Discord de Scene Packer."
+      "error-read": "Une erreur s'est produite lors de la lecture du fichier \"{name}\". Veuillez demander de l'aide sur le serveur Discord de Scene Packer."
     },
     "assets-to-lowercase": {
       "find-assets": "Trouver des assets",
