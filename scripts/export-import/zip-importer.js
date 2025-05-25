@@ -30,6 +30,12 @@ export default class ZipImporter extends FormApplication {
     this.showProgress = false;
   }
 
+  /**
+   * Reference to the progress bar displayed in the UI.
+   * @type Notification
+   */
+  static #progressBar;
+
   /** @inheritDoc */
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
@@ -87,6 +93,8 @@ export default class ZipImporter extends FormApplication {
       message: `<p>${game.i18n.localize('SCENE-PACKER.importer.process-fetch-data')}</p>`,
     });
 
+    let didError = false;
+    const fileReads = [];
     this.decompressed = {};
     let totalFiles = 0;
     let processedFiles = 0;
@@ -94,6 +102,8 @@ export default class ZipImporter extends FormApplication {
     unzipper.register(fflate.AsyncUnzipInflate);
     unzipper.onfile = file => {
       totalFiles++;
+      let onComplete;
+      let onErr;
       let fileData = [];
       file.ondata = async (err, dat, final) => {
         if (err) {
@@ -111,6 +121,8 @@ export default class ZipImporter extends FormApplication {
           this.updateProcessStatus({
             message: `<p class="error">${game.i18n.format('SCENE-PACKER.zip-importer.error-unzip', { name: file.name })}</p>`,
           });
+          didError = true;
+          onErr(err);
 
           return;
         }
@@ -126,10 +138,14 @@ export default class ZipImporter extends FormApplication {
             offset += chunk.length;
           });
           this.decompressed[file.name] = completeData;
+          onComplete();
 
           processedFiles++;
         }
       }
+      // Track each file to be unzipped as a separate promise, to allow us to
+      // fully process the zip file.
+      fileReads.push(new Promise((resolve, reject) => { onComplete = resolve; onErr = reject; }));
       file.start();
     }
 
@@ -142,6 +158,7 @@ export default class ZipImporter extends FormApplication {
           done
         } = await reader.read();
         if (done) {
+          // The full zip file has been read and pushed to the unzipper
           unzipper.push(new Uint8Array(0), true);
           break;
         }
@@ -164,8 +181,10 @@ export default class ZipImporter extends FormApplication {
       });
     }
 
-    console.log(this.decompressed);
-    if (!this.decompressed) {
+    // Wait for all the files to finish unzipping
+    await Promise.all(fileReads);
+    console.log('decompressed', this.decompressed);
+    if (!this.decompressed || didError) {
       return false;
     }
 
@@ -794,7 +813,7 @@ export default class ZipImporter extends FormApplication {
 
         const folder = localAsset.substring(0, localAsset.lastIndexOf('/'));
         const filename = asset.split('/')
-          .pop();
+          .pop().split('?')[0];
         const newAssetLocation = `${baseURL}${folder}/${encodeURIComponent(filename)}`;
 
         if (needsDownloading) {
@@ -871,7 +890,13 @@ export default class ZipImporter extends FormApplication {
    */
   displayProgressBar(name, total, current) {
     const progress = total > 0 ? Math.round((current / total) * 100) : 100;
-    if (typeof SceneNavigation.displayProgressBar === 'function') {
+    if (game.release.generation >= 13) {
+      let bar = ZipImporter.#progressBar;
+      if ( !bar || bar?.pct === 1 ) {
+        bar = ZipImporter.#progressBar = ui.notifications.info(name, {progress: true});
+      }
+      bar.update({message: name, pct: Math.clamp(progress, 0, 100) / 100});
+    } else if (typeof SceneNavigation.displayProgressBar === 'function') {
       SceneNavigation.displayProgressBar({
         label: name,
         pct: progress,

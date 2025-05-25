@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.8.6
+
+- Adjusted the "Import from Moulinette ZIP" processing to correctly wait for all files in the ZIP to be processed and available before continuing the import.
+- Adjusted upload handling to better support files and paths that contain spaces.
+- Removed several deprecation warnings relating to the FilePicker.
+
 ## v2.8.5
 
 - Allow the "Import from Moulinette ZIP" wizard to process zip files larger than 2GB in file size.
