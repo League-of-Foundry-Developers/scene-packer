@@ -70,6 +70,12 @@ export default class MoulinetteImporter extends FormApplication {
     });
   }
 
+  /**
+   * Reference to the progress bar displayed in the UI.
+   * @type Notification
+   */
+  static #progressBar;
+
   /** @inheritdoc */
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
@@ -895,7 +901,7 @@ export default class MoulinetteImporter extends FormApplication {
         }
 
         let folder = localAsset.substring(0, localAsset.lastIndexOf('/'));
-        const filename = asset.split('/').pop();
+        const filename = asset.split('/').pop().split('?')[0];
         const newAssetLocation = `${baseURL}${folder}/${encodeURIComponent(filename)}`;
 
         if (needsDownloading) {
@@ -1154,7 +1160,13 @@ export default class MoulinetteImporter extends FormApplication {
    */
   displayProgressBar(name, total, current) {
     const progress = total > 0 ? Math.round((current / total) * 100) : 100;
-    if (typeof SceneNavigation.displayProgressBar === 'function') {
+    if (game.release.generation >= 13) {
+      let bar = MoulinetteImporter.#progressBar;
+      if ( !bar || bar?.pct === 1 ) {
+        bar = MoulinetteImporter.#progressBar = ui.notifications.info(name, {progress: true});
+      }
+      bar.update({message: name, pct: Math.clamp(progress, 0, 100) / 100});
+    } else if (typeof SceneNavigation.displayProgressBar === 'function') {
       SceneNavigation.displayProgressBar({label: name, pct: progress});
     } else if (typeof SceneNavigation._onLoadProgress === 'function') {
       SceneNavigation._onLoadProgress(name, progress);

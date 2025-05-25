@@ -61,7 +61,9 @@ export function GetFilePickerSource(target) {
   }
 
   try {
-    if (FilePicker.matchS3URL(target)) {
+    if ((game.release.generation >= 13 ?
+      foundry.applications.apps.FilePicker.implementation :
+      FilePicker).matchS3URL(target)) {
       return 's3';
     }
   } catch (e) {
@@ -84,7 +86,9 @@ export function GetFilePickerOptions(target) {
     bucket = game.settings.get('moulinette-core', 's3Bucket');
 
     if (!bucket) {
-      const s3Match = FilePicker.matchS3URL(target);
+      const s3Match = (game.release.generation >= 13 ?
+        foundry.applications.apps.FilePicker.implementation :
+        FilePicker).matchS3URL(target);
       if (s3Match) {
         bucket = s3Match.groups.bucket;
       }
@@ -111,7 +115,9 @@ export async function ExpandWildcard(path) {
   }
 
   try {
-    const base = await FilePicker.browse(
+    const base = await (game.release.generation >= 13 ?
+      foundry.applications.apps.FilePicker.implementation :
+      FilePicker).browse(
       GetFilePickerSource(path),
       path,
       Object.assign(GetFilePickerOptions(path), {
@@ -136,7 +142,9 @@ export async function ExpandWildcard(path) {
  */
 export async function FileExists(path) {
   try {
-    const parentFolder = await FilePicker.browse(
+    const parentFolder = await (game.release.generation >= 13 ?
+      foundry.applications.apps.FilePicker.implementation :
+      FilePicker).browse(
       GetFilePickerSource(path),
       path,
       Object.assign(GetFilePickerOptions(path), {
@@ -184,13 +192,17 @@ export async function CreateFolderRecursive(path) {
   const folders = path.split('/');
   let curFolder = '';
   for (const f of folders) {
-    const parentFolder = await FilePicker.browse(source, curFolder, options);
+    const parentFolder = await (game.release.generation >= 13 ?
+      foundry.applications.apps.FilePicker.implementation :
+      FilePicker).browse(source, curFolder, options);
     curFolder += (curFolder.length > 0 ? '/' : '') + f;
     const dirs = parentFolder.dirs.map((d) => decodeURIComponent(d));
     if (!dirs.includes(decodeURIComponent(curFolder))) {
       try {
         ScenePacker.logType(CONSTANTS.MODULE_NAME, 'info', true, `Creating folder ${curFolder}`);
-        await FilePicker.createDirectory(source, curFolder, options);
+        await (game.release.generation >= 13 ?
+          foundry.applications.apps.FilePicker.implementation :
+          FilePicker).createDirectory(source, curFolder, options);
       } catch (e) {
         ScenePacker.logType(CONSTANTS.MODULE_NAME, 'error', true, `Unable to create ${curFolder}`, e);
       }
@@ -225,8 +237,10 @@ export async function UploadFile(file, folderPath, options = {}) {
   try {
     if (IsUsingTheForge()) {
       return await ForgeVTT_FilePicker.upload(source, folderPath, file, {}, options);
+    } else if (game.release.generation >= 13) {
+      return await foundry.applications.apps.FilePicker.implementation.upload(source, decodeURIComponent(folderPath), file, {}, options);
     } else {
-      return await FilePicker.upload(source, folderPath, file, {}, options);
+      return await FilePicker.upload(source, decodeURIComponent(folderPath), file, {}, options);
     }
   } catch (e) {
     ScenePacker.logType(CONSTANTS.MODULE_NAME, 'error', true, `Unable to upload ${folderPath}`, e);
