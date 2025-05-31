@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.8.7
+
+- Fixed the "right click" context menus on Scenes not working correctly in Foundry VTT v13.
+  - These are the "pack", "unpack" etc. context menus.
+
 ## v2.8.6
 
 - Adjusted the "Import from Moulinette ZIP" processing to correctly wait for all files in the ZIP to be processed and available before continuing the import.

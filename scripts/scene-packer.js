@@ -5813,14 +5813,14 @@ Hooks.once('devModeReady', ({registerPackageDebugFlag}) => {
 });
 
 Hooks.once('setup', () => {
-  Hooks.on('getSceneDirectoryEntryContext', function (app, html, data) {
+  const sceneContextEntries = function (app, contextEntries, data) {
     if (game.user.isGM) {
-      html.push(
+      contextEntries.push(
         {
           name: game.i18n.localize('SCENE-PACKER.scene-context.pack.title'),
           icon: '<i class="fas fa-scroll"></i>',
           condition: (li) => {
-            let documentId = li.data('documentId') || li.data('entityId');
+            let documentId = li.dataset.entryId ?? li.data('documentId') ?? li.data('entityId');
             let scene = game.scenes.get(documentId);
             let instance = ScenePacker.GetInstanceForScene(scene);
             if (instance) {
@@ -5831,7 +5831,7 @@ Hooks.once('setup', () => {
             return game.user.isGM && game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_ENABLE_CONTEXT_MENU);
           },
           callback: (li) => {
-            let documentId = li.data('documentId') || li.data('entityId');
+            let documentId = li.dataset.entryId ?? li.data('documentId') ?? li.data('entityId');
             let scene = game.scenes.get(documentId);
             let instance = ScenePacker.GetInstanceForScene(scene);
             if (instance) {
@@ -5851,7 +5851,7 @@ Hooks.once('setup', () => {
           name: game.i18n.localize('SCENE-PACKER.scene-context.unpack.title'),
           icon: '<i class="fas fa-scroll"></i>',
           condition: (li) => {
-            let documentId = li.data('documentId') || li.data('entityId');
+            let documentId = li.dataset.entryId ?? li.data('documentId') ?? li.data('entityId');
             let scene = game.scenes.get(documentId);
             let instance = ScenePacker.GetInstanceForScene(scene);
             return instance &&
@@ -5860,7 +5860,7 @@ Hooks.once('setup', () => {
               game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_ENABLE_CONTEXT_MENU);
           },
           callback: (li) => {
-            let documentId = li.data('documentId') || li.data('entityId');
+            let documentId = li.dataset.entryId ?? li.data('documentId') ?? li.data('entityId');
             let scene = game.scenes.get(documentId);
             let instance = ScenePacker.GetInstanceForScene(scene);
             if (instance) {
@@ -5874,7 +5874,7 @@ Hooks.once('setup', () => {
           ),
           icon: '<i class="fas fa-scroll"></i>',
           condition: (li) => {
-            let documentId = li.data('documentId') || li.data('entityId');
+            let documentId = li.dataset.entryId ?? li.data('documentId') ?? li.data('entityId');
             let scene = game.scenes.get(documentId);
             let instance = ScenePacker.GetInstanceForScene(scene);
             return instance &&
@@ -5883,7 +5883,7 @@ Hooks.once('setup', () => {
               game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_ENABLE_CONTEXT_MENU);
           },
           callback: (li) => {
-            let documentId = li.data('documentId') || li.data('entityId');
+            let documentId = li.dataset.entryId ?? li.data('documentId') ?? li.data('entityId');
             let scene = game.scenes.get(documentId);
             let instance = ScenePacker.GetInstanceForScene(scene);
             if (instance) {
@@ -5903,14 +5903,16 @@ Hooks.once('setup', () => {
               game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_ENABLE_CONTEXT_MENU);
           },
           callback: (li) => {
-            let documentId = li.data('documentId') || li.data('entityId');
+            let documentId = li.dataset.entryId ?? li.data('documentId') ?? li.data('entityId');
             let scene = game.scenes.get(documentId);
             new globalScenePacker.AssetReport({scene});
           },
         },
       );
     }
-  });
+  };
+  Hooks.on('getSceneDirectoryEntryContext', sceneContextEntries);
+  Hooks.on('getSceneContextOptions', sceneContextEntries);
 
   Hooks.on('canvasReady', async (readyCanvas) => {
     if (!game.user.isGM) {
