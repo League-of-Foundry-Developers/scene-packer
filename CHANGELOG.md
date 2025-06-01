@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.8.8
+
+- Fixed the fix from v2.8.7 that broke "right clicking" on Scenes in Foundry VTT v12 and below.
+
 ## v2.8.7
 
 - Fixed the "right click" context menus on Scenes not working correctly in Foundry VTT v13.

@@ -5820,6 +5820,7 @@ Hooks.once('setup', () => {
           name: game.i18n.localize('SCENE-PACKER.scene-context.pack.title'),
           icon: '<i class="fas fa-scroll"></i>',
           condition: (li) => {
+            li = li instanceof HTMLElement ? li : li[0];
             let documentId = li.dataset.entryId ?? li.data('documentId') ?? li.data('entityId');
             let scene = game.scenes.get(documentId);
             let instance = ScenePacker.GetInstanceForScene(scene);
@@ -5831,6 +5832,7 @@ Hooks.once('setup', () => {
             return game.user.isGM && game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_ENABLE_CONTEXT_MENU);
           },
           callback: (li) => {
+            li = li instanceof HTMLElement ? li : li[0];
             let documentId = li.dataset.entryId ?? li.data('documentId') ?? li.data('entityId');
             let scene = game.scenes.get(documentId);
             let instance = ScenePacker.GetInstanceForScene(scene);
@@ -5851,6 +5853,7 @@ Hooks.once('setup', () => {
           name: game.i18n.localize('SCENE-PACKER.scene-context.unpack.title'),
           icon: '<i class="fas fa-scroll"></i>',
           condition: (li) => {
+            li = li instanceof HTMLElement ? li : li[0];
             let documentId = li.dataset.entryId ?? li.data('documentId') ?? li.data('entityId');
             let scene = game.scenes.get(documentId);
             let instance = ScenePacker.GetInstanceForScene(scene);
@@ -5860,6 +5863,7 @@ Hooks.once('setup', () => {
               game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_ENABLE_CONTEXT_MENU);
           },
           callback: (li) => {
+            li = li instanceof HTMLElement ? li : li[0];
             let documentId = li.dataset.entryId ?? li.data('documentId') ?? li.data('entityId');
             let scene = game.scenes.get(documentId);
             let instance = ScenePacker.GetInstanceForScene(scene);
@@ -5874,6 +5878,7 @@ Hooks.once('setup', () => {
           ),
           icon: '<i class="fas fa-scroll"></i>',
           condition: (li) => {
+            li = li instanceof HTMLElement ? li : li[0];
             let documentId = li.dataset.entryId ?? li.data('documentId') ?? li.data('entityId');
             let scene = game.scenes.get(documentId);
             let instance = ScenePacker.GetInstanceForScene(scene);
@@ -5883,6 +5888,7 @@ Hooks.once('setup', () => {
               game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_ENABLE_CONTEXT_MENU);
           },
           callback: (li) => {
+            li = li instanceof HTMLElement ? li : li[0];
             let documentId = li.dataset.entryId ?? li.data('documentId') ?? li.data('entityId');
             let scene = game.scenes.get(documentId);
             let instance = ScenePacker.GetInstanceForScene(scene);
@@ -5903,6 +5909,7 @@ Hooks.once('setup', () => {
               game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTING_ENABLE_CONTEXT_MENU);
           },
           callback: (li) => {
+            li = li instanceof HTMLElement ? li : li[0];
             let documentId = li.dataset.entryId ?? li.data('documentId') ?? li.data('entityId');
             let scene = game.scenes.get(documentId);
             new globalScenePacker.AssetReport({scene});
