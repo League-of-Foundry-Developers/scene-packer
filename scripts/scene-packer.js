@@ -5821,7 +5821,10 @@ Hooks.once('setup', () => {
           icon: '<i class="fas fa-scroll"></i>',
           condition: (li) => {
             li = li instanceof HTMLElement ? li : li[0];
-            let documentId = li.dataset.entryId ?? li.data('documentId') ?? li.data('entityId');
+            let documentId = li?.dataset?.entryId ?? li?.dataset?.documentId ?? li?.dataset?.entityId;
+            if (!documentId) {
+              return false;
+            }
             let scene = game.scenes.get(documentId);
             let instance = ScenePacker.GetInstanceForScene(scene);
             if (instance) {
@@ -5833,7 +5836,10 @@ Hooks.once('setup', () => {
           },
           callback: (li) => {
             li = li instanceof HTMLElement ? li : li[0];
-            let documentId = li.dataset.entryId ?? li.data('documentId') ?? li.data('entityId');
+            let documentId = li?.dataset?.entryId ?? li?.dataset?.documentId ?? li?.dataset?.entityId;
+            if (!documentId) {
+              return;
+            }
             let scene = game.scenes.get(documentId);
             let instance = ScenePacker.GetInstanceForScene(scene);
             if (instance) {
@@ -5854,7 +5860,10 @@ Hooks.once('setup', () => {
           icon: '<i class="fas fa-scroll"></i>',
           condition: (li) => {
             li = li instanceof HTMLElement ? li : li[0];
-            let documentId = li.dataset.entryId ?? li.data('documentId') ?? li.data('entityId');
+            let documentId = li?.dataset?.entryId ?? li?.dataset?.documentId ?? li?.dataset?.entityId;
+            if (!documentId) {
+              return false;
+            }
             let scene = game.scenes.get(documentId);
             let instance = ScenePacker.GetInstanceForScene(scene);
             return instance &&
@@ -5864,7 +5873,10 @@ Hooks.once('setup', () => {
           },
           callback: (li) => {
             li = li instanceof HTMLElement ? li : li[0];
-            let documentId = li.dataset.entryId ?? li.data('documentId') ?? li.data('entityId');
+            let documentId = li?.dataset?.entryId ?? li?.dataset?.documentId ?? li?.dataset?.entityId;
+            if (!documentId) {
+              return;
+            }
             let scene = game.scenes.get(documentId);
             let instance = ScenePacker.GetInstanceForScene(scene);
             if (instance) {
@@ -5879,7 +5891,10 @@ Hooks.once('setup', () => {
           icon: '<i class="fas fa-scroll"></i>',
           condition: (li) => {
             li = li instanceof HTMLElement ? li : li[0];
-            let documentId = li.dataset.entryId ?? li.data('documentId') ?? li.data('entityId');
+            let documentId = li?.dataset?.entryId ?? li?.dataset?.documentId ?? li?.dataset?.entityId;
+            if (!documentId) {
+              return false;
+            }
             let scene = game.scenes.get(documentId);
             let instance = ScenePacker.GetInstanceForScene(scene);
             return instance &&
@@ -5889,7 +5904,10 @@ Hooks.once('setup', () => {
           },
           callback: (li) => {
             li = li instanceof HTMLElement ? li : li[0];
-            let documentId = li.dataset.entryId ?? li.data('documentId') ?? li.data('entityId');
+            let documentId = li?.dataset?.entryId ?? li?.dataset?.documentId ?? li?.dataset?.entityId;
+            if (!documentId) {
+              return;
+            }
             let scene = game.scenes.get(documentId);
             let instance = ScenePacker.GetInstanceForScene(scene);
             if (instance) {
@@ -5910,7 +5928,10 @@ Hooks.once('setup', () => {
           },
           callback: (li) => {
             li = li instanceof HTMLElement ? li : li[0];
-            let documentId = li.dataset.entryId ?? li.data('documentId') ?? li.data('entityId');
+            let documentId = li?.dataset?.entryId ?? li?.dataset?.documentId ?? li?.dataset?.entityId;
+            if (!documentId) {
+              return;
+            }
             let scene = game.scenes.get(documentId);
             new globalScenePacker.AssetReport({scene});
           },
