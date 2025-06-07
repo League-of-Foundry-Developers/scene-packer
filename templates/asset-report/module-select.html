@@ -22,7 +22,7 @@
   <ul id="module-list" class="directory-list package-list">
     {{#each modules}}
     <li class="package flexcol{{css}}" data-module-name="{{this.id}}">
-      <div class="package-overview flexrow">
+      <div class="package-overview flexrow tags">
         <label class="package-title checkbox">
           <input type="checkbox" class="active" name="{{this.id}}" data-dtype="Boolean" {{checked this.activeModule}}/>
           {{~this.title~}}
