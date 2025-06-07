@@ -11,6 +11,7 @@
   margin-top: 5px;
   border-top: 1px solid #7a7971;
   height: 600px;
+  overflow: hidden auto;
 }
 .asset-report #module-list .package-metadata {
   flex: 0 0 100%;

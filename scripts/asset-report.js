@@ -395,7 +395,7 @@ export default class AssetReport extends FormApplication {
     const show = game.i18n.localize('SCENE-PACKER.asset-report.show');
     const hide = game.i18n.localize('SCENE-PACKER.asset-report.hide');
     $text.text($text.text() === show ? hide : show);
-    $tag.closest('.overview').siblings('.dependencies').toggle();
+    $tag.closest('.overview').siblings('.dependencies').toggleClass('hidden');
   }
 
   /**
