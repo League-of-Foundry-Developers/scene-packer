@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.8.9
+
+- Further fixes for "right click" context menus.
+  - Maybe this time it will work on all versions of Foundry VTT.
+- Improved the styling of the Asset Report on Foundry VTT v13.
+
 ## v2.8.8
 
 - Fixed the fix from v2.8.7 that broke "right clicking" on Scenes in Foundry VTT v12 and below.
