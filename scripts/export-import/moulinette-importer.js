@@ -37,6 +37,12 @@ export default class MoulinetteImporter extends FormApplication {
      * @type {ExporterData|Object|null}
      */
     this.scenePackerInfo = null;
+    this.isCorrectSystem = true;
+    /**
+     * Placeholder actor used for importing scenes into the wrong type of system.
+     * @type {Actor|null}
+     */
+    this.placeholderActor = null;
 
     this.processing = false;
     this.processingMessage = '';
@@ -195,6 +201,7 @@ export default class MoulinetteImporter extends FormApplication {
     });
     this.scenePackerInfo = await this.fetchData(this.packInfo['mtte.json']);
     console.log('scenePackerInfo', this.scenePackerInfo); // TODO Delete this line
+    this.isCorrectSystem = this.scenePackerInfo?.system === game.system.id;
     const relatedData = await this.fetchData(this.packInfo['data/related-data.json']);
     const unrelatedData = await this.fetchData(this.packInfo['data/unrelated-data.json']);
     const assetData = await this.fetchData(this.packInfo['data/assets.json']);
@@ -204,6 +211,38 @@ export default class MoulinetteImporter extends FormApplication {
      * @type {Map<string, boolean>}
      */
     const assetMap = new Map();
+
+    if (!this.isCorrectSystem) {
+      let proceed;
+      if (foundry?.applications?.api?.DialogV2?.confirm) {
+        proceed = await foundry.applications.api.DialogV2.confirm({
+          content: game.i18n.format(
+            'SCENE-PACKER.importer.incorrect-system',
+            {
+              currentSystem: game.system.id,
+              packSystem: this.scenePackerInfo?.system || 'unknown',
+            }
+          ),
+          window: {
+            title: game.i18n.localize('SCENE-PACKER.importer.name'),
+          },
+          rejectClose: true,
+          modal: true,
+          yes: {
+            default: true,
+          }
+        });
+      } else {
+        proceed = await Dialog.confirm({
+          title: game.i18n.localize('SCENE-PACKER.importer.name'),
+          content: game.i18n.localize('SCENE-PACKER.importer.incorrect-system'),
+        });
+      }
+
+      if (!proceed) {
+        return;
+      }
+    }
 
     // TODO Handle entities that already exist but are a different version
     const sceneData = await this.fetchDataIfMissing(this.packInfo['data/Scene.json'],
@@ -293,6 +332,26 @@ export default class MoulinetteImporter extends FormApplication {
             }
           }
         }
+        if (!this.isCorrectSystem) {
+          // If the system is not correct, we need to replace the actor data from the tokens on scenes
+          if (documents.some(d => d.tokens?.length)) {
+            // Create a placeholder actor to use for the tokens
+            if (!this.placeholderActor) {
+              this.placeholderActor = await CONFIG.Actor.documentClass.create({
+                name: 'Placeholder Actor',
+                type: Object.keys(CONFIG.Actor.dataModels)
+                  .shift(),
+              });
+            }
+            for (const document of documents) {
+              for (const token of document.tokens) {
+                token.actorLink = false;
+                token.actorId = this.placeholderActor?.id;
+                token.delta = {};
+              }
+            }
+          }
+        }
         let created = [];
         if (CONSTANTS.IsV12orNewer()) {
           // Run via the .fromImport method as that migrates data from old game versions since v12.
@@ -326,7 +385,7 @@ export default class MoulinetteImporter extends FormApplication {
         console.groupEnd();
       }
     }
-    if (actorData.length) {
+    if (actorData.length && this.isCorrectSystem) {
       const filteredData = this.filterData(actorData, relatedData, 'Actor', sourceReference);
       if (filteredData.length) {
         ScenePacker.logType(
@@ -450,7 +509,7 @@ export default class MoulinetteImporter extends FormApplication {
       }
     }
 
-    if (itemData.length) {
+    if (itemData.length && this.isCorrectSystem) {
       const filteredData = this.filterData(itemData, relatedData, 'Item', sourceReference);
       if (filteredData.length) {
         ScenePacker.logType(
@@ -713,7 +772,7 @@ export default class MoulinetteImporter extends FormApplication {
           switch (type) {
             case 'Actor':
               const actor = actorData.find(a => a._id === id);
-              if (actor) {
+              if (actor && this.isCorrectSystem) {
                 dataToImport.push(actor);
               }
               break;
@@ -725,7 +784,7 @@ export default class MoulinetteImporter extends FormApplication {
               break;
             case 'Item':
               const item = itemData.find(i => i._id === id);
-              if (item) {
+              if (item && this.isCorrectSystem) {
                 dataToImport.push(item);
               }
               break;
@@ -809,7 +868,7 @@ export default class MoulinetteImporter extends FormApplication {
       callback: () => {
         window.location.reload();
       }
-    })
+    });
   }
 
   /**

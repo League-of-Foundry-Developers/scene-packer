@@ -332,7 +332,8 @@
       "email": "Email:",
       "version": "Version:",
       "more-info": "More info:",
-      "missing-asset": "Missing asset from package data: {asset}"
+      "missing-asset": "Missing asset from package data: {asset}",
+      "incorrect-system": "The system of the pack you are trying to import ({packSystem}) is different from the current system ({currentSystem}) and you may experience issues. Any tokens on scenes will be replaced with a placeholder actor to increase compatibility. Do you wish to proceed?"
     },
     "zip-importer": {
       "name": "Import from Moulinette ZIP",

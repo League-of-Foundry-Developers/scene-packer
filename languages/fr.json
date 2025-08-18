@@ -308,7 +308,8 @@
       "version": "Version :",
       "more-info": "Plus d'infos :",
       "missing-asset": "Asset manquant dans les données du paquet : {asset}",
-      "unrelated-intro": "Les entités suivantes ne sont pas directement liées à une Scène de ce pack et ont été automatiquement importées pour éviter de briser des liens."
+      "unrelated-intro": "Les entités suivantes ne sont pas directement liées à une Scène de ce pack et ont été automatiquement importées pour éviter de briser des liens.",
+      "incorrect-system": "Le système du pack que vous essayez d’importer ({packSystem}) est différent du système actuel ({currentSystem}) et vous pourriez rencontrer des problèmes. Tous les jetons sur les scènes seront remplacés par un acteur temporaire pour améliorer la compatibilité. Souhaitez-vous continuer?"
     },
     "instance-prompt": {
       "title": "Choisir l'instance",

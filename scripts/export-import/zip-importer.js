@@ -21,6 +21,12 @@ export default class ZipImporter extends FormApplication {
      * @type {ExporterData|Object|null}
      */
     this.scenePackerInfo = null;
+    this.isCorrectSystem = true;
+    /**
+     * Placeholder actor used for importing scenes into the wrong type of system.
+     * @type {Actor|null}
+     */
+    this.placeholderActor = null;
     this.folderData = {};
 
     this.filename = '';
@@ -191,6 +197,7 @@ export default class ZipImporter extends FormApplication {
     this.scenePackerInfo = this.getDataFromZip(Object.keys(this.decompressed)
       .filter(f => !f.startsWith('data') && f.endsWith('.json'))[0]);
     console.log('scenePackerInfo', this.scenePackerInfo); // TODO Delete this line
+    this.isCorrectSystem = this.scenePackerInfo?.system === game.system.id;
     const unrelatedData = this.getDataFromZip('data/unrelated-data.json');
     const assetData = this.getDataFromZip('data/assets.json');
     this.folderData = this.getDataFromZip('data/folders.json');
@@ -199,6 +206,38 @@ export default class ZipImporter extends FormApplication {
      * @type {Map<string, boolean>}
      */
     const assetMap = new Map();
+
+    if (!this.isCorrectSystem) {
+      let proceed;
+      if (foundry?.applications?.api?.DialogV2?.confirm) {
+        proceed = await foundry.applications.api.DialogV2.confirm({
+          content: game.i18n.format(
+            'SCENE-PACKER.importer.incorrect-system',
+            {
+              currentSystem: game.system.id,
+              packSystem: this.scenePackerInfo?.system || 'unknown',
+            }
+          ),
+          window: {
+            title: game.i18n.localize('SCENE-PACKER.importer.name'),
+          },
+          rejectClose: true,
+          modal: true,
+          yes: {
+            default: true,
+          }
+        });
+      } else {
+        proceed = await Dialog.confirm({
+          title: game.i18n.localize('SCENE-PACKER.importer.name'),
+          content: game.i18n.localize('SCENE-PACKER.importer.incorrect-system'),
+        });
+      }
+
+      if (!proceed) {
+        return false;
+      }
+    }
 
     const sceneData = this.missingDataOnly(this.getDataFromZip('data/Scene.json'), game.scenes);
     const actorData = this.missingDataOnly(this.getDataFromZip('data/Actor.json'), game.actors);
@@ -257,6 +296,26 @@ export default class ZipImporter extends FormApplication {
           }
         }
       }
+      if (!this.isCorrectSystem) {
+        // If the system is not correct, we need to replace the actor data from the tokens on scenes
+        if (documents.some(d => d.tokens?.length)) {
+          // Create a placeholder actor to use for the tokens
+          if (!this.placeholderActor) {
+            this.placeholderActor = await CONFIG.Actor.documentClass.create({
+              name: 'Placeholder Actor',
+              type: Object.keys(CONFIG.Actor.dataModels)
+                .shift(),
+            });
+          }
+          for (const document of documents) {
+            for (const token of document.tokens) {
+              token.actorLink = false;
+              token.actorId = this.placeholderActor?.id;
+              token.delta = {};
+            }
+          }
+        }
+      }
       let created = [];
       if (CONSTANTS.IsV12orNewer()) {
         // Run via the .fromImport method as that migrates data from old game versions since v12.
@@ -290,7 +349,7 @@ export default class ZipImporter extends FormApplication {
       console.groupEnd();
     }
 
-    if (actorData.length) {
+    if (actorData.length && this.isCorrectSystem) {
       ScenePacker.logType(
         CONSTANTS.MODULE_NAME,
         'info',
@@ -408,7 +467,7 @@ export default class ZipImporter extends FormApplication {
       console.groupEnd();
     }
 
-    if (itemData.length) {
+    if (itemData.length && this.isCorrectSystem) {
       ScenePacker.logType(
         this.scenePackerInfo.name,
         'info',
@@ -656,7 +715,7 @@ export default class ZipImporter extends FormApplication {
           switch (type) {
             case 'Actor':
               const actor = actorData.find(a => a._id === id);
-              if (actor) {
+              if (actor && this.isCorrectSystem) {
                 dataToImport.push(actor);
               }
               break;
@@ -668,7 +727,7 @@ export default class ZipImporter extends FormApplication {
               break;
             case 'Item':
               const item = itemData.find(i => i._id === id);
-              if (item) {
+              if (item && this.isCorrectSystem) {
                 dataToImport.push(item);
               }
               break;
@@ -743,7 +802,7 @@ export default class ZipImporter extends FormApplication {
       callback: () => {
         window.location.reload();
       }
-    })
+    });
   }
 
   /** @inheritdoc */
