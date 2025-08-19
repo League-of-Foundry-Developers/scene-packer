@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.8.10
+
+- Added support for automatically replacing incompatible data when importing packs via the Moulinette importers.
+  - This occurs when you try to import a pack into a system that is different to the system the pack was created in.
+  - All Actors and Items will not be imported (since they are incompatible), a "Placeholder Actor" will be created for scene tokens.
+
 ## v2.8.9
 
 - Further fixes for "right click" context menus.
