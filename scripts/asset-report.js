@@ -406,7 +406,7 @@ export default class AssetReport extends FormApplication {
     event.preventDefault();
     const $tag = $(event.currentTarget);
     $tag.find('i.fas').toggleClass('fa-angle-double-down fa-angle-double-up');
-    $tag.siblings('ul').toggle();
+    $tag.siblings('ul').toggleClass('hidden');
   }
 
   /**
