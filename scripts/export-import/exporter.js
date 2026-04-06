@@ -1,5 +1,6 @@
 import { CONSTANTS } from '../constants.js';
 import ExporterProgress from './exporter-progress.js';
+import { ExporterTemplate } from './exporter-template.js';
 
 export default class Exporter extends FormApplication {
   constructor(object, options) {
@@ -427,6 +428,355 @@ export default class Exporter extends FormApplication {
     }, 500, exporter);
   }
 
+  /**
+   * Collect all form data from the exporter form
+   * @returns {Object} Object containing all form metadata and document selections
+   * @private
+   */
+  _collectFormData() {
+    const form = this.element.find('form')[0];
+    const formData = new FormDataExtended(form).object;
+
+    let welcomeJournalName = '';
+    if (formData.welcomeJournal) {
+      const collection = CONFIG.JournalEntry?.collection?.instance;
+      if (collection) {
+        const journal = collection.get(formData.welcomeJournal);
+        if (journal) {
+          welcomeJournalName = journal.name;
+        }
+      }
+    }
+
+    const players = {};
+    const recommendedPlayers = parseInt(formData.playersRecommended, 10);
+    const minPlayers = parseInt(formData.playersMin, 10);
+    const maxPlayers = parseInt(formData.playersMax, 10);
+    if (recommendedPlayers) {
+      players.recommended = recommendedPlayers;
+    }
+    if (minPlayers) {
+      players.min = minPlayers;
+    }
+    if (maxPlayers) {
+      players.max = maxPlayers;
+    }
+
+    // Collect player levels - handle both single values and arrays
+    const playerLevels = [];
+    if (typeof formData.playerLevelRecommended === 'number' || typeof formData.playerLevelMin === 'number' || typeof formData.playerLevelMax === 'number') {
+      const recommended = parseInt(formData.playerLevelRecommended, 10);
+      const min = parseInt(formData.playerLevelMin, 10);
+      const max = parseInt(formData.playerLevelMax, 10);
+      const playerLever = {};
+      if (Number.isFinite(recommended)) {
+        playerLever.recommended = recommended;
+      }
+      if (Number.isFinite(min)) {
+        playerLever.min = min;
+      }
+      if (Number.isFinite(max)) {
+        playerLever.max = max;
+      }
+
+      if (Object.keys(playerLever).length > 0) {
+        playerLevels.push(playerLever);
+      }
+    }
+
+    if (formData.playerLevelMin?.length || formData.playerLevelMax?.length || formData.playerLevelRecommended?.length) {
+      const minArr = Array.isArray(formData.playerLevelMin) ? formData.playerLevelMin : [];
+      const maxArr = Array.isArray(formData.playerLevelMax) ? formData.playerLevelMax : [];
+      const recArr = Array.isArray(formData.playerLevelRecommended) ?
+        formData.playerLevelRecommended :
+        [];
+
+      const longestLength = Math.max(minArr.length, maxArr.length, recArr.length);
+
+      for (let i = 0; i < longestLength; i++) {
+        const recommended = parseInt(recArr[i], 10);
+        const min = parseInt(minArr[i], 10);
+        const max = parseInt(maxArr[i], 10);
+
+        const playerLevel = {};
+        if (Number.isFinite(recommended)) {
+          playerLevel.recommended = recommended;
+        }
+        if (Number.isFinite(min)) {
+          playerLevel.min = min;
+        }
+        if (Number.isFinite(max)) {
+          playerLevel.max = max;
+        }
+
+        if (Object.keys(playerLevel).length > 0) {
+          playerLevels.push(playerLevel);
+        }
+      }
+    }
+
+    const tokenStyles = [];
+    this.element.find('input[name="tokenStyles"]:checked').each((i, el) => {
+      tokenStyles.push(el.value);
+    });
+
+    const grid = [];
+    this.element.find('input[name="grid"]:checked').each((i, el) => {
+      grid.push(el.value);
+    });
+
+    const pregen = formData.pregen === 'yes';
+
+    const themes = Array.from(new Set(
+      (formData.themes || '').split(',')
+        .map(e => e.toLowerCase().trim())
+        .filter(e => e)
+    ));
+
+    const tags = Array.from(new Set(
+      (formData.tags || '').split(',')
+        .map(e => e.toLowerCase().trim())
+        .filter(e => e)
+    ));
+
+    const documentTypes = [...CONSTANTS.PACK_IMPORT_ORDER, 'Folder'];
+    const selections = {};
+
+    documentTypes.forEach(type => {
+      selections[type] = [];
+      this.element.find(`input[data-type="${type}"]:checked`).each((i, el) => {
+        const id = el.value;
+        const collection = CONFIG[type]?.collection?.instance;
+        if (collection) {
+          const doc = collection.get(id);
+          if (doc) {
+            selections[type].push({
+              id: doc.id,
+              name: doc.name,
+            });
+          }
+        }
+      });
+    });
+
+    return {
+      name: formData.packageName,
+      author: formData.author,
+      version: formData.version,
+      description: this.editors?.packageDescription?.mce?.getContent() || '',
+      cover_image: formData.packageCover,
+      external_link: formData.externalLink,
+      email: formData.email,
+      discordId: formData.discordId,
+      system: formData.system || '',
+      category: formData.adventureCategory || '',
+      play_hours: parseInt(formData.duration, 10) || 0,
+      welcome_journal: formData.welcomeJournal,
+      welcome_journal_name: welcomeJournalName,
+      allow_complete_import: formData.allowCompleteImport === 'yes',
+      players: players,
+      player_levels: playerLevels,
+      token_styles: tokenStyles,
+      grid: grid,
+      pregen: pregen,
+      themes: themes,
+      tags: tags,
+      selections: selections,
+    };
+  }
+
+  /**
+   * Handler for Save Template button
+   * @param {Event} event
+   */
+  async _saveTemplate(event) {
+    event.preventDefault();
+
+    try {
+      const template = new ExporterTemplate(this._collectFormData());
+      template.download();
+
+      ui.notifications.info(game.i18n.localize('SCENE-PACKER.exporter.template.save-success'));
+    } catch (err) {
+      console.error('Error saving template:', err);
+      ui.notifications.error(
+        game.i18n.format('SCENE-PACKER.exporter.template.load-error', { error: err.message })
+      );
+    }
+  }
+
+  /**
+   * Handler for Load Template button
+   * @param {Event} event
+   */
+  async _loadTemplate(event) {
+    event.preventDefault();
+
+    // Create file input element
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json,application/json';
+
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      try {
+        const text = await file.text();
+        const template = ExporterTemplate.fromJSON(text);
+        const missing = template.getMissingItems();
+
+        if (missing.length > 0) {
+          const proceed = await this._showMissingItemsDialog(missing);
+          if (!proceed) {
+            return;
+          }
+        }
+
+        await this._applyTemplate(template);
+
+        ui.notifications.info(game.i18n.localize('SCENE-PACKER.exporter.template.load-success'));
+      } catch (err) {
+        console.error('Error loading template:', err);
+        ui.notifications.error(
+          game.i18n.format('SCENE-PACKER.exporter.template.load-error', { error: err.message })
+        );
+      }
+    };
+
+    input.click();
+  }
+
+  /**
+   * Show dialog warning about missing items
+   * @param {Array} missingItems - Array of missing items
+   * @returns {Promise<boolean>} True if user wants to proceed
+   */
+  async _showMissingItemsDialog(missingItems) {
+    const content = await renderTemplate(
+      'modules/scene-packer/templates/export-import/template-missing-documents.hbs',
+      { missingItems }
+    );
+
+    return Dialog.confirm({
+      title: game.i18n.localize('SCENE-PACKER.exporter.template.missing-title'),
+      content: content,
+      yes: () => true,
+      no: () => false,
+      defaultYes: false
+    });
+  }
+
+  /**
+   * Apply a template to the form
+   * @param {ExporterTemplate} template
+   */
+  async _applyTemplate(template) {
+    this.element.find('#SP-export-packageName').val(template.name || '');
+    this.element.find('#SP-export-author').val(template.author || '');
+    this.element.find('#SP-export-version').val(template.version || '');
+    this.element.find('#SP-export-packageCover').val(template.cover_image || '');
+    this.element.find('#SP-export-email').val(template.email || '');
+    this.element.find('#SP-export-discordId').val(template.discordId || '');
+    this.element.find('#SP-export-externalLink').val(template.external_link || '');
+    this.element.find('#SP-export-welcomeJournal').val(template.welcome_journal || '');
+    this.element.find('#SP-export-system').val(template.system || '');
+    this.element.find('#SP-export-adventureCategory').val(template.category || '');
+    this.element.find('#SP-export-duration').val(template.play_hours || '');
+
+    if (this.editors?.packageDescription?.mce) {
+      this.editors.packageDescription.mce.setContent(template.description || '');
+    }
+
+    if (template.players) {
+      this.element.find('#SP-export-playersRecommended').val(template.players.recommended || '');
+      this.element.find('#SP-export-playersMin').val(template.players.min || '');
+      this.element.find('#SP-export-playersMax').val(template.players.max || '');
+    }
+
+    const playerLevelsContainer = this.element.find('#SP-export-player-levels-add').parent();
+    playerLevelsContainer.find('.form-group').not(':first').remove();
+
+    if (template.player_levels && template.player_levels.length > 0) {
+      const firstRow = playerLevelsContainer.find('.form-group').first();
+      const firstLevel = template.player_levels[0];
+      firstRow.find('input[name="playerLevelRecommended"]').val(firstLevel.recommended || '');
+      firstRow.find('input[name="playerLevelMin"]').val(firstLevel.min || '');
+      firstRow.find('input[name="playerLevelMax"]').val(firstLevel.max || '');
+
+      for (let i = 1; i < template.player_levels.length; i++) {
+        const level = template.player_levels[i];
+        const playerLevelContent = `<div class="form-group">
+                <input type="number" name="playerLevelRecommended" min="0" value="${level.recommended || ''}" placeholder="${game.i18n.localize('SCENE-PACKER.exporter.options.adventure-player-level-recommended-placeholder')}" autocomplete="off">
+                <input type="number" name="playerLevelMin" min="0" value="${level.min || ''}" placeholder="${game.i18n.localize('SCENE-PACKER.exporter.options.adventure-player-level-min-placeholder')}" autocomplete="off">
+                <input type="number" name="playerLevelMax" min="0" value="${level.max || ''}" placeholder="${game.i18n.localize('SCENE-PACKER.exporter.options.adventure-player-level-max-placeholder')}" autocomplete="off">
+                <span class="spacer"></span>
+              </div>`;
+        $(playerLevelContent).insertBefore(this.element.find('#SP-export-player-levels-add'));
+      }
+    }
+
+    this.element.find('input[name="grid"]').prop('checked', false);
+    if (template.grid && Array.isArray(template.grid)) {
+      template.grid.forEach(gridType => {
+        this.element.find(`input[name="grid"][value="${gridType}"]`).prop('checked', true);
+      });
+    }
+
+    this.element.find('input[name="tokenStyles"]').prop('checked', false);
+    if (template.token_styles && Array.isArray(template.token_styles)) {
+      template.token_styles.forEach(style => {
+        this.element.find(`input[name="tokenStyles"][value="${style}"]`).prop('checked', true);
+      });
+    }
+
+    if (template.pregen) {
+      this.element.find('#SP-export-pregen-yes').prop('checked', true);
+      this.element.find('#SP-export-pregen-no').prop('checked', false);
+    } else {
+      this.element.find('#SP-export-pregen-yes').prop('checked', false);
+      this.element.find('#SP-export-pregen-no').prop('checked', true);
+    }
+
+    if (template.allow_complete_import) {
+      this.element.find('#SP-export-allow-import-yes').prop('checked', true);
+      this.element.find('#SP-export-allow-import-no').prop('checked', false);
+    } else {
+      this.element.find('#SP-export-allow-import-yes').prop('checked', false);
+      this.element.find('#SP-export-allow-import-no').prop('checked', true);
+    }
+
+    if (template.themes && Array.isArray(template.themes)) {
+      this.element.find('#SP-export-theme').val(template.themes.join(', '));
+    }
+
+    if (template.tags && Array.isArray(template.tags)) {
+      this.element.find('#SP-export-tags').val(template.tags.join(', '));
+    }
+
+    this.element.find('div.tab:not([data-tab=options]) input[type="checkbox"]').prop('checked', false);
+
+    if (template.selections) {
+      const documentTypes = ['Scene', 'Actor', 'Item', 'JournalEntry', 'RollTable', 'Cards', 'Playlist', 'Macro', 'Folder'];
+
+      documentTypes.forEach(type => {
+        if (template.selections[type] && Array.isArray(template.selections[type])) {
+          template.selections[type].forEach(item => {
+            const collection = CONFIG[type]?.collection?.instance;
+            if (collection && collection.get(item.id)) {
+              this.element.find(`input[data-type="${type}"][value="${item.id}"]`).prop('checked', true);
+            }
+          });
+        }
+      });
+    }
+
+    let scenePackerExporter = $('#scene-packer-exporter');
+    this.selected = scenePackerExporter.find('div.tab:not([data-tab=options]) input[type="checkbox"]:checked');
+
+    this._updateCounts();
+  }
+
   /** @inheritdoc */
   activateListeners(html) {
     super.activateListeners(html);
@@ -487,6 +837,8 @@ export default class Exporter extends FormApplication {
     }
 
     html.find('button[name="close"]').click(this.close.bind(this));
+    html.find('.save-template').click(this._saveTemplate.bind(this));
+    html.find('.load-template').click(this._loadTemplate.bind(this));
   }
 
   /** @inheritdoc */
@@ -792,36 +1144,21 @@ export class ExporterData {
   DownloadJSON() {
     const content = JSON.stringify(this, null, 2);
     const filename = this.name.slugify({ strict: true }) || 'export';
-    const blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
-    if (typeof window.navigator.msSaveBlob !== 'undefined') {
-      // IE doesn't allow using a blob object directly as link href.
-      // Workaround for "HTML7007: One or more blob URLs were
-      // revoked by closing the blob for which they were created.
-      // These URLs will no longer resolve as the data backing
-      // the URL has been freed."
-      window.navigator.msSaveBlob(blob, `${filename}.json`);
-      return;
-    }
 
-    // Create a link pointing to the ObjectURL containing the blob
-    const blobURL = URL.createObjectURL(blob);
-    const tempLink = document.createElement('a');
-    tempLink.style.display = 'none';
-    tempLink.setAttribute('href', blobURL);
-    tempLink.setAttribute('download', `${filename}.json`);
-    // Safari thinks _blank anchor are pop ups. We only want to set _blank
-    // target if the browser does not support the HTML5 download attribute.
-    // This allows you to download files in desktop safari if pop up blocking
-    // is enabled.
-    if (typeof tempLink.download === 'undefined') {
-      tempLink.setAttribute('target', '_blank');
-    }
-    tempLink.click();
+    if (typeof foundry?.utils?.saveDataToFile === 'function') {
+      foundry.utils.saveDataToFile(content, 'text/json', `${filename}.json`);
+    } else {
+      const blob = new Blob([content], {type: 'text/json'});
 
-    setTimeout(() => {
-      // For Firefox it is necessary to delay revoking the ObjectURL
-      URL.revokeObjectURL(blobURL);
-    }, 200);
+      // Create an element to trigger the download
+      const a = document.createElement('a');
+      a.href = window.URL.createObjectURL(blob);
+      a.download = `${filename}.json`;
+
+      // Dispatch a click event to the element
+      a.dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true, view: window}));
+      setTimeout(() => window.URL.revokeObjectURL(a.href), 100);
+    }
   }
 
   /**

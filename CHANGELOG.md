@@ -1,5 +1,17 @@
 # Changelog
 
+## v2.8.12
+
+- Added Export Template feature to Moulinette exporter.
+  - Users can now save their selections and form configuration as a downloadable JSON template file.
+  - Templates can be loaded later to restore selections and settings.
+  - Warning dialog displays when loading templates with documents that no longer exist.
+
+## v2.8.11
+
+- Fixed styling in Journal Entries being impossible to read on dark themes.
+- Fixed asset report not allowing toggling of report entries due to Core CSS conflicts.
+
 ## v2.8.10
 
 - Added support for automatically replacing incompatible data when importing packs via the Moulinette importers.

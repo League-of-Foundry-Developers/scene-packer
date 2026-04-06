@@ -1,0 +1,18 @@
+<div class="missing-documents-warning">
+  <p class="warning-message">
+    <i class="fas fa-exclamation-triangle"></i>
+    {{localize "SCENE-PACKER.exporter.template.missing-warning"}}
+  </p>
+  
+  <div class="missing-list">
+    {{#each missingItems}}
+      <div class="missing-item">
+        <strong>{{type}}:</strong> {{name}} <em>(ID: {{id}})</em>
+      </div>
+    {{/each}}
+  </div>
+  
+  <p class="continue-message">
+    {{localize "SCENE-PACKER.exporter.template.missing-continue"}}
+  </p>
+</div>
