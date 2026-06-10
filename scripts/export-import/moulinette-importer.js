@@ -48,6 +48,7 @@ export default class MoulinetteImporter extends FormApplication {
     this.processingMessage = '';
     this.errorMessage = '';
     this.loading = true;
+    this.pendingRender = false;
 
     if (!this.packInfo || !this.packInfo['mtte.json']) {
       ScenePacker.logType(
@@ -57,7 +58,7 @@ export default class MoulinetteImporter extends FormApplication {
         game.i18n.localize('SCENE-PACKER.importer.invalid-pack-data'),
       );
       this.errorMessage = game.i18n.localize('SCENE-PACKER.importer.invalid-pack-data');
-      this.render();
+      this.render(true);
 
       return;
     }
@@ -72,8 +73,48 @@ export default class MoulinetteImporter extends FormApplication {
 
         return;
       }
-      this.render();
+      this.requestRender();
+    }).catch(err => {
+      this.loading = true;
+      this.errorMessage = game.i18n.localize('SCENE-PACKER.importer.invalid-pack-data');
+      ScenePacker.logType(
+        game.i18n.localize('SCENE-PACKER.importer.name'),
+        'error',
+        true,
+        err?.message ?? String(err),
+      );
+      this.requestRender();
     });
+  }
+
+  /**
+   * Render the importer once the package metadata has loaded.
+   *
+   * The importer is opened externally by Moulinette via `render(true)`, which
+   * begins an asynchronous render. The metadata fetch frequently resolves while
+   * that initial render is still in progress. `Application._render` ignores any
+   * render requested while the Application is in the RENDERING state (even a
+   * forced one), so a render triggered here would be silently dropped and the
+   * window would stay stuck on the loading spinner with the import buttons
+   * disabled until it was closed and reopened. To avoid that race the render is
+   * deferred until the in-progress render finishes (flushed in `_render`).
+   */
+  requestRender() {
+    if (this._state === this.constructor.RENDER_STATES.RENDERING) {
+      this.pendingRender = true;
+
+      return;
+    }
+    this.render(true);
+  }
+
+  /** @inheritdoc */
+  async _render(force, options) {
+    await super._render(force, options);
+    if (this.pendingRender) {
+      this.pendingRender = false;
+      await super._render(true, options);
+    }
   }
 
   /**
