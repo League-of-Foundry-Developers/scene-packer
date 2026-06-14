@@ -170,7 +170,12 @@ export class ExporterTemplate {
       const exportName = this.name ?? 'scene-packer-template';
       const now = new Date();
       const dateStr = now.toISOString().slice(0, 16).replace('T', '-').replace(/:/g, '');
-      filename = `export-${exportName}-${dateStr}.json`;
+      filename = `export-${exportName}-${dateStr}`;
+    }
+
+    // Ensure a .json extension regardless of whether a custom filename was passed.
+    if (!filename.toLowerCase().endsWith('.json')) {
+      filename += '.json';
     }
 
     const content = this.toJSON();
@@ -182,7 +187,7 @@ export class ExporterTemplate {
       // Create an element to trigger the download
       const a = document.createElement('a');
       a.href = window.URL.createObjectURL(blob);
-      a.download = `${filename}.json`;
+      a.download = filename;
 
       // Dispatch a click event to the element
       a.dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true, view: window}));
