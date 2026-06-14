@@ -69,42 +69,42 @@ export default class WelcomeJournal extends JournalSheet {
         instance.importAllContent();
       } else if (e.target.classList.contains('sp-import-replace')) {
         const deleteExisting = async function () {
-          const sceneIDs = game.scenes.filter(s => (s._stats?.compendiumSource ?? s.getFlag('core', 'sourceId'))
+          const sceneIDs = game.scenes.filter(s => (s._stats?.compendiumSource ?? s.flags?.core?.sourceId)
             ?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
           if (sceneIDs.length) {
             await Scene.deleteDocuments(sceneIDs);
           }
-          const actorIDs = game.actors.filter(s => (s._stats?.compendiumSource ?? s.getFlag('core', 'sourceId'))
+          const actorIDs = game.actors.filter(s => (s._stats?.compendiumSource ?? s.flags?.core?.sourceId)
             ?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
           if (actorIDs.length) {
             await Actor.deleteDocuments(actorIDs);
           }
-          const itemIDs = game.items.filter(s => (s._stats?.compendiumSource ?? s.getFlag('core', 'sourceId'))
+          const itemIDs = game.items.filter(s => (s._stats?.compendiumSource ?? s.flags?.core?.sourceId)
             ?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
           if (itemIDs.length) {
             await Item.deleteDocuments(itemIDs);
           }
-          const journalIDs = game.journal.filter(s => (s._stats?.compendiumSource ?? s.getFlag('core', 'sourceId'))
+          const journalIDs = game.journal.filter(s => (s._stats?.compendiumSource ?? s.flags?.core?.sourceId)
             ?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
           if (journalIDs.length) {
             await JournalEntry.deleteDocuments(journalIDs);
           }
-          const rollTableIDs = game.tables.filter(s => (s._stats?.compendiumSource ?? s.getFlag('core', 'sourceId'))
+          const rollTableIDs = game.tables.filter(s => (s._stats?.compendiumSource ?? s.flags?.core?.sourceId)
             ?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
           if (rollTableIDs.length) {
             await RollTable.deleteDocuments(rollTableIDs);
           }
-          const playlistIDs = game.playlists.filter(s => (s._stats?.compendiumSource ?? s.getFlag('core', 'sourceId'))
+          const playlistIDs = game.playlists.filter(s => (s._stats?.compendiumSource ?? s.flags?.core?.sourceId)
             ?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
           if (playlistIDs.length) {
             await Playlist.deleteDocuments(playlistIDs);
           }
-          const macroIDs = game.macros.filter(s => (s._stats?.compendiumSource ?? s.getFlag('core', 'sourceId'))
+          const macroIDs = game.macros.filter(s => (s._stats?.compendiumSource ?? s.flags?.core?.sourceId)
             ?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
           if (macroIDs.length) {
             await Macro.deleteDocuments(macroIDs);
           }
-          const cardIDs = game.cards.filter(s => (s._stats?.compendiumSource ?? s.getFlag('core', 'sourceId'))
+          const cardIDs = game.cards.filter(s => (s._stats?.compendiumSource ?? s.flags?.core?.sourceId)
             ?.startsWith(`Compendium.${this.moduleName}`)).map(s => s.id);
           if (cardIDs.length) {
             await Card.deleteDocuments(cardIDs);

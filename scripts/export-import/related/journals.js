@@ -107,7 +107,7 @@ export function ExtractRelatedQuickEncounterData(journal) {
     const journal = game.journal.find((a) => {
       return (
         (a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === quickEncounter.journalEntryId ||
-          (a._stats?.compendiumSource ?? a.getFlag('core', 'sourceId')) === quickEncounter.journalEntryId ||
+          (a._stats?.compendiumSource ?? a.flags?.core?.sourceId) === quickEncounter.journalEntryId ||
           a.id === quickEncounter.journalEntryId) &&
         !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated')
       );
@@ -124,7 +124,7 @@ export function ExtractRelatedQuickEncounterData(journal) {
       const actor = game.actors.find((a) => {
         return (
           (a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === extractedActor.actorID ||
-            (a._stats?.compendiumSource ?? a.getFlag('core', 'sourceId')) === extractedActor.actorID ||
+            (a._stats?.compendiumSource ?? a.flags?.core?.sourceId) === extractedActor.actorID ||
             a.id === extractedActor.actorID) &&
           !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated')
         );
