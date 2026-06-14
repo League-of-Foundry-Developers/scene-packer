@@ -6,6 +6,12 @@
   - Users can now save their selections and form configuration as a downloadable JSON template file.
   - Templates can be loaded later to restore selections and settings.
   - Warning dialog displays when loading templates with documents that no longer exist.
+  - Export templates now remember individually selected playlist sounds, so loading a template no longer exports playlists with zero sounds.
+- Fixed the Moulinette importer sometimes getting stuck on the "Loading data..." spinner the first time a pack was opened, requiring the window to be closed and reopened.
+  - Thank you [BeneosBattlemaps](https://github.com/BeneosBattlemaps) for the contribution.
+- Fixed importing on dnd5e 5.x / Foundry V13 flooding the console with "Failed data preparation" errors by creating imported documents via the system's document class.
+  - Thank you [BeneosBattlemaps](https://github.com/BeneosBattlemaps) for the contribution.
+- Reduced deprecation warnings logged while importing by reading the legacy `core.sourceId` flag directly instead of via the deprecated getter.
 
 ## v2.8.11
 
