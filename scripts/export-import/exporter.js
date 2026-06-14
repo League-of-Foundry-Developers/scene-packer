@@ -559,6 +559,24 @@ export default class Exporter extends FormApplication {
       });
     });
 
+    // Capture individually-selected playlist sounds. PlaylistSound is an
+    // embedded document (no top-level collection), so resolve its name by
+    // looking it up inside the playlists. This lets a saved template carry the
+    // exact sounds a package uses, so the playlist is trimmed on export.
+    selections.PlaylistSound = [];
+    this.element.find('input[data-type="PlaylistSound"]:checked').each((i, el) => {
+      const id = el.value;
+      let name = id;
+      for (const playlist of game.playlists) {
+        const sound = playlist.sounds.get(id);
+        if (sound) {
+          name = sound.name;
+          break;
+        }
+      }
+      selections.PlaylistSound.push({ id, name });
+    });
+
     return {
       name: formData.packageName,
       author: formData.author,
@@ -769,6 +787,16 @@ export default class Exporter extends FormApplication {
           });
         }
       });
+
+      // Restore individually-selected playlist sounds. PlaylistSound is an
+      // embedded document with no top-level CONFIG collection, so it is handled
+      // separately from the documentTypes loop above: just tick the matching
+      // sound checkbox if it exists in the rendered playlist tree.
+      if (Array.isArray(template.selections.PlaylistSound)) {
+        template.selections.PlaylistSound.forEach(item => {
+          this.element.find(`input[data-type="PlaylistSound"][value="${item.id}"]`).prop('checked', true);
+        });
+      }
     }
 
     let scenePackerExporter = $('#scene-packer-exporter');
