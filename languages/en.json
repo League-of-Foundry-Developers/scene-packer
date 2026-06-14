@@ -502,6 +502,7 @@
         "help": "Save your current selections and settings as a template file, or load a previously saved template.",
         "save-success": "Template saved successfully!",
         "load-success": "Template loaded successfully!",
+        "save-error": "Failed to save template: {error}",
         "load-error": "Failed to load template: {error}",
         "invalid-file": "Invalid template file format",
         "missing-warning": "The following items from the template no longer exist in your world:",

@@ -618,7 +618,7 @@ export default class Exporter extends FormApplication {
     } catch (err) {
       console.error('Error saving template:', err);
       ui.notifications.error(
-        game.i18n.format('SCENE-PACKER.exporter.template.load-error', { error: err.message })
+        game.i18n.format('SCENE-PACKER.exporter.template.save-error', { error: err.message })
       );
     }
   }
