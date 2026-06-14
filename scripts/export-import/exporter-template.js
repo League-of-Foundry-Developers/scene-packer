@@ -99,15 +99,7 @@ export class ExporterTemplate {
     }
 
     if (!json.templateVersion) {
-      if (typeof json === 'string') {
-        try {
-          json = JSON.parse(json);
-        } catch (err) {
-          throw new Error(game.i18n.localize('SCENE-PACKER.exporter.template.invalid-file'));
-        }
-      } else {
-        throw new Error(game.i18n.localize('SCENE-PACKER.exporter.template.invalid-file'));
-      }
+      throw new Error(game.i18n.localize('SCENE-PACKER.exporter.template.invalid-file'));
     }
 
     if (json.templateVersion !== ExporterTemplate.TEMPLATE_VERSION) {
