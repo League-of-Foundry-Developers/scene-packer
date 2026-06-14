@@ -155,7 +155,7 @@ export async function ExtractQuickEncounterAssets(journal) {
       const actor = game.actors.find((a) => {
         return (
           (a.getFlag(CONSTANTS.MODULE_NAME, 'sourceId') === extractedActor.actorID ||
-            (a._stats?.compendiumSource ?? a.getFlag('core', 'sourceId')) === extractedActor.actorID ||
+            (a._stats?.compendiumSource ?? a.flags?.core?.sourceId) === extractedActor.actorID ||
             a.id === extractedActor.actorID) &&
           !a.getFlag(CONSTANTS.MODULE_NAME, 'deprecated')
         );

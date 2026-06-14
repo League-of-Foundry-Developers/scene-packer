@@ -481,6 +481,20 @@
       "invalid": {
         "title": "forme de donné non valide",
         "fields": "<p>Les champs suivants de l'onglet <strong>Options</strong> nécessitent une valeur :</p><ul>{fields}</ul>"
+      },
+      "template": {
+        "label": "Modèle d'exportation",
+        "save": "Enregistrer le modèle",
+        "load": "Charger le modèle",
+        "help": "Enregistrez vos sélections et paramètres actuels sous forme de fichier modèle, ou chargez un modèle précédemment enregistré.",
+        "save-success": "Modèle enregistré avec succès !",
+        "load-success": "Modèle chargé avec succès !",
+        "save-error": "Échec de l'enregistrement du modèle : {error}",
+        "load-error": "Échec du chargement du modèle : {error}",
+        "invalid-file": "Format de fichier de modèle invalide",
+        "missing-warning": "Les éléments suivants du modèle n'existent plus dans votre monde :",
+        "missing-continue": "Ces éléments seront ignorés. Voulez-vous continuer à charger le modèle ?",
+        "missing-title": "Éléments manquants"
       }
     },
     "adventure-converter": {

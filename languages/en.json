@@ -494,6 +494,20 @@
       "invalid": {
         "title": "Invalid form data",
         "fields": "<p>The following fields on the <strong>Options</strong> tab require a value:</p><ul>{fields}</ul>"
+      },
+      "template": {
+        "label": "Export Template",
+        "save": "Save Template",
+        "load": "Load Template",
+        "help": "Save your current selections and settings as a template file, or load a previously saved template.",
+        "save-success": "Template saved successfully!",
+        "load-success": "Template loaded successfully!",
+        "save-error": "Failed to save template: {error}",
+        "load-error": "Failed to load template: {error}",
+        "invalid-file": "Invalid template file format",
+        "missing-warning": "The following items from the template no longer exist in your world:",
+        "missing-continue": "These items will be skipped. Do you want to continue loading the template?",
+        "missing-title": "Missing Items"
       }
     },
     "adventure-converter": {

@@ -274,3 +274,42 @@
 #scene-packer-exporter .tabs.sheet-tabs [data-tab] {
   padding: 0;
 }
+#scene-packer-exporter .template-management {
+  margin-top: 1em;
+}
+#scene-packer-exporter .template-management .form-fields {
+  display: flex;
+  gap: 10px;
+  margin-top: 0.5em;
+}
+#scene-packer-exporter .template-management button {
+  flex: 1;
+  padding: 8px 12px;
+}
+.missing-documents-warning {
+  padding: 10px;
+}
+.missing-documents-warning .warning-message {
+  color: #ff6400;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.missing-documents-warning .missing-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin: 10px 0;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+.missing-documents-warning .missing-item {
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+.missing-documents-warning .missing-item:last-child {
+  border-bottom: none;
+}
+.missing-documents-warning .continue-message {
+  margin-top: 10px;
+  font-style: italic;
+}

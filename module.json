@@ -3,14 +3,13 @@
   "name": "scene-packer",
   "title": "Library: Scene Packer",
   "description": "A module to assist with Scene and Adventure packing and unpacking.",
-  "version": "2.8.11",
+  "version": "2.8.12",
   "library": "true",
-  "manifestPlusVersion": "1.2.0",
   "minimumCoreVersion": "0.8.6",
-  "compatibleCoreVersion": "13",
+  "compatibleCoreVersion": "14",
   "compatibility": {
     "minimum": "0.8.6",
-    "verified": "13"
+    "verified": "14"
   },
   "author": "Blair McMillan",
   "authors": [
@@ -68,19 +67,11 @@
     {
       "name": "Scene Packer",
       "sorting": "a",
-      "packs": [
-        "journals",
-        "macros"
-      ]
+      "packs": ["journals", "macros"]
     }
   ],
-  "esmodules": [
-    "/scripts/scene-packer.js",
-    "/scripts/wrapped.js"
-  ],
-  "styles": [
-    "styles/scene-packer.css"
-  ],
+  "esmodules": ["/scripts/scene-packer.js", "/scripts/wrapped.js"],
+  "styles": ["styles/scene-packer.css"],
   "languages": [
     {
       "lang": "en",
@@ -101,14 +92,14 @@
   "flags": {
     "allowBugReporter": true,
     "hotReload": {
-      "extensions": [
-        "css",
-        "hbs"
-      ],
-      "paths": [
-        "styles",
-        "templates"
-      ]
-    }
+      "extensions": ["css", "hbs"],
+      "paths": ["styles", "templates"]
+    },
+    "suppressedWarnings": [
+      "name",
+      "minimumCoreVersion",
+      "compatibleCoreVersion",
+      "author"
+    ]
   }
 }

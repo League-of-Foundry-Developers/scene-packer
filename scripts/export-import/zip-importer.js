@@ -319,11 +319,11 @@ export default class ZipImporter extends FormApplication {
       let created = [];
       if (CONSTANTS.IsV12orNewer()) {
         // Run via the .fromImport method as that migrates data from old game versions since v12.
-        created = await Scene.createDocuments(await Promise.all(documents.map(async d => Scene.fromImport({...d, active: false}))), { keepId: true });
+        created = await getDocumentClass("Scene").createDocuments(await Promise.all(documents.map(async d => getDocumentClass("Scene").fromImport({...d, active: false}))), { keepId: true });
       } else {
         // Run via the .fromSource method as that operates in a non-strict validation format, allowing
         // for older formats to still be parsed in most cases.
-        created = await Scene.createDocuments(documents.map(d => Scene.fromSource({...d, active: false}).toObject()), { keepId: true });
+        created = await getDocumentClass("Scene").createDocuments(documents.map(d => getDocumentClass("Scene").fromSource({...d, active: false}).toObject()), { keepId: true });
       }
 
       // Check for compendium references within the scenes and update them to local world references
@@ -373,11 +373,11 @@ export default class ZipImporter extends FormApplication {
       let created = [];
       if (CONSTANTS.IsV12orNewer()) {
         // Run via the .fromImport method as that migrates data from old game versions since v12.
-        created = await Actor.createDocuments(await Promise.all(documents.map(async d => Actor.fromImport(d))), { keepId: true });
+        created = await getDocumentClass("Actor").createDocuments(await Promise.all(documents.map(async d => getDocumentClass("Actor").fromImport(d))), { keepId: true });
       } else {
         // Run via the .fromSource method as that operates in a non-strict validation format, allowing
         // for older formats to still be parsed in most cases.
-        created = await Actor.createDocuments(documents.map(d => Actor.fromSource(d).toObject()), { keepId: true });
+        created = await getDocumentClass("Actor").createDocuments(documents.map(d => getDocumentClass("Actor").fromSource(d).toObject()), { keepId: true });
       }
 
       // Check for compendium references within the actors and update them to local world references
@@ -443,11 +443,11 @@ export default class ZipImporter extends FormApplication {
       let created = [];
       if (CONSTANTS.IsV12orNewer()) {
         // Run via the .fromImport method as that migrates data from old game versions since v12.
-        created = await JournalEntry.createDocuments(await Promise.all(documents.map(async d => JournalEntry.fromImport(d))), { keepId: true });
+        created = await getDocumentClass("JournalEntry").createDocuments(await Promise.all(documents.map(async d => getDocumentClass("JournalEntry").fromImport(d))), { keepId: true });
       } else {
         // Run via the .fromSource method as that operates in a non-strict validation format, allowing
         // for older formats to still be parsed in most cases.
-        created = await JournalEntry.createDocuments(documents.map(d => JournalEntry.fromSource(d).toObject()), { keepId: true });
+        created = await getDocumentClass("JournalEntry").createDocuments(documents.map(d => getDocumentClass("JournalEntry").fromSource(d).toObject()), { keepId: true });
       }
       if (this.scenePackerInfo?.welcome_journal) {
         if (created.find(j => j.id === this.scenePackerInfo.welcome_journal)) {
@@ -491,11 +491,11 @@ export default class ZipImporter extends FormApplication {
       let created = [];
       if (CONSTANTS.IsV12orNewer()) {
         // Run via the .fromImport method as that migrates data from old game versions since v12.
-        created = await Item.createDocuments(await Promise.all(documents.map(async d => Item.fromImport(d))), { keepId: true });
+        created = await getDocumentClass("Item").createDocuments(await Promise.all(documents.map(async d => getDocumentClass("Item").fromImport(d))), { keepId: true });
       } else {
         // Run via the .fromSource method as that operates in a non-strict validation format, allowing
         // for older formats to still be parsed in most cases.
-        created = await Item.createDocuments(documents.map(d => Item.fromSource(d).toObject()), { keepId: true });
+        created = await getDocumentClass("Item").createDocuments(documents.map(d => getDocumentClass("Item").fromSource(d).toObject()), { keepId: true });
       }
 
       // Check for compendium references within the items and update them to local world references
@@ -533,11 +533,11 @@ export default class ZipImporter extends FormApplication {
       }
       if (CONSTANTS.IsV12orNewer()) {
         // Run via the .fromImport method as that migrates data from old game versions since v12.
-        await Macro.createDocuments(await Promise.all(documents.map(async d => Macro.fromImport(d))), { keepId: true });
+        await getDocumentClass("Macro").createDocuments(await Promise.all(documents.map(async d => getDocumentClass("Macro").fromImport(d))), { keepId: true });
       } else {
         // Run via the .fromSource method as that operates in a non-strict validation format, allowing
         // for older formats to still be parsed in most cases.
-        await Macro.createDocuments(documents.map(d => Macro.fromSource(d).toObject()), { keepId: true });
+        await getDocumentClass("Macro").createDocuments(documents.map(d => getDocumentClass("Macro").fromSource(d).toObject()), { keepId: true });
       }
     }
 
@@ -571,7 +571,7 @@ export default class ZipImporter extends FormApplication {
         }
         const playlistData = existingPlaylist.toJSON();
         const sounds = playlistData.sounds || [];
-        const newPlaylistData = Playlist.fromSource(d).toObject();
+        const newPlaylistData = getDocumentClass("Playlist").fromSource(d).toObject();
         const newSounds = [];
         let hasUpdates = false;
         for (const sound of (newPlaylistData.sounds || [])) {
@@ -596,11 +596,11 @@ export default class ZipImporter extends FormApplication {
       if (documents.length) {
         if (CONSTANTS.IsV12orNewer()) {
           // Run via the .fromImport method as that migrates data from old game versions.
-          await Playlist.createDocuments(await Promise.all(documents.map(async d => Playlist.fromImport(d))), { keepId: true });
+          await getDocumentClass("Playlist").createDocuments(await Promise.all(documents.map(async d => getDocumentClass("Playlist").fromImport(d))), { keepId: true });
         } else {
           // Run via the .fromSource method as that operates in a non-strict validation format, allowing
           // for older formats to still be parsed in most cases.
-          await Playlist.createDocuments(documents.map(d => Playlist.fromSource(d).toObject()), { keepId: true });
+          await getDocumentClass("Playlist").createDocuments(documents.map(d => getDocumentClass("Playlist").fromSource(d).toObject()), { keepId: true });
         }
       }
     }
@@ -628,11 +628,11 @@ export default class ZipImporter extends FormApplication {
       }
       if (CONSTANTS.IsV12orNewer()) {
         // Run via the .fromImport method as that migrates data from old game versions.
-        await Cards.createDocuments(await Promise.all(documents.map(async d => Cards.fromImport(d))), { keepId: true });
+        await getDocumentClass("Cards").createDocuments(await Promise.all(documents.map(async d => getDocumentClass("Cards").fromImport(d))), { keepId: true });
       } else {
         // Run via the .fromSource method as that operates in a non-strict validation format, allowing
         // for older formats to still be parsed in most cases.
-        await Cards.createDocuments(documents.map(d => Cards.fromSource(d).toObject()), { keepId: true });
+        await getDocumentClass("Cards").createDocuments(documents.map(d => getDocumentClass("Cards").fromSource(d).toObject()), { keepId: true });
       }
     }
 
@@ -660,11 +660,11 @@ export default class ZipImporter extends FormApplication {
       let created = [];
       if (CONSTANTS.IsV12orNewer()) {
         // Run via the .fromImport method as that migrates data from old game versions.
-        created = await RollTable.createDocuments(await Promise.all(documents.map(async d => RollTable.fromImport(d))), { keepId: true });
+        created = await getDocumentClass("RollTable").createDocuments(await Promise.all(documents.map(async d => getDocumentClass("RollTable").fromImport(d))), { keepId: true });
       } else {
         // Run via the .fromSource method as that operates in a non-strict validation format, allowing
         // for older formats to still be parsed in most cases.
-        created = await RollTable.createDocuments(documents.map(d => RollTable.fromSource(d).toObject()), { keepId: true });
+        created = await getDocumentClass("RollTable").createDocuments(documents.map(d => getDocumentClass("RollTable").fromSource(d).toObject()), { keepId: true });
       }
 
       // Check for compendium references within the roll tables and update them to local world references
