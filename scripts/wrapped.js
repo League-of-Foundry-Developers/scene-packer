@@ -62,9 +62,13 @@ Hooks.once('setup', function () {
   }
 
   // Clean up temporary compendium folder entities when importing all from a compendium.
+  // The global CompendiumCollection is deprecated in v13, and removed in v15.
+  const compendiumCollectionPath = foundry.documents?.collections?.CompendiumCollection
+    ? 'foundry.documents.collections.CompendiumCollection'
+    : 'CompendiumCollection';
   libWrapper.register(
     'scene-packer',
-    'CompendiumCollection.prototype.importAll',
+    `${compendiumCollectionPath}.prototype.importAll`,
     async function (wrapped, ...args) {
       const data = await wrapped.bind(this)(...args);
       if (game.modules.get('compendium-folders')?.active) {
@@ -74,19 +78,24 @@ Hooks.once('setup', function () {
 
       let tempEntities = data.filter(e => e.name === CONSTANTS.CF_TEMP_ENTITY_NAME);
       if (tempEntities.length) {
-        Dialog.confirm({
-          title: game.i18n.format('SCENE-PACKER.notifications.import-entities.cf-clean-up-title', {
-            name: CONSTANTS.CF_TEMP_ENTITY_NAME,
-          }),
-          content: game.i18n.format('SCENE-PACKER.notifications.import-entities.cf-clean-up', {
-            name: CONSTANTS.CF_TEMP_ENTITY_NAME,
-            count: tempEntities.length,
-          }),
-          yes: () => {
-            const callback = m => m.find(e => e.name === 'Clean up #[CF_tempEntity] entries')?.execute();
-            game.packs.get('scene-packer.macros').getDocuments().then(callback);
-          },
+        const title = game.i18n.format('SCENE-PACKER.notifications.import-entities.cf-clean-up-title', {
+          name: CONSTANTS.CF_TEMP_ENTITY_NAME,
         });
+        const content = game.i18n.format('SCENE-PACKER.notifications.import-entities.cf-clean-up', {
+          name: CONSTANTS.CF_TEMP_ENTITY_NAME,
+          count: tempEntities.length,
+        });
+        const cleanUp = () => {
+          const callback = m => m.find(e => e.name === 'Clean up #[CF_tempEntity] entries')?.execute();
+          game.packs.get('scene-packer.macros').getDocuments().then(callback);
+        };
+        // The V1 Dialog is deprecated in v13, and removed in v16.
+        const DialogV2 = foundry.applications?.api?.DialogV2;
+        if (DialogV2) {
+          DialogV2.confirm({window: {title}, content}).then(confirmed => confirmed && cleanUp());
+        } else {
+          Dialog.confirm({title, content, yes: cleanUp});
+        }
       }
       return data;
     },

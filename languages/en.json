@@ -92,6 +92,7 @@
         "creating-data": "Importing {count} new {type}.",
         "missing-name": "Tried to find an actor for a token with no name.",
         "could-not-import": "Error importing entity",
+        "unregistered-page-type": "Journal \"{journal}\" page \"{page}\" has unregistered type \"{type}\". Importing it as a text page.",
         "invalid-packs": {
           "error": "Invalid pack configuration. Cannot import {type}. Check console (F12) for more details.",
           "short": "ImportEntities was called with no searchPacks defined.",
