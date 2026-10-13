@@ -1,10 +1,14 @@
 import { CONSTANTS } from './constants.js';
 
+// The global JournalSheet is deprecated in v13, and removed in v15.
+const BaseJournalSheetRef = foundry.appv1?.sheets?.JournalSheet ?? JournalSheet;
+const renderTpl = foundry.applications?.handlebars?.renderTemplate ?? renderTemplate;
+
 /**
  * Welcome Journal is a special Journal Sheet that contains import buttons allowing a user to
  * import the associated adventure.
  */
-export default class WelcomeJournal extends JournalSheet {
+export default class WelcomeJournal extends BaseJournalSheetRef {
   constructor(journal, options = {}) {
     super(journal, options);
 
@@ -126,6 +130,16 @@ export default class WelcomeJournal extends JournalSheet {
   }
 
   /** @inheritdoc */
+  isPageVisible(page) {
+    // Pages with an unregistered subtype have no sheet class and crash the render.
+    const sheetClasses = CONFIG.JournalEntryPage?.sheetClasses;
+    if (sheetClasses && !sheetClasses[page.type]) {
+      return false;
+    }
+    return super.isPageVisible(page);
+  }
+
+  /** @inheritdoc */
   async _render(force = false, options = {}) {
     await super._render(force, options);
 
@@ -136,7 +150,7 @@ export default class WelcomeJournal extends JournalSheet {
       section = $(this.element).find('section:first').children().first();
     }
 
-    const html = await renderTemplate(`modules/scene-packer/templates/welcome-journal-footer.html`, {
+    const html = await renderTpl(`modules/scene-packer/templates/welcome-journal-footer.html`, {
       alreadyImported: this.alreadyImported,
       totalCount: this.totalCount,
     });

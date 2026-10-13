@@ -546,6 +546,7 @@ export default class ScenePacker {
             packContent.map(c => {
               let cData = collection.fromCompendium(c, {clearSort: false, keepId: true});
               cData._id = c.id; // Preserve the original ID
+              ScenePacker.ConvertUnregisteredJournalPages(cData);
 
               const newFlags = {};
               newFlags['core'] = {sourceId: c.uuid};
@@ -1115,6 +1116,35 @@ export default class ScenePacker {
   }
 
   /**
+   * Convert Journal pages whose subtype aren't registered in this world into text pages.
+   * @param {Object} data The JournalEntry source data.
+   * @returns {Boolean} Whether any page was converted
+   */
+  static ConvertUnregisteredJournalPages(data) {
+    const validTypes = game.documentTypes?.JournalEntryPage;
+    if (!Array.isArray(validTypes) || !Array.isArray(data?.pages)) {
+      return false;
+    }
+    let converted = false;
+    for (const page of data.pages) {
+      if (!page?.type || validTypes.includes(page.type)) {
+        continue;
+      }
+      ScenePacker.logType(CONSTANTS.MODULE_NAME, 'warn', true,
+        game.i18n.format('SCENE-PACKER.notifications.import-entities.unregistered-page-type', {
+          journal: data.name,
+          page: page.name,
+          type: page.type,
+        }));
+      page.type = 'text';
+      page.system = {};
+      page.text ??= {content: '', format: CONST.JOURNAL_ENTRY_PAGE_FORMATS?.HTML ?? 1};
+      converted = true;
+    }
+    return converted;
+  }
+
+  /**
    * Log a message to console of the requested type if dev mode is enabled.
    * @param {String} moduleName The name of the module
    * @param {String} type The type of log. One of "error", "warn" or "log"
@@ -1478,13 +1508,11 @@ export default class ScenePacker {
           });
         } else {
           if (!availablePacks.includes(j)) {
-            ui.notifications.error(
-              game.i18n.localize('SCENE-PACKER.errors.ignoredPacks.ui'),
-            );
-            throw game.i18n.format('SCENE-PACKER.errors.ignoredPacks.invalid', {
+            // Ignoring a pack that doesn't exist is a no-op, so warn rather than break initialisation.
+            this.logWarn(true, game.i18n.format('SCENE-PACKER.errors.ignoredPacks.invalid', {
               pack: j,
               packs: availablePacks.join(', '),
-            });
+            }));
           } else {
             this.ignoredCompendiumPacks.add(`${this.moduleName}.${j}`);
           }
@@ -2731,6 +2759,7 @@ export default class ScenePacker {
         createData = createData.concat(
           content.map((c) => {
             const cData = collection.fromCompendium(c, {clearSort: false, keepId: true});
+            ScenePacker.ConvertUnregisteredJournalPages(cData);
             // Utilise the folder structure as defined by the Compendium Folder if it exists, otherwise
             // fall back to the default folder.
             const cfPath = cData.flags?.cf?.path;
@@ -3531,6 +3560,14 @@ export default class ScenePacker {
     // Set the sorting value
     if (entityData?.flags?.cf?.sort) {
       update.sort = entityData.flags.cf.sort;
+    }
+
+    if (type === 'JournalEntry') {
+      const data = collection.fromCompendium(entity, {clearSort: false, keepId: true});
+      if (ScenePacker.ConvertUnregisteredJournalPages(data)) {
+        // fromCompendium sets the source (flags.core.sourceId pre-v12, _stats.compendiumSource from v12)
+        return await collection.documentClass.create(foundry.utils.mergeObject(data, update), {keepId: true});
+      }
     }
 
     return await collection.importFromCompendium(game.packs.get(entity.compendium.collection), entity.id, update, {clearSort: false, keepId: true});
