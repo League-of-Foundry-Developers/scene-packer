@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.8.13
+
+- Fixes calls to methods that have been removed in v14.
+- Added workaround when importing Journal Pages which were created with an unregistered Page Type.
+  - Thank you Qwasss2 for the report.
+
 ## v2.8.12
 
 - Added Export Template feature to Moulinette exporter.
